@@ -14,7 +14,7 @@ const EmpresasPage = () => {
 
       <header className="empresas_hero reveal">
         <span className="empresas_label">Atención Corporativa</span>
-        <h1 className="empresas_title serif">Ingeniería del Cuidado para su <span style={{ color: 'var(--sand-beige)' }}>Equipo</span></h1>
+        <h1 className="empresas_title serif">Ingeniería del Cuidado para su <span style={{ color: 'var(--accent-clay)' }}>Equipo</span></h1>
         <p className="world_description">
           Llevamos la excelencia de Naamá Studio al entorno profesional, diseñando jornadas de restauración técnica y descanso hospitalario a medida de su corporación.
         </p>
@@ -42,27 +42,27 @@ const EmpresasPage = () => {
           <h2 className="cta_heading serif">Consulte nuestra propuesta B2B</h2>
           <p className="cta_sub">Diseñamos sesiones personalizadas según los objetivos de bienestar de su empresa.</p>
           
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginBottom: '40px', color: 'rgba(26,26,26,0.4)', fontSize: '0.8rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginBottom: '40px', color: 'rgba(43,43,43,0.4)', fontSize: '0.8rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <MapPin size={14} /> <span>San Miguel, Santiago</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <Mail size={14} /> <span>empresas@naamastudio.cl</span>
+              <Mail size={14} /> <span>naamastudiospa@gmail.com</span>
             </div>
           </div>
 
           <button 
-            className="premium_btn" 
+            className="nav_cta_boutique" 
             style={{ 
-              background: 'var(--carbon-black)', 
-              color: '#fff', 
-              padding: '20px 40px', 
+              padding: '22px 50px', 
               border: 'none', 
               cursor: 'pointer',
               textTransform: 'uppercase',
-              letterSpacing: '0.2em',
-              fontSize: '0.7rem'
+              letterSpacing: '0.3em',
+              fontSize: '0.7rem',
+              fontWeight: '800'
             }}
+            onClick={() => window.location.href = 'mailto:naamastudiospa@gmail.com'}
           >
             Solicitar Información
           </button>
