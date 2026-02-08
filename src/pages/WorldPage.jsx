@@ -8,6 +8,8 @@ import { ArrowLeft, Search, Filter } from 'lucide-react';
 import '../styles/Global.css';
 import '../styles/WorldPage.css';
 
+const WorldPage = () => {
+  const { mundoId } = useParams();
   const [activeTab, setActiveTab] = useState('Todos');
   const [searchTerm, setSearchTerm] = useState('');
   
