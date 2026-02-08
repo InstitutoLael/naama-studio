@@ -129,7 +129,7 @@
 }
 
 .staff_input::placeholder {
-  color: rgba(43, 43, 43, 0.15);
+  color: rgba(43, 43, 43, 0.4); /* Increased from 0.15 for better contrast */
   font-style: italic;
 }
 

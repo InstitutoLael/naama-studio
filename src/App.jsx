@@ -105,7 +105,8 @@ const App = () => {
             <span className="footer_label">Digital</span>
             <div className="footer_social_links">
               <a href="https://www.instagram.com/naamastudio_/" target="_blank" rel="noopener noreferrer" className="social_link">Instagram</a>
-              <a href="#" className="social_link">WhatsApp</a>
+              <a href="https://wa.me/56979520623" target="_blank" rel="noopener noreferrer" className="social_link">WhatsApp Oficial</a>
+              <a href="mailto:naamastudiospa@gmail.com" className="social_link">naamastudiospa@gmail.com</a>
             </div>
           </div>
         </div>

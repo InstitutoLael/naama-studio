@@ -166,7 +166,7 @@
 }
 
 .teaser_btn_gold {
-  background: var(--bg-linen);
+  background: var(--accent-sand); /* Changed from linen to accent-sand for 'Gold' feel */
   color: var(--text-slate);
   padding: 22px 50px;
   border: none;
@@ -177,11 +177,13 @@
   margin-top: 50px;
   cursor: pointer;
   transition: var(--transition-fast);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
 }
 
 .teaser_btn_gold:hover {
-  transform: scale(1.05);
+  transform: scale(1.05) translateY(-3px);
   background: #fff;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
 }
 
 /* Instagram Section: Pure Luxe */

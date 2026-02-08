@@ -18,6 +18,7 @@
   z-index: 1500;
   padding: 40px 0;
   transition: var(--transition-luxe);
+  background: transparent;
 }
 
 .nav_scrolled {
@@ -150,7 +151,15 @@
 }
 
 @media (max-width: 1024px) {
-  .nav_container { padding: 0 40px; }
+  .main_nav {
+    padding: 20px 0;
+    background: var(--bg-linen);
+    border-bottom: var(--border-fine);
+  }
+  .nav_container { 
+    padding: 0 30px; 
+    justify-content: center; /* Center logo on mobile */
+  }
   .nav_links { display: none; }
   .footer_grid { grid-template-columns: 1fr; gap: 60px; }
   .footer { padding-bottom: 150px; } /* Space for BottomNav */
