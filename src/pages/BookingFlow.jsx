@@ -15,10 +15,9 @@ const BookingFlow = () => {
   const prevStep = () => setStep(step - 1);
 
   const needs = [
-    { id: 'descanso', title: 'Descanso', desc: 'Prioridad: Relajación y desconexión total.' },
-    { id: 'reparacion', title: 'Reparación', desc: 'Prioridad: Salud capilar o cutánea intensiva.' },
-    { id: 'cambio', title: 'Cambio de Look', desc: 'Prioridad: Transformación y nueva estética.' },
-    { id: 'mantenimiento', title: 'Mantenimiento', desc: 'Prioridad: Continuidad de estilo y pulcritud.' }
+    { id: 'cambio', title: 'Necesito un cambio visible.', desc: 'Prioridad: Transformación y nueva estética.' },
+    { id: 'mantenimiento', title: 'Busco mantener mi estilo.', desc: 'Prioridad: Continuidad de estilo y pulcritud.' },
+    { id: 'descanso', title: 'Solo necesito silencio y descanso.', desc: 'Prioridad: Relajación y desconexión total (Lujo).' }
   ];
 
   return (
@@ -30,8 +29,8 @@ const BookingFlow = () => {
         
         {step === 1 && (
           <div className="booking_step_content">
-            <span className="booking_label">Paso 01 · Tu Necesidad</span>
-            <h2 className="booking_question serif">¿Qué necesita tu <br /> <span style={{ color: 'var(--accent-clay)' }}>cabello/piel</span> hoy?</h2>
+            <span className="booking_label">Preparamos tu llegada</span>
+            <h2 className="booking_question serif">"Cuéntanos cómo te sientes hoy para que podamos servirte mejor."</h2>
             
             <div className="options_grid">
               {needs.map(n => (
@@ -102,8 +101,7 @@ const BookingFlow = () => {
             </div>
             <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '20px' }}>Consulta <span style={{ color: 'var(--accent-clay)' }}>Completada</span></h2>
             <p style={{ color: 'rgba(43,43,43,0.5)', marginBottom: '50px', fontSize: '1.2rem' }}>
-              Tu espacio ha sido preparado técnicamente. <br />
-              Ahora, completa tu reserva formal en nuestra agenda.
+              "Tu espacio ha sido reservado. Todo estará listo para recibirte con la calma que mereces. Hasta pronto."
             </p>
             
             <a href="https://naamastudio.setmore.com/" target="_blank" rel="noopener noreferrer">

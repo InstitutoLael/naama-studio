@@ -2,25 +2,24 @@ export const mundos = [
   {
     id: 'capilar',
     name: 'Corte y Estilo',
-    categories: ['Peluquería', 'Tratamiento Capilar'],
-    description: 'Ingeniería capilar avanzada y diseño de estilo personalizado.',
-    icon: 'Scissors',
-    image: 'labor-hands.png'
+    categories: ["Cortes", "Peinado", "Estilismo"],
+    description: "Arquitectura para tu cabello. Diseñamos formas que respetan tu textura natural y simplifican tu día a día.",
+    icon: "Scissors",
+    image: "cortes-mundos.png"
   },
   {
-    id: 'estetico',
-    name: 'Estética Avanzada',
-    categories: ['Estetica'],
-    description: 'Procedimientos de restauración cutánea y cuidado corporal técnico.',
-    icon: 'Sparkles',
-    image: 'salon-arch.png' 
+    id: "color",
+    name: "Colorimetría",
+    description: "Luz y profundidad. Técnicas avanzadas para un color que se ve nacido, no puesto. Salud capilar ante todo.",
+    icon: "Palette",
+    categories: ["Coloración", "Balayage", "Reflejos"],
+    image: "color-mundos.png"
   },
   {
-    id: 'mirada',
-    name: 'Diseño de Mirada',
-    categories: ['Pestañas y Cejas'],
-    description: 'Arquitectura de cejas y realce técnico de pestañas.',
-    icon: 'Heart',
+    id: "tratamientos",
+    name: "Restauración",
+    description: "Ciencia aplicada. Recuperamos la fuerza y el brillo de tu fibra capilar con protocolos de hidratación profunda y descanso visual.",
+    icon: "Zap",
     image: 'mirada-bg.png'
   },
   {
