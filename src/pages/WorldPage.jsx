@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { servicesData } from '../data/servicesData';
+import { fuzzyMatch } from '../utils/searchUtils';
 import { mundos } from '../data/categories';
 import ServiceCard from '../components/UI/ServiceCard';
 import SEOHead from '../components/SEOHead';
@@ -29,11 +30,10 @@ const WorldPage = () => {
     }
     
     if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      services = services.filter(s => 
-        s.name.toLowerCase().includes(search) || 
-        s.worker.toLowerCase().includes(search)
-      );
+      services = services.filter(s => {
+        const searchableText = `${s.name} ${s.worker} ${s.cat}`.toLowerCase();
+        return fuzzyMatch(searchTerm, searchableText);
+      });
     }
     
     return services;
@@ -100,7 +100,7 @@ const WorldPage = () => {
           <div className="services_grid">
             {filteredServices.length > 0 ? (
               filteredServices.map((service, index) => (
-                <div key={`${service.name}-${index}`} className="service_card_wrapper reveal">
+                <div key={`${service.name}-${index}`} className="service_card_wrapper">
                   <ServiceCard service={service} />
                 </div>
               ))

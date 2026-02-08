@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { servicesData } from '../data/servicesData';
+import { searchServices } from '../utils/searchUtils';
 import ServiceCard from '../components/UI/ServiceCard';
 import SEOHead from '../components/SEOHead';
 import '../styles/Global.css';
@@ -18,14 +19,7 @@ const StaffPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredServices = useMemo(() => {
-    if (searchTerm.length < 2) return [];
-    const search = searchTerm.toLowerCase();
-    return servicesData.filter(s => {
-      const nameMatch = s.name?.toLowerCase().includes(search);
-      const workerMatch = s.worker?.toLowerCase().includes(search);
-      const catMatch = s.cat?.toLowerCase().includes(search);
-      return nameMatch || workerMatch || catMatch;
-    });
+    return searchServices(servicesData, searchTerm);
   }, [searchTerm]);
 
   return (
@@ -84,7 +78,7 @@ const StaffPage = () => {
             <div className="services_grid">
               {filteredServices.length > 0 ? (
                 filteredServices.map((service, index) => (
-                  <div key={`${service.name}-${index}`} className="service_card_wrapper reveal">
+                  <div key={`${service.name}-${index}`} className="service_card_wrapper">
                     <ServiceCard service={service} />
                   </div>
                 ))
