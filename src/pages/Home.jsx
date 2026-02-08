@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { mundos } from '../data/categories';
 import SEOHead from '../components/SEOHead';
 import { ArrowRight } from 'lucide-react';
