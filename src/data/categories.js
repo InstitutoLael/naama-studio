@@ -3,55 +3,47 @@ export const mundos = [
     id: 'capilar',
     name: 'Corte y Estilo',
     categories: ["Cortes", "Peinado", "Estilismo"],
-    description: "Arquitectura para tu cabello. Diseñamos formas que respetan tu textura natural y simplifican tu día a día.",
+    description: "Arquitectura para tu cabello. Diseñamos formas que respetan tu textura natural.",
     icon: "Scissors",
-    image: "cortes-mundos.png"
+    image: "/assets/salon-arch.png"
   },
   {
     id: "color",
     name: "Colorimetría",
-    description: "Luz y profundidad. Técnicas avanzadas para un color que se ve nacido, no puesto. Salud capilar ante todo.",
+    description: "Luz y profundidad. Técnicas avanzadas para un color que se ve nacido, no puesto.",
     icon: "Palette",
     categories: ["Coloración", "Balayage", "Reflejos"],
-    image: "color-mundos.png"
+    image: "/assets/labor-hands.png"
   },
   {
     id: "tratamientos",
     name: "Restauración",
-    description: "Ciencia aplicada. Recuperamos la fuerza y el brillo de tu fibra capilar con protocolos de hidratación profunda y descanso visual.",
+    description: "Ciencia dedicada a recuperar la fuerza y el brillo de tu fibra capilar.",
     icon: "Zap",
-    image: 'mirada-bg.png'
+    image: '/assets/mirada-bg.png'
   },
   {
     id: 'bienestar',
     name: 'Terapias de Descanso',
     categories: ['Masaje'],
-    description: 'Sesiones de descompresión muscular y recuperación física.',
+    description: 'Sesiones de descompresión muscular y recuperación física profunda.',
     icon: 'Info',
-    image: 'wellness-bg.png'
+    image: '/assets/wellness-bg.png'
   },
   {
     id: 'manos-pies',
     name: 'Manicure & Pedicure',
     categories: ['Manicure', 'Pedicure'],
-    description: 'Cuidado técnico de extremidades y estética de uñas.',
+    description: 'Cuidado técnico de extremidades y estética de uñas con pulcritud.',
     icon: 'Sparkles',
-    image: 'nails-bg.png'
+    image: '/assets/nails-bg.png'
   },
   {
     id: 'clinico',
     name: 'Atención Clínica',
     categories: ['Podología'],
-    description: 'Salud podal y podología clínica especializada.',
+    description: 'Salud podal y podología clínica especializada para el bienestar diario.',
     icon: 'User',
-    image: 'hero-bg.png'
-  },
-  {
-    id: 'depilacion',
-    name: 'Depilación Técnica',
-    categories: ['Depilación'],
-    description: 'Sistemas de extracción de vello con precisión y cuidado cutáneo.',
-    icon: 'CheckCircle',
-    image: 'hero-bg.png'
+    image: '/assets/hero-bg.png'
   }
 ];

@@ -43,42 +43,36 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Nuestros Mundos: Editorial Mosaic Layout */}
+      {/* Nuestros Mundos: Technical Gallery View */}
       <section className="home_worlds_section">
         <div className="section_header_boutique reveal">
           <div className="header_left">
-            <span className="world_item_tag">Catálogo Editorial</span>
+            <span className="world_item_tag">Ingeniería Estética</span>
             <h2 className="serif" style={{ fontSize: '3.5rem' }}>Ecosistemas del Cuidado</h2>
           </div>
           <p style={{ maxWidth: '400px', fontSize: '0.9rem', color: 'rgba(43,43,43,0.5)', textAlign: 'right', lineHeight: '1.6' }}>
-            Explora nuestros mundos técnicos. Cada sección es un compromiso con la pulcritud, la ciencia estética y tu restauración total.
+            Cada sección es un ecosistema técnico diseñado para tu restauración. <br />
+            Explora nuestros protocolos basados en la ciencia del descanso.
           </p>
         </div>
 
-        <div className="worlds_mosaic_grid">
-          {mundos.slice(0, 4).map((mundo, index) => (
+        <div className="worlds_gallery_grid container">
+          {mundos.map((mundo, index) => (
             <div 
               key={mundo.id} 
-              className={`world_mosaic_item reveal delay-${index + 1}`}
+              className={`world_gallery_item reveal delay-${(index % 3) + 1}`}
               onClick={() => navigate(`/mundo/${mundo.id}`)}
             >
-              <div className="world_mosaic_image_container">
-                <img src={`/src/assets/${mundo.image}`} alt={mundo.name} className="world_mosaic_img" />
-                <div className="world_mosaic_overlay">
-                  <span className="mosaic_tag">Mundo 0{index + 1}</span>
+              <div className="world_gallery_img_box">
+                <img src={mundo.image} alt={mundo.name} className="world_gallery_img" />
+                <div className="world_gallery_info_overlay">
+                  <span className="mosaic_tag">Protocolo 0{index + 1}</span>
                   <h3 className="mosaic_title serif">{mundo.name}</h3>
-                  <p className="mosaic_desc">{mundo.description}</p>
-                  <span className="mosaic_link">Explorar Protocolo →</span>
+                  <button className="mosaic_link_btn">Explorar Capas de Cuidado</button>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-        
-        <div className="worlds_cta_bar container reveal">
-            <button className="nav_item" onClick={() => navigate('/staff')} style={{ opacity: 1, borderBottom: '1px solid var(--accent-clay)' }}>
-              Ver Todos los Mundos & Precios
-            </button>
         </div>
       </section>
 
@@ -118,10 +112,10 @@ const Home = () => {
           <span className="essence_label">Instagram</span>
           <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '50px' }}>Síguenos en <span style={{ color: 'var(--accent-clay)' }}>@naamastudio_</span></h2>
           <div className="instagram_grid">
-             <div className="insta_item"><img src={SalonArch} alt="Naamá Studio Atmosphere" /></div>
-             <div className="insta_item"><img src={`/src/assets/labor-hands.png`} alt="Técnica y Maestría" /></div>
-             <div className="insta_item"><img src={`/src/assets/mirada-bg.png`} alt="Detalle Terapéutico" /></div>
-             <div className="insta_item"><img src={`/src/assets/hero-bg.png`} alt="Excelencia Naamá" /></div>
+             <div className="insta_item"><img src="/assets/salon-arch.png" alt="Naamá Studio Atmosphere" /></div>
+             <div className="insta_item"><img src="/assets/labor-hands.png" alt="Técnica y Maestría" /></div>
+             <div className="insta_item"><img src="/assets/mirada-bg.png" alt="Detalle Terapéutico" /></div>
+             <div className="insta_item"><img src="/assets/hero-bg.png" alt="Excelencia Naamá" /></div>
           </div>
           <a href="https://www.instagram.com/naamastudio_/" target="_blank" rel="noopener noreferrer" className="nav_item" style={{ marginTop: '50px', display: 'inline-block', opacity: 1, borderBottom: '1px solid var(--accent-sand)' }}>
             Ver Perfil Oficial

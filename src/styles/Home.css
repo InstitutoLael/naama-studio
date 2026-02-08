@@ -82,67 +82,60 @@
   color: rgba(43, 43, 43, 0.85);
 }
 
-/* Mundos: Editorial Mosaic Grid */
+/* Mundos: Technical Gallery Grid */
 .home_worlds_section {
-  padding: 150px 0;
-  background: #fff;
-}
-
-.worlds_mosaic_grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5px;
-  background: rgba(43, 43, 43, 0.08); /* Grid lines */
-  border-top: var(--border-fine);
-  border-bottom: var(--border-fine);
-  margin-bottom: 80px;
-}
-
-.world_mosaic_item {
-  position: relative;
-  height: 700px;
-  overflow: hidden;
-  cursor: pointer;
+  padding: 180px 0;
   background: var(--bg-linen);
 }
 
-.world_mosaic_image_container {
-  width: 100%;
-  height: 100%;
+.worlds_gallery_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
 }
 
-.world_mosaic_img {
+.world_gallery_item {
+  position: relative;
+  height: 500px;
+  overflow: hidden;
+  cursor: pointer;
+  background: #fff;
+  border: var(--border-fine);
+}
+
+.world_gallery_img_box {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.world_gallery_img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 1.5s var(--transition-luxe);
   filter: grayscale(100%) contrast(1.1);
 }
 
-.world_mosaic_item:hover .world_mosaic_img {
-  transform: scale(1.1);
+.world_gallery_item:hover .world_gallery_img {
+  transform: scale(1.05);
   filter: grayscale(0) contrast(1);
 }
 
-.world_mosaic_overlay {
+.world_gallery_info_overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(43, 43, 43, 0.8) 0%, transparent 60%);
-  padding: 60px;
+  background: linear-gradient(to top, rgba(43, 43, 43, 0.8) 0%, transparent 70%);
+  padding: 40px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   color: #fff;
-  opacity: 0;
   transition: var(--transition-luxe);
 }
 
-.world_mosaic_item:hover .world_mosaic_overlay {
-  opacity: 1;
-}
-
 .mosaic_tag {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.3em;
@@ -151,32 +144,26 @@
 }
 
 .mosaic_title {
-  font-size: 3rem;
-  margin-bottom: 20px;
-}
-
-.mosaic_desc {
-  font-size: 1rem;
-  line-height: 1.6;
-  max-width: 400px;
-  margin-bottom: 30px;
-  opacity: 0.7;
-}
-
-.mosaic_link {
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-}
-
-.worlds_cta_bar {
-  text-align: center;
-}
-
-.world_item_name {
   font-size: 2.2rem;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
+}
+
+.mosaic_link_btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #fff;
+  padding: 12px 25px;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  width: fit-content;
+  transition: var(--transition-fast);
+}
+
+.world_gallery_item:hover .mosaic_link_btn {
+  background: #fff;
+  color: var(--text-slate);
+  border-color: #fff;
 }
 
 /* Intelligent Booking Teaser */

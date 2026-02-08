@@ -8,11 +8,11 @@ import '../styles/Global.css';
 import '../styles/StaffPage.css';
 
 const specialists = [
-  { name: "Allison", specialty: "Make-up & Hair Styling", initial: "A" },
-  { name: "Cami", specialty: "Technical Color & Esthetics", initial: "C" },
-  { name: "Valeria", specialty: "Master Alisados & Cutting", initial: "V" },
-  { name: "Gaby", specialty: "Dermo-Nails & Depilation", initial: "G" },
-  { name: "Vivy", specialty: "High-End Facials & Maderotherapy", initial: "V" }
+  { name: "Allison", specialty: "Make-up & Hair Styling" },
+  { name: "Cami", specialty: "Technical Color & Esthetics" },
+  { name: "Valeria", specialty: "Master Alisados & Cutting" },
+  { name: "Gaby", specialty: "Dermo-Nails & Depilation" },
+  { name: "Vivy", specialty: "High-End Facials & Maderotherapy" }
 ];
 
 const StaffPage = () => {
@@ -37,12 +37,12 @@ const StaffPage = () => {
         </p>
       </header>
       
-      <main className="staff_grid_editorial">
+      <main className="specialist_gallery container">
         {specialists.map((pro, index) => (
           <div 
             key={index} 
-            className="staff_card_editorial reveal" 
-            style={{ transitionDelay: `${index * 0.1}s`, cursor: 'pointer' }}
+            className="specialist_item reveal" 
+            style={{ transitionDelay: `${index * 0.1}s` }}
             onClick={() => {
               setSearchTerm(pro.name);
               const searchSection = document.querySelector('.staff_search_section');
@@ -51,14 +51,9 @@ const StaffPage = () => {
               }
             }}
           >
-            <div className="staff_placeholder_initial serif">
-              {pro.initial}
-            </div>
-            <div className="staff_info_box">
-              <h3 className="staff_full_name">{pro.name}</h3>
-              <p className="staff_specialty">{pro.specialty}</p>
-              <span className="staff_link_hint">Ver Servicios →</span>
-            </div>
+            <h3 className="specialist_name serif">{pro.name}</h3>
+            <p className="specialist_role">{pro.specialty}</p>
+            <button className="specialist_view_btn">Ver sus servicios</button>
           </div>
         ))}
       </main>
@@ -85,23 +80,21 @@ const StaffPage = () => {
           </div>
         </div>
 
-        {searchTerm && (
-          <div className="services_grid_adaptive">
-            <div className="services_grid">
-              {filteredServices.length > 0 ? (
-                filteredServices.map((service, index) => (
-                  <div key={`${service.name}-${index}`} className="service_card_wrapper">
-                    <ServiceCard service={service} defaultExpanded={true} />
-                  </div>
-                ))
-              ) : (
-                <div className="empty_selection">
-                  <p className="serif">No se encontraron resultados para "{searchTerm}"</p>
+        <div className="services_grid_adaptive">
+          <div className="services_grid">
+            {filteredServices.length > 0 ? (
+              filteredServices.map((service, index) => (
+                <div key={`${service.name}-${index}`} className="service_card_wrapper">
+                  <ServiceCard service={service} defaultExpanded={searchTerm !== ''} />
                 </div>
-              )}
-            </div>
+              ))
+            ) : (
+              <div className="empty_selection">
+                <p className="serif">No se encontraron resultados para "{searchTerm}"</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </section>
 
       <section className="container section-padding reveal" style={{ textAlign: 'center', marginTop: '100px' }}>
