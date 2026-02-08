@@ -44,6 +44,8 @@ const Home = () => {
       </section>
 
       {/* The Essence: Minimalist & Hospital-Grade */}
+      <section className="home_essence reveal">
+        <div className="container">
           <span className="essence_label">La Promesa de Valor</span>
           <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '40px' }}>La Belleza es un Acto de Servicio.</h2>
           <p className="essence_text serif">
