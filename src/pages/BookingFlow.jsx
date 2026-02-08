@@ -15,10 +15,21 @@ const BookingFlow = () => {
   const prevStep = () => setStep(step - 1);
 
   const needs = [
-    { id: 'cambio', title: 'Necesito un cambio visible.', desc: 'Prioridad: Transformación y nueva estética.' },
-    { id: 'mantenimiento', title: 'Busco mantener mi estilo.', desc: 'Prioridad: Continuidad de estilo y pulcritud.' },
-    { id: 'descanso', title: 'Solo necesito silencio y descanso.', desc: 'Prioridad: Relajación y desconexión total (Lujo).' }
+    { id: 'cambio', title: 'Necesito un cambio visible.', desc: 'Transformación y nueva estética.' },
+    { id: 'mantenimiento', title: 'Busco mantener mi estilo.', desc: 'Continuidad de estilo y pulcritud.' },
+    { id: 'descanso', title: 'Solo necesito silencio y descanso.', desc: 'Relajación y desconexión total.' }
   ];
+
+  const sendWhatsApp = () => {
+    const needLabel = needs.find(n => n.id === formData.need)?.title || formData.need;
+    const message = `*Nueva Consulta Digital - Naamá Studio*%0A%0A` +
+      `*Preferencia:* ${needLabel}%0A` +
+      `*Fecha sugerida:* ${formData.date}%0A` +
+      `*Notas técnicas:* ${formData.notes || 'Sin notas'}%0A%0A` +
+      `_Enviado desde el sistema de reserva digital._`;
+    
+    window.open(`https://wa.me/56979520623?text=${message}`, '_blank');
+  };
 
   return (
     <div className="booking_flow_container">
@@ -101,15 +112,23 @@ const BookingFlow = () => {
             </div>
             <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '20px' }}>Consulta <span style={{ color: 'var(--accent-clay)' }}>Completada</span></h2>
             <p style={{ color: 'rgba(43,43,43,0.5)', marginBottom: '50px', fontSize: '1.2rem' }}>
-              "Tu espacio ha sido reservado. Todo estará listo para recibirte con la calma que mereces. Hasta pronto."
+              "Tu espacio está siendo diseñado. Para garantizar la excelencia técnica, envía tu consulta a nuestro equipo ahora."
             </p>
             
-            <a href="https://naamastudio.setmore.com/" target="_blank" rel="noopener noreferrer">
-               <button className="next_btn" style={{ padding: '25px 60px' }}>Confirmar en Setmore</button>
-            </a>
+            <div className="booking_actions_vertical" style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
+               <button className="next_btn" style={{ padding: '25px 60px', width: '100%' }} onClick={sendWhatsApp}>
+                 Enviar a WhatsApp Oficial
+               </button>
+               
+               <a href="https://naamastudio.setmore.com/" target="_blank" rel="noopener noreferrer" style={{ width: '100%' }}>
+                  <button className="back_btn" style={{ padding: '20px 60px', width: '100%', border: 'var(--border-fine)' }}>
+                    Ver Disponibilidad en Setmore
+                  </button>
+               </a>
+            </div>
             
             <p style={{ marginTop: '40px', fontSize: '0.8rem', color: 'rgba(43,43,43,0.3)' }}>
-               Te esperamos para servirte con excelencia.
+               Gracias por confiar en nuestra ingeniería del cuidado.
             </p>
           </div>
         )}

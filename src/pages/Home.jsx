@@ -43,23 +43,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* The Essence: Minimalist & Hospital-Grade */}
-      <section className="home_essence reveal">
-        <div className="container">
-          <span className="essence_label">La Promesa de Valor</span>
-          <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '40px' }}>La Belleza es un Acto de Servicio.</h2>
-          <p className="essence_text serif">
-            "Creemos que el verdadero bienestar no necesita misticismo, necesita maestría. En Naamá Studio, honramos tu tiempo y tu confianza con higiene impecable, productos honestos y manos que entienden la arquitectura de tu belleza."
-          </p>
-          <p className="essence_text serif" style={{ fontSize: '1.5rem', marginTop: '-30px', opacity: 0.9 }}>
-            Nuestro estándar es simple: que al salir, te sientas más tú misma que cuando entraste. <br />
-            <span style={{ color: 'var(--accent-clay)' }}>Dulce. Placentera. Renovada.</span>
-          </p>
-          <div style={{ height: '1px', background: 'var(--accent-clay)', width: '60px', margin: '0 auto' }}></div>
-        </div>
-      </section>
-
-      {/* Experience Rail: Horizontal Swipe-ready */}
+      {/* Experience Rail: Horizontal Swipe-ready - MOVIDO ARRIBA */}
       <section className="home_worlds_section">
         <div className="section_header_boutique reveal">
           <div className="header_left">
@@ -87,12 +71,27 @@ const Home = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                    <div style={{ height: '1px', background: 'var(--accent-clay)', flex: 1 }}></div>
                    <ArrowRight size={20} strokeWidth={1} color="var(--accent-clay)" />
-                </div>
+                 </div>
               </div>
             </div>
           ))}
-          {/* Decorative Spacer for end of rail */}
           <div style={{ minWidth: '60px' }}></div>
+        </div>
+      </section>
+
+      {/* The Essence: Minimalist & Hospital-Grade */}
+      <section className="home_essence reveal">
+        <div className="container">
+          <span className="essence_label">La Promesa de Valor</span>
+          <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '40px' }}>La Belleza es un Acto de Servicio.</h2>
+          <p className="essence_text serif">
+            "Creemos que el verdadero bienestar no necesita misticismo, necesita maestría. En Naamá Studio, honramos tu tiempo y tu confianza con higiene impecable, productos honestos y manos que entienden la arquitectura de tu belleza."
+          </p>
+          <p className="essence_text serif" style={{ fontSize: '1.5rem', marginTop: '-30px', opacity: 0.9 }}>
+            Nuestro estándar es simple: que al salir, te sientas más tú misma que cuando entraste. <br />
+            <span style={{ color: 'var(--accent-clay)' }}>Dulce. Placentera. Renovada.</span>
+          </p>
+          <div style={{ height: '1px', background: 'var(--accent-clay)', width: '60px', margin: '0 auto' }}></div>
         </div>
       </section>
 
