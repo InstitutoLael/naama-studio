@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import '../../styles/ServiceCard.css';
 
-const ServiceCard = ({ service }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+const ServiceCard = ({ service, defaultExpanded = false }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   return (
     <div className={`service_card ${isExpanded ? 'expanded' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
