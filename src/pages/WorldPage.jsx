@@ -1,25 +1,46 @@
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { servicesData } from '../data/servicesData';
 import { mundos } from '../data/categories';
 import ServiceCard from '../components/UI/ServiceCard';
 import SEOHead from '../components/SEOHead';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Search, Filter } from 'lucide-react';
 import '../styles/Global.css';
 import '../styles/WorldPage.css';
 
-const WorldPage = () => {
-  const { mundoId } = useParams();
+  const [activeTab, setActiveTab] = useState('Todos');
+  const [searchTerm, setSearchTerm] = useState('');
   
   const mundo = useMemo(() => mundos.find(m => m.id === mundoId), [mundoId]);
   
+  const categories = useMemo(() => {
+    if (!mundo) return [];
+    return ['Todos', ...new Set(servicesData.filter(s => mundo.categories.includes(s.cat)).map(s => s.cat))];
+  }, [mundo]);
+
   const filteredServices = useMemo(() => {
     if (!mundo) return [];
-    return servicesData.filter(service => mundo.categories.includes(service.cat));
-  }, [mundo]);
+    let services = servicesData.filter(service => mundo.categories.includes(service.cat));
+    
+    if (activeTab !== 'Todos') {
+      services = services.filter(s => s.cat === activeTab);
+    }
+    
+    if (searchTerm) {
+      const search = searchTerm.toLowerCase();
+      services = services.filter(s => 
+        s.name.toLowerCase().includes(search) || 
+        s.worker.toLowerCase().includes(search)
+      );
+    }
+    
+    return services;
+  }, [mundo, activeTab, searchTerm]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    setActiveTab('Todos');
+    setSearchTerm('');
   }, [mundoId]);
 
   if (!mundo) {
@@ -39,22 +60,48 @@ const WorldPage = () => {
       <SEOHead title={mundo.name} description={mundo.description} />
       
       <header className="world_header reveal">
-        <span className="world_category_label">Ingeniería del Cuidado</span>
+        <span className="world_category_label">Catálogo Técnico</span>
         <h1 className="world_title serif">{mundo.name}</h1>
         <p className="world_description">{mundo.description}</p>
-        <div className="section_divider" style={{ background: 'var(--sand-beige)', width: '40px', marginTop: '40px' }}></div>
+        
+        <div className="discovery_bar">
+          <div className="search_wrapper">
+            <Search size={18} strokeWidth={1} className="search_icon" />
+            <input 
+              type="text" 
+              placeholder="Staff Search: Nombre o técnico..." 
+              className="staff_input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <div className="category_tabs_wrapper">
+            <div className="tabs_rail">
+              {categories.map(cat => (
+                <button 
+                  key={cat} 
+                  className={`tab_btn ${activeTab === cat ? 'active' : ''}`}
+                  onClick={() => setActiveTab(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </header>
 
       <main className="services_grid">
         {filteredServices.length > 0 ? (
           filteredServices.map((service, index) => (
-            <div key={index} className="service_card_wrapper reveal">
+            <div key={`${service.name}-${index}`} className="service_card_wrapper reveal">
               <ServiceCard service={service} />
             </div>
           ))
         ) : (
-          <div className="container" style={{ padding: '60px 0', opacity: 0.5 }}>
-            <p>No hay servicios disponibles bajo esta categoría en este momento.</p>
+          <div className="container" style={{ padding: '100px 0', textAlign: 'center', gridColumn: '1 / -1' }}>
+            <p className="serif" style={{ fontSize: '1.5rem', opacity: 0.3 }}>No se encontraron servicios bajo esta selección.</p>
           </div>
         )}
       </main>

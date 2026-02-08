@@ -1,15 +1,23 @@
 /* ServiceCard: Technical Precision & Quiet Luxury */
 .service_card {
-  padding: 80px 60px;
-  height: 100%;
+  padding: 60px 40px;
+  height: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   transition: var(--transition-luxe);
+  cursor: pointer;
+  border-bottom: var(--border-fine);
+  background-color: transparent;
+  position: relative;
 }
 
 .service_card:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.service_card.expanded {
   background-color: #fff;
+  padding-bottom: 80px;
 }
 
 .card_top {
@@ -24,16 +32,17 @@
 }
 
 .service_name_text {
-  font-size: 2.8rem;
-  line-height: 1.1;
+  font-size: 1.8rem;
+  line-height: 1.2;
   color: var(--text-slate);
-  max-width: 75%;
+  max-width: 70%;
 }
 
 .service_price_text {
   font-family: var(--font-serif);
-  font-size: 2rem;
+  font-size: 1.4rem;
   color: var(--accent-clay);
+  font-weight: 500;
 }
 
 .service_meta_data {
@@ -57,27 +66,30 @@
   max-width: 90%;
 }
 
-.card_bottom {
-  margin-top: auto;
-  padding-top: 50px;
-  border-top: var(--border-fine);
+.card_expanded_content {
+  margin-top: 20px;
+  border-top: 1px solid rgba(176, 141, 121, 0.1);
+  padding-top: 30px;
 }
 
-.detail_label {
-  font-size: 0.6rem;
-  font-weight: 900;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  color: var(--text-slate);
-  margin-bottom: 15px;
-  display: block;
-  opacity: 0.5;
+.protocol_box {
+  margin-top: 30px;
+  padding: 25px;
+  background-color: var(--bg-linen);
+  border-left: 2px solid var(--accent-clay);
 }
 
-.detail_text {
-  font-size: 0.85rem;
-  color: rgba(43, 43, 43, 0.5);
-  line-height: 1.6;
+.expand_hint {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  opacity: 0.3;
+  transition: var(--transition-luxe);
+}
+
+.service_card:hover .expand_hint {
+  opacity: 1;
+  transform: translateY(-5px);
 }
 
 @media (max-width: 768px) {

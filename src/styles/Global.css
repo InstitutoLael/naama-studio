@@ -107,3 +107,13 @@ img {
 .image-reveal:hover img {
   transform: scale(1.05);
 }
+
+/* Editorial Architecture: God Level Consistency */
+img:not(.logo_img) {
+  filter: grayscale(100%) contrast(110%);
+  transition: var(--transition-luxe);
+}
+
+img:not(.logo_img):hover {
+  filter: grayscale(0%) contrast(100%);
+}
