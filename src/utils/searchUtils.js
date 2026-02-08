@@ -29,7 +29,7 @@ export const fuzzyMatch = (searchTerm, targetContent) => {
  * Global search engine for servicesData.
  */
 export const searchServices = (data, query) => {
-  if (!query || query.length < 2) return [];
+  if (!query) return [];
   
   return data.filter(item => {
     const searchableContent = `${item.name} ${item.worker} ${item.cat} ${item.desc || ''}`.toLowerCase();
