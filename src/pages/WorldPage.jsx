@@ -94,18 +94,45 @@ const WorldPage = () => {
         </div>
       </header>
 
-      <main className="services_grid">
-        {filteredServices.length > 0 ? (
-          filteredServices.map((service, index) => (
-            <div key={`${service.name}-${index}`} className="service_card_wrapper reveal">
-              <ServiceCard service={service} />
-            </div>
-          ))
-        ) : (
-          <div className="container" style={{ padding: '100px 0', textAlign: 'center', gridColumn: '1 / -1' }}>
-            <p className="serif" style={{ fontSize: '1.5rem', opacity: 0.3 }}>No se encontraron servicios bajo esta selección.</p>
+      <main className="services_grid_adaptive">
+        {/* Desktop/Tablet View: Search + Tabs + Grid */}
+        <div className="desktop_catalog_view">
+          <div className="services_grid">
+            {filteredServices.length > 0 ? (
+              filteredServices.map((service, index) => (
+                <div key={`${service.name}-${index}`} className="service_card_wrapper reveal">
+                  <ServiceCard service={service} />
+                </div>
+              ))
+            ) : (
+              <div className="empty_selection">
+                <p className="serif">No se encontraron servicios bajo esta selección.</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Mobile View: Accordion-first architecture */}
+        <div className="mobile_catalog_view">
+           {categories.filter(c => c !== 'Todos').map((cat) => {
+             const catServices = filteredServices.filter(s => s.cat === cat);
+             if (catServices.length === 0 && searchTerm) return null;
+             
+             return (
+               <details key={cat} className="category_accordion reveal">
+                 <summary className="accordion_header serif">
+                   <span>{cat}</span>
+                   <span className="count_badge">{catServices.length}</span>
+                 </summary>
+                 <div className="accordion_content">
+                   {catServices.map((service, idx) => (
+                     <ServiceCard key={`${service.name}-${idx}`} service={service} />
+                   ))}
+                 </div>
+               </details>
+             );
+           })}
+        </div>
       </main>
 
       <section className="container section-padding reveal" style={{ textAlign: 'center' }}>
