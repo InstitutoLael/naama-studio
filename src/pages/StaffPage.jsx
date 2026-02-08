@@ -85,7 +85,7 @@ const StaffPage = () => {
             {filteredServices.length > 0 ? (
               filteredServices.map((service, index) => (
                 <div key={`${service.name}-${index}`} className="service_card_wrapper">
-                  <ServiceCard service={service} defaultExpanded={searchTerm !== ''} />
+                  <ServiceCard service={service} defaultExpanded={false} />
                 </div>
               ))
             ) : (

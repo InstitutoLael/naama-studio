@@ -32,26 +32,19 @@ const ServiceCard = ({ service, defaultExpanded = false }) => {
 
       {isExpanded && (
         <div className="card_expanded_content reveal">
-          <div className="expanded_technical_grid">
-             <div className="technical_info_item">
-                <span className="detail_label">Protocolo Técnico</span>
-                <p className="detail_text">{service.why}</p>
-             </div>
-             <div className="technical_meta_item">
-                <div className="meta_item_block">
-                   <span className="detail_label">Inversión de Tiempo</span>
-                   <p className="meta_value serif">{service.time}</p>
-                </div>
-                <div className="meta_item_block">
-                   <span className="detail_label">Especialista</span>
-                   <p className="meta_value serif">{service.worker}</p>
-                </div>
-             </div>
-          </div>
-          <div className="service_description_block">
-            <span className="detail_label">Descripción</span>
-            <p className="service_description_text">{service.desc}</p>
-          </div>
+          {service.why && (
+            <div className="technical_info_item">
+              <span className="detail_label">Protocolo Técnico</span>
+              <p className="detail_text">{service.why}</p>
+            </div>
+          )}
+          
+          {service.desc && (
+            <div className="service_description_block">
+              <span className="detail_label">Descripción</span>
+              <p className="service_description_text">{service.desc}</p>
+            </div>
+          )}
           
           <div className="card_cta_row">
             <button 

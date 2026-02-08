@@ -1,6 +1,6 @@
 /* ServiceCard: Technical Precision & Quiet Luxury */
 .service_card {
-  padding: 30px 25px;
+  padding: 20px 25px;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -16,12 +16,12 @@
 }
 
 .service_card:not(.no_expand):hover {
-  background-color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 .service_card.expanded {
   background-color: #fff;
-  padding-bottom: 50px;
+  padding-bottom: 30px;
 }
 
 .card_top {
