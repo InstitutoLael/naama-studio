@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, User } from 'lucide-react';
+import { Clock as ClockIcon, User } from 'lucide-react';
 import '../../styles/ServiceCard.css';
 
 const ServiceCard = ({ service }) => {
@@ -11,7 +11,7 @@ const ServiceCard = ({ service }) => {
         
         <div className="service_meta">
           <div className="meta_item">
-            <Clock size={14} strokeWidth={1.5} />
+            <ClockIcon size={14} strokeWidth={1.5} />
             <span>{service.time}</span>
           </div>
           <div className="meta_item">

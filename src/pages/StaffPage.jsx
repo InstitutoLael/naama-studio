@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { servicesData } from '../data/servicesData';
-import { Search, Clock, User } from 'lucide-react';
+import { Search, Clock as ClockIcon, User } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import '../styles/Global.css';
 import '../styles/StaffPage.css';
@@ -62,7 +62,7 @@ const StaffPage = () => {
               <div className="item_pricing">
                 <span className="item_price_val">${service.price}</span>
                 <div className="item_time_val">
-                  <Clock size={10} style={{ marginRight: '4px' }} />
+                  <ClockIcon size={10} style={{ marginRight: '4px' }} />
                   <span>{service.time}</span>
                 </div>
               </div>
