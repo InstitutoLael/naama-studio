@@ -87,11 +87,50 @@
 
 .staff_search_section {
   margin-top: 150px;
+  padding-bottom: 100px;
 }
 
 .staff_search_section .section_header_boutique {
   padding: 0 60px;
   margin-bottom: 20px;
+}
+
+/* Discovery & Search Shared System */
+.discovery_bar {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.search_wrapper {
+  display: flex;
+  align-items: center;
+  border-bottom: var(--border-medium);
+  padding: 15px 0;
+  transition: var(--transition-luxe);
+}
+
+.search_wrapper:focus-within {
+  border-color: var(--accent-clay);
+}
+
+.search_icon {
+  margin-right: 20px;
+  color: rgba(43, 43, 43, 0.2);
+}
+
+.staff_input {
+  background: transparent;
+  border: none;
+  width: 100%;
+  font-family: var(--font-serif);
+  color: var(--text-slate);
+  outline: none;
+}
+
+.staff_input::placeholder {
+  color: rgba(43, 43, 43, 0.15);
+  font-style: italic;
 }
 
 /* Reusing grid architecture from WorldPage for consistency */

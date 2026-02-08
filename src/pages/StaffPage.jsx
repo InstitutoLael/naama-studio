@@ -18,13 +18,14 @@ const StaffPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredServices = useMemo(() => {
-    if (!searchTerm) return [];
+    if (searchTerm.length < 2) return [];
     const search = searchTerm.toLowerCase();
-    return servicesData.filter(s => 
-      s.name.toLowerCase().includes(search) || 
-      s.worker.toLowerCase().includes(search) ||
-      s.cat.toLowerCase().includes(search)
-    );
+    return servicesData.filter(s => {
+      const nameMatch = s.name?.toLowerCase().includes(search);
+      const workerMatch = s.worker?.toLowerCase().includes(search);
+      const catMatch = s.cat?.toLowerCase().includes(search);
+      return nameMatch || workerMatch || catMatch;
+    });
   }, [searchTerm]);
 
   return (
