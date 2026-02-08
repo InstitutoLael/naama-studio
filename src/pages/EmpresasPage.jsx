@@ -1,6 +1,7 @@
 import React from 'react';
-import { Mail, MapPin } from 'lucide-react';
+import { Mail, MapPin, Package, CheckCircle } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
+import { b2bPacks } from '../data/b2bPacks';
 import '../styles/Global.css';
 import '../styles/EmpresasPage.css';
 
@@ -39,6 +40,38 @@ const EmpresasPage = () => {
           <p className="benefit_desc">Gift cards corporativas físicas en acabado lino crudo. Un gesto de reconocimiento técnico que permite al colaborador elegir su propio protocolo de restauración en nuestro salón.</p>
         </div>
       </main>
+
+      <section className="container section-padding reveal">
+        <span className="essence_label">Combinaciones de Valor</span>
+        <h2 className="serif" style={{ fontSize: '3.5rem', marginBottom: '60px' }}>Packs de Ingeniería <span style={{ color: 'var(--accent-clay)' }}>B2B</span></h2>
+        
+        <div className="b2b_packs_grid">
+          {b2bPacks.map((pack) => (
+            <div key={pack.id} className="b2b_pack_card">
+              <div className="pack_status_badge">{pack.modality}</div>
+              <h3 className="serif pack_name">{pack.name}</h3>
+              <p className="pack_desc">{pack.description}</p>
+              <div className="pack_services_list">
+                 {pack.services.map(s => <span key={s} className="pack_service_tag">{s}</span>)}
+              </div>
+              <div className="pack_footer">
+                 <div className="pack_price_box">
+                    <span className="pack_label_tag">Inversión desde</span>
+                    <span className="pack_price serif">${pack.price} <small className="pack_savings">(-{pack.savings})</small></span>
+                 </div>
+                 <button 
+                  id={`btn_pack_${pack.id}`}
+                  className="nav_cta_boutique" 
+                  style={{ padding: '15px 30px', fontSize: '0.6rem' }} 
+                  onClick={() => window.location.href = `mailto:naamastudiospa@gmail.com?subject=Interés en Pack B2B: ${pack.name}`}
+                 >
+                   Solicitar Pack
+                 </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="container reveal" style={{ marginBottom: '150px' }}>
         <div className="b2b_cta_section">

@@ -87,3 +87,96 @@
   .benefit_item { padding: 80px 40px; }
   .b2b_cta_section { padding: 80px 40px; margin-bottom: 100px; }
 }
+
+.b2b_packs_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  margin-bottom: 100px;
+}
+
+.b2b_pack_card {
+  background: #fff;
+  border: var(--border-fine);
+  padding: 50px 40px;
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition-luxe);
+}
+
+.b2b_pack_card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+.pack_status_badge {
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-clay);
+  margin-bottom: 25px;
+}
+
+.pack_name {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.pack_desc {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: rgba(43, 43, 43, 0.6);
+  margin-bottom: 30px;
+  flex-grow: 1;
+}
+
+.pack_services_list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.pack_service_tag {
+  font-size: 0.65rem;
+  background: var(--bg-linen);
+  padding: 6px 12px;
+  border-radius: 4px;
+  color: var(--text-slate);
+}
+
+.pack_footer {
+  border-top: 1px solid rgba(43, 43, 43, 0.05);
+  padding-top: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.pack_label_tag {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(43,43,43,0.4);
+  display: block;
+}
+
+.pack_price {
+  font-size: 1.8rem;
+  color: var(--text-slate);
+}
+
+.pack_savings {
+  font-size: 1rem;
+  color: var(--accent-clay);
+  font-style: italic;
+}
+
+@media (max-width: 1200px) {
+  .b2b_packs_grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 768px) {
+  .b2b_packs_grid { grid-template-columns: 1fr; }
+}
