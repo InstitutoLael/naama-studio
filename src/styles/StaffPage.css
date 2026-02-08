@@ -1,0 +1,139 @@
+.staff_container {
+  min-height: 100vh;
+  padding-top: 100px;
+  background: var(--onyx);
+}
+
+.staff_header {
+  padding: 100px 40px 60px;
+  text-align: center;
+  border-bottom: var(--border-thin);
+}
+
+.staff_header h1 {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.staff_header p {
+  color: var(--gray-muted);
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
+.search_wrapper {
+  position: relative;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.search_icon {
+  position: absolute;
+  left: 30px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--champagne);
+  opacity: 0.5;
+}
+
+.staff_input {
+  width: 100%;
+  background: var(--charcoal);
+  border: var(--border-thin);
+  border-radius: 100px;
+  padding: 25px 30px 25px 70px;
+  color: var(--white-soft);
+  font-size: 1.1rem;
+  font-family: var(--font-sans);
+  transition: var(--transition-smooth);
+}
+
+.staff_input:focus {
+  outline: none;
+  border-color: var(--champagne);
+  box-shadow: 0 0 20px rgba(206, 181, 133, 0.1);
+}
+
+.staff_content {
+  max-width: 1200px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.results_count {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--gray-muted);
+  margin-bottom: 30px;
+  display: block;
+}
+
+.staff_services_list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.staff_item {
+  background: var(--charcoal);
+  border: var(--border-thin);
+  padding: 30px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 40px;
+  transition: var(--transition-smooth);
+}
+
+.staff_item:hover {
+  border-color: rgba(206, 181, 133, 0.5);
+  transform: translateX(10px);
+}
+
+.item_info h3 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.item_cat {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--champagne);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.item_worker {
+  font-size: 0.8rem;
+  color: var(--gray-muted);
+}
+
+.item_pricing {
+  text-align: right;
+}
+
+.item_price_val {
+  font-size: 2.2rem;
+  font-family: var(--font-serif);
+  color: var(--white-soft);
+  display: block;
+}
+
+.item_time_val {
+  font-size: 0.7rem;
+  color: var(--gray-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 768px) {
+  .staff_item { grid-template-columns: 1fr; gap: 20px; }
+  .item_pricing { text-align: left; }
+}

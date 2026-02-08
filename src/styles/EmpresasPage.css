@@ -1,0 +1,115 @@
+.empresas_container {
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+.empresas_hero {
+  height: 80vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.empresas_hero_bg {
+  position: absolute;
+  inset: 0;
+  background: url('../assets/wellness-bg.png') no-repeat center/cover;
+  filter: brightness(0.4) saturate(0.8);
+  transform: scale(1.05);
+}
+
+.empresas_hero_content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 0 40px;
+}
+
+.tagline {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.5em;
+  color: var(--champagne);
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.empresas_hero h1 {
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  line-height: 1.1;
+  margin-bottom: 2rem;
+}
+
+.empresas_main {
+  max-width: 1400px;
+  margin: 100px auto;
+  padding: 0 40px;
+}
+
+.benefits_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 60px;
+  margin-bottom: 150px;
+}
+
+.benefit_card {
+  padding: 60px;
+  background: var(--charcoal);
+  border: var(--border-thin);
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.benefit_card:hover {
+  border-color: var(--champagne);
+  transform: translateY(-10px);
+}
+
+.benefit_icon {
+  margin-bottom: 30px;
+  color: var(--champagne);
+}
+
+.benefit_card h3 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.benefit_card p {
+  color: var(--gray-muted);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.cta_section {
+  background: var(--charcoal);
+  padding: 100px 40px;
+  border: var(--border-thin);
+  text-align: center;
+  border-radius: 4px;
+}
+
+.cta_section h2 {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cta_info_list {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin: 40px 0;
+  color: var(--champagne);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .cta_info_list { flex-direction: column; gap: 15px; }
+  .benefit_card { padding: 40px 20px; }
+}

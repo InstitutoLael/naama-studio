@@ -1,0 +1,99 @@
+.service_card {
+  background: var(--charcoal);
+  border: var(--border-thin);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 450px;
+  transition: var(--transition-smooth);
+}
+
+.service_card:hover {
+  border-color: var(--champagne);
+  box-shadow: var(--shadow-luxury);
+  transform: translateY(-5px);
+}
+
+.service_category {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--champagne);
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.service_name {
+  font-size: 2rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: var(--white-soft);
+}
+
+.service_meta {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 2rem;
+  color: var(--gray-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.meta_item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.service_pricing {
+  margin-bottom: 2.5rem;
+}
+
+.price_old {
+  text-decoration: line-through;
+  color: rgba(255,255,255,0.2);
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.price_new {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--white-soft);
+  font-family: var(--font-serif);
+}
+
+.service_description {
+  color: var(--gray-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.naama_experience {
+  border-top: var(--border-thin);
+  padding-top: 2rem;
+  margin-top: auto;
+}
+
+.experience_label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--champagne);
+  display: block;
+  margin-bottom: 10px;
+}
+
+.experience_text {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: rgba(255,255,255,0.7);
+  line-height: 1.4;
+}

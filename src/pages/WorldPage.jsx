@@ -1,10 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { servicesData } from '../data/servicesData';
 import { mundos } from '../data/categories';
 import ServiceCard from '../components/UI/ServiceCard';
-import { ChevronLeft, Sparkles } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
+import { ChevronLeft } from 'lucide-react';
+import '../styles/Global.css';
+import '../styles/WorldPage.css';
 
 const WorldPage = () => {
   const { mundoId } = useParams();
@@ -16,64 +18,54 @@ const WorldPage = () => {
     return servicesData.filter(service => mundo.categories.includes(service.cat));
   }, [mundo]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [mundoId]);
+
   if (!mundo) {
     return (
-      <div className="error-page" style={{ paddingTop: '100px', textAlign: 'center' }}>
+      <div className="error_page">
         <SEOHead title="Error 404" description="Mundo no encontrado." />
         <h2 className="serif">Mundo no encontrado</h2>
-        <Link to="/" className="gold-link" style={{ color: 'var(--accent-color)' }}>Volver al inicio</Link>
+        <Link to="/" className="gold_link">Volver al inicio</Link>
       </div>
     );
   }
 
+  const bgStyle = {
+    backgroundImage: `url(/src/assets/${mundo.image})`
+  };
+
   return (
-    <div className="world-page animate-fade-in">
+    <div className="world_container">
       <SEOHead title={mundo.name} description={mundo.description} />
-      <header className="world-header">
-        <div className="header-container">
-          <Link to="/" className="back-link"><ChevronLeft size={16} /> Volver</Link>
-          <div className="world-title-wrapper">
-            <h1 className="serif">{mundo.name}</h1>
-            <p>{mundo.description}</p>
-          </div>
+      
+      <header className="world_hero">
+        <div className="world_hero_bg" style={bgStyle}></div>
+        <div className="world_hero_overlay"></div>
+        <div className="world_hero_content reveal">
+          <Link to="/" className="back_btn">
+            <ChevronLeft size={16} />
+            <span>Volver</span>
+          </Link>
+          <h1 className="world_title serif">{mundo.name}</h1>
+          <p className="world_desc">{mundo.description}</p>
         </div>
       </header>
 
-      <main className="world-content">
-        <div className="services-grid">
+      <main className="services_section">
+        <div className="services_grid">
           {filteredServices.length > 0 ? (
             filteredServices.map((service, index) => (
               <ServiceCard key={index} service={service} />
             ))
           ) : (
-            <div className="no-services">
+            <div className="no_services_msg">
               <p>No hay servicios disponibles en este momento para esta categoría.</p>
             </div>
           )}
         </div>
       </main>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .world-page { padding-top: 100px; min-height: 100vh; }
-        .world-header { background: #050505; border-bottom: 1px solid var(--border-color); padding: 40px 20px; }
-        .header-container { max-width: 1200px; margin: 0 auto; }
-        .back-link { display: flex; align-items: center; gap: 5px; color: var(--accent-color); font-size: 0.8rem; text-transform: uppercase; font-weight: 700; margin-bottom: 30px; }
-        
-        .world-title-wrapper h1 { font-size: 3.5rem; margin-bottom: 10px; }
-        .world-title-wrapper p { color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; }
-
-        .world-content { max-width: 1200px; margin: 60px auto; padding: 0 20px; }
-        .services-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          gap: 30px;
-        }
-        .no-services { text-align: center; padding: 100px 0; color: var(--text-secondary); }
-
-        @media (max-width: 768px) {
-          .world-title-wrapper h1 { font-size: 2.5rem; }
-        }
-      `}} />
     </div>
   );
 };

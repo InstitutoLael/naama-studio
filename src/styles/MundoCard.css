@@ -1,0 +1,102 @@
+.mundo_card {
+  position: relative;
+  height: 500px;
+  width: 100%;
+  border-radius: 4px; /* Minimalist sharp edges with slight rounding */
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--charcoal);
+  border: var(--border-thin);
+  transition: var(--transition-smooth);
+}
+
+.mundo_bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: var(--transition-smooth);
+  filter: grayscale(100%) brightness(0.6);
+}
+
+.mundo_card:hover .mundo_bg {
+  transform: scale(1.05);
+  filter: grayscale(0%) brightness(0.8);
+}
+
+.mundo_overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.2) 60%, rgba(0,0,0,0.1) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  z-index: 2;
+}
+
+.mundo_icon_top {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  color: var(--champagne);
+  opacity: 0.6;
+}
+
+.mundo_title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--white-soft);
+}
+
+.mundo_description {
+  font-size: 0.9rem;
+  color: var(--gray-muted);
+  max-width: 300px;
+  margin-bottom: 2rem;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: var(--transition-smooth);
+}
+
+.mundo_card:hover .mundo_description {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.mundo_explore {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--champagne);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.explore_line {
+  width: 30px;
+  height: 1px;
+  background: var(--champagne);
+  transition: var(--transition-smooth);
+}
+
+.mundo_card:hover .explore_line {
+  width: 60px;
+}
+
+.mundo_badge {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  background: rgba(206, 181, 133, 0.1);
+  backdrop-filter: blur(5px);
+  padding: 5px 15px;
+  border: 1px solid rgba(206, 181, 133, 0.3);
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--champagne);
+}
