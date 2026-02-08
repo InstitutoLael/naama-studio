@@ -65,6 +65,23 @@
   font-size: 0.9rem;
   font-style: italic;
   color: rgba(43, 43, 43, 0.4);
+  margin-bottom: 20px;
+}
+
+.staff_link_hint {
+  font-size: 0.55rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-clay);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: var(--transition-luxe);
+}
+
+.staff_card_editorial:hover .staff_link_hint {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* Hover Effect: Color Inversion */

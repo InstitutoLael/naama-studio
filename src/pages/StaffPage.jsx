@@ -39,13 +39,25 @@ const StaffPage = () => {
       
       <main className="staff_grid_editorial">
         {specialists.map((pro, index) => (
-          <div key={index} className="staff_card_editorial reveal" style={{ transitionDelay: `${index * 0.1}s` }}>
+          <div 
+            key={index} 
+            className="staff_card_editorial reveal" 
+            style={{ transitionDelay: `${index * 0.1}s`, cursor: 'pointer' }}
+            onClick={() => {
+              setSearchTerm(pro.name);
+              const searchSection = document.querySelector('.staff_search_section');
+              if (searchSection) {
+                searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+          >
             <div className="staff_placeholder_initial serif">
               {pro.initial}
             </div>
             <div className="staff_info_box">
               <h3 className="staff_full_name">{pro.name}</h3>
               <p className="staff_specialty">{pro.specialty}</p>
+              <span className="staff_link_hint">Ver Servicios →</span>
             </div>
           </div>
         ))}
