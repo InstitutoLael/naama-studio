@@ -1,12 +1,11 @@
-/* ServiceCard: Clean Typography & Detailed Labor */
+/* ServiceCard: Technical Precision & Quiet Luxury */
 .service_card {
-  padding: 60px 40px;
+  padding: 80px 60px;
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: var(--transition-editorial);
-  cursor: default;
+  transition: var(--transition-luxe);
 }
 
 .service_card:hover {
@@ -14,74 +13,75 @@
 }
 
 .card_top {
-  margin-bottom: 40px;
+  margin-bottom: 60px;
 }
 
 .service_name_row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 25px;
+  margin-bottom: 35px;
 }
 
 .service_name_text {
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   line-height: 1.1;
-  color: var(--carbon-black);
-  max-width: 80%;
+  color: var(--text-slate);
+  max-width: 75%;
 }
 
 .service_price_text {
   font-family: var(--font-serif);
-  font-size: 1.8rem;
-  color: var(--sand-beige);
+  font-size: 2rem;
+  color: var(--accent-clay);
 }
 
 .service_meta_data {
   display: flex;
   gap: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 .meta_tag {
   font-size: 0.65rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: rgba(26, 26, 26, 0.4);
+  letter-spacing: 0.2em;
+  color: var(--secondary-olive);
 }
 
 .service_description_text {
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: rgba(26, 26, 26, 0.7);
+  font-size: 1rem;
+  line-height: 1.8;
+  color: rgba(43, 43, 43, 0.7);
   max-width: 90%;
 }
 
 .card_bottom {
   margin-top: auto;
-  padding-top: 40px;
-  border-top: var(--border-light);
+  padding-top: 50px;
+  border-top: var(--border-fine);
 }
 
 .detail_label {
   font-size: 0.6rem;
-  font-weight: 800;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--sand-beige);
-  margin-bottom: 12px;
+  letter-spacing: 0.3em;
+  color: var(--text-slate);
+  margin-bottom: 15px;
   display: block;
+  opacity: 0.5;
 }
 
 .detail_text {
   font-size: 0.85rem;
-  font-style: italic;
-  color: rgba(26, 26, 26, 0.5);
-  line-height: 1.5;
+  color: rgba(43, 43, 43, 0.5);
+  line-height: 1.6;
 }
 
-@media (max-width: 480px) {
-  .service_name_text { font-size: 1.8rem; }
-  .service_price_text { font-size: 1.5rem; }
+@media (max-width: 768px) {
+  .service_card { padding: 60px 40px; }
+  .service_name_text { font-size: 2rem; }
+  .service_price_text { font-size: 1.6rem; }
 }

@@ -1,19 +1,26 @@
 :root {
-  /* Cotton Paper & Boutique Palette */
-  /* Focus: Grace, Pulcritud y Descanso */
-  --cotton-paper: #F9F8F4;
-  --carbon-black: #1A1A1A;
-  --sand-beige: #E5D3B3;
-  --border-light: 1px solid rgba(26, 26, 26, 0.08);
-  --border-strong: 1px solid rgba(26, 26, 26, 0.15);
+  /* "La Creación" Palette - God Level Elevation */
+  /* Focus: Raw materials, technical grace, hospital-level pulcritud */
+  --bg-linen: #F4F1EA;
+  --text-slate: #2B2B2B;
+  --accent-clay: #B08D79;
+  --accent-sand: #E5D3B3;
+  --secondary-olive: #6D7363;
   
-  /* Typography */
+  --border-fine: 1px solid rgba(43, 43, 43, 0.08);
+  --border-medium: 1px solid rgba(43, 43, 43, 0.15);
+  
+  /* Typography - Editorial Architecture */
   --font-serif: 'Playfair Display', serif;
   --font-sans: 'Inter', sans-serif;
   
-  /* Spacing & Effects */
-  --transition-editorial: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Spacing & Experience */
+  --transition-luxe: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --max-width: 1400px;
+  
+  /* UX Helpers */
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
 }
 
 * {
@@ -23,25 +30,31 @@
 }
 
 body {
-  background-color: var(--cotton-paper);
-  color: var(--carbon-black);
+  background-color: var(--bg-linen);
+  color: var(--text-slate);
   font-family: var(--font-sans);
   overflow-x: hidden;
-  line-height: 1.7;
+  line-height: 1.6; /* Generous line height for restful reading */
   -webkit-font-smoothing: antialiased;
+  cursor: default;
 }
 
 h1, h2, h3, h4, .serif {
   font-family: var(--font-serif);
   font-weight: 400;
   letter-spacing: -0.01em;
-  line-height: 1.2;
+  line-height: 1.1;
+}
+
+p {
+  font-size: 1rem;
+  letter-spacing: 0.01em;
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  transition: var(--transition-editorial);
+  transition: var(--transition-luxe);
 }
 
 img {
@@ -50,36 +63,47 @@ img {
   display: block;
 }
 
-/* Base Classes */
-.container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 40px;
+/* Luxury Polish: Glassmorphism & Fades */
+.glass {
+  background: rgba(244, 241, 234, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
-.text-uppercase {
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.section-padding {
-  padding: 120px 0;
-}
-
-/* Animations: Subtle Fades */
+/* Animations: Blur-In Elevation */
 [class*="reveal"] {
   opacity: 0;
-  transform: translateY(20px);
-  transition: var(--transition-editorial);
+  filter: blur(10px);
+  transform: translateY(30px);
+  transition: opacity 1.2s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s ease;
 }
 
 .reveal-visible {
   opacity: 1;
+  filter: blur(0);
   transform: translateY(0);
 }
 
 .delay-1 { transition-delay: 0.1s; }
 .delay-2 { transition-delay: 0.2s; }
-.delay-3 { transition-delay: 0.3s; }
+.delay-3 { transition-delay: 0.4s; }
+
+/* Responsive Typography Adjustment */
+@media (max-width: 768px) {
+  h1 { font-size: 2.8rem; }
+  p { font-size: 0.95rem; }
+}
+
+/* Performance: Image Hover effects */
+.image-reveal {
+  overflow: hidden;
+  position: relative;
+}
+
+.image-reveal img {
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.image-reveal:hover img {
+  transform: scale(1.05);
+}

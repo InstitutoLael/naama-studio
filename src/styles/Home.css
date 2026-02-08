@@ -1,80 +1,220 @@
 .home_page {
-  background-color: var(--cotton-paper);
-  color: var(--carbon-black);
-  min-height: 100vh;
+  background-color: var(--bg-linen);
 }
 
-/* Home Hero: Gallery Style */
+/* Hero: Cinematic & Deep */
 .home_hero {
   height: 100vh;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100px 40px;
   text-align: center;
-}
-
-.hero_statement {
-  font-size: clamp(2rem, 5vw, 4.5rem);
-  max-width: 900px;
-  margin-bottom: 60px;
-  line-height: 1.1;
-  color: var(--carbon-black);
-}
-
-.hero_portrait_wrapper {
-  width: 100%;
-  max-width: 450px;
-  height: 600px;
   overflow: hidden;
-  position: relative;
-  opacity: 0;
-  transform: translateY(40px);
-  transition: var(--transition-editorial);
+  padding: 0 40px;
 }
 
-.hero_portrait_wrapper.reveal-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.hero_portrait {
+.hero_video_bg {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: sepia(0.2) contrast(1.05); /* Soft natural look */
+  z-index: 0;
+  filter: brightness(0.9) sepia(0.1); 
 }
 
-/* Instagram Section */
+.hero_overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 60%, var(--bg-linen) 100%);
+  z-index: 1;
+}
+
+.hero_content {
+  position: relative;
+  z-index: 2;
+  max-width: 1000px;
+}
+
+.hero_promise {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  color: var(--text-slate);
+  margin-bottom: 30px;
+  display: block;
+}
+
+.hero_statement {
+  font-size: clamp(2.5rem, 7vw, 6rem);
+  margin-bottom: 40px;
+  color: var(--text-slate);
+}
+
+/* Essence: Meaningful Whitespace */
+.home_essence {
+  padding: 180px 40px;
+  text-align: center;
+}
+
+.essence_content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.essence_label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  color: var(--accent-clay);
+  margin-bottom: 40px;
+  display: block;
+}
+
+.essence_text {
+  font-size: clamp(1.5rem, 3vw, 2.8rem);
+  line-height: 1.4;
+  margin-bottom: 60px;
+  color: rgba(43, 43, 43, 0.85);
+}
+
+/* Worlds: Swipe-First Horizontal List (Mobile) / Editorial Rail (Desktop) */
+.home_worlds_section {
+  padding: 100px 0 200px;
+}
+
+.section_header_boutique {
+  padding: 0 60px;
+  margin-bottom: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.worlds_rail {
+  display: flex;
+  gap: 40px;
+  padding: 0 60px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.worlds_rail::-webkit-scrollbar { display: none; }
+
+.world_rail_item {
+  min-width: 450px;
+  scroll-snap-align: start;
+  transition: var(--transition-luxe);
+  cursor: pointer;
+}
+
+.world_item_image_wrapper {
+  height: 600px;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.world_item_image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.world_rail_item:hover .world_item_image {
+  transform: scale(1.05);
+}
+
+.world_item_info {
+  padding: 0 10px;
+}
+
+.world_item_tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-clay);
+  display: block;
+  margin-bottom: 12px;
+}
+
+.world_item_name {
+  font-size: 2.2rem;
+  margin-bottom: 15px;
+}
+
+/* Intelligent Booking Teaser */
+.booking_teaser {
+  padding: 180px 60px;
+  background-color: var(--text-slate);
+  color: #fff;
+  text-align: center;
+}
+
+.teaser_content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.teaser_btn_gold {
+  background: var(--bg-linen);
+  color: var(--text-slate);
+  padding: 22px 50px;
+  border: none;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin-top: 50px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.teaser_btn_gold:hover {
+  transform: scale(1.05);
+  background: #fff;
+}
+
+/* Instagram Section: Pure Luxe */
 .home_instagram {
-  padding: 150px 0;
+  padding: 180px 0;
   background: #fff;
   text-align: center;
-  border-top: var(--border-light);
-  border-bottom: var(--border-light);
+  border-top: var(--border-fine);
+  border-bottom: var(--border-fine);
 }
 
 .instagram_grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  max-width: 1200px;
+  max-width: var(--max-width);
   margin: 0 auto;
+  padding: 0 60px;
 }
 
 .insta_item {
   aspect-ratio: 1/1;
   overflow: hidden;
-  border: var(--border-light);
+  border: var(--border-fine);
+  position: relative;
 }
 
 .insta_item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: var(--transition-editorial);
-  filter: sepia(0.1);
+  transition: var(--transition-luxe);
+  filter: sepia(0.05) contrast(1.02);
 }
 
 .insta_item:hover img {
@@ -82,106 +222,47 @@
   filter: sepia(0);
 }
 
-/* Services List: Broken Grid / Organic */
-.home_services_section {
-  padding: 150px 0;
-  max-width: 1200px;
-  margin: 0 auto;
-  position: relative;
+/* Diario Section: Editorial Rail */
+.home_diario {
+  padding: 180px 0;
 }
 
-.services_layout {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 100px;
+.diario_rail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 80px;
 }
 
-.services_list {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.service_list_item {
-  font-family: var(--font-serif);
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  padding: 25px 0;
-  border-bottom: var(--border-light);
+.diario_card {
   cursor: pointer;
-  transition: var(--transition-editorial);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
+  transition: var(--transition-luxe);
 }
 
-.service_list_item:hover {
-  padding-left: 20px;
-  color: var(--sand-beige);
-}
-
-.service_number {
-  font-family: var(--font-sans);
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--sand-beige);
-  margin-right: 30px;
-}
-
-.services_visual_container {
-  flex: 1;
-  height: 700px;
-  position: sticky;
-  top: 150px;
+.diario_img_wrapper {
+  height: 400px;
   overflow: hidden;
-  border-radius: 2px;
+  margin-bottom: 30px;
+  border: var(--border-fine);
 }
 
-.service_preview_img {
+.diario_img_wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  transition: var(--transition-editorial);
-  transform: scale(1.1);
+  transition: var(--transition-luxe);
 }
 
-.service_preview_img.active {
-  opacity: 1;
-  transform: scale(1);
+.diario_card:hover .diario_img_wrapper img {
+  transform: scale(1.05);
 }
 
-/* Philosophy / Essence */
-.home_essence {
-  padding: 150px 40px;
-  background: #fff;
-  text-align: center;
-}
-
-.essence_content {
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.essence_title {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5em;
-  color: var(--sand-beige);
-  margin-bottom: 40px;
-}
-
-.essence_text {
-  font-size: 1.8rem;
-  line-height: 1.5;
-  margin-bottom: 60px;
+.diario_info {
+  padding: 0 10px;
 }
 
 @media (max-width: 1024px) {
-  .services_layout { flex-direction: column; gap: 60px; }
-  .services_visual_container { display: none; }
-  .service_list_item { font-size: 2.2rem; }
+  .instagram_grid { grid-template-columns: 1fr 1fr; padding: 0 40px; }
+  .diario_rail { grid-template-columns: 1fr; padding: 0 40px; }
+  .diario_img_wrapper { height: 300px; }
 }

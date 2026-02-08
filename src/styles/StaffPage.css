@@ -1,50 +1,53 @@
 .staff_page {
-  background-color: var(--cotton-paper);
+  background-color: var(--bg-linen);
   min-height: 100vh;
-  padding-top: 150px;
+  padding-top: 180px;
 }
 
 .staff_header {
-  margin-bottom: 80px;
+  margin-bottom: 100px;
+  padding: 0 60px;
 }
 
 .staff_title {
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  margin-bottom: 20px;
+  font-size: clamp(2.8rem, 7vw, 4.5rem);
+  margin-bottom: 25px;
 }
 
 .staff_subtitle {
-  color: rgba(26, 26, 26, 0.5);
-  max-width: 600px;
-  font-size: 1rem;
+  color: rgba(43, 43, 43, 0.5);
+  max-width: 650px;
+  font-size: 1.1rem;
+  line-height: 1.7;
 }
 
-/* Search Bar: Elegant & Discreet */
+/* Search Bar: Deep Slate & Fine Lines */
 .staff_search_container {
-  margin-bottom: 60px;
-  border-bottom: var(--border-strong);
+  margin: 0 60px 80px;
+  border-bottom: var(--border-medium);
   display: flex;
   align-items: center;
-  padding: 15px 0;
+  padding: 20px 0;
 }
 
 .staff_search_input {
   background: transparent;
   border: none;
   width: 100%;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-family: var(--font-serif);
-  color: var(--carbon-black);
+  color: var(--text-slate);
   outline: none;
 }
 
 .staff_search_input::placeholder {
-  color: rgba(26, 26, 26, 0.1);
+  color: rgba(43, 43, 43, 0.1);
   font-style: italic;
 }
 
-/* List with "Air" */
+/* Detailed List: God Level Spacing */
 .staff_results_list {
+  padding: 0 60px;
   display: flex;
   flex-direction: column;
 }
@@ -53,15 +56,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 30px 0;
-  border-bottom: var(--border-light);
-  transition: var(--transition-editorial);
+  padding: 40px 0;
+  border-bottom: var(--border-fine);
+  transition: var(--transition-luxe);
 }
 
 .staff_item_row:hover {
   background-color: #fff;
-  padding-left: 15px;
-  padding-right: 15px;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
 .staff_item_main {
@@ -69,27 +72,28 @@
 }
 
 .staff_item_name {
-  font-size: 1.4rem;
-  margin-bottom: 5px;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
 }
 
 .staff_item_meta {
   display: flex;
-  gap: 20px;
-  color: rgba(26, 26, 26, 0.3);
-  font-size: 0.65rem;
-  font-weight: 700;
+  gap: 25px;
+  color: rgba(43, 43, 43, 0.4);
+  font-size: 0.7rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
 }
 
 .staff_item_price {
   font-family: var(--font-serif);
-  font-size: 1.8rem;
-  color: var(--sand-beige);
+  font-size: 2.2rem;
+  color: var(--accent-clay);
 }
 
-@media (max-width: 768px) {
-  .staff_item_row { flex-direction: column; align-items: flex-start; gap: 20px; }
-  .staff_item_price { font-size: 1.5rem; }
+@media (max-width: 1024px) {
+  .staff_header, .staff_search_container, .staff_results_list { padding: 0 40px; margin-left: 0; margin-right: 0; }
+  .staff_item_row { flex-direction: column; align-items: flex-start; gap: 25px; }
+  .staff_item_price { font-size: 1.8rem; }
 }

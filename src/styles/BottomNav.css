@@ -1,0 +1,58 @@
+.bottom_nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(70px + var(--safe-bottom));
+  background: var(--bg-linen);
+  border-top: var(--border-fine);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px var(--safe-bottom);
+  z-index: 2000;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.05);
+}
+
+.bottom_nav_item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--text-slate);
+  opacity: 0.4;
+  text-decoration: none;
+  transition: var(--transition-fast);
+  padding: 10px 0;
+}
+
+.bottom_nav_item span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.bottom_nav_item.active {
+  opacity: 1;
+  color: var(--accent-clay);
+}
+
+.bottom_nav_item.cta {
+  opacity: 1;
+  color: var(--accent-clay);
+}
+
+/* Visibility Control */
+@media (min-width: 1025px) {
+  .bottom_nav {
+    display: none;
+  }
+}
+
+/* Luxury Touch: Haptic Feedback Simulation */
+.bottom_nav_item:active {
+  transform: scale(0.92);
+}

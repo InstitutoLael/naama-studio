@@ -1,58 +1,54 @@
-/* WorldPage: Minimalist Editorial */
+/* WorldPage: God Level Editorial */
 .world_page {
-  background-color: var(--cotton-paper);
+  background-color: var(--bg-linen);
   min-height: 100vh;
-  padding-top: 150px;
+  padding-top: 180px;
 }
 
 .world_header {
-  padding: 0 40px;
-  max-width: 800px;
-  margin-bottom: 100px;
-  opacity: 0;
-  transition: var(--transition-editorial);
-}
-
-.world_header.reveal-visible {
-  opacity: 1;
+  padding: 0 60px;
+  max-width: 1000px;
+  margin-bottom: 120px;
 }
 
 .world_category_label {
-  font-size: 0.7rem;
-  font-weight: 700;
+  font-size: 0.65rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.4em;
-  color: var(--sand-beige);
-  margin-bottom: 25px;
+  color: var(--accent-clay);
+  margin-bottom: 30px;
   display: block;
 }
 
 .world_title {
-  font-size: clamp(3rem, 8vw, 6rem);
-  margin-bottom: 30px;
-  color: var(--carbon-black);
+  font-size: clamp(3.2rem, 9vw, 6.5rem);
+  margin-bottom: 40px;
+  color: var(--text-slate);
 }
 
 .world_description {
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   line-height: 1.8;
-  color: rgba(26, 26, 26, 0.6);
+  color: rgba(43, 43, 43, 0.6);
+  max-width: 700px;
 }
 
 .services_grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-  gap: 1px; /* Minimalist line appearance */
-  background-color: rgba(26, 26, 26, 0.05); /* Separator color */
-  border-top: var(--border-light);
-  border-bottom: var(--border-light);
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  gap: 1.5px; /* Technical line separator */
+  background-color: rgba(43, 43, 43, 0.08); /* Minimalist grid lines */
+  border-top: var(--border-fine);
+  border-bottom: var(--border-fine);
 }
 
 .service_card_wrapper {
-  background-color: var(--cotton-paper);
+  background-color: var(--bg-linen);
 }
 
-@media (max-width: 768px) {
-  .world_header { padding-top: 50px; }
+@media (max-width: 1024px) {
+  .world_header { padding: 0 40px; }
+  .world_title { font-size: 3rem; }
   .services_grid { grid-template-columns: 1fr; }
 }
