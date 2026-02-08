@@ -181,15 +181,14 @@
 
 @media (max-width: 1200px) {
   .services_grid { grid-template-columns: repeat(2, 1fr); }
-  .staff_grid_editorial { grid-template-columns: repeat(2, 1fr); }
+  .specialist_gallery { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 768px) {
   .staff_header { padding: 0 30px; margin-bottom: 60px; }
   .staff_title { font-size: 3rem; }
-  .staff_grid_editorial { grid-template-columns: 1fr; }
-  .staff_card_editorial { padding: 80px 30px; }
-  .staff_placeholder_initial { font-size: 6rem; }
+  .specialist_gallery { grid-template-columns: 1fr; }
+  .specialist_item { padding: 60px 30px; }
   
   .staff_search_section .section_header_boutique { padding: 0 30px; }
   .staff_search_section .discovery_bar { margin: 40px 30px 60px !important; }
