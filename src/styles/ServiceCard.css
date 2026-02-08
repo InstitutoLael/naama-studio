@@ -1,99 +1,87 @@
+/* ServiceCard: Clean Typography & Detailed Labor */
 .service_card {
-  background: var(--charcoal);
-  border: var(--border-thin);
-  padding: 40px;
+  padding: 60px 40px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 450px;
-  transition: var(--transition-smooth);
+  transition: var(--transition-editorial);
+  cursor: default;
 }
 
 .service_card:hover {
-  border-color: var(--champagne);
-  box-shadow: var(--shadow-luxury);
-  transform: translateY(-5px);
+  background-color: #fff;
 }
 
-.service_category {
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  color: var(--champagne);
-  margin-bottom: 1.5rem;
-  display: block;
+.card_top {
+  margin-bottom: 40px;
 }
 
-.service_name {
-  font-size: 2rem;
-  line-height: 1.2;
-  margin-bottom: 1.5rem;
-  color: var(--white-soft);
-}
-
-.service_meta {
+.service_name_row {
   display: flex;
-  gap: 20px;
-  margin-bottom: 2rem;
-  color: var(--gray-muted);
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 25px;
 }
 
-.meta_item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.service_name_text {
+  font-size: 2.2rem;
+  line-height: 1.1;
+  color: var(--carbon-black);
+  max-width: 80%;
 }
 
-.service_pricing {
-  margin-bottom: 2.5rem;
-}
-
-.price_old {
-  text-decoration: line-through;
-  color: rgba(255,255,255,0.2);
-  font-size: 0.9rem;
-  margin-bottom: 4px;
-  display: block;
-}
-
-.price_new {
-  font-size: 2.5rem;
-  font-weight: 300;
-  color: var(--white-soft);
+.service_price_text {
   font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--sand-beige);
 }
 
-.service_description {
-  color: var(--gray-muted);
+.service_meta_data {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.meta_tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(26, 26, 26, 0.4);
+}
+
+.service_description_text {
   font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
+  line-height: 1.7;
+  color: rgba(26, 26, 26, 0.7);
+  max-width: 90%;
 }
 
-.naama_experience {
-  border-top: var(--border-thin);
-  padding-top: 2rem;
+.card_bottom {
   margin-top: auto;
+  padding-top: 40px;
+  border-top: var(--border-light);
 }
 
-.experience_label {
+.detail_label {
   font-size: 0.6rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--champagne);
+  color: var(--sand-beige);
+  margin-bottom: 12px;
   display: block;
-  margin-bottom: 10px;
 }
 
-.experience_text {
+.detail_text {
   font-size: 0.85rem;
   font-style: italic;
-  color: rgba(255,255,255,0.7);
-  line-height: 1.4;
+  color: rgba(26, 26, 26, 0.5);
+  line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+  .service_name_text { font-size: 1.8rem; }
+  .service_price_text { font-size: 1.5rem; }
 }

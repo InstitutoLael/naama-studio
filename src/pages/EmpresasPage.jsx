@@ -1,69 +1,73 @@
 import React from 'react';
-import { Users, Coffee, Sparkles, MapPin, Mail } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import '../styles/Global.css';
 import '../styles/EmpresasPage.css';
 
 const EmpresasPage = () => {
   return (
-    <div className="empresas_container">
+    <div className="empresas_page">
       <SEOHead 
-        title="Empresas & Bienestar" 
-        description="Servicios exclusivos de bienestar corporativo y jornadas de desconexión para equipos de alto nivel." 
+        title="B2B & Bienestar Corporativo" 
+        description="Servicios de restauración y cuidado técnico para equipos corporativos de alto rendimiento." 
       />
 
       <header className="empresas_hero reveal">
-        <div className="empresas_hero_bg"></div>
-        <div className="empresas_hero_content">
-          <span className="tagline">Bienestar Corporativo</span>
-          <h1 className="serif">Elevamos el Espíritu de tu <span className="text-gold">Equipo</span></h1>
-          <p className="hero_description">
-            Transforma la productividad en plenitud. Naamá para Empresas ofrece experiencias de autocuidado diseñadas para el mundo profesional.
-          </p>
-        </div>
+        <span className="empresas_label">Atención Corporativa</span>
+        <h1 className="empresas_title serif">Ingeniería del Cuidado para su <span style={{ color: 'var(--sand-beige)' }}>Equipo</span></h1>
+        <p className="world_description">
+          Llevamos la excelencia de Naamá Studio al entorno profesional, diseñando jornadas de restauración técnica y descanso hospitalario a medida de su corporación.
+        </p>
       </header>
 
-      <main className="empresas_main">
-        <section className="benefits_grid">
-          <div className="benefit_card reveal delay-1">
-            <Users className="benefit_icon" size={40} strokeWidth={1} />
-            <h3 className="serif">Uso Exclusivo</h3>
-            <p>El estudio se reserva íntegramente para su corporación, garantizando privacidad absoluta y atención boutique.</p>
-          </div>
-          
-          <div className="benefit_card reveal delay-2">
-            <Coffee className="benefit_icon" size={40} strokeWidth={1} />
-            <h3 className="serif">Jornada de Desconexión</h3>
-            <p>Circuitos personalizados que incluyen masajes de descarga, tratamientos faciales y catering de autor.</p>
-          </div>
+      <main className="empresas_benefits container reveal delay-1">
+        <div className="benefit_item">
+          <h3 className="benefit_title serif">Exclusividad</h3>
+          <p className="benefit_desc">Reserva íntegra de nuestras instalaciones para garantizar la privacidad y el enfoque absoluto en la atención de su personal.</p>
+        </div>
+        
+        <div className="benefit_item">
+          <h3 className="benefit_title serif">Restauración</h3>
+          <p className="benefit_desc">Protocolos de cuidado físico y estético orientados a la recuperación de la fatiga profesional y el estrés ejecutivo.</p>
+        </div>
 
-          <div className="benefit_card reveal delay-3">
-            <Sparkles className="benefit_icon" size={40} strokeWidth={1} />
-            <h3 className="serif">Cultura Wellness</h3>
-            <p>Fomente el sentido de pertenencia y bienestar. Un equipo cuidado es un equipo inspirador.</p>
-          </div>
-        </section>
-
-        <section className="cta_section reveal">
-          <h2 className="serif">Hablemos de su Equipo</h2>
-          <p className="hero_description">
-            Coordinemos una propuesta a la medida de los objetivos de su empresa.
-          </p>
-          
-          <div className="cta_info_list">
-            <div className="cta_info_item">
-              <MapPin size={14} style={{ marginRight: '8px' }} />
-              <span>San Miguel, Santiago</span>
-            </div>
-            <div className="cta_info_item">
-              <Mail size={14} style={{ marginRight: '8px' }} />
-              <span>contacto@naamastudio.cl</span>
-            </div>
-          </div>
-          
-          <button className="premium_btn">Solicitar Dossier B2B</button>
-        </section>
+        <div className="benefit_item">
+          <h3 className="benefit_title serif">Hospitalidad</h3>
+          <p className="benefit_desc">Una experiencia de servicio 5 estrellas basada en la transparencia, la pulcritud y el detalle técnico.</p>
+        </div>
       </main>
+
+      <section className="container reveal" style={{ marginBottom: '150px' }}>
+        <div className="b2b_cta_section">
+          <h2 className="cta_heading serif">Consulte nuestra propuesta B2B</h2>
+          <p className="cta_sub">Diseñamos sesiones personalizadas según los objetivos de bienestar de su empresa.</p>
+          
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginBottom: '40px', color: 'rgba(26,26,26,0.4)', fontSize: '0.8rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <MapPin size={14} /> <span>San Miguel, Santiago</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Mail size={14} /> <span>empresas@naamastudio.cl</span>
+            </div>
+          </div>
+
+          <button 
+            className="premium_btn" 
+            style={{ 
+              background: 'var(--carbon-black)', 
+              color: '#fff', 
+              padding: '20px 40px', 
+              border: 'none', 
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.2em',
+              fontSize: '0.7rem'
+            }}
+          >
+            Solicitar Información
+          </button>
+        </div>
+      </section>
     </div>
   );
 };

@@ -1,115 +1,86 @@
-.empresas_container {
+.empresas_page {
+  background-color: var(--cotton-paper);
   min-height: 100vh;
-  padding-bottom: 120px;
+  padding-top: 150px;
 }
 
 .empresas_hero {
-  height: 80vh;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  max-width: 900px;
+  margin: 0 auto 120px;
   text-align: center;
-}
-
-.empresas_hero_bg {
-  position: absolute;
-  inset: 0;
-  background: url('../assets/wellness-bg.png') no-repeat center/cover;
-  filter: brightness(0.4) saturate(0.8);
-  transform: scale(1.05);
-}
-
-.empresas_hero_content {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
   padding: 0 40px;
 }
 
-.tagline {
+.empresas_label {
   font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.5em;
-  color: var(--champagne);
+  font-weight: 700;
   text-transform: uppercase;
-  margin-bottom: 2rem;
+  letter-spacing: 0.4em;
+  color: var(--sand-beige);
+  margin-bottom: 30px;
   display: block;
 }
 
-.empresas_hero h1 {
-  font-size: clamp(3rem, 10vw, 5.5rem);
+.empresas_title {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
   line-height: 1.1;
-  margin-bottom: 2rem;
+  margin-bottom: 40px;
 }
 
-.empresas_main {
-  max-width: 1400px;
-  margin: 100px auto;
-  padding: 0 40px;
-}
-
-.benefits_grid {
+/* Benefit List: Horizontal / Clean */
+.empresas_benefits {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 60px;
-  margin-bottom: 150px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background-color: rgba(26, 26, 26, 0.05);
+  border-top: var(--border-light);
+  border-bottom: var(--border-light);
+  margin-bottom: 120px;
 }
 
-.benefit_card {
-  padding: 60px;
-  background: var(--charcoal);
-  border: var(--border-thin);
-  text-align: center;
-  transition: var(--transition-smooth);
+.benefit_item {
+  background-color: var(--cotton-paper);
+  padding: 80px 40px;
+  text-align: left;
 }
 
-.benefit_card:hover {
-  border-color: var(--champagne);
-  transform: translateY(-10px);
+.benefit_item:hover {
+  background-color: #fff;
 }
 
-.benefit_icon {
-  margin-bottom: 30px;
-  color: var(--champagne);
+.benefit_title {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--carbon-black);
 }
 
-.benefit_card h3 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-}
-
-.benefit_card p {
-  color: var(--gray-muted);
-  font-size: 1rem;
+.benefit_desc {
+  font-size: 0.95rem;
   line-height: 1.8;
+  color: rgba(26, 26, 26, 0.6);
 }
 
-.cta_section {
-  background: var(--charcoal);
+/* B2B Contact */
+.b2b_cta_section {
+  max-width: 1000px;
+  margin: 0 auto;
   padding: 100px 40px;
-  border: var(--border-thin);
+  background: #fff;
+  border: var(--border-light);
   text-align: center;
-  border-radius: 4px;
 }
 
-.cta_section h2 {
-  font-size: 3.5rem;
-  margin-bottom: 1.5rem;
+.cta_heading {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
 }
 
-.cta_info_list {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin: 40px 0;
-  color: var(--champagne);
-  font-weight: 700;
-  font-size: 0.9rem;
+.cta_sub {
+  color: rgba(26, 26, 26, 0.6);
+  margin-bottom: 40px;
 }
 
-@media (max-width: 768px) {
-  .cta_info_list { flex-direction: column; gap: 15px; }
-  .benefit_card { padding: 40px 20px; }
+@media (max-width: 1024px) {
+  .empresas_benefits { grid-template-columns: 1fr; }
+  .benefit_item { padding: 60px 40px; }
 }

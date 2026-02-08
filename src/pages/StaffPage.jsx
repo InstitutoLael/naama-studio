@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { servicesData } from '../data/servicesData';
-import { Search, Clock as ClockIcon, User } from 'lucide-react';
+import { Search } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import '../styles/Global.css';
 import '../styles/StaffPage.css';
@@ -18,58 +18,55 @@ const StaffPage = () => {
   }, [searchTerm]);
 
   return (
-    <div className="staff_container">
+    <div className="staff_page container">
       <SEOHead 
-        title="Consulta de Precios" 
-        description="Herramienta interna de Naamá Studio para consulta rápida de valores y especialistas." 
+        title="Consulta de Valores" 
+        description="Portal de transparencia técnica y consulta de valores para el equipo Naamá Studio." 
       />
 
       <header className="staff_header reveal">
-        <h1 className="serif">Consulta de Precios</h1>
-        <p>
-          Optimizado para el equipo Naamá. 
-          Encuentra valores, tiempos de servicio y especialistas asignados de forma instantánea.
+        <span className="world_category_label">Protocolo de Equipo</span>
+        <h1 className="staff_title serif">Consulta de Valores</h1>
+        <p className="staff_subtitle">
+          Herramienta técnica de transparencia. Encuentra información sobre tratamientos, especialistas y tiempos de restauración de forma eficiente.
         </p>
-        
-        <div className="search_wrapper">
-          <Search size={20} className="search_icon" />
-          <input 
-            type="text" 
-            placeholder="Busca por servicio, categoría o profesional..." 
-            className="staff_input"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
       </header>
+      
+      <div className="staff_search_container reveal delay-1">
+        <Search size={24} strokeWidth={1} style={{ marginRight: '20px', color: 'rgba(26,26,26,0.2)' }} />
+        <input 
+          type="text" 
+          placeholder="Filtrar por tratamiento o especialista..." 
+          className="staff_search_input"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-      <main className="staff_content">
-        <span className="results_count reveal">
-          Servicios encontrados: <strong>{filteredServices.length}</strong>
-        </span>
-
-        <div className="staff_services_list">
-          {filteredServices.map((service, index) => (
-            <div key={index} className="staff_item reveal">
-              <div className="item_info">
-                <span className="item_cat">{service.cat}</span>
-                <h3 className="item_name serif">{service.name}</h3>
-                <div className="item_worker">
-                  <User size={12} style={{ marginRight: '5px' }} />
-                  <span>Especialista: {service.worker}</span>
-                </div>
-              </div>
-              <div className="item_pricing">
-                <span className="item_price_val">${service.price}</span>
-                <div className="item_time_val">
-                  <ClockIcon size={10} style={{ marginRight: '4px' }} />
-                  <span>{service.time}</span>
-                </div>
+      <main className="staff_results_list">
+        {filteredServices.map((service, index) => (
+          <div key={index} className="staff_item_row reveal">
+            <div className="staff_item_main">
+              <span className="staff_item_meta">{service.cat}</span>
+              <h3 className="staff_item_name serif">{service.name}</h3>
+              <div className="staff_item_meta">
+                <span>Sesión: {service.time}</span>
+                <span>·</span>
+                <span>Técnico: {service.worker}</span>
               </div>
             </div>
-          ))}
-        </div>
+            <div className="staff_item_price">${service.price}</div>
+          </div>
+        ))}
+
+        {filteredServices.length === 0 && (
+          <div style={{ padding: '60px 0', textAlign: 'center', opacity: 0.3 }}>
+            <p className="serif" style={{ fontSize: '1.5rem' }}>No se han encontrado registros.</p>
+          </div>
+        )}
       </main>
+
+      <div style={{ height: '100px' }}></div>
     </div>
   );
 };

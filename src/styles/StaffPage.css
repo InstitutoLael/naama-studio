@@ -1,139 +1,95 @@
-.staff_container {
+.staff_page {
+  background-color: var(--cotton-paper);
   min-height: 100vh;
-  padding-top: 100px;
-  background: var(--onyx);
+  padding-top: 150px;
 }
 
 .staff_header {
-  padding: 100px 40px 60px;
-  text-align: center;
-  border-bottom: var(--border-thin);
+  margin-bottom: 80px;
 }
 
-.staff_header h1 {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  background: var(--gold-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.staff_title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  margin-bottom: 20px;
 }
 
-.staff_header p {
-  color: var(--gray-muted);
+.staff_subtitle {
+  color: rgba(26, 26, 26, 0.5);
   max-width: 600px;
-  margin: 0 auto 40px;
+  font-size: 1rem;
 }
 
-.search_wrapper {
-  position: relative;
-  max-width: 800px;
-  margin: 0 auto;
+/* Search Bar: Elegant & Discreet */
+.staff_search_container {
+  margin-bottom: 60px;
+  border-bottom: var(--border-strong);
+  display: flex;
+  align-items: center;
+  padding: 15px 0;
 }
 
-.search_icon {
-  position: absolute;
-  left: 30px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--champagne);
-  opacity: 0.5;
-}
-
-.staff_input {
+.staff_search_input {
+  background: transparent;
+  border: none;
   width: 100%;
-  background: var(--charcoal);
-  border: var(--border-thin);
-  border-radius: 100px;
-  padding: 25px 30px 25px 70px;
-  color: var(--white-soft);
-  font-size: 1.1rem;
-  font-family: var(--font-sans);
-  transition: var(--transition-smooth);
-}
-
-.staff_input:focus {
+  font-size: 1.5rem;
+  font-family: var(--font-serif);
+  color: var(--carbon-black);
   outline: none;
-  border-color: var(--champagne);
-  box-shadow: 0 0 20px rgba(206, 181, 133, 0.1);
 }
 
-.staff_content {
-  max-width: 1200px;
-  margin: 60px auto;
-  padding: 0 20px;
+.staff_search_input::placeholder {
+  color: rgba(26, 26, 26, 0.1);
+  font-style: italic;
 }
 
-.results_count {
-  font-size: 0.7rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--gray-muted);
-  margin-bottom: 30px;
-  display: block;
-}
-
-.staff_services_list {
+/* List with "Air" */
+.staff_results_list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
 }
 
-.staff_item {
-  background: var(--charcoal);
-  border: var(--border-thin);
-  padding: 30px;
-  display: grid;
-  grid-template-columns: 1fr auto;
+.staff_item_row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 40px;
-  transition: var(--transition-smooth);
+  padding: 30px 0;
+  border-bottom: var(--border-light);
+  transition: var(--transition-editorial);
 }
 
-.staff_item:hover {
-  border-color: rgba(206, 181, 133, 0.5);
-  transform: translateX(10px);
+.staff_item_row:hover {
+  background-color: #fff;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 
-.item_info h3 {
-  font-size: 1.8rem;
-  margin-bottom: 0.5rem;
+.staff_item_main {
+  flex: 1;
 }
 
-.item_cat {
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--champagne);
-  margin-bottom: 8px;
-  display: block;
+.staff_item_name {
+  font-size: 1.4rem;
+  margin-bottom: 5px;
 }
 
-.item_worker {
-  font-size: 0.8rem;
-  color: var(--gray-muted);
-}
-
-.item_pricing {
-  text-align: right;
-}
-
-.item_price_val {
-  font-size: 2.2rem;
-  font-family: var(--font-serif);
-  color: var(--white-soft);
-  display: block;
-}
-
-.item_time_val {
-  font-size: 0.7rem;
-  color: var(--gray-muted);
+.staff_item_meta {
+  display: flex;
+  gap: 20px;
+  color: rgba(26, 26, 26, 0.3);
+  font-size: 0.65rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
+.staff_item_price {
+  font-family: var(--font-serif);
+  font-size: 1.8rem;
+  color: var(--sand-beige);
+}
+
 @media (max-width: 768px) {
-  .staff_item { grid-template-columns: 1fr; gap: 20px; }
-  .item_pricing { text-align: left; }
+  .staff_item_row { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .staff_item_price { font-size: 1.5rem; }
 }

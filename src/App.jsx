@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { MapPin, Mail, Instagram, Facebook } from 'lucide-react';
+import { Instagram, Facebook, Calendar } from 'lucide-react';
 import Home from './pages/Home';
 import WorldPage from './pages/WorldPage';
 import StaffPage from './pages/StaffPage';
 import EmpresasPage from './pages/EmpresasPage';
+import Logo from './assets/naama-studio.png';
 import './styles/Global.css';
 import './styles/App.css';
 
@@ -20,16 +21,37 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Reveal effect on scroll
+  useEffect(() => {
+    const observerOptions = {
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('reveal-visible');
+        }
+      });
+    }, observerOptions);
+
+    const elements = document.querySelectorAll('[class*="reveal"]');
+    elements.forEach(el => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, [location.pathname]);
+
   return (
     <div className="naama_app">
       <nav className={`main_nav ${scrolled ? 'nav_scrolled' : ''}`}>
         <div className="nav_container">
-          <Link to="/" className="logo serif">NAAMÁ</Link>
+          <Link to="/" className="logo_link">
+            <img src={Logo} alt="Naamá Studio" className="nav_logo" />
+          </Link>
           <div className="nav_links">
             <Link to="/" className={`nav_item ${location.pathname === '/' ? 'active' : ''}`}>Inicio</Link>
-            <Link to="/staff" className={`nav_item ${location.pathname === '/staff' ? 'active' : ''}`}>Precios</Link>
+            <Link to="/staff" className={`nav_item ${location.pathname === '/staff' ? 'active' : ''}`}>Consulta de Valores</Link>
             <Link to="/empresas" className={`nav_item ${location.pathname === '/empresas' ? 'active' : ''}`}>Empresas</Link>
-            <a href="#contacto" className="nav_item nav_cta">Citar</a>
           </div>
         </div>
       </nav>
@@ -43,40 +65,41 @@ const App = () => {
         </Routes>
       </main>
 
-      <footer className="footer" id="contacto">
+      <a href="https://wa.me/tu-numero" className="sticky_booking" target="_blank" rel="noopener noreferrer">
+        Agendar Cita
+      </a>
+
+      <footer className="footer">
         <div className="footer_grid">
           <div className="footer_brand">
-            <h2 className="serif">NAAMÁ STUDIO</h2>
+            <img src={Logo} alt="Naamá Studio" className="footer_logo" />
             <p className="footer_text">
-              La cumbre de la belleza y el bienestar en Santiago. 
-              Un espacio diseñado para la plenitud y la perfección técnica.
+              Un estudio dedicado a la excelencia técnica y el descanso personal. 
+              Ubicado en el corazón de San Miguel, Santiago.
             </p>
           </div>
           
           <div className="footer_contact">
-            <span className="footer_label">Ubicación</span>
-            <p className="footer_text">
-              <MapPin size={14} style={{ marginRight: '8px' }} />
-              Arcadia 1297, San Miguel, Santiago
-            </p>
-            <p className="footer_text" style={{ marginTop: '10px' }}>
-              <Mail size={14} style={{ marginRight: '8px' }} />
-              contacto@naamastudio.cl
-            </p>
+            <span className="footer_label">Ubicación & Contacto</span>
+            <ul className="footer_links">
+              <li className="footer_text">Arcadia 1297, San Miguel</li>
+              <li className="footer_text">Santiago, Chile</li>
+              <li className="footer_text">+56 9 XXXX XXXX</li>
+            </ul>
           </div>
 
           <div className="footer_social">
-            <span className="footer_label">Síguenos</span>
-            <div className="nav_links" style={{ display: 'flex' }}>
-              <a href="#" className="footer_link"><Instagram size={20} /></a>
-              <a href="#" className="footer_link"><Facebook size={20} /></a>
+            <span className="footer_label">Presencia Digital</span>
+            <div style={{ display: 'flex', gap: '20px' }}>
+              <a href="#" className="footer_link"><Instagram size={18} /></a>
+              <a href="#" className="footer_link"><Facebook size={18} /></a>
             </div>
           </div>
         </div>
         
         <div className="footer_bottom">
           <p>&copy; 2025 Naamá Studio. Todos los derechos reservados.</p>
-          <p>Handcrafted for Vivy & Gaby</p>
+          <p>Hospitalidad & Estética</p>
         </div>
       </footer>
     </div>

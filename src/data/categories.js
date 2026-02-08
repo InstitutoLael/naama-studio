@@ -1,57 +1,57 @@
 export const mundos = [
   {
     id: 'capilar',
-    name: 'Mundo Capilar',
+    name: 'Corte y Estilo',
     categories: ['Peluquería', 'Tratamiento Capilar'],
-    description: 'Expertos en color, corte y cuidado intensivo para tu cabello.',
+    description: 'Ingeniería capilar avanzada y diseño de estilo personalizado.',
     icon: 'Scissors',
-    image: 'hero-bg.png'
+    image: 'labor-hands.png'
   },
   {
     id: 'estetico',
-    name: 'Mundo Estético',
+    name: 'Estética Avanzada',
     categories: ['Estetica'],
-    description: 'Tratamientos faciales y corporales de vanguardia.',
+    description: 'Procedimientos de restauración cutánea y cuidado corporal técnico.',
     icon: 'Sparkles',
-    image: 'hero-bg.png' 
+    image: 'salon-arch.png' 
   },
   {
     id: 'mirada',
-    name: 'Mundo Mirada',
+    name: 'Diseño de Mirada',
     categories: ['Pestañas y Cejas'],
-    description: 'Realce y definición para tus ojos y cejas.',
+    description: 'Arquitectura de cejas y realce técnico de pestañas.',
     icon: 'Heart',
     image: 'mirada-bg.png'
   },
   {
     id: 'bienestar',
-    name: 'Mundo Bienestar',
+    name: 'Terapias de Descanso',
     categories: ['Masaje'],
-    description: 'Relajación profunda y terapias de bienestar.',
+    description: 'Sesiones de descompresión muscular y recuperación física.',
     icon: 'Info',
     image: 'wellness-bg.png'
   },
   {
     id: 'manos-pies',
-    name: 'Mundo Manos y Pies',
+    name: 'Manicure & Pedicure',
     categories: ['Manicure', 'Pedicure'],
-    description: 'Cuidado profesional para tus uñas y extremidades.',
+    description: 'Cuidado técnico de extremidades y estética de uñas.',
     icon: 'Sparkles',
     image: 'nails-bg.png'
   },
   {
     id: 'clinico',
-    name: 'Mundo Clínico',
+    name: 'Atención Clínica',
     categories: ['Podología'],
-    description: 'Salud podal y atención clínica especializada.',
+    description: 'Salud podal y podología clínica especializada.',
     icon: 'User',
     image: 'hero-bg.png'
   },
   {
     id: 'depilacion',
-    name: 'Mundo Depilación',
+    name: 'Depilación Técnica',
     categories: ['Depilación'],
-    description: 'Suavidad duradera con técnicas de extracción precisas.',
+    description: 'Sistemas de extracción de vello con precisión y cuidado cutáneo.',
     icon: 'CheckCircle',
     image: 'hero-bg.png'
   }

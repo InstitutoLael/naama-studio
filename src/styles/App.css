@@ -1,22 +1,30 @@
+.naama_app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navigation: High-End Minimalist */
 .main_nav {
-  position: fixed;
+  position: absolute; /* Starts as overlay, will change on scroll if needed */
   top: 0;
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: 40px 0;
-  transition: var(--transition-smooth);
+  padding: 60px 0;
+  transition: var(--transition-editorial);
 }
 
 .nav_scrolled {
-  padding: 20px 0;
-  background: rgba(10, 10, 10, 0.9);
-  backdrop-filter: blur(20px);
-  border-bottom: var(--border-thin);
+  position: fixed;
+  padding: 25px 0;
+  background: rgba(249, 248, 244, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: var(--border-light);
 }
 
 .nav_container {
-  max-width: 1400px;
+  max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 40px;
   display: flex;
@@ -24,82 +32,96 @@
   align-items: center;
 }
 
-.logo {
-  font-size: 1.8rem;
-  font-weight: 300;
-  letter-spacing: 0.3em;
-  color: var(--white-soft);
-  text-decoration: none;
+.logo_link {
+  display: flex;
+  align-items: center;
+}
+
+.nav_logo {
+  height: 50px; /* Logo with "air" */
+  width: auto;
+  transition: var(--transition-editorial);
 }
 
 .nav_links {
   display: flex;
-  gap: 40px;
+  gap: 50px;
   align-items: center;
 }
 
 .nav_item {
-  text-decoration: none;
-  color: var(--white-soft);
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.65rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  transition: var(--transition-smooth);
-  opacity: 0.6;
+  letter-spacing: 0.25em;
+  color: var(--carbon-black);
+  opacity: 0.5;
+  transition: var(--transition-editorial);
 }
 
 .nav_item:hover, .nav_item.active {
   opacity: 1;
-  color: var(--champagne);
 }
 
-.nav_cta {
-  background: var(--champagne);
-  color: var(--onyx) !important;
-  padding: 10px 25px;
+/* Sticky Booking Button */
+.sticky_booking {
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  z-index: 1001;
+  background: var(--carbon-black);
+  color: #fff;
+  padding: 15px 30px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
   border-radius: 2px;
-  opacity: 1 !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: var(--transition-editorial);
 }
 
-.nav_cta:hover {
-  background: var(--white-soft);
+.sticky_booking:hover {
+  transform: translateY(-5px);
+  background: #333;
 }
 
+/* Footer: Gallery Style */
 .footer {
-  background: var(--charcoal);
-  padding: 120px 40px 40px;
-  border-top: var(--border-thin);
+  background: #fff;
+  border-top: var(--border-light);
+  padding: 120px 40px 60px;
+  margin-top: auto;
 }
 
 .footer_grid {
-  max-width: 1400px;
+  max-width: var(--max-width);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 80px;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 100px;
   margin-bottom: 80px;
 }
 
-.footer_brand h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
+.footer_logo {
+  height: 60px;
+  margin-bottom: 30px;
 }
 
 .footer_text {
-  color: var(--gray-muted);
+  color: rgba(26, 26, 26, 0.6);
   font-size: 0.9rem;
-  line-height: 1.8;
+  max-width: 400px;
 }
 
 .footer_label {
   font-size: 0.6rem;
-  font-weight: 800;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--champagne);
-  margin-bottom: 25px;
+  margin-bottom: 30px;
   display: block;
+  opacity: 0.4;
 }
 
 .footer_links {
@@ -110,30 +132,28 @@
 }
 
 .footer_link {
-  text-decoration: none;
-  color: var(--gray-muted);
-  font-size: 0.9rem;
-  transition: var(--transition-smooth);
+  color: rgba(26, 26, 26, 0.6);
+  font-size: 0.85rem;
 }
 
 .footer_link:hover {
-  color: var(--champagne);
+  color: var(--carbon-black);
 }
 
 .footer_bottom {
-  max-width: 1400px;
+  max-width: var(--max-width);
   margin: 0 auto;
   padding-top: 40px;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: var(--border-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: rgba(255,255,255,0.2);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  color: rgba(26, 26, 26, 0.3);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+  .footer_grid { grid-template-columns: 1fr; gap: 60px; }
   .nav_links { display: none; }
-  .footer_grid { grid-template-columns: 1fr; gap: 40px; }
-  .footer { padding-top: 60px; }
+  .main_nav { padding: 30px 0; }
 }
