@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { Search } from 'lucide-react';
+import { servicesData } from '../data/servicesData';
+import ServiceCard from '../components/UI/ServiceCard';
 import SEOHead from '../components/SEOHead';
 import '../styles/Global.css';
 import '../styles/StaffPage.css';
@@ -12,6 +15,18 @@ const specialists = [
 ];
 
 const StaffPage = () => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredServices = useMemo(() => {
+    if (!searchTerm) return [];
+    const search = searchTerm.toLowerCase();
+    return servicesData.filter(s => 
+      s.name.toLowerCase().includes(search) || 
+      s.worker.toLowerCase().includes(search) ||
+      s.cat.toLowerCase().includes(search)
+    );
+  }, [searchTerm]);
+
   return (
     <div className="staff_page">
       <SEOHead 
@@ -40,6 +55,47 @@ const StaffPage = () => {
           </div>
         ))}
       </main>
+
+      <section className="staff_search_section reveal">
+        <div className="section_header_boutique">
+           <div className="header_left">
+             <span className="world_item_tag">Transparencia Técnica</span>
+             <h2 className="serif" style={{ fontSize: '2.5rem' }}>Consulta de Valores</h2>
+           </div>
+        </div>
+
+        <div className="discovery_bar" style={{ margin: '40px 60px 80px' }}>
+          <div className="search_wrapper">
+            <Search size={22} strokeWidth={1} className="search_icon" />
+            <input 
+              type="text" 
+              placeholder="Escribe un tratamiento o especialista..." 
+              className="staff_input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ fontSize: '1.2rem' }}
+            />
+          </div>
+        </div>
+
+        {searchTerm && (
+          <div className="services_grid_adaptive">
+            <div className="services_grid">
+              {filteredServices.length > 0 ? (
+                filteredServices.map((service, index) => (
+                  <div key={`${service.name}-${index}`} className="service_card_wrapper reveal">
+                    <ServiceCard service={service} />
+                  </div>
+                ))
+              ) : (
+                <div className="empty_selection">
+                  <p className="serif">No se encontraron resultados para "{searchTerm}"</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
 
       <section className="container section-padding reveal" style={{ textAlign: 'center', marginTop: '100px' }}>
          <h2 className="serif" style={{ fontSize: '1.8rem' }}>La maestría no necesita filtros.</h2>

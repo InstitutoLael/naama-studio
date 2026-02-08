@@ -85,7 +85,38 @@
   color: rgba(244, 241, 234, 0.5);
 }
 
+.staff_search_section {
+  margin-top: 150px;
+}
+
+.staff_search_section .section_header_boutique {
+  padding: 0 60px;
+  margin-bottom: 20px;
+}
+
+/* Reusing grid architecture from WorldPage for consistency */
+.services_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5px;
+  background-color: rgba(43, 43, 43, 0.08);
+  border-top: var(--border-fine);
+  border-bottom: var(--border-fine);
+}
+
+.service_card_wrapper {
+  background-color: var(--bg-linen);
+}
+
+.empty_selection {
+  padding: 100px 0;
+  text-align: center;
+  grid-column: 1 / -1;
+  opacity: 0.3;
+}
+
 @media (max-width: 1200px) {
+  .services_grid { grid-template-columns: repeat(2, 1fr); }
   .staff_grid_editorial { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -95,4 +126,8 @@
   .staff_grid_editorial { grid-template-columns: 1fr; }
   .staff_card_editorial { padding: 80px 30px; }
   .staff_placeholder_initial { font-size: 6rem; }
+  
+  .staff_search_section .section_header_boutique { padding: 0 30px; }
+  .staff_search_section .discovery_bar { margin: 40px 30px 60px !important; }
+  .services_grid { grid-template-columns: 1fr; }
 }
