@@ -22,18 +22,21 @@ const EmpresasPage = () => {
 
       <main className="empresas_benefits container reveal delay-1">
         <div className="benefit_item">
-          <h3 className="benefit_title serif">Exclusividad</h3>
-          <p className="benefit_desc">Reserva íntegra de nuestras instalaciones para garantizar la privacidad y el enfoque absoluto en la atención de su personal.</p>
+          <span className="detail_label">Modalidad 01</span>
+          <h3 className="benefit_title serif">Naamá en Salón</h3>
+          <p className="benefit_desc">Reserva íntegra de nuestras instalaciones para jornadas de bienestar exclusivo. Packs de restauración técnica que incluyen cuidado capilar, podología y descanso visual en un entorno de pulcritud absoluta.</p>
         </div>
         
         <div className="benefit_item">
-          <h3 className="benefit_title serif">Restauración</h3>
-          <p className="benefit_desc">Protocolos de cuidado físico y estético orientados a la recuperación de la fatiga profesional y el estrés ejecutivo.</p>
+          <span className="detail_label">Modalidad 02</span>
+          <h3 className="benefit_title serif">Naamá en Oficina</h3>
+          <p className="benefit_desc">Desplazamos nuestra ingeniería del cuidado a sus dependencias. Montaje de estaciones técnicas de masaje clínico, diseño de mirada y tratamientos express para equipos de alta exigencia sin salir de su entorno seguro.</p>
         </div>
 
         <div className="benefit_item">
-          <h3 className="benefit_title serif">Hospitalidad</h3>
-          <p className="benefit_desc">Una experiencia de servicio 5 estrellas basada en la transparencia, la pulcritud y el detalle técnico.</p>
+          <span className="detail_label">Modalidad 03</span>
+          <h3 className="benefit_title serif">Packs de Honor</h3>
+          <p className="benefit_desc">Gift cards corporativas físicas en acabado lino crudo. Un gesto de reconocimiento técnico que permite al colaborador elegir su propio protocolo de restauración en nuestro salón.</p>
         </div>
       </main>
 
