@@ -2,98 +2,97 @@
   background-color: var(--bg-linen);
   min-height: 100vh;
   padding-top: 180px;
+  padding-bottom: 120px;
 }
 
 .staff_header {
-  margin-bottom: 100px;
   padding: 0 60px;
+  margin-bottom: 120px;
+  max-width: 1000px;
 }
 
 .staff_title {
-  font-size: clamp(2.8rem, 7vw, 4.5rem);
-  margin-bottom: 25px;
+  font-size: clamp(3rem, 10vw, 6rem);
+  margin-bottom: 30px;
 }
 
 .staff_subtitle {
-  color: rgba(43, 43, 43, 0.5);
-  max-width: 650px;
-  font-size: 1.1rem;
-  line-height: 1.7;
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: rgba(43, 43, 43, 0.6);
+  max-width: 700px;
 }
 
-/* Search Bar: Deep Slate & Fine Lines */
-.staff_search_container {
-  margin: 0 60px 80px;
-  border-bottom: var(--border-medium);
-  display: flex;
-  align-items: center;
-  padding: 20px 0;
+.staff_grid_editorial {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5px;
+  background-color: rgba(43, 43, 43, 0.08);
+  border-top: var(--border-fine);
+  border-bottom: var(--border-fine);
 }
 
-.staff_search_input {
-  background: transparent;
-  border: none;
-  width: 100%;
-  font-size: 1.8rem;
-  font-family: var(--font-serif);
-  color: var(--text-slate);
-  outline: none;
-}
-
-.staff_search_input::placeholder {
-  color: rgba(43, 43, 43, 0.1);
-  font-style: italic;
-}
-
-/* Detailed List: God Level Spacing */
-.staff_results_list {
-  padding: 0 60px;
+.staff_card_editorial {
+  background-color: var(--bg-linen);
+  padding: 100px 40px;
   display: flex;
   flex-direction: column;
-}
-
-.staff_item_row {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 40px 0;
-  border-bottom: var(--border-fine);
-  transition: var(--transition-luxe);
+  justify-content: center;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: default;
 }
 
-.staff_item_row:hover {
-  background-color: #fff;
-  padding-left: 30px;
-  padding-right: 30px;
+.staff_placeholder_initial {
+  font-size: 8rem;
+  line-height: 0.8;
+  margin-bottom: 40px;
+  color: var(--text-slate);
+  transition: transform 0.6s ease;
 }
 
-.staff_item_main {
-  flex: 1;
-}
-
-.staff_item_name {
-  font-size: 1.8rem;
-  margin-bottom: 8px;
-}
-
-.staff_item_meta {
-  display: flex;
-  gap: 25px;
-  color: rgba(43, 43, 43, 0.4);
-  font-size: 0.7rem;
+.staff_full_name {
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.3em;
+  margin-bottom: 10px;
+  color: var(--text-slate);
 }
 
-.staff_item_price {
-  font-family: var(--font-serif);
-  font-size: 2.2rem;
-  color: var(--accent-clay);
+.staff_specialty {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: rgba(43, 43, 43, 0.4);
 }
 
-@media (max-width: 1024px) {
-  .staff_header, .staff_search_container, .staff_results_list { padding: 0 40px; margin-left: 0; margin-right: 0; }
-  .staff_item_row { flex-direction: column; align-items: flex-start; gap: 25px; }
-  .staff_item_price { font-size: 1.8rem; }
+/* Hover Effect: Color Inversion */
+.staff_card_editorial:hover {
+  background-color: var(--text-slate);
+}
+
+.staff_card_editorial:hover .staff_placeholder_initial {
+  color: var(--bg-linen);
+  transform: scale(1.1);
+}
+
+.staff_card_editorial:hover .staff_full_name {
+  color: var(--bg-linen);
+}
+
+.staff_card_editorial:hover .staff_specialty {
+  color: rgba(244, 241, 234, 0.5);
+}
+
+@media (max-width: 1200px) {
+  .staff_grid_editorial { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .staff_header { padding: 0 30px; margin-bottom: 60px; }
+  .staff_title { font-size: 3rem; }
+  .staff_grid_editorial { grid-template-columns: 1fr; }
+  .staff_card_editorial { padding: 80px 30px; }
+  .staff_placeholder_initial { font-size: 6rem; }
 }

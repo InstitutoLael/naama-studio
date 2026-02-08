@@ -1,72 +1,50 @@
-import React, { useState, useMemo } from 'react';
-import { servicesData } from '../data/servicesData';
-import { Search } from 'lucide-react';
+import React from 'react';
 import SEOHead from '../components/SEOHead';
 import '../styles/Global.css';
 import '../styles/StaffPage.css';
 
+const specialists = [
+  { name: "Allison", specialty: "Make-up & Hair Styling", initial: "A" },
+  { name: "Cami", specialty: "Technical Color & Esthetics", initial: "C" },
+  { name: "Valeria", specialty: "Master Alisados & Cutting", initial: "V" },
+  { name: "Gaby", specialty: "Dermo-Nails & Depilation", initial: "G" },
+  { name: "Vivy", specialty: "High-End Facials & Maderotherapy", initial: "V" }
+];
+
 const StaffPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-
-  const filteredServices = useMemo(() => {
-    return servicesData.filter(s => {
-      const search = searchTerm.toLowerCase();
-      return s.name.toLowerCase().includes(search) || 
-             s.worker.toLowerCase().includes(search) ||
-             s.cat.toLowerCase().includes(search);
-    });
-  }, [searchTerm]);
-
   return (
-    <div className="staff_page container">
+    <div className="staff_page">
       <SEOHead 
-        title="Consulta de Valores" 
-        description="Portal de transparencia técnica y consulta de valores para el equipo Naamá Studio." 
+        title="Nuestro Equipo" 
+        description="Conoce a los especialistas detrás de la ingeniería del cuidado en Naamá Studio." 
       />
 
       <header className="staff_header reveal">
         <span className="world_category_label">Protocolo de Equipo</span>
-        <h1 className="staff_title serif">Consulta de Valores</h1>
+        <h1 className="staff_title serif">Hospitalidad Técnica</h1>
         <p className="staff_subtitle">
-          Herramienta técnica de transparencia. Encuentra información sobre tratamientos, especialistas y tiempos de restauración de forma eficiente.
+          Un equipo de especialistas dedicados a la ciencia del descanso y la excelencia estética. Cada inicial representa un legado de cuidado.
         </p>
       </header>
       
-      <div className="staff_search_container reveal delay-1">
-        <Search size={24} strokeWidth={1} style={{ marginRight: '20px', color: 'rgba(26,26,26,0.2)' }} />
-        <input 
-          type="text" 
-          placeholder="Filtrar por tratamiento o especialista..." 
-          className="staff_search_input"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
-
-      <main className="staff_results_list">
-        {filteredServices.map((service, index) => (
-          <div key={index} className="staff_item_row reveal">
-            <div className="staff_item_main">
-              <span className="staff_item_meta">{service.cat}</span>
-              <h3 className="staff_item_name serif">{service.name}</h3>
-              <div className="staff_item_meta">
-                <span>Sesión: {service.time}</span>
-                <span>·</span>
-                <span>Técnico: {service.worker}</span>
-              </div>
+      <main className="staff_grid_editorial">
+        {specialists.map((pro, index) => (
+          <div key={index} className="staff_card_editorial reveal" style={{ transitionDelay: `${index * 0.1}s` }}>
+            <div className="staff_placeholder_initial serif">
+              {pro.initial}
             </div>
-            <div className="staff_item_price">${service.price}</div>
+            <div className="staff_info_box">
+              <h3 className="staff_full_name">{pro.name}</h3>
+              <p className="staff_specialty">{pro.specialty}</p>
+            </div>
           </div>
         ))}
-
-        {filteredServices.length === 0 && (
-          <div style={{ padding: '60px 0', textAlign: 'center', opacity: 0.3 }}>
-            <p className="serif" style={{ fontSize: '1.5rem' }}>No se han encontrado registros.</p>
-          </div>
-        )}
       </main>
 
-      <div style={{ height: '100px' }}></div>
+      <section className="container section-padding reveal" style={{ textAlign: 'center', marginTop: '100px' }}>
+         <h2 className="serif" style={{ fontSize: '1.8rem' }}>La maestría no necesita filtros.</h2>
+         <p style={{ opacity: 0.5, marginTop: '20px' }}>Solo técnica, silencio y hospitalidad.</p>
+      </section>
     </div>
   );
 };
