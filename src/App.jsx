@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
-import { Instagram, Facebook, Calendar } from 'lucide-react';
+import { Instagram, Facebook, Calendar, ArrowUp } from 'lucide-react';
 import Home from './pages/Home';
 import WorldPage from './pages/WorldPage';
 import StaffPage from './pages/StaffPage';
@@ -8,6 +8,15 @@ import EmpresasPage from './pages/EmpresasPage';
 import Logo from './assets/naama-studio.png';
 import './styles/Global.css';
 import './styles/App.css';
+
+// Scroll to top helper
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
 
 const App = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -43,6 +52,7 @@ const App = () => {
 
   return (
     <div className="naama_app">
+      <ScrollToTop />
       <nav className={`main_nav ${scrolled ? 'nav_scrolled' : ''}`}>
         <div className="nav_container">
           <Link to="/" className="logo_link">
@@ -52,6 +62,7 @@ const App = () => {
             <Link to="/" className={`nav_item ${location.pathname === '/' ? 'active' : ''}`}>Inicio</Link>
             <Link to="/staff" className={`nav_item ${location.pathname === '/staff' ? 'active' : ''}`}>Consulta de Valores</Link>
             <Link to="/empresas" className={`nav_item ${location.pathname === '/empresas' ? 'active' : ''}`}>Empresas</Link>
+            <a href="https://naamastudio.setmore.com/" target="_blank" rel="noopener noreferrer" className="nav_item nav_cta">Citar</a>
           </div>
         </div>
       </nav>
@@ -65,7 +76,7 @@ const App = () => {
         </Routes>
       </main>
 
-      <a href="https://wa.me/tu-numero" className="sticky_booking" target="_blank" rel="noopener noreferrer">
+      <a href="https://naamastudio.setmore.com/" className="sticky_booking" target="_blank" rel="noopener noreferrer">
         Agendar Cita
       </a>
 
@@ -91,7 +102,7 @@ const App = () => {
           <div className="footer_social">
             <span className="footer_label">Presencia Digital</span>
             <div style={{ display: 'flex', gap: '20px' }}>
-              <a href="#" className="footer_link"><Instagram size={18} /></a>
+              <a href="https://www.instagram.com/naamastudio_/" target="_blank" rel="noopener noreferrer" className="footer_link"><Instagram size={18} /></a>
               <a href="#" className="footer_link"><Facebook size={18} /></a>
             </div>
           </div>

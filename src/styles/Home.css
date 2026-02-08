@@ -46,6 +46,42 @@
   filter: sepia(0.2) contrast(1.05); /* Soft natural look */
 }
 
+/* Instagram Section */
+.home_instagram {
+  padding: 150px 0;
+  background: #fff;
+  text-align: center;
+  border-top: var(--border-light);
+  border-bottom: var(--border-light);
+}
+
+.instagram_grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.insta_item {
+  aspect-ratio: 1/1;
+  overflow: hidden;
+  border: var(--border-light);
+}
+
+.insta_item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition-editorial);
+  filter: sepia(0.1);
+}
+
+.insta_item:hover img {
+  transform: scale(1.05);
+  filter: sepia(0);
+}
+
 /* Services List: Broken Grid / Organic */
 .home_services_section {
   padding: 150px 0;

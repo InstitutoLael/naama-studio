@@ -49,6 +49,23 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Instagram Feed Teaser */}
+      <section className="home_instagram reveal">
+        <div className="container">
+          <span className="essence_title">Instagram</span>
+          <h2 className="serif" style={{ fontSize: '2.5rem', marginBottom: '40px' }}>Síguenos en <span className="text-gold">@naamastudio_</span></h2>
+          <div className="instagram_grid">
+             <div className="insta_item"><img src={SalonArch} alt="Insta 1" /></div>
+             <div className="insta_item"><img src={`/src/assets/hero-bg.png`} alt="Insta 2" /></div>
+             <div className="insta_item"><img src={`/src/assets/labor-hands.png`} alt="Insta 3" /></div>
+             <div className="insta_item"><img src={`/src/assets/mirada-bg.png`} alt="Insta 4" /></div>
+          </div>
+          <a href="https://www.instagram.com/naamastudio_/" target="_blank" rel="noopener noreferrer" className="nav_item" style={{ marginTop: '40px', display: 'inline-block', opacity: 1, borderBottom: '1px solid var(--sand-beige)' }}>
+            Ver Perfil Completo
+          </a>
+        </div>
+      </section>
+
       {/* Technical Services List */}
       <section className="home_services_section container">
         <div className="services_layout">
