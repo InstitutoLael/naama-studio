@@ -5,7 +5,7 @@ import SEOHead from '../components/SEOHead';
 const EmpresasPage = () => {
   return (
     <div className="empresas-page animate-fade-in">
-      <SEOHead title="Empresas" description="Servicios exclusivos de bienestar corporativo y Wellness Days en Naamá Studio." />
+      <SEOHead title="Empresas" description="Servicios exclusivos de bienestar corporativo y jornadas especiales en Naamá Studio." />
       <header className="empresas-hero">
         <div className="hero-content">
           <span className="accent-label">BIENESTAR CORPORATIVO</span>
@@ -24,8 +24,8 @@ const EmpresasPage = () => {
             </div>
             <div className="prop-card">
               <Coffee className="accent" size={32} />
-              <h3 className="serif">Wellness Day</h3>
-              <p>Diseñamos jornadas de medio día o día completo con circuitos de masajes, tratamientos faciales y catering saludable.</p>
+              <h3 className="serif">Día de Bienestar</h3>
+              <p>Diseñamos jornadas de medio día o día completo con circuitos de masajes, tratamientos faciales y atención preferencial.</p>
             </div>
             <div className="prop-card">
               <Sparkles className="accent" size={32} />

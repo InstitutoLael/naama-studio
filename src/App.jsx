@@ -18,7 +18,7 @@ const App = () => {
             <h2 className="serif">NAAMÁ</h2>
           </Link>
           <div className="nav-links">
-            <Link to="/staff" className="nav-link">Staff</Link>
+            <Link to="/staff" className="nav-link">Precios</Link>
             <Link to="/empresas" className="nav-link highlight">Empresas</Link>
           </div>
         </div>

@@ -28,8 +28,8 @@ const StaffPage = () => {
       <SEOHead title="Buscador de Precios" description="Consulta rápida de precios y servicios para el equipo de Naamá Studio." />
       <header className="staff-header">
         <div className="header-container">
-          <h1 className="serif">Buscador Consultoría</h1>
-          <p>Herramienta interna para consulta rápida de precios y servicios por profesional.</p>
+          <h1 className="serif">Consulta de Precios</h1>
+          <p>Herramienta para el equipo: busca precios y servicios rápidamente.</p>
           
           <div className="search-bar-wrapper">
             <Search size={20} className="search-icon" />
@@ -55,11 +55,10 @@ const StaffPage = () => {
               <div className="item-main">
                 <span className="item-cat">{service.cat}</span>
                 <h3 className="item-name serif">{service.name}</h3>
-                <span className="item-worker">👤 {service.worker}</span>
               </div>
-              <div className="item-price">
-                <span className="price-value">${service.price}</span>
-                <span className="item-time">🕒 {service.time}</span>
+              <div className="service-meta">
+                <span className="meta-item"><Clock size={12} /> {service.time}</span>
+                <span className="meta-item">👤 Especialista: {service.worker}</span>
               </div>
               <div className="item-why">
                 <p>{service.why}</p>
