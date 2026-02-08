@@ -3,10 +3,20 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import '../../styles/ServiceCard.css';
 
 const ServiceCard = ({ service, defaultExpanded = false }) => {
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const hasDetails = service.why || service.desc;
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded && hasDetails);
+
+  const toggleExpand = () => {
+    if (hasDetails) {
+      setIsExpanded(!isExpanded);
+    }
+  };
 
   return (
-    <div className={`service_card ${isExpanded ? 'expanded' : ''}`} onClick={() => setIsExpanded(!isExpanded)}>
+    <div 
+      className={`service_card ${isExpanded ? 'expanded' : ''} ${!hasDetails ? 'no_expand' : ''}`} 
+      onClick={toggleExpand}
+    >
       <div className="card_top">
         <div className="service_name_row">
           <h3 className="service_name_text serif">{service.name}</h3>
@@ -57,9 +67,11 @@ const ServiceCard = ({ service, defaultExpanded = false }) => {
         </div>
       )}
 
-      <div className="expand_hint">
-        {isExpanded ? <ChevronUp size={16} strokeWidth={1} /> : <ChevronDown size={16} strokeWidth={1} />}
-      </div>
+      {hasDetails && (
+        <div className="expand_hint">
+          {isExpanded ? <ChevronUp size={14} strokeWidth={1} /> : <ChevronDown size={14} strokeWidth={1} />}
+        </div>
+      )}
     </div>
   );
 };

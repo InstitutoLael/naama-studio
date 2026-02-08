@@ -1,6 +1,6 @@
 /* ServiceCard: Technical Precision & Quiet Luxury */
 .service_card {
-  padding: 60px 40px;
+  padding: 30px 25px;
   height: auto;
   display: flex;
   flex-direction: column;
@@ -11,52 +11,56 @@
   position: relative;
 }
 
-.service_card:hover {
+.service_card.no_expand {
+  cursor: default;
+}
+
+.service_card:not(.no_expand):hover {
   background-color: rgba(255, 255, 255, 0.5);
 }
 
 .service_card.expanded {
   background-color: #fff;
-  padding-bottom: 80px;
+  padding-bottom: 50px;
 }
 
 .card_top {
-  margin-bottom: 60px;
+  margin-bottom: 0px;
 }
 
 .service_name_row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 35px;
+  margin-bottom: 15px;
 }
 
 .service_name_text {
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   line-height: 1.2;
   color: var(--text-slate);
-  max-width: 70%;
+  max-width: 80%;
 }
 
 .service_price_text {
   font-family: var(--font-serif);
-  font-size: 1.4rem;
+  font-size: 1.1rem;
   color: var(--accent-clay);
   font-weight: 500;
 }
 
 .service_meta_data {
   display: flex;
-  gap: 30px;
-  margin-bottom: 40px;
+  gap: 15px;
+  margin-top: 10px;
 }
 
 .meta_tag {
-  font-size: 0.65rem;
+  font-size: 0.55rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--secondary-olive);
+  letter-spacing: 0.15em;
+  color: rgba(43, 43, 43, 0.4);
 }
 
 .service_description_text {
@@ -68,67 +72,58 @@
 
 /* Expanded Content: Technical Focus */
 .card_expanded_content {
-  margin-top: 40px;
-  border-top: 1px solid rgba(176, 141, 121, 0.1);
-  padding-top: 40px;
+  margin-top: 25px;
+  border-top: 1px solid rgba(43, 43, 43, 0.05);
+  padding-top: 25px;
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 30px;
 }
 
 .expanded_technical_grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 60px;
+  grid-template-columns: 1fr;
+  gap: 25px;
 }
 
 .technical_info_item {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
 }
 
 .technical_meta_item {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  padding-left: 40px;
-  border-left: 1px solid rgba(43, 43, 43, 0.05);
+  display: none; /* Hide redundant meta in mobile/compact view */
 }
 
 .detail_label {
-  font-size: 0.55rem;
+  font-size: 0.5rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.25em;
+  letter-spacing: 0.2em;
   color: var(--accent-clay);
   display: block;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .detail_text {
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: var(--text-slate);
-}
-
-.meta_value {
-  font-size: 1.6rem;
+  font-size: 0.85rem;
+  line-height: 1.6;
   color: var(--text-slate);
 }
 
 .service_description_block {
-  max-width: 800px;
+  max-width: 100%;
 }
 
 .service_description_text {
-  font-size: 1.1rem;
-  line-height: 1.7;
+  font-size: 0.9rem;
+  line-height: 1.6;
   color: rgba(43, 43, 43, 0.6);
 }
 
 .card_cta_row {
-  margin-top: 20px;
+  margin-top: 10px;
   display: flex;
   justify-content: flex-start;
 }
@@ -153,8 +148,8 @@
 
 .expand_hint {
   position: absolute;
-  top: 60px;
-  right: 40px;
+  top: 30px;
+  right: 25px;
   opacity: 0.2;
   transition: var(--transition-luxe);
 }
@@ -165,7 +160,7 @@
 }
 
 @media (max-width: 768px) {
-  .service_card { padding: 60px 40px; }
-  .service_name_text { font-size: 2rem; }
-  .service_price_text { font-size: 1.6rem; }
+  .service_card { padding: 25px 20px; }
+  .service_name_text { font-size: 1.15rem; }
+  .service_price_text { font-size: 1rem; }
 }
