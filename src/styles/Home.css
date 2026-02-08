@@ -82,69 +82,96 @@
   color: rgba(43, 43, 43, 0.85);
 }
 
-/* Worlds: Swipe-First Horizontal List (Mobile) / Editorial Rail (Desktop) */
+/* Mundos: Editorial Mosaic Grid */
 .home_worlds_section {
-  padding: 100px 0 200px;
+  padding: 150px 0;
+  background: #fff;
 }
 
-.section_header_boutique {
-  padding: 0 60px;
+.worlds_mosaic_grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5px;
+  background: rgba(43, 43, 43, 0.08); /* Grid lines */
+  border-top: var(--border-fine);
+  border-bottom: var(--border-fine);
   margin-bottom: 80px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
 }
 
-.worlds_rail {
-  display: flex;
-  gap: 40px;
-  padding: 0 60px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.worlds_rail::-webkit-scrollbar { display: none; }
-
-.world_rail_item {
-  min-width: 450px;
-  scroll-snap-align: start;
-  transition: var(--transition-luxe);
-  cursor: pointer;
-}
-
-.world_item_image_wrapper {
-  height: 600px;
-  width: 100%;
-  overflow: hidden;
-  margin-bottom: 30px;
+.world_mosaic_item {
   position: relative;
+  height: 700px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg-linen);
 }
 
-.world_item_image {
+.world_mosaic_image_container {
+  width: 100%;
+  height: 100%;
+}
+
+.world_mosaic_img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: grayscale(100%) contrast(1.1);
 }
 
-.world_rail_item:hover .world_item_image {
-  transform: scale(1.05);
+.world_mosaic_item:hover .world_mosaic_img {
+  transform: scale(1.1);
+  filter: grayscale(0) contrast(1);
 }
 
-.world_item_info {
-  padding: 0 10px;
+.world_mosaic_overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(43, 43, 43, 0.8) 0%, transparent 60%);
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  color: #fff;
+  opacity: 0;
+  transition: var(--transition-luxe);
 }
 
-.world_item_tag {
-  font-size: 0.6rem;
-  font-weight: 700;
+.world_mosaic_item:hover .world_mosaic_overlay {
+  opacity: 1;
+}
+
+.mosaic_tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin-bottom: 15px;
+  color: var(--accent-sand);
+}
+
+.mosaic_title {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.mosaic_desc {
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 400px;
+  margin-bottom: 30px;
+  opacity: 0.7;
+}
+
+.mosaic_link {
+  font-size: 0.65rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--accent-clay);
-  display: block;
-  margin-bottom: 12px;
+}
+
+.worlds_cta_bar {
+  text-align: center;
 }
 
 .world_item_name {

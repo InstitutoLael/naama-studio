@@ -43,39 +43,42 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Experience Rail: Horizontal Swipe-ready - MOVIDO ARRIBA */}
+      {/* Nuestros Mundos: Editorial Mosaic Layout */}
       <section className="home_worlds_section">
         <div className="section_header_boutique reveal">
           <div className="header_left">
             <span className="world_item_tag">Catálogo Editorial</span>
-            <h2 className="serif" style={{ fontSize: '3.5rem' }}>Nuestros Mundos</h2>
+            <h2 className="serif" style={{ fontSize: '3.5rem' }}>Ecosistemas del Cuidado</h2>
           </div>
-          <p style={{ maxWidth: '300px', fontSize: '0.85rem', color: 'rgba(43,43,43,0.5)', textAlign: 'right' }}>
-            Cada mundo es un ecosistema de técnica y bienestar diseñado para tu restauración.
+          <p style={{ maxWidth: '400px', fontSize: '0.9rem', color: 'rgba(43,43,43,0.5)', textAlign: 'right', lineHeight: '1.6' }}>
+            Explora nuestros mundos técnicos. Cada sección es un compromiso con la pulcritud, la ciencia estética y tu restauración total.
           </p>
         </div>
 
-        <div className="worlds_rail">
-          {mundos.map((mundo, index) => (
+        <div className="worlds_mosaic_grid">
+          {mundos.slice(0, 4).map((mundo, index) => (
             <div 
               key={mundo.id} 
-              className={`world_rail_item reveal delay-${(index % 3) + 1}`}
+              className={`world_mosaic_item reveal delay-${index + 1}`}
               onClick={() => navigate(`/mundo/${mundo.id}`)}
             >
-              <div className="world_item_image_wrapper">
-                <img src={`/src/assets/${mundo.image}`} alt={mundo.name} className="world_item_image" />
-              </div>
-              <div className="world_item_info">
-                <span className="world_item_tag">Mundo 0{index + 1}</span>
-                <h3 className="world_item_name serif">{mundo.name}</h3>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                   <div style={{ height: '1px', background: 'var(--accent-clay)', flex: 1 }}></div>
-                   <ArrowRight size={20} strokeWidth={1} color="var(--accent-clay)" />
-                 </div>
+              <div className="world_mosaic_image_container">
+                <img src={`/src/assets/${mundo.image}`} alt={mundo.name} className="world_mosaic_img" />
+                <div className="world_mosaic_overlay">
+                  <span className="mosaic_tag">Mundo 0{index + 1}</span>
+                  <h3 className="mosaic_title serif">{mundo.name}</h3>
+                  <p className="mosaic_desc">{mundo.description}</p>
+                  <span className="mosaic_link">Explorar Protocolo →</span>
+                </div>
               </div>
             </div>
           ))}
-          <div style={{ minWidth: '60px' }}></div>
+        </div>
+        
+        <div className="worlds_cta_bar container reveal">
+            <button className="nav_item" onClick={() => navigate('/staff')} style={{ opacity: 1, borderBottom: '1px solid var(--accent-clay)' }}>
+              Ver Todos los Mundos & Precios
+            </button>
         </div>
       </section>
 
@@ -95,18 +98,17 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Intelligent Booking Teaser */}
+      {/* AI Agent Booking Teaser */}
       <section id="booking" className="booking_teaser reveal">
         <div className="teaser_content">
-          <span className="world_item_tag" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '30px' }}>Atención Técnica</span>
-          <h2 className="serif" style={{ fontSize: '3.5rem', marginBottom: '30px' }}>Diseñamos tu espacio de <span style={{ color: 'var(--accent-sand)' }}>restauración</span>.</h2>
+          <span className="world_item_tag" style={{ color: 'rgba(255,255,255,0.4)', marginBottom: '30px' }}>Hospitalidad 24/7</span>
+          <h2 className="serif" style={{ fontSize: '3.5rem', marginBottom: '30px' }}>Habla con nuestra <span style={{ color: 'var(--accent-sand)' }}>Agente IA</span>.</h2>
           <p style={{ color: 'rgba(255,255,255,0.5)', maxWidth: '600px', margin: '0 auto 40px' }}>
-            Inicia tu proceso de reserva a través de nuestra consulta digital inteligente. 
-            Priorizamos tu tiempo y tus objetivos estéticos.
+            ¿No sabes qué servicio necesitas? Nuestra asistente técnica te guiará por WhatsApp para diseñar tu sesión ideal.
           </p>
-          <Link to="/reservar">
-             <button className="teaser_btn_gold">Agendar Cita</button>
-          </Link>
+          <a href="https://wa.me/56979520623?text=Hola! Necesito asesoría técnica para mi próxima sesión en Naamá Studio." target="_blank" rel="noopener noreferrer">
+             <button className="teaser_btn_gold">Consultar Agente IA</button>
+          </a>
         </div>
       </section>
 
@@ -116,10 +118,10 @@ const Home = () => {
           <span className="essence_label">Instagram</span>
           <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '50px' }}>Síguenos en <span style={{ color: 'var(--accent-clay)' }}>@naamastudio_</span></h2>
           <div className="instagram_grid">
-             <div className="insta_item"><img src={SalonArch} alt="Insta 1" /></div>
-             <div className="insta_item"><img src={`/src/assets/hero-bg.png`} alt="Insta 2" /></div>
-             <div className="insta_item"><img src={`/src/assets/labor-hands.png`} alt="Insta 3" /></div>
-             <div className="insta_item"><img src={`/src/assets/mirada-bg.png`} alt="Insta 4" /></div>
+             <div className="insta_item"><img src={SalonArch} alt="Naamá Studio Atmosphere" /></div>
+             <div className="insta_item"><img src={`/src/assets/labor-hands.png`} alt="Técnica y Maestría" /></div>
+             <div className="insta_item"><img src={`/src/assets/mirada-bg.png`} alt="Detalle Terapéutico" /></div>
+             <div className="insta_item"><img src={`/src/assets/hero-bg.png`} alt="Excelencia Naamá" /></div>
           </div>
           <a href="https://www.instagram.com/naamastudio_/" target="_blank" rel="noopener noreferrer" className="nav_item" style={{ marginTop: '50px', display: 'inline-block', opacity: 1, borderBottom: '1px solid var(--accent-sand)' }}>
             Ver Perfil Oficial
