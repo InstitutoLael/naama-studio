@@ -6,6 +6,7 @@ import WorldPage from './pages/WorldPage';
 import StaffPage from './pages/StaffPage';
 import EmpresasPage from './pages/EmpresasPage';
 import BookingFlow from './pages/BookingFlow';
+import NuestraHistoria from './pages/NuestraHistoria';
 import BottomNav from './components/UI/BottomNav';
 import Logo from './assets/naama-studio.png';
 import './styles/Global.css';
@@ -79,6 +80,7 @@ const App = () => {
           <Route path="/staff" element={<StaffPage />} />
           <Route path="/empresas" element={<EmpresasPage />} />
           <Route path="/reservar" element={<BookingFlow />} />
+          <Route path="/nuestra-historia" element={<NuestraHistoria />} />
         </Routes>
       </main>
 
