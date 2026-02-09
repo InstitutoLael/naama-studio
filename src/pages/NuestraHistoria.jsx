@@ -9,33 +9,93 @@ const START_DATE = new Date('2023-12-10T13:00:00');
 const CARDS = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1517260739337-6799d239ce83?q=80&w=800&auto=format&fit=crop", // Couple holding hands / night
+    image: "/assets/romantic/FotoprofesionalBesito.jpeg", 
     text: "Orar juntos por WhatsApp... mi momento favorito del día.",
     date: "03.07.2023"
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1554672408-730436b60dde?q=80&w=800&auto=format&fit=crop", // McDonald's vibes / fries
+    image: "/assets/romantic/Primerasfotosjuntos.jpeg",
     text: "Nuestra primera cita... McDonald's y una Coca-Cola bien helada (con hielo, obvio).",
     date: "Primera Cita"
   },
   {
     id: 3,
-    image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop", // Letter / Writing
+    image: "/assets/romantic/Foto1Noviembre.jpeg",
     text: "Aquel 10 de Diciembre de 2023, 13:00 hrs... cuando todo cambió.",
     date: "10.12.2023"
   },
   {
     id: 4,
-    image: "https://images.unsplash.com/photo-1490730141103-6cac27aaab94?q=80&w=800&auto=format&fit=crop", // Church / Light
+    image: "/assets/romantic/Fotoqueamodeella.jpeg",
     text: "El culto de las 12... donde pedí por ti.",
     date: "Fe"
   },
   {
     id: 5,
-    image: "https://images.unsplash.com/photo-1518568814500-bf0f8d125f46?q=80&w=800&auto=format&fit=crop", // Holding hands strong
+    image: "/assets/romantic/Fotolindos.jpeg",
     text: "Tú sana, que yo pongo la fe en marcha. Trato hecho.",
     date: "Promesa"
+  },
+  {
+    id: 6,
+    image: "/assets/romantic/Fotoenelcerro.jpeg",
+    text: "Cada aventura contigo es mi nueva favorita.",
+    date: "Aventuras"
+  },
+  {
+    id: 7,
+    image: "/assets/romantic/Fotoenelespejo.jpeg",
+    text: "Eres mi reflejo y mi mejor versión.",
+    date: "Nosotros"
+  },
+  {
+    id: 8,
+    image: "/assets/romantic/Fotodeellaenelestadio.jpeg",
+    text: "Tu sonrisa ilumina cualquier estadio.",
+    date: "Pasión"
+  },
+   {
+    id: 9,
+    image: "/assets/romantic/Diadepicnic.jpeg",
+    text: "Días simples, recuerdos eternos.",
+    date: "Picnic"
+  },
+   {
+    id: 10,
+    image: "/assets/romantic/FotoFormal.jpeg",
+    text: "Elegancia y amor, la combinación perfecta.",
+    date: "Gala"
+  },
+  {
+    id: 11,
+    image: "/assets/romantic/FotosdeColoColo.jpeg",
+    text: "Compartiendo pasiones.",
+    date: "Albo"
+  },
+  {
+    id: 12,
+    image: "/assets/romantic/Fotoregaloneando.jpeg",
+    text: "El mejor lugar del mundo: tus abrazos.",
+    date: "Paz"
+  },
+  {
+    id: 13,
+    image: "/assets/romantic/MiCumpleaños.jpeg",
+    text: "Celebrar la vida contigo es el mejor regalo.",
+    date: "Cumpleaños"
+  },
+  {
+    id: 14,
+    image: "/assets/romantic/FotosEnplayita.jpeg",
+    text: "Mar, arena y tú. No pido más.",
+    date: "Verano"
+  },
+  {
+    id: 15,
+    image: "/assets/romantic/Fotodestarwars.jpeg",
+    text: "Que la fuerza de nuestro amor nos acompañe siempre.",
+    date: "Galaxy"
   }
 ];
 
