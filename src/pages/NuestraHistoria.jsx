@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Heart, Stars, X, ZoomIn, MessageCircle, Plus, Camera } from 'lucide-react';
-import ReactPlayer from 'react-player'; // CHANGED: Imported full library to fix build error
+import ReactPlayer from 'react-player';
 
 const START_DATE = new Date('2023-12-10T13:00:00');
 
@@ -16,8 +16,9 @@ const STORY_HIGHLIGHTS = [
   { 
     id: 2, 
     src: "/assets/romantic/PrimerMensajedeWhatsApp.jpeg", 
-    text: "Cuando TÚ diste el primer paso. Bendita esa notificación.", 
-    rotate: 3 
+    text: "Ese primer mensaje... Bendita la hora en que me atreví a hablarte.", // Updated text
+    rotate: 3,
+    isScreenshot: true // Flag to handle object-fit
   },
   { 
     id: 3, 
@@ -46,6 +47,8 @@ const STORY_HIGHLIGHTS = [
 ];
 
 // --- DATA: "NUESTRO UNIVERSO" (Resto) ---
+// Note: All verified files in `public/assets/romantic` are `.jpeg`.
+// Exception: `Cartafondonegro` is `.heic` on disk. User MUST convert it to `.jpg`.
 const GALLERY_MEMORIES = [
   { id: 7, src: "/assets/romantic/Cartafondonegro.jpg", text: "Aún leo lo que me escribiste aquí..." }, 
   { id: 8, src: "/assets/romantic/Diadepicnic.jpeg" },
@@ -102,7 +105,12 @@ const PolaroidCard = ({ data, index, total, onRemove }) => {
       <div className="bg-white p-3 pb-20 shadow-2xl transform transition-transform duration-300 hover:scale-[1.02] relative">
         <div className="aspect-[4/5] w-full overflow-hidden bg-gray-100 relative mb-3">
             <div className="absolute inset-0 bg-amber-900/10 mix-blend-multiply z-10 pointer-events-none"></div>
-            <img src={data.src} alt="Recuerdo" className="w-full h-full object-cover pointer-events-none select-none" />
+            {/* Logic for Screenshot vs Photo */}
+            <img 
+                src={data.src} 
+                alt="Recuerdo" 
+                className={`w-full h-full pointer-events-none select-none ${data.isScreenshot ? 'object-contain bg-black' : 'object-cover'}`} 
+            />
         </div>
         
         <div className="absolute bottom-4 left-0 right-0 px-4 text-center">
@@ -122,7 +130,7 @@ const NuestraHistoria = () => {
   const [cards, setCards] = useState(STORY_HIGHLIGHTS);
   const [elapsed, setElapsed] = useState({});
   const [selectedImage, setSelectedImage] = useState(null); 
-  const [playing, setPlaying] = useState(false); // Audio State
+  const [playing, setPlaying] = useState(false);
 
   // META TAGS & PRIVACY
   useEffect(() => {
@@ -332,7 +340,7 @@ const NuestraHistoria = () => {
                                     viewport={{ once: true, margin: "-50px" }}
                                     transition={{ duration: 0.6, delay: i % 4 * 0.1 }}
                                     className="break-inside-avoid relative group rounded-lg overflow-hidden cursor-zoom-in shadow-xl"
-                                    onClick={() => setSelectedImage(photo)} // Select the whole object
+                                    onClick={() => setSelectedImage(photo)} 
                                 >
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 z-10">
                                         <ZoomIn className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
@@ -406,7 +414,7 @@ const NuestraHistoria = () => {
                     >
                         <p className="font-playfair text-2xl md:text-3xl text-white mb-4 leading-relaxed drop-shadow-lg shadow-black">
                             ¿Viste todo lo que hemos construido?<br/>
-                            <span className="text-rose-400 italic">Aún quedan muchas fotos por sacar.</span>
+                            <span className="text-rose-400 italic">Aún quedan muchas páginas en blanco... pero esas se escriben de a dos.<br/>Sin prisa, pero con ganas.</span>
                         </p>
                         <p className="font-dancing text-4xl text-amber-100 mt-8 mb-12 drop-shadow-[0_4px_4px_rgba(0,0,0,1)]">Te espero.</p>
 
