@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Play, Pause, Music, Volume2, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 const START_DATE = new Date('2023-12-10T13:00:00');
 
@@ -91,8 +92,6 @@ const NuestraHistoria = () => {
   const [noBtnPos, setNoBtnPos] = useState({ x: 0, y: 0 });
   const [cards, setCards] = useState(CARDS);
   const [elapsed, setElapsed] = useState({});
-  const [audioPlaying, setAudioPlaying] = useState(false);
-  const audioRef = useRef(null);
 
   // Privacy: No Index
   useEffect(() => {
@@ -133,21 +132,9 @@ const NuestraHistoria = () => {
 
   const handleYes = () => {
     setStarted(true);
-    if (audioRef.current) {
-        audioRef.current.volume = 0.5;
-        audioRef.current.play().then(() => setAudioPlaying(true)).catch(() => console.log("Autoplay blocked"));
-    }
   };
 
-  const toggleAudio = () => {
-      if(audioRef.current.paused) {
-          audioRef.current.play();
-          setAudioPlaying(true);
-      } else {
-          audioRef.current.pause();
-          setAudioPlaying(false);
-      }
-  }
+
 
   const removeCard = (id) => {
       setCards(prev => {
@@ -161,7 +148,6 @@ const NuestraHistoria = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans overflow-hidden relative selection:bg-rose-500/30">
-        <audio ref={audioRef} src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3" loop />
 
         {/* --- BACKGROUND PARTICLES --- */}
         <div className="absolute inset-0 pointer-events-none">
@@ -258,31 +244,7 @@ const NuestraHistoria = () => {
                         <p className="text-slate-500 text-sm italic">Desliza las fotos hacia los lados...</p>
                     </div>
 
-                    {/* Audio Player */}
-                    <motion.div 
-                        initial={{ y: 50, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 2 }}
-                        className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-full border border-slate-800 shadow-2xl"
-                    >
-                        <button onClick={toggleAudio} className="text-rose-400 hover:text-rose-300 transition-colors">
-                            {audioPlaying ? <Pause size={18} /> : <Play size={18} />}
-                        </button>
-                        
-                        <div className="flex flex-col">
-                            <span className="text-[10px] text-slate-400 uppercase tracking-widest">Nuestra Canción</span>
-                            <div className="flex items-end gap-0.5 h-3">
-                                {[...Array(10)].map((_, i) => (
-                                    <motion.div
-                                        key={i}
-                                        className="w-0.5 bg-rose-500/50"
-                                        animate={{ height: audioPlaying ? [4, 12, 4] : 2 }}
-                                        transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    </motion.div>
+
 
                 </motion.div>
             )}
