@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Heart, Stars, X, ZoomIn, MessageCircle, Plus, Camera } from 'lucide-react';
-import ReactPlayer from 'react-player/youtube';
+import ReactPlayer from 'react-player'; // CHANGED: Imported full library to fix build error
 
 const START_DATE = new Date('2023-12-10T13:00:00');
 
@@ -47,7 +47,7 @@ const STORY_HIGHLIGHTS = [
 
 // --- DATA: "NUESTRO UNIVERSO" (Resto) ---
 const GALLERY_MEMORIES = [
-  { id: 7, src: "/assets/romantic/Cartafondonegro.jpg", text: "Aún leo lo que me escribiste aquí..." }, // Converted & Text added
+  { id: 7, src: "/assets/romantic/Cartafondonegro.jpg", text: "Aún leo lo que me escribiste aquí..." }, 
   { id: 8, src: "/assets/romantic/Diadepicnic.jpeg" },
   { id: 9, src: "/assets/romantic/FotosdeColoColo.jpeg" },
   { id: 10, src: "/assets/romantic/Foto1Noviembre.jpeg" },
@@ -121,7 +121,7 @@ const NuestraHistoria = () => {
   const [noBtnPos, setNoBtnPos] = useState({ x: 0, y: 0 });
   const [cards, setCards] = useState(STORY_HIGHLIGHTS);
   const [elapsed, setElapsed] = useState({});
-  const [selectedImage, setSelectedImage] = useState(null); // Stores the full object now
+  const [selectedImage, setSelectedImage] = useState(null); 
   const [playing, setPlaying] = useState(false); // Audio State
 
   // META TAGS & PRIVACY
