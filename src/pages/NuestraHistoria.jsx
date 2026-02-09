@@ -181,7 +181,8 @@ const NuestraHistoria = () => {
   const [noBtnPos, setNoBtnPos] = useState({ x: 0, y: 0 });
   const [cards, setCards] = useState(STORY_HIGHLIGHTS);
   const [elapsed, setElapsed] = useState({});
-  const [totalStats, setTotalStats] = useState({}); // New state for cumulative stats
+  const [totalStats, setTotalStats] = useState({}); 
+  const [showLetter, setShowLetter] = useState(false); // Modal state
 
   // ... (meta tags effect)
 
@@ -452,8 +453,14 @@ const NuestraHistoria = () => {
                             <p className="font-dancing text-xl text-gray-800 leading-relaxed text-center">
                                 "Sé que técnicamente no estamos contando... pero mi corazón no sabe de pausas. Feliz día, Cami."
                             </p>
-                            <div className="text-center mt-6">
-                                <span className="text-xs font-serif italic text-gray-400">Siempre tuyo.</span>
+                            
+                            <div className="mt-8 text-center">
+                                <button 
+                                    onClick={() => setShowLetter(true)}
+                                    className="text-xs font-serif italic text-rose-500 hover:text-rose-700 border-b border-rose-300 pb-0.5 transition-colors"
+                                >
+                                    Leer algo más...
+                                </button>
                             </div>
                         </motion.div>
 
@@ -523,12 +530,64 @@ const NuestraHistoria = () => {
                         <div className="mt-20 opacity-40 hover:opacity-100 transition-opacity duration-1000 max-w-lg mx-auto">
                              <Heart size={14} className="mx-auto mb-4 text-rose-500 animate-pulse" />
                              <p className="text-xs md:text-sm text-slate-400 italic font-serif tracking-widest leading-loose">
-                                "Lo mío es fe, y esa no siempre entiende de lógica humana."
+                                "Lo mío es fe."
                             </p>
                         </div>
                        
                     </motion.div>
 
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+        {/* LETTER MODAL */}
+        <AnimatePresence>
+            {showLetter && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
+                    onClick={() => setShowLetter(false)}
+                >
+                    <motion.div 
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 50, opacity: 0 }}
+                        className="bg-[#fffdf5] w-full max-w-lg p-8 md:p-12 rounded-sm shadow-2xl relative max-h-[80vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button 
+                            onClick={() => setShowLetter(false)}
+                            className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 transition-colors"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <div className="text-center mb-8">
+                            <Heart size={20} className="text-rose-500 mx-auto mb-4" />
+                            <h3 className="font-playfair text-2xl text-gray-900 border-b border-gray-200 pb-4 mx-10">Desde el Corazón</h3>
+                        </div>
+
+                        <div className="font-dancing text-xl text-gray-800 space-y-6 leading-relaxed text-justify">
+                            <p>
+                                Sé que es una lucha muy grande cuando la cabeza dice una cosa y el corazón siente otra…
+                            </p>
+                            <p>
+                                Respeto tu decisión y tu espacio. Pero por mi parte, ya no me muevo por mis propias fuerzas... porque si fuera solo por mí, quizás ya me habría rendido hace rato.
+                            </p>
+                            <p className="font-bold text-rose-900">
+                                Lo mío es fe, y esa no siempre entiende de lógica humana.
+                            </p>
+                            <p>
+                                No pretendo incomodarte, solo quería que supieras que aquí sigo, construyendo, esperando y creyendo.
+                            </p>
+                        </div>
+
+                        <div className="mt-12 text-right">
+                            <p className="font-playfair italic text-gray-600">Diego.</p>
+                        </div>
+                    </motion.div>
                 </motion.div>
             )}
         </AnimatePresence>
