@@ -182,7 +182,8 @@ const NuestraHistoria = () => {
   const [cards, setCards] = useState(STORY_HIGHLIGHTS);
   const [elapsed, setElapsed] = useState({});
   const [totalStats, setTotalStats] = useState({}); 
-  const [showLetter, setShowLetter] = useState(false); // Modal state
+  const [showLetter, setShowLetter] = useState(false); 
+  const [selectedImage, setSelectedImage] = useState(null); // Restored Lightbox State
 
   // ... (meta tags effect)
 
@@ -234,7 +235,6 @@ const NuestraHistoria = () => {
         });
     }
     setStarted(true);
-    setPlaying(true);
   };
 
   const removeCard = (id) => {
@@ -250,61 +250,29 @@ const NuestraHistoria = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden relative selection:bg-rose-500/30">
 
-        {/* --- YOUTUBE PLAYER & FLOATING CONTROLS --- */}
-        <div className="fixed bottom-6 right-6 z-50">
-             <div className="hidden">
-                 <ReactPlayer 
-                    url='https://www.youtube.com/watch?v=USDX0X-d588'
-                    playing={playing}
-                    loop={true}
-                    volume={0.5}
-                    muted={muted}
-                    width="0"
-                    height="0"
-                />
-            </div>
-            
-            {started && (
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 px-4 py-3 rounded-full shadow-2xl"
+        {/* --- FLOATING MUSIC CARD (LINK ONLY) --- */}
+        {started && (
+             <div className="fixed bottom-6 right-6 z-50">
+                <a 
+                    href="https://youtu.be/USDX0X-d588?si=p7cMXFaTbm3ojJv9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 bg-black/60 backdrop-blur-md border border-rose-500/30 px-5 py-3 rounded-full shadow-2xl hover:bg-black/80 transition-all group"
                 >
                     <div className="relative">
-                        <Music size={18} className={`text-rose-400 ${playing ? 'animate-spin-slow' : ''}`} />
+                        <Music size={20} className="text-rose-400 animate-spin-slow" />
+                        <div className="absolute inset-0 bg-rose-500/20 blur-lg rounded-full animate-pulse"></div>
                     </div>
                     
                     <div className="flex flex-col mr-2">
-                        <span className="text-[10px] uppercase tracking-widest text-white/50">Sonando</span>
-                        {/* External Link for Song */}
-                        <a 
-                            href="https://youtu.be/USDX0X-d588?si=p7cMXFaTbm3ojJv9" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-xs font-semibold text-white truncate max-w-[100px] hover:text-rose-300 transition-colors underline decoration-white/30"
-                        >
+                        <span className="text-[10px] uppercase tracking-widest text-white/50 group-hover:text-rose-300 transition-colors">Nuestra Canción</span>
+                        <span className="text-sm font-semibold text-white underline decoration-white/30 underline-offset-4 group-hover:text-rose-100 transition-colors">
                             No Se Va - Morat
-                        </a>
+                        </span>
                     </div>
-
-                    <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
-
-                    <button 
-                        onClick={() => setPlaying(!playing)} 
-                        className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
-                    >
-                        {playing ? <Pause size={18} /> : <Play size={18} />}
-                    </button>
-                    
-                    <button 
-                         onClick={() => setMuted(!muted)}
-                         className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
-                    >
-                        {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                    </button>
-                </motion.div>
-            )}
-        </div>
+                </a>
+            </div>
+        )}
 
         {/* --- BACKGROUND --- */}
         <div className="fixed inset-0 pointer-events-none z-0">
