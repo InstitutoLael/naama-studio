@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import React, { useState, useEffect, useRef } from 'react';
+
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
 import { Heart } from 'lucide-react';
 
