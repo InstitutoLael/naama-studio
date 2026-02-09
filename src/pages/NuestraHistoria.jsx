@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Heart, Stars, X, ZoomIn } from 'lucide-react';
+import { Heart, Stars, X, ZoomIn, MessageCircle } from 'lucide-react';
 
 const START_DATE = new Date('2023-12-10T13:00:00');
 
@@ -119,6 +119,7 @@ const NuestraHistoria = () => {
   const [cards, setCards] = useState(STORY_HIGHLIGHTS);
   const [elapsed, setElapsed] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
+  const audioRef = useRef(null); // Persistent Audio Ref
 
   // Privacy
   useEffect(() => {
@@ -167,6 +168,11 @@ const NuestraHistoria = () => {
         });
     }
     setStarted(true);
+    // Try to play audio
+    if (audioRef.current) {
+        audioRef.current.volume = 0.4;
+        audioRef.current.play().catch(e => console.log("Audio autoplay prevented", e));
+    }
   };
 
   const removeCard = (id) => {
@@ -181,6 +187,12 @@ const NuestraHistoria = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden relative selection:bg-rose-500/30">
+
+        {/* --- PERSISTENT AUDIO --- 
+            Placed here at root level so it doesn't unmount when switching phases. 
+            Using a romantic piano track as placeholder. 
+        */}
+        <audio ref={audioRef} src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3" loop preload="auto" />
 
         {/* --- BACKGROUND --- */}
         <div className="fixed inset-0 pointer-events-none z-0">
@@ -280,6 +292,7 @@ const NuestraHistoria = () => {
                             <p className="text-slate-400 font-dancing text-xl">Cada foto, un tesoro.</p>
                         </div>
                         
+                        {/* Modified Grid: 2 columns on mobile (columns-2) */}
                         <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 px-2">
                             {GALLERY_MEMORIES.map((photo, i) => (
                                 <motion.div
@@ -305,18 +318,28 @@ const NuestraHistoria = () => {
                         </div>
                     </section>
 
-                    {/* FINAL CTA */}
+                    {/* FINAL CTA & WHATSAPP BUTTON */}
                     <motion.div 
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         transition={{ duration: 1.5, delay: 0.5 }}
-                        className="mt-32 mb-16 text-center max-w-lg mx-auto px-6"
+                        className="mt-32 mb-24 text-center max-w-lg mx-auto px-6"
                     >
                         <p className="font-playfair text-2xl md:text-3xl text-white mb-4 leading-relaxed">
                             ¿Viste todo lo que hemos construido?<br/>
                             <span className="text-rose-400 italic">Aún quedan muchas fotos por sacar.</span>
                         </p>
-                        <p className="font-dancing text-4xl text-amber-100 mt-8">Te espero.</p>
+                        <p className="font-dancing text-4xl text-amber-100 mt-8 mb-12">Te espero.</p>
+
+                        <a 
+                            href="https://wa.me/56949481562?text=Vi%20la%20página...%20hablemos."
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-full font-playfair tracking-normal text-lg transition-all shadow-lg hover:shadow-emerald-500/30 group"
+                        >
+                            <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            Escribir el siguiente capítulo...
+                        </a>
                     </motion.div>
 
                 </motion.div>
