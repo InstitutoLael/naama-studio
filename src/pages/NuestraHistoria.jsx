@@ -67,45 +67,58 @@ const GALLERY_MEMORIES = [
   { id: 23, src: "/assets/romantic/MiCumpleaños.jpeg" }
 ];
 
-// --- COMPONENT: TIMING COUNTER (Premium Design) ---
-const TimeCounter = ({ elapsed }) => {
+// --- COMPONENT: TIMING COUNTER (The "Deep Time" Design) ---
+const TimeCounter = ({ elapsed, total }) => {
     return (
-        <div className="flex flex-col items-center justify-center gap-6 mt-12 mb-16 relative">
-            {/* Decoration Line */}
-            <div className="absolute inset-y-0 w-[1px] bg-gradient-to-b from-transparent via-rose-500/50 to-transparent left-1/2 -translate-x-1/2 hidden md:block"></div>
+        <div className="w-full max-w-5xl mx-auto mt-12 mb-20 relative px-4">
+            
+            {/* 1. THE MAIN BREAKDOWN (YY/MM/DD) */}
+            <div className="grid grid-cols-3 gap-2 md:gap-8 mb-4 md:mb-8">
+                <TimeBox value={elapsed.yrs} label="Años" color="text-rose-200" />
+                <TimeBox value={elapsed.mos} label="Meses" color="text-rose-200" />
+                <TimeBox value={elapsed.dias} label="Días" color="text-rose-200" />
+            </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-12 z-10">
-                <div className="flex flex-col items-center group">
-                    <span className="font-playfair text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:scale-110 transition-transform duration-500">
-                        {elapsed.yrs || 0}
-                    </span>
-                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-rose-200 uppercase mt-2 border-t border-rose-500/30 pt-2 w-full text-center">Años</span>
+            {/* 2. THE DETAILS (HH/MM/SS) */}
+            <div className="grid grid-cols-3 gap-2 md:gap-8 mb-12">
+                 <TimeBox value={elapsed.hrs} label="Horas" color="text-amber-100" size="small" />
+                 <TimeBox value={elapsed.min} label="Minutos" color="text-amber-100" size="small" />
+                 <TimeBox value={elapsed.seg} label="Segundos" color="text-amber-200" size="small" highlight />
+            </div>
+
+            {/* 3. THE PERSPECTIVE (Cumulative Totals) */}
+            <div className="relative pt-10 border-t border-white/10">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0f172a] px-4 text-xs text-white/40 uppercase tracking-[0.3em]">
+                    Lo que eso significa
                 </div>
                 
-                <div className="flex flex-col items-center group">
-                    <span className="font-playfair text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:scale-110 transition-transform duration-500 delay-100">
-                        {elapsed.mos || 0}
-                    </span>
-                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-rose-200 uppercase mt-2 border-t border-rose-500/30 pt-2 w-full text-center">Meses</span>
-                </div>
-
-                <div className="flex flex-col items-center group">
-                    <span className="font-playfair text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:scale-110 transition-transform duration-500 delay-200">
-                        {elapsed.dias || 0}
-                    </span>
-                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-rose-200 uppercase mt-2 border-t border-rose-500/30 pt-2 w-full text-center">Días</span>
-                </div>
-
-                 <div className="flex flex-col items-center group">
-                    <span className="font-playfair text-5xl md:text-7xl font-bold text-amber-200 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)] group-hover:scale-110 transition-transform duration-500 delay-300 min-w-[80px]">
-                        {String(elapsed.seg || 0).padStart(2, '0')}
-                    </span>
-                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-amber-100 uppercase mt-2 border-t border-amber-500/30 pt-2 w-full text-center">Segs</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                    <CumulativeBox value={total.days} label="Días Totales" />
+                    <CumulativeBox value={total.hours} label="Horas de Historia" />
+                    <CumulativeBox value={total.seconds} label="Segundos juntos" />
                 </div>
             </div>
         </div>
     );
 };
+
+const TimeBox = ({ value, label, color, size = "large", highlight = false }) => (
+    <div className={`flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-white/5 shadow-2xl ${size === "large" ? 'p-4 md:p-8' : 'p-3 md:p-6'} ${highlight ? 'ring-1 ring-amber-400/30 bg-amber-900/10' : ''}`}>
+        <span className={`font-playfair font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 ${size === "large" ? 'text-4xl md:text-7xl' : 'text-2xl md:text-5xl'} ${color} drop-shadow-sm`}>
+            {String(value || 0).padStart(2, '0')}
+        </span>
+        <span className="text-[10px] md:text-xs tracking-[0.3em] text-white/40 uppercase mt-2 md:mt-4">{label}</span>
+    </div>
+);
+
+const CumulativeBox = ({ value, label }) => (
+    <div className="flex flex-col animate-pulse-slow">
+        <span className="font-mono text-xl md:text-2xl text-white/80">
+            {new Intl.NumberFormat('es-CL').format(value || 0)}
+        </span>
+        <span className="text-[10px] uppercase tracking-widest text-white/30 mt-1">{label}</span>
+    </div>
+);
 
 // --- COMPONENT: CARD/POLAROID (DECK) ---
 const PolaroidCard = ({ data, index, total, onRemove }) => {
@@ -168,27 +181,9 @@ const NuestraHistoria = () => {
   const [noBtnPos, setNoBtnPos] = useState({ x: 0, y: 0 });
   const [cards, setCards] = useState(STORY_HIGHLIGHTS);
   const [elapsed, setElapsed] = useState({});
-  const [selectedImage, setSelectedImage] = useState(null); 
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [totalStats, setTotalStats] = useState({}); // New state for cumulative stats
 
-  // META TAGS & PRIVACY
-  useEffect(() => {
-    const metaRobots = document.createElement('meta');
-    metaRobots.name = "robots";
-    metaRobots.content = "noindex, nofollow";
-    document.head.appendChild(metaRobots);
-
-    const ogTitle = document.createElement('meta');
-    ogTitle.setAttribute('property', 'og:title');
-    ogTitle.content = "Una historia que no termina...";
-    document.head.appendChild(ogTitle);
-    
-    return () => {
-        if(document.head.contains(metaRobots)) document.head.removeChild(metaRobots);
-        // ...
-    };
-  }, []);
+  // ... (meta tags effect)
 
   // Timer
   useEffect(() => {
@@ -196,6 +191,8 @@ const NuestraHistoria = () => {
     const interval = setInterval(() => {
       const now = new Date();
       const diff = now - START_DATE;
+      
+      // Breakdown
       setElapsed({
         yrs: Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25)),
         mos: Math.floor((diff % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44)),
@@ -204,6 +201,14 @@ const NuestraHistoria = () => {
         min: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
         seg: Math.floor((diff % (1000 * 60)) / 1000),
       });
+
+      // Cumulative Totals
+      setTotalStats({
+          days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+          hours: Math.floor(diff / (1000 * 60 * 60)),
+          seconds: Math.floor(diff / 1000)
+      });
+
     }, 1000);
     return () => clearInterval(interval);
   }, [started]);
@@ -380,7 +385,7 @@ const NuestraHistoria = () => {
                              <Heart className="w-10 h-10 text-rose-500 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]" fill="#f43f5e" />
                         </motion.div>
                         <h2 className="font-playfair text-4xl md:text-5xl text-white drop-shadow-lg shadow-black tracking-wide">Nuestra Historia</h2>
-                        <TimeCounter elapsed={elapsed} />
+                        <TimeCounter elapsed={elapsed} total={totalStats} />
                     </div>
 
                     {/* SECTION 1: INTERACTIVE DECK (Los Hilos del Destino) */}
