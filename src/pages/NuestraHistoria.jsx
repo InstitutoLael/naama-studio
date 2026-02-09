@@ -103,20 +103,20 @@ const TimeCounter = ({ elapsed, total }) => {
 };
 
 const TimeBox = ({ value, label, color, size = "large", highlight = false }) => (
-    <div className={`flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-white/5 shadow-2xl ${size === "large" ? 'p-4 md:p-8' : 'p-3 md:p-6'} ${highlight ? 'ring-1 ring-amber-400/30 bg-amber-900/10' : ''}`}>
-        <span className={`font-playfair font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 ${size === "large" ? 'text-4xl md:text-7xl' : 'text-2xl md:text-5xl'} ${color} drop-shadow-sm`}>
+    <div className={`flex flex-col items-center justify-center bg-white/5 backdrop-blur-md rounded-2xl border border-white/5 shadow-2xl ${size === "large" ? 'p-2 md:p-8' : 'p-2 md:p-6'} ${highlight ? 'ring-1 ring-amber-400/30 bg-amber-900/10' : ''}`}>
+        <span className={`font-playfair font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 ${size === "large" ? 'text-3xl md:text-7xl' : 'text-2xl md:text-5xl'} ${color} drop-shadow-sm`}>
             {String(value || 0).padStart(2, '0')}
         </span>
-        <span className="text-[10px] md:text-xs tracking-[0.3em] text-white/40 uppercase mt-2 md:mt-4">{label}</span>
+        <span className="text-[9px] md:text-xs tracking-[0.3em] text-white/40 uppercase mt-2 md:mt-4">{label}</span>
     </div>
 );
 
 const CumulativeBox = ({ value, label }) => (
     <div className="flex flex-col animate-pulse-slow">
-        <span className="font-mono text-xl md:text-2xl text-white/80">
+        <span className="font-mono text-lg md:text-2xl text-white/80">
             {new Intl.NumberFormat('es-CL').format(value || 0)}
         </span>
-        <span className="text-[10px] uppercase tracking-widest text-white/30 mt-1">{label}</span>
+        <span className="text-[9px] md:text-[10px] uppercase tracking-widest text-white/30 mt-1">{label}</span>
     </div>
 );
 
@@ -519,11 +519,11 @@ const NuestraHistoria = () => {
                             Escribir el siguiente capítulo...
                         </a>
 
-                        {/* Easter Egg */}
-                        <div className="mt-16 opacity-30 hover:opacity-60 transition-opacity duration-1000">
-                             <Heart size={12} className="mx-auto mb-2 text-rose-500" />
-                             <p className="text-[10px] text-white italic font-serif tracking-widest">
-                                PD: El silencio otorga... y ese corazón rojo lo dijo todo.
+                        {/* Easter Egg / The Faith Quote */}
+                        <div className="mt-20 opacity-40 hover:opacity-100 transition-opacity duration-1000 max-w-lg mx-auto">
+                             <Heart size={14} className="mx-auto mb-4 text-rose-500 animate-pulse" />
+                             <p className="text-xs md:text-sm text-slate-400 italic font-serif tracking-widest leading-loose">
+                                "Lo mío es fe, y esa no siempre entiende de lógica humana."
                             </p>
                         </div>
                        
