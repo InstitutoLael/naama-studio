@@ -67,29 +67,41 @@ const GALLERY_MEMORIES = [
   { id: 23, src: "/assets/romantic/MiCumpleaños.jpeg" }
 ];
 
-// --- COMPONENT: TIMING COUNTER (Elegant Design) ---
+// --- COMPONENT: TIMING COUNTER (Premium Design) ---
 const TimeCounter = ({ elapsed }) => {
     return (
-        <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mt-8">
-            <div className="flex flex-col items-center bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10 min-w-[80px] sm:min-w-[100px]">
-                <span className="font-playfair text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-300 drop-shadow-sm">
-                    {elapsed.yrs || 0}
-                </span>
-                <span className="text-xs tracking-[0.2em] text-white/60 uppercase mt-2">Años</span>
-            </div>
-            
-            <div className="flex flex-col items-center bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10 min-w-[80px] sm:min-w-[100px]">
-                <span className="font-playfair text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-300 drop-shadow-sm">
-                    {elapsed.mos || 0}
-                </span>
-                <span className="text-xs tracking-[0.2em] text-white/60 uppercase mt-2">Meses</span>
-            </div>
+        <div className="flex flex-col items-center justify-center gap-6 mt-12 mb-16 relative">
+            {/* Decoration Line */}
+            <div className="absolute inset-y-0 w-[1px] bg-gradient-to-b from-transparent via-rose-500/50 to-transparent left-1/2 -translate-x-1/2 hidden md:block"></div>
 
-            <div className="flex flex-col items-center bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10 min-w-[80px] sm:min-w-[100px]">
-                 <span className="font-playfair text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-300 drop-shadow-sm">
-                    {elapsed.dias || 0}
-                </span>
-                <span className="text-xs tracking-[0.2em] text-white/60 uppercase mt-2">Días</span>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-12 z-10">
+                <div className="flex flex-col items-center group">
+                    <span className="font-playfair text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:scale-110 transition-transform duration-500">
+                        {elapsed.yrs || 0}
+                    </span>
+                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-rose-200 uppercase mt-2 border-t border-rose-500/30 pt-2 w-full text-center">Años</span>
+                </div>
+                
+                <div className="flex flex-col items-center group">
+                    <span className="font-playfair text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:scale-110 transition-transform duration-500 delay-100">
+                        {elapsed.mos || 0}
+                    </span>
+                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-rose-200 uppercase mt-2 border-t border-rose-500/30 pt-2 w-full text-center">Meses</span>
+                </div>
+
+                <div className="flex flex-col items-center group">
+                    <span className="font-playfair text-5xl md:text-7xl font-bold text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-hover:scale-110 transition-transform duration-500 delay-200">
+                        {elapsed.dias || 0}
+                    </span>
+                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-rose-200 uppercase mt-2 border-t border-rose-500/30 pt-2 w-full text-center">Días</span>
+                </div>
+
+                 <div className="flex flex-col items-center group">
+                    <span className="font-playfair text-5xl md:text-7xl font-bold text-amber-200 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)] group-hover:scale-110 transition-transform duration-500 delay-300 min-w-[80px]">
+                        {String(elapsed.seg || 0).padStart(2, '0')}
+                    </span>
+                    <span className="text-[10px] md:text-xs tracking-[0.4em] text-amber-100 uppercase mt-2 border-t border-amber-500/30 pt-2 w-full text-center">Segs</span>
+                </div>
             </div>
         </div>
     );
@@ -172,8 +184,6 @@ const NuestraHistoria = () => {
     ogTitle.content = "Una historia que no termina...";
     document.head.appendChild(ogTitle);
     
-    // ... rest of meta if needed
-
     return () => {
         if(document.head.contains(metaRobots)) document.head.removeChild(metaRobots);
         // ...
@@ -260,7 +270,15 @@ const NuestraHistoria = () => {
                     
                     <div className="flex flex-col mr-2">
                         <span className="text-[10px] uppercase tracking-widest text-white/50">Sonando</span>
-                        <span className="text-xs font-semibold text-white truncate max-w-[100px]">No Se Va - Morat</span>
+                        {/* External Link for Song */}
+                        <a 
+                            href="https://youtu.be/USDX0X-d588?si=p7cMXFaTbm3ojJv9" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-xs font-semibold text-white truncate max-w-[100px] hover:text-rose-300 transition-colors underline decoration-white/30"
+                        >
+                            No Se Va - Morat
+                        </a>
                     </div>
 
                     <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
