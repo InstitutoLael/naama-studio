@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Heart, Stars, X, ZoomIn, MessageCircle, Plus, Camera } from 'lucide-react';
+import { Heart, Stars, X, ZoomIn, MessageCircle, Plus, Camera, Music, Volume2, VolumeX, Pause, Play } from 'lucide-react';
 import ReactPlayer from 'react-player';
 
 const START_DATE = new Date('2023-12-10T13:00:00');
@@ -16,9 +16,9 @@ const STORY_HIGHLIGHTS = [
   { 
     id: 2, 
     src: "/assets/romantic/PrimerMensajedeWhatsApp.jpeg", 
-    text: "Ese primer mensaje... Bendita la hora en que me atreví a hablarte.", // Updated text
+    text: "Ese primer mensaje... Bendita la hora en que me atreví a escribirte.", 
     rotate: 3,
-    isScreenshot: true // Flag to handle object-fit
+    isScreenshot: true 
   },
   { 
     id: 3, 
@@ -47,10 +47,8 @@ const STORY_HIGHLIGHTS = [
 ];
 
 // --- DATA: "NUESTRO UNIVERSO" (Resto) ---
-// Note: All verified files in `public/assets/romantic` are `.jpeg`.
-// Exception: `Cartafondonegro` is `.heic` on disk. User MUST convert it to `.jpg`.
 const GALLERY_MEMORIES = [
-  { id: 7, src: "/assets/romantic/Cartafondonegro.jpg", text: "Aún leo lo que me escribiste aquí..." }, 
+  { id: 7, src: "/assets/romantic/cartanegra.jpg", text: "Aún leo lo que escribimos aquí..." },  
   { id: 8, src: "/assets/romantic/Diadepicnic.jpeg" },
   { id: 9, src: "/assets/romantic/FotosdeColoColo.jpeg" },
   { id: 10, src: "/assets/romantic/Foto1Noviembre.jpeg" },
@@ -68,6 +66,34 @@ const GALLERY_MEMORIES = [
   { id: 22, src: "/assets/romantic/FotosEnplayita.jpeg" },
   { id: 23, src: "/assets/romantic/MiCumpleaños.jpeg" }
 ];
+
+// --- COMPONENT: TIMING COUNTER (Elegant Design) ---
+const TimeCounter = ({ elapsed }) => {
+    return (
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mt-8">
+            <div className="flex flex-col items-center bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10 min-w-[80px] sm:min-w-[100px]">
+                <span className="font-playfair text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-300 drop-shadow-sm">
+                    {elapsed.yrs || 0}
+                </span>
+                <span className="text-xs tracking-[0.2em] text-white/60 uppercase mt-2">Años</span>
+            </div>
+            
+            <div className="flex flex-col items-center bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10 min-w-[80px] sm:min-w-[100px]">
+                <span className="font-playfair text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-300 drop-shadow-sm">
+                    {elapsed.mos || 0}
+                </span>
+                <span className="text-xs tracking-[0.2em] text-white/60 uppercase mt-2">Meses</span>
+            </div>
+
+            <div className="flex flex-col items-center bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/10 min-w-[80px] sm:min-w-[100px]">
+                 <span className="font-playfair text-4xl sm:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-amber-100 to-amber-300 drop-shadow-sm">
+                    {elapsed.dias || 0}
+                </span>
+                <span className="text-xs tracking-[0.2em] text-white/60 uppercase mt-2">Días</span>
+            </div>
+        </div>
+    );
+};
 
 // --- COMPONENT: CARD/POLAROID (DECK) ---
 const PolaroidCard = ({ data, index, total, onRemove }) => {
@@ -105,11 +131,12 @@ const PolaroidCard = ({ data, index, total, onRemove }) => {
       <div className="bg-white p-3 pb-20 shadow-2xl transform transition-transform duration-300 hover:scale-[1.02] relative">
         <div className="aspect-[4/5] w-full overflow-hidden bg-gray-100 relative mb-3">
             <div className="absolute inset-0 bg-amber-900/10 mix-blend-multiply z-10 pointer-events-none"></div>
-            {/* Logic for Screenshot vs Photo */}
             <img 
                 src={data.src} 
                 alt="Recuerdo" 
-                className={`w-full h-full pointer-events-none select-none ${data.isScreenshot ? 'object-contain bg-black' : 'object-cover'}`} 
+                className={`w-full h-full pointer-events-none select-none ${
+                    data.isScreenshot ? 'object-contain bg-gray-100 p-2' : 'object-cover'
+                }`} 
             />
         </div>
         
@@ -131,6 +158,7 @@ const NuestraHistoria = () => {
   const [elapsed, setElapsed] = useState({});
   const [selectedImage, setSelectedImage] = useState(null); 
   const [playing, setPlaying] = useState(false);
+  const [muted, setMuted] = useState(false);
 
   // META TAGS & PRIVACY
   useEffect(() => {
@@ -143,22 +171,12 @@ const NuestraHistoria = () => {
     ogTitle.setAttribute('property', 'og:title');
     ogTitle.content = "Una historia que no termina...";
     document.head.appendChild(ogTitle);
-
-    const ogDesc = document.createElement('meta');
-    ogDesc.setAttribute('property', 'og:description');
-    ogDesc.content = "¿Te atreves a recordar? Hay cosas que el tiempo no borra.";
-    document.head.appendChild(ogDesc);
-
-    const ogImage = document.createElement('meta');
-    ogImage.setAttribute('property', 'og:image');
-    ogImage.content = "/assets/romantic/FotoprofesionalBesito.jpeg"; 
-    document.head.appendChild(ogImage);
+    
+    // ... rest of meta if needed
 
     return () => {
         if(document.head.contains(metaRobots)) document.head.removeChild(metaRobots);
-        if(document.head.contains(ogTitle)) document.head.removeChild(ogTitle);
-        if(document.head.contains(ogDesc)) document.head.removeChild(ogDesc);
-        if(document.head.contains(ogImage)) document.head.removeChild(ogImage);
+        // ...
     };
   }, []);
 
@@ -216,27 +234,63 @@ const NuestraHistoria = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden relative selection:bg-rose-500/30">
 
-        {/* --- YOUTUBE PLAYER (Hidden) --- */}
-        <div className="hidden">
-            <ReactPlayer 
-                url='https://www.youtube.com/watch?v=USDX0X-d588'
-                playing={playing}
-                loop={true}
-                volume={0.5}
-                width="0"
-                height="0"
-                config={{
-                    youtube: {
-                        playerVars: { showinfo: 0, controls: 0, modestbranding: 1 }
-                    }
-                }}
-            />
+        {/* --- YOUTUBE PLAYER & FLOATING CONTROLS --- */}
+        <div className="fixed bottom-6 right-6 z-50">
+             <div className="hidden">
+                 <ReactPlayer 
+                    url='https://www.youtube.com/watch?v=USDX0X-d588'
+                    playing={playing}
+                    loop={true}
+                    volume={0.5}
+                    muted={muted}
+                    width="0"
+                    height="0"
+                />
+            </div>
+            
+            {started && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 bg-black/40 backdrop-blur-md border border-white/10 px-4 py-3 rounded-full shadow-2xl"
+                >
+                    <div className="relative">
+                        <Music size={18} className={`text-rose-400 ${playing ? 'animate-spin-slow' : ''}`} />
+                    </div>
+                    
+                    <div className="flex flex-col mr-2">
+                        <span className="text-[10px] uppercase tracking-widest text-white/50">Sonando</span>
+                        <span className="text-xs font-semibold text-white truncate max-w-[100px]">No Se Va - Morat</span>
+                    </div>
+
+                    <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
+
+                    <button 
+                        onClick={() => setPlaying(!playing)} 
+                        className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+                    >
+                        {playing ? <Pause size={18} /> : <Play size={18} />}
+                    </button>
+                    
+                    <button 
+                         onClick={() => setMuted(!muted)}
+                         className="p-1.5 hover:bg-white/10 rounded-full transition-colors"
+                    >
+                        {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                    </button>
+                </motion.div>
+            )}
         </div>
 
         {/* --- BACKGROUND --- */}
         <div className="fixed inset-0 pointer-events-none z-0">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-950 via-slate-950 to-black"></div>
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+            
+            {/* Ambient Blobs */}
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-rose-900/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow"></div>
+            <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen animate-pulse-slow delay-1000"></div>
+
             {[...Array(20)].map((_, i) => (
                 <motion.div
                     key={i}
@@ -273,7 +327,7 @@ const NuestraHistoria = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={handleYes}
-                            className="px-12 py-4 bg-gradient-to-r from-rose-500 to-amber-600 rounded-full text-white font-playfair tracking-widest text-xl shadow-lg z-10"
+                            className="px-12 py-4 bg-gradient-to-r from-rose-500 to-amber-600 rounded-full text-white font-playfair tracking-widest text-xl shadow-lg z-10 box-decoration-clone"
                         >
                             SÍ
                         </motion.button>
@@ -299,17 +353,21 @@ const NuestraHistoria = () => {
                     className="relative z-10 min-h-screen flex flex-col items-center py-16 px-4 w-full max-w-7xl mx-auto"
                 >
                     {/* Header */}
-                    <div className="text-center mb-12">
-                        <Heart className="w-8 h-8 text-rose-500 mx-auto mb-4 drop-shadow-[0_0_10px_rgba(244,63,94,0.5)]" fill="#f43f5e" />
-                        <h2 className="font-playfair text-3xl text-white drop-shadow-lg shadow-black">Nuestra Historia</h2>
-                        <div className="font-mono text-amber-100 mt-4 text-lg drop-shadow-lg shadow-black font-bold">
-                            {elapsed.yrs} Años • {elapsed.mos} Meses • {elapsed.dias} Días
-                        </div>
+                    <div className="text-center mb-16 px-4">
+                        <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+                        >
+                             <Heart className="w-10 h-10 text-rose-500 mx-auto mb-6 drop-shadow-[0_0_15px_rgba(244,63,94,0.6)]" fill="#f43f5e" />
+                        </motion.div>
+                        <h2 className="font-playfair text-4xl md:text-5xl text-white drop-shadow-lg shadow-black tracking-wide">Nuestra Historia</h2>
+                        <TimeCounter elapsed={elapsed} />
                     </div>
 
                     {/* SECTION 1: INTERACTIVE DECK (Los Hilos del Destino) */}
                     <section className="relative w-full flex flex-col items-center justify-center min-h-[550px] mb-24">
-                        <h3 className="font-dancing text-2xl text-slate-300 mb-8 drop-shadow-lg shadow-black">Los Hilos del Destino</h3>
+                        <h3 className="font-dancing text-3xl text-slate-300 mb-12 drop-shadow-lg shadow-black">Los Hilos del Destino</h3>
                         <div className="relative w-full max-w-[300px] md:max-w-sm h-[450px] flex items-center justify-center perspective-1000">
                              {cards.map((card, index) => (
                                  <PolaroidCard 
@@ -321,17 +379,17 @@ const NuestraHistoria = () => {
                                  />
                              ))}
                         </div>
-                        <p className="mt-8 text-slate-400 text-xs animate-bounce drop-shadow-md">← Desliza →</p>
+                        <p className="mt-8 text-slate-400 text-xs animate-bounce drop-shadow-md tracking-widest uppercase">← Desliza →</p>
                     </section>
 
                     {/* SECTION 2: NUESTRO UNIVERSO (Infinite Masonry) */}
-                    <section className="w-full pt-12 border-t border-slate-800/50">
+                    <section className="w-full pt-16 border-t border-white/5 bg-gradient-to-b from-transparent to-black/30">
                         <div className="text-center mb-16">
                             <h3 className="font-playfair text-3xl md:text-5xl text-white mb-4 drop-shadow-lg shadow-black">Nuestro Universo</h3>
-                            <p className="text-slate-300 font-dancing text-xl drop-shadow-lg shadow-black">Cada foto, un tesoro.</p>
+                            <p className="text-slate-300 font-dancing text-2xl drop-shadow-lg shadow-black">Cada recuerdo es eterno.</p>
                         </div>
                         
-                        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 px-2">
+                        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 px-4 max-w-7xl mx-auto">
                             {GALLERY_MEMORIES.map((photo, i) => (
                                 <motion.div
                                     key={photo.id}
@@ -339,7 +397,7 @@ const NuestraHistoria = () => {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true, margin: "-50px" }}
                                     transition={{ duration: 0.6, delay: i % 4 * 0.1 }}
-                                    className="break-inside-avoid relative group rounded-lg overflow-hidden cursor-zoom-in shadow-xl"
+                                    className="break-inside-avoid relative group rounded-lg overflow-hidden cursor-zoom-in shadow-xl ring-1 ring-white/10"
                                     onClick={() => setSelectedImage(photo)} 
                                 >
                                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 z-10">
@@ -357,49 +415,58 @@ const NuestraHistoria = () => {
                     </section>
 
                     {/* SECTION 3: THE DEDICATION & EMPTY FRAMES (Future) */}
-                    <section className="mt-32 max-w-4xl mx-auto px-4">
+                    <section className="mt-32 max-w-5xl mx-auto px-4">
                          
                         {/* Dedication Card */}
                         <motion.div 
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            className="bg-[#fffdf5] p-8 md:p-12 shadow-2xl rotate-1 max-w-lg mx-auto mb-20 relative"
+                            className="bg-[#fffdf5] p-8 md:p-12 shadow-2xl rotate-1 max-w-lg mx-auto mb-20 relative transform hover:rotate-0 transition-transform duration-500"
                         >
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-32 h-8 bg-white/20 backdrop-blur-sm border-l border-r border-white/50 -rotate-1 shadow-sm"></div>
-                            <h4 className="font-dancing text-3xl text-gray-800 mb-4 font-bold text-center">Hoy es 10...</h4>
+                            <h4 className="font-dancing text-3xl text-gray-800 mb-6 font-bold text-center border-b border-gray-200 pb-4">10 de Diciembre</h4>
                             <p className="font-dancing text-xl text-gray-800 leading-relaxed text-center">
                                 "Sé que técnicamente no estamos contando... pero mi corazón no sabe de pausas. Feliz día, Cami."
                             </p>
+                            <div className="text-center mt-6">
+                                <span className="text-xs font-serif italic text-gray-400">Siempre tuyo.</span>
+                            </div>
                         </motion.div>
 
                         {/* Empty Frames */}
                         <div className="text-center mb-12">
-                            <h3 className="font-playfair text-2xl text-white/90 italic mb-8 drop-shadow-lg shadow-black">¿Y si llenamos estos espacios?</h3>
+                            <h3 className="font-playfair text-3xl text-white/90 italic mb-12 drop-shadow-lg shadow-black">Lo que está por venir...</h3>
                             
                             <div className="flex flex-col md:flex-row gap-8 justify-center items-center">
                                 {/* Frame 1 */}
                                 <motion.div 
                                     whileHover={{ scale: 1.02 }}
-                                    className="w-64 h-80 border-2 border-dashed border-white/40 rounded-lg flex flex-col items-center justify-center bg-white/5 backdrop-blur-sm p-6 text-center group transition-colors hover:border-white/60 shadow-lg"
+                                    className="w-64 h-80 border-[1px] border-dashed border-white/30 rounded-lg flex flex-col items-center justify-center bg-white/5 backdrop-blur-sm p-6 text-center group transition-all hover:border-rose-400/50 hover:bg-white/10 shadow-lg relative overflow-hidden"
                                 >
-                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-4 text-white/50 group-hover:text-white group-hover:bg-white/20 transition-all">
-                                        <Camera size={24} />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    <div className="relative z-10 flex flex-col items-center">
+                                        <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-6 text-white/40 group-hover:text-rose-200 group-hover:bg-white/10 transition-all border border-white/10">
+                                            <Camera size={28} />
+                                        </div>
+                                        <p className="font-playfair text-white/90 text-lg drop-shadow-md">Próximo 10 de Diciembre</p>
+                                        <span className="text-[10px] text-rose-300 uppercase tracking-widest mt-3 drop-shadow-md border-t border-white/10 pt-2 px-4">Aniversario Oficial</span>
                                     </div>
-                                    <p className="font-playfair text-white/90 text-lg drop-shadow-md">10 de Marzo (Reservado)</p>
-                                    <span className="text-xs text-rose-300 uppercase tracking-widest mt-2 drop-shadow-md">(Nuestro Aniversario)</span>
                                 </motion.div>
 
                                 {/* Frame 2 */}
                                 <motion.div 
                                     whileHover={{ scale: 1.02 }}
-                                    className="w-64 h-80 border-2 border-dashed border-white/40 rounded-lg flex flex-col items-center justify-center bg-white/5 backdrop-blur-sm p-6 text-center group transition-colors hover:border-white/60 shadow-lg"
+                                    className="w-64 h-80 border-[1px] border-dashed border-white/30 rounded-lg flex flex-col items-center justify-center bg-white/5 backdrop-blur-sm p-6 text-center group transition-all hover:border-amber-400/50 hover:bg-white/10 shadow-lg relative overflow-hidden"
                                 >
-                                    <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-4 text-white/50 group-hover:text-white group-hover:bg-white/20 transition-all">
-                                        <Plus size={24} />
-                                    </div>
-                                    <p className="font-playfair text-white/90 text-lg drop-shadow-md">Nuestra próxima aventura...</p>
-                                    <span className="text-xs text-amber-200 uppercase tracking-widest mt-2 font-dancing drop-shadow-md">Tú eliges</span>
+                                     <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                     <div className="relative z-10 flex flex-col items-center">
+                                        <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-6 text-white/40 group-hover:text-amber-200 group-hover:bg-white/10 transition-all border border-white/10">
+                                            <Plus size={28} />
+                                        </div>
+                                        <p className="font-playfair text-white/90 text-lg drop-shadow-md">Próxima Aventura</p>
+                                        <span className="text-[10px] text-amber-200 uppercase tracking-widest mt-3 drop-shadow-md border-t border-white/10 pt-2 px-4">Destino: Desconocido</span>
+                                     </div>
                                 </motion.div>
                             </div>
                         </div>
@@ -410,28 +477,33 @@ const NuestraHistoria = () => {
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         transition={{ duration: 1.5, delay: 0.5 }}
-                        className="mt-24 mb-24 text-center max-w-lg mx-auto px-6"
+                        className="mt-32 mb-24 text-center max-w-2xl mx-auto px-6"
                     >
-                        <p className="font-playfair text-2xl md:text-3xl text-white mb-4 leading-relaxed drop-shadow-lg shadow-black">
-                            ¿Viste todo lo que hemos construido?<br/>
-                            <span className="text-rose-400 italic">Aún quedan muchas páginas en blanco... pero esas se escriben de a dos.<br/>Sin prisa, pero con ganas.</span>
+                         <div className="w-20 h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent mx-auto mb-10"></div>
+                        <p className="font-playfair text-3xl md:text-4xl text-white mb-6 leading-relaxed drop-shadow-lg shadow-black">
+                            <span className="block text-2xl mb-4 text-white/70 italic">¿Viste todo lo que hemos construido?</span>
+                            "Aún quedan muchas páginas en blanco...<br/>pero esas se escriben de a dos."
                         </p>
-                        <p className="font-dancing text-4xl text-amber-100 mt-8 mb-12 drop-shadow-[0_4px_4px_rgba(0,0,0,1)]">Te espero.</p>
+                        <p className="font-sans text-sm tracking-[0.2em] text-amber-100/60 uppercase mb-12">Sin prisa, pero con ganas.</p>
 
                         <a 
                             href="https://wa.me/56949481562?text=Escribamos%20el%20siguiente%20capítulo..."
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-full font-playfair tracking-normal text-lg transition-all shadow-lg hover:shadow-emerald-500/30 group mb-8"
+                            className="inline-flex items-center gap-4 px-10 py-5 bg-gradient-to-r from-emerald-800 to-emerald-600 hover:from-emerald-700 hover:to-emerald-500 text-white rounded-full font-playfair tracking-wide text-lg transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] group transform hover:-translate-y-1"
                         >
-                            <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            <MessageCircle className="w-6 h-6 group-hover:rotate-12 transition-transform" />
                             Escribir el siguiente capítulo...
                         </a>
 
                         {/* Easter Egg */}
-                        <p className="text-[10px] text-white/30 italic font-serif">
-                            PD: El silencio otorga... y ese corazón rojo lo dijo todo.
-                        </p>
+                        <div className="mt-16 opacity-30 hover:opacity-60 transition-opacity duration-1000">
+                             <Heart size={12} className="mx-auto mb-2 text-rose-500" />
+                             <p className="text-[10px] text-white italic font-serif tracking-widest">
+                                PD: El silencio otorga... y ese corazón rojo lo dijo todo.
+                            </p>
+                        </div>
+                       
                     </motion.div>
 
                 </motion.div>
@@ -448,23 +520,31 @@ const NuestraHistoria = () => {
                     className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm"
                     onClick={() => setSelectedImage(null)}
                 >
-                    <button className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
+                    <button className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors z-[110]">
                         <X size={32} />
                     </button>
                     <motion.div 
-                        initial={{ scale: 0.9 }}
-                        animate={{ scale: 1 }}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
                         className="relative max-w-5xl max-h-[90vh] flex flex-col items-center"
+                        onClick={(e) => e.stopPropagation()} // Prevent close on image click
                     >
                          <img 
                             src={selectedImage.src} 
-                            className="max-w-full max-h-[80vh] object-contain rounded-sm shadow-2xl"
+                            className="max-w-full max-h-[85vh] object-contain rounded-sm shadow-2xl"
                         />
                         {/* Display caption if it exists */}
                         {selectedImage.text && (
-                             <p className="mt-4 text-white font-dancing text-2xl drop-shadow-lg text-center px-4 bg-black/30 backdrop-blur-md py-2 rounded-full">
-                                {selectedImage.text}
-                             </p>
+                             <motion.div 
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                delay={0.2}
+                                className="mt-6 px-6 py-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10"
+                             >
+                                <p className="text-white font-dancing text-xl md:text-2xl drop-shadow-md text-center">
+                                    {selectedImage.text}
+                                </p>
+                             </motion.div>
                         )}
                     </motion.div>
                 </motion.div>
