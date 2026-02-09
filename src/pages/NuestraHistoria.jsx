@@ -1,114 +1,89 @@
 import React, { useState, useEffect, useRef } from 'react';
-
 import { motion, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { Heart, Stars } from 'lucide-react';
 
 const START_DATE = new Date('2023-12-10T13:00:00');
 
-// --- DATA: CARTAS/POLAROIDS ---
-const CARDS = [
+// --- DATA: MEMORIAS PRINCIPALES (Deck Interactivo) ---
+const MEMORIES = [
   {
     id: 1,
-    image: "/assets/romantic/FotoprofesionalBesito.jpeg", 
-    text: "Orar juntos por WhatsApp... mi momento favorito del día.",
-    date: "03.07.2023"
+    img: "/assets/romantic/FotoprofesionalBesito.jpeg", 
+    title: "Nuestro Amor",
+    date: "El Sello",
+    text: "No necesito nada más que este momento contigo. Tú y yo contra el mundo.",
+    rotation: -3
   },
   {
     id: 2,
-    image: "/assets/romantic/Primerasfotosjuntos.jpeg",
-    text: "Nuestra primera cita... McDonald's y una Coca-Cola bien helada (con hielo, obvio).",
-    date: "Primera Cita"
+    img: "/assets/romantic/Primerasfotosjuntos.jpeg",
+    title: "Donde todo empezó",
+    date: "El Inicio",
+    text: "Miro esta foto y pienso: 'Si supieran todo lo bonito que les espera a estos dos...'.",
+    rotation: 4
   },
   {
     id: 3,
-    image: "/assets/romantic/Foto1Noviembre.jpeg",
-    text: "Aquel 10 de Diciembre de 2023, 13:00 hrs... cuando todo cambió.",
-    date: "10.12.2023"
+    img: "/assets/romantic/Fotodespuesdevigilia.jpeg",
+    title: "Nuestra Fortaleza",
+    date: "Fe Inquebrantable",
+    text: "'Tú sana, que yo pongo la fe en marcha'. Trato hecho, mi amor. Dios está en medio.",
+    rotation: -5
   },
   {
     id: 4,
-    image: "/assets/romantic/Fotoqueamodeella.jpeg",
-    text: "El culto de las 12... donde pedí por ti.",
-    date: "Fe"
+    img: "/assets/romantic/FotosdeColoColo.jpeg",
+    title: "La Pasión",
+    date: "En el estadio",
+    text: "Compartir pasiones contigo hace que todo sea el doble de emocionante. ¡Aguante nosotros!",
+    rotation: 3
   },
   {
     id: 5,
-    image: "/assets/romantic/Fotolindos.jpeg",
-    text: "Tú sana, que yo pongo la fe en marcha. Trato hecho.",
-    date: "Promesa"
+    img: "/assets/romantic/Diadepicnic.jpeg",
+    title: "Paz",
+    date: "Tardes así...",
+    text: "La vida se siente más liviana cuando estoy a tu lado. Gracias por tanta paz.",
+    rotation: -2
   },
   {
     id: 6,
-    image: "/assets/romantic/Fotoenelcerro.jpeg",
-    text: "Cada aventura contigo es mi nueva favorita.",
-    date: "Aventuras"
-  },
-  {
-    id: 7,
-    image: "/assets/romantic/Fotoenelespejo.jpeg",
-    text: "Eres mi reflejo y mi mejor versión.",
-    date: "Nosotros"
-  },
-  {
-    id: 8,
-    image: "/assets/romantic/Fotodeellaenelestadio.jpeg",
-    text: "Tu sonrisa ilumina cualquier estadio.",
-    date: "Pasión"
-  },
-   {
-    id: 9,
-    image: "/assets/romantic/Diadepicnic.jpeg",
-    text: "Días simples, recuerdos eternos.",
-    date: "Picnic"
-  },
-   {
-    id: 10,
-    image: "/assets/romantic/FotoFormal.jpeg",
-    text: "Elegancia y amor, la combinación perfecta.",
-    date: "Gala"
-  },
-  {
-    id: 11,
-    image: "/assets/romantic/FotosdeColoColo.jpeg",
-    text: "Compartiendo pasiones.",
-    date: "Albo"
-  },
-  {
-    id: 12,
-    image: "/assets/romantic/Fotoregaloneando.jpeg",
-    text: "El mejor lugar del mundo: tus abrazos.",
-    date: "Paz"
-  },
-  {
-    id: 13,
-    image: "/assets/romantic/MiCumpleaños.jpeg",
-    text: "Celebrar la vida contigo es el mejor regalo.",
-    date: "Cumpleaños"
-  },
-  {
-    id: 14,
-    image: "/assets/romantic/FotosEnplayita.jpeg",
-    text: "Mar, arena y tú. No pido más.",
-    date: "Verano"
-  },
-  {
-    id: 15,
-    image: "/assets/romantic/Fotodestarwars.jpeg",
-    text: "Que la fuerza de nuestro amor nos acompañe siempre.",
-    date: "Galaxy"
+    img: "/assets/romantic/Fotoqueamodeella.jpeg",
+    title: "Simplemente Tú",
+    date: "Mi vista favorita",
+    text: "Podría mirarte mil horas y no me cansaría. Eres arte, Cami.",
+    rotation: 5
   }
 ];
 
-// --- COMPONENT: DRAGGABLE CARD ---
-const CardResult = ({ data, index, total, onRemove }) => {
+// --- DATA: GALERÍA INFINITA (Resto de las fotos) ---
+const GALLERY_PHOTOS = [
+    "/assets/romantic/Foto1Noviembre.jpeg",
+    "/assets/romantic/FotoBabyShowerdeamigos.jpeg",
+    "/assets/romantic/FotoBonitosParafondo.jpeg",
+    "/assets/romantic/FotoFormal.jpeg",
+    "/assets/romantic/FotoSELL.jpeg",
+    "/assets/romantic/Fotodeellaenelestadio.jpeg",
+    "/assets/romantic/Fotodestarwars.jpeg",
+    "/assets/romantic/Fotoenelcerro.jpeg",
+    "/assets/romantic/Fotoenelespejo.jpeg",
+    "/assets/romantic/Fotoenelestadio.jpeg",
+    "/assets/romantic/Fotolindos.jpeg",
+    "/assets/romantic/Fotoqueellasevepreciosa.jpeg",
+    "/assets/romantic/Fotoregaloneando.jpeg",
+    "/assets/romantic/FotosEnplayita.jpeg",
+    "/assets/romantic/MiCumpleaños.jpeg"
+];
+
+// --- COMPONENT: CARD/POLAROID ---
+const PolaroidCard = ({ data, index, total, onRemove }) => {
   const x = useMotionValue(0);
-  const rotate = useTransform(x, [-150, 150], [-10, 10]);
-  const opacity = useTransform(x, [-150, 0, 150], [0.5, 1, 0.5]);
-  
-  // Random slight rotation for the stack look
-  const randomRotate = useRef(Math.random() * 6 - 3); // -3 to 3 deg
+  const rotate = useTransform(x, [-200, 200], [-15, 15]);
+  const opacity = useTransform(x, [-200, -100, 0, 100, 200], [0, 1, 1, 1, 0]);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleDragEnd = (event, info) => {
+    setIsDragging(false);
     if (Math.abs(info.offset.x) > 100) {
       onRemove(data.id);
     }
@@ -118,27 +93,38 @@ const CardResult = ({ data, index, total, onRemove }) => {
     <motion.div
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
+      onDragStart={() => setIsDragging(true)}
+      onDragEnd={handleDragEnd}
       style={{ 
         x, 
         rotate: rotate, 
         opacity,
-        zIndex: total - index,
-        rotateZ: randomRotate.current 
+        zIndex: isDragging ? 100 : total - index, // Ensure visual priority when dragging
+        rotateZ: data.rotation
       }}
-      onDragEnd={handleDragEnd}
-      animate={{ scale: index === 0 ? 1 : 0.95 - index * 0.05, y: index * 10 }}
-      className="absolute top-0 left-0 w-full max-w-sm mx-auto cursor-grab active:cursor-grabbing"
+      animate={{ 
+          scale: index === 0 ? 1 : 0.95 - index * 0.05, 
+          y: index * 10,
+      }}
+      className="absolute top-0 w-full max-w-[320px] md:max-w-sm cursor-grab active:cursor-grabbing"
     >
-      <div className="bg-white p-3 pb-12 shadow-2xl shadow-black/50 transform transition-transform hover:scale-[1.02]">
-        <div className="aspect-[3/4] overflow-hidden bg-gray-100 mb-4 relative">
-            <div className="absolute inset-0 bg-slate-900/5 mix-blend-multiply"></div>
-            <img src={data.image} alt="Memory" className="w-full h-full object-cover pointer-events-none" />
+      {/* Polaroid Structure */}
+      <div className="bg-white p-4 pb-16 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] transform transition-transform duration-300 hover:scale-[1.02] relative">
+        {/* The Photo */}
+        <div className="aspect-[4/5] w-full overflow-hidden bg-gray-100 relative mb-4">
+            <div className="absolute inset-0 bg-amber-900/10 mix-blend-multiply z-10 pointer-events-none"></div> {/* Vintage Filter */}
+            <img src={data.img} alt={data.title} className="w-full h-full object-cover pointer-events-none select-none" />
         </div>
         
-        <div className="absolute bottom-4 left-0 right-0 text-center px-4">
-            <p className="font-dancing text-xl text-slate-600 mb-1">{data.text}</p>
-            <p className="font-sans text-[10px] text-slate-400 uppercase tracking-widest">{data.date}</p>
+        {/* The Text (Handwritten style in the white space) */}
+        <div className="absolute bottom-4 left-0 right-0 px-6 text-center">
+            <h3 className="font-dancing text-2xl text-slate-800 mb-1 font-bold">{data.title}</h3>
+            <p className="font-dancing text-lg text-slate-600 leading-tight">{data.text}</p>
+            <span className="block mt-2 text-[10px] font-sans text-slate-400 uppercase tracking-widest">{data.date}</span>
         </div>
+
+        {/* Tape Effect */}
+        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-24 h-8 bg-white/30 backdrop-blur-sm border-l border-r border-white/50 rotate-1 shadow-sm"></div>
       </div>
     </motion.div>
   );
@@ -150,10 +136,10 @@ const NuestraHistoria = () => {
   const [started, setStarted] = useState(false);
   const [noBtnText, setNoBtnText] = useState("Mejor lo borro");
   const [noBtnPos, setNoBtnPos] = useState({ x: 0, y: 0 });
-  const [cards, setCards] = useState(CARDS);
+  const [cards, setCards] = useState(MEMORIES);
   const [elapsed, setElapsed] = useState({});
 
-  // Privacy: No Index
+  // Privacy
   useEffect(() => {
     const meta = document.createElement('meta');
     meta.name = "robots";
@@ -169,12 +155,12 @@ const NuestraHistoria = () => {
       const now = new Date();
       const diff = now - START_DATE;
       setElapsed({
-        years: Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25)),
-        months: Math.floor((diff % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44)),
-        days: Math.floor((diff % (1000 * 60 * 60 * 24 * 30.44)) / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+        yrs: Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25)),
+        mos: Math.floor((diff % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44)),
+        dias: Math.floor((diff % (1000 * 60 * 60 * 24 * 30.44)) / (1000 * 60 * 60 * 24)),
+        hrs: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        min: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seg: Math.floor((diff % (1000 * 60)) / 1000),
       });
     }, 1000);
     return () => clearInterval(interval);
@@ -182,129 +168,211 @@ const NuestraHistoria = () => {
 
   // "No" Button Logic
   const moveNoButton = () => {
-    const x = Math.random() * (window.innerWidth - 200);
-    const y = Math.random() * (window.innerHeight - 100);
+    const x = Math.random() * (Math.min(window.innerWidth - 200, 300)) * (Math.random() > 0.5 ? 1 : -1);
+    const y = Math.random() * (Math.min(window.innerHeight - 100, 300)) * (Math.random() > 0.5 ? 1 : -1);
     setNoBtnPos({ x, y });
     
-    const phrases = ["¡Muy lenta!", "¡Ups, se escapó!", "Inténtalo de nuevo", "El destino dice que no", "¡Tramposa!"];
+    const phrases = ["¡Tramposa!", "¡Muy lenta!", "No te rindas", "El destino dice SÍ", "Ups..."];
     setNoBtnText(phrases[Math.floor(Math.random() * phrases.length)]);
   };
 
   const handleYes = () => {
+    // Canvas Confetti
+    if (window.confetti) {
+        window.confetti({
+            particleCount: 150,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#FF69B4', '#FFB6C1', '#FFC0CB']
+        });
+    }
     setStarted(true);
   };
-
-
 
   const removeCard = (id) => {
       setCards(prev => {
           const newCards = prev.filter(c => c.id !== id);
           if (newCards.length === 0) {
-              setTimeout(() => setCards(CARDS), 1000); // Reset stack if empty
+              setTimeout(() => setCards(MEMORIES), 1500); // Reload deck
           }
           return newCards;
       });
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white font-sans overflow-hidden relative selection:bg-rose-500/30">
+    <div className="min-h-screen bg-slate-950 text-white font-sans overflow-x-hidden relative selection:bg-rose-500/30">
 
-        {/* --- BACKGROUND PARTICLES --- */}
-        <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-950 to-slate-950"></div>
-            {[...Array(20)].map((_, i) => (
+        {/* --- BACKGROUND --- */}
+        <div className="fixed inset-0 pointer-events-none z-0">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950 via-slate-950 to-black"></div>
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+            {/* Soft Particles */}
+            {[...Array(15)].map((_, i) => (
                 <motion.div
                     key={i}
-                    className="absolute bg-white rounded-full opacity-20"
-                    initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, scale: Math.random() * 0.5 }}
-                    animate={{ y: [null, Math.random() * -100] }}
-                    transition={{ duration: Math.random() * 10 + 10, repeat: Infinity, ease: "linear" }}
+                    className="absolute bg-white rounded-full blur-[1px] opacity-30"
+                    initial={{ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight }}
+                    animate={{ y: [null, Math.random() * -50] }}
+                    transition={{ duration: Math.random() * 5 + 5, repeat: Infinity, ease: "easeInOut", yoyo: Infinity }}
                     style={{ width: Math.random() * 3 + 1, height: Math.random() * 3 + 1 }}
                 />
             ))}
         </div>
 
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
             {!started ? (
                 // --- INTRO PHASE ---
                 <motion.div 
+                    key="intro"
                     initial={{ opacity: 0 }} 
                     animate={{ opacity: 1 }} 
-                    exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-                    transition={{ duration: 1 }}
+                    exit={{ opacity: 0, scale: 1.1, filter: "blur(20px)" }}
+                    transition={{ duration: 0.8 }}
                     className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 text-center"
                 >
-                    <h1 className="font-playfair text-4xl md:text-6xl mb-8 leading-tight tracking-tight drop-shadow-lg">
-                        Cami... <br/>
-                        <span className="text-2xl md:text-3xl font-light text-slate-400 block mt-4 font-sans">
-                            Hay cosas que no se borran,<br/> solo se guardan esperando su momento.
-                        </span>
-                    </h1>
+                    <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <Stars className="w-12 h-12 text-amber-200 mx-auto mb-6 opacity-80" />
+                        <h1 className="font-playfair text-4xl md:text-7xl mb-8 leading-tight tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400">
+                            Cami... <br/>
+                            <span className="text-2xl md:text-3xl font-light text-slate-400 block mt-6 font-dancing">
+                                ¿Seguimos escribiendo esta historia?
+                            </span>
+                        </h1>
+                    </motion.div>
 
-                    <div className="flex gap-8 items-center mt-12 relative h-20 w-full justify-center">
-                         <button 
+                    <div className="flex flex-col md:flex-row gap-6 items-center mt-12 w-full justify-center relative min-h-[100px]">
+                         <motion.button 
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={handleYes}
-                            className="px-10 py-3 border border-amber-200/50 text-amber-100 font-playfair tracking-widest text-lg hover:bg-amber-500/10 hover:border-amber-400 transition-all duration-500 shadow-[0_0_15px_rgba(251,191,36,0.1)] hover:shadow-[0_0_25px_rgba(251,191,36,0.3)]">
-                            SÍ
-                        </button>
+                            className="px-12 py-4 bg-gradient-to-r from-rose-500 to-amber-600 rounded-full text-white font-playfair tracking-widest text-xl shadow-[0_0_30px_rgba(244,63,94,0.4)] hover:shadow-[0_0_50px_rgba(244,63,94,0.6)] transition-all z-10"
+                        >
+                            SÍ, PARA SIEMPRE
+                        </motion.button>
 
-                        <button
+                        <motion.button
                             onMouseEnter={moveNoButton}
                             onTouchStart={moveNoButton}
-                            style={{ 
-                                position: noBtnPos.x ? 'absolute' : 'relative', 
-                                left: noBtnPos.x, 
-                                top: noBtnPos.y 
-                            }}
-                            className="px-6 py-3 text-slate-600 font-sans text-sm tracking-widest hover:text-slate-400 transition-colors duration-300"
+                            animate={{ x: noBtnPos.x, y: noBtnPos.y }}
+                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                            className="px-8 py-4 text-slate-500 font-sans text-sm tracking-widest hover:text-slate-300 transition-colors cursor-pointer border border-slate-800 rounded-full hover:border-slate-600"
                         >
                             {noBtnText}
-                        </button>
+                        </motion.button>
                     </div>
                 </motion.div>
             ) : (
                 // --- MAIN PHASE ---
                 <motion.div 
+                    key="main"
                     initial={{ opacity: 0 }} 
                     animate={{ opacity: 1 }} 
                     transition={{ delay: 0.5, duration: 1.5 }}
-                    className="relative z-10 min-h-screen flex flex-col items-center py-12 px-4"
+                    className="relative z-10 min-h-screen flex flex-col items-center py-16 px-4 md:px-8 w-full max-w-7xl mx-auto"
                 >
                     {/* Header / Counter */}
-                    <div className="text-center mb-12">
-                        <p className="font-dancing text-2xl text-slate-400 mb-6">El tiempo pasa, pero lo nuestro sigue contando...</p>
+                    <header className="text-center mb-16 w-full">
+                        <motion.div 
+                            initial={{ y: -20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ duration: 1 }}
+                            className="mb-8"
+                        >
+                            <Heart className="w-8 h-8 text-rose-500 mx-auto mb-4 animate-pulse" fill="#f43f5e" />
+                            <h2 className="font-playfair text-3xl md:text-5xl text-white mb-2">Nuestra Historia</h2>
+                            <p className="font-dancing text-xl md:text-2xl text-slate-400">Cada segundo cuenta...</p>
+                        </motion.div>
                         
-                        <div className="grid grid-cols-3 md:grid-cols-6 gap-4 md:gap-8 font-mono text-slate-200">
-                             {['years', 'months', 'days', 'hours', 'minutes', 'seconds'].map((unit, i) => (
-                                <div key={unit} className="flex flex-col items-center">
-                                    <span className="text-3xl md:text-4xl font-light">{elapsed[unit] || 0}</span>
-                                    <span className="text-[10px] uppercase tracking-widest text-slate-600 mt-1">{unit}</span>
-                                </div>
-                             ))}
+                        <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 md:p-8 inline-block border border-white/10 shadow-2xl">
+                             <div className="grid grid-cols-3 md:grid-cols-6 gap-6 md:gap-10 font-mono text-amber-100">
+                                 {[
+                                     { l: 'Años', v: elapsed.yrs },
+                                     { l: 'Meses', v: elapsed.mos },
+                                     { l: 'Días', v: elapsed.dias },
+                                     { l: 'Horas', v: elapsed.hrs },
+                                     { l: 'Min', v: elapsed.min },
+                                     { l: 'Seg', v: elapsed.seg }
+                                 ].map((item, i) => (
+                                    <div key={item.l} className="flex flex-col items-center relative">
+                                        <span className="text-2xl md:text-4xl font-light tabular-nums">{item.v || 0}</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-slate-500 mt-2">{item.l}</span>
+                                        {i !== 5 && <div className="hidden md:block absolute -right-6 top-2 text-slate-700">:</div>}
+                                    </div>
+                                 ))}
+                            </div>
                         </div>
-                    </div>
+                    </header>
 
-                    {/* Draggable Deck */}
-                    <div className="relative w-full max-w-sm h-[500px] flex items-center justify-center perspective-1000">
-                         {cards.map((card, index) => (
-                             <CardResult 
-                                key={card.id} 
-                                data={card} 
-                                index={index} 
-                                total={cards.length} 
-                                onRemove={removeCard} 
-                             />
-                         ))}
-                         {cards.length === 0 && (
-                             <div className="text-slate-500 font-dancing text-xl">Reiniciando recuerdos...</div>
-                         )}
-                    </div>
+                    {/* INTERACTIVE DECK */}
+                    <section className="relative w-full flex flex-col items-center justify-center min-h-[600px] mb-20">
+                         <div className="relative w-full max-w-[320px] md:max-w-sm h-[500px] flex items-center justify-center perspective-1000">
+                             {cards.map((card, index) => (
+                                 <PolaroidCard 
+                                    key={card.id} 
+                                    data={card} 
+                                    index={index} 
+                                    total={cards.length} 
+                                    onRemove={removeCard} 
+                                 />
+                             ))}
+                             
+                             {cards.length === 0 && (
+                                 <motion.div 
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="text-center"
+                                 >
+                                    <p className="text-slate-400 font-dancing text-2xl mb-4">¡Tantas historias por contar!</p>
+                                    <button 
+                                        onClick={() => setCards(MEMORIES)}
+                                        className="px-6 py-2 bg-white/10 hover:bg-white/20 rounded-full text-sm transition-colors text-white border border-white/20"
+                                    >
+                                        Ver de nuevo
+                                    </button>
+                                 </motion.div>
+                             )}
+                        </div>
+                        <p className="mt-8 text-slate-500 text-sm flex items-center gap-2 animate-bounce">
+                           ← Desliza las fotos →
+                        </p>
+                    </section>
 
-                    <div className="mt-12 text-center max-w-md">
-                        <p className="text-slate-500 text-sm italic">Desliza las fotos hacia los lados...</p>
-                    </div>
+                    {/* INFINITE GALLERY (Masonry) */}
+                    <section className="w-full pt-12 border-t border-slate-800/50">
+                        <div className="text-center mb-12">
+                            <h3 className="font-playfair text-3xl text-white mb-2">Nuestra Galería Infinita</h3>
+                            <p className="text-slate-400 font-dancing text-lg">Pequeños instantes, grandes recuerdos</p>
+                        </div>
+                        
+                        <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4 px-2">
+                            {GALLERY_PHOTOS.map((src, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true, margin: "-50px" }}
+                                    transition={{ delay: i % 3 * 0.1, duration: 0.8 }}
+                                    className="break-inside-avoid relative group rounded-lg overflow-hidden"
+                                >
+                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                                    <img 
+                                        src={src} 
+                                        alt="Recuerdo" 
+                                        className="w-full h-auto object-cover transform group-hover:scale-110 transition-transform duration-700 ease-in-out"
+                                        loading="lazy"
+                                    />
+                                </motion.div>
+                            ))}
+                        </div>
+                    </section>
 
-
+                    <footer className="mt-24 text-center text-slate-600 text-xs">
+                        <p>Creado con amor para Cami ❤️</p>
+                    </footer>
 
                 </motion.div>
             )}
