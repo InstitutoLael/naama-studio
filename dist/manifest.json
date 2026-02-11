@@ -1,0 +1,24 @@
+{
+  "name": "Naamá Studio",
+  "short_name": "Naamá",
+  "description": "Gracia, Pulcritud y Descanso. La cuna de la ingeniería estética y hospitalaria en Santiago.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F1EA",
+  "theme_color": "#B08D79",
+  "orientation": "portrait",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/assets/naama-studio.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/naama-studio.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["beauty", "lifestyle", "health"]
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, MapPin, Package, CheckCircle } from 'lucide-react';
+import { Mail, MapPin } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import { b2bPacks } from '../data/b2bPacks';
 import '../styles/Global.css';
@@ -15,7 +15,7 @@ const EmpresasPage = () => {
 
       <header className="empresas_hero reveal">
         <span className="empresas_label">Atención Corporativa</span>
-        <h1 className="empresas_title serif">Ingeniería del Cuidado para su <span style={{ color: 'var(--accent-clay)' }}>Equipo</span></h1>
+        <h1 className="empresas_title serif">Ingeniería del Cuidado para su <span className="b2b_accent_text">Equipo</span></h1>
         <p className="world_description">
           Llevamos la excelencia de Naamá Studio al entorno profesional, diseñando jornadas de restauración técnica y descanso hospitalario a medida de su corporación.
         </p>
@@ -41,9 +41,9 @@ const EmpresasPage = () => {
         </div>
       </main>
 
-      <section className="container section-padding reveal">
+      <section className="container section-padding reveal b2b_section_header">
         <span className="essence_label">Combinaciones de Valor</span>
-        <h2 className="serif" style={{ fontSize: '3.5rem', marginBottom: '60px' }}>Packs de Ingeniería <span style={{ color: 'var(--accent-clay)' }}>B2B</span></h2>
+        <h2 className="serif b2b_heading_large">Packs de Ingeniería <span className="b2b_accent_text">B2B</span></h2>
         
         <div className="b2b_packs_grid">
           {b2bPacks.map((pack) => (
@@ -61,9 +61,9 @@ const EmpresasPage = () => {
                  </div>
                  <button 
                   id={`btn_pack_${pack.id}`}
-                  className="nav_cta_boutique" 
-                  style={{ padding: '15px 30px', fontSize: '0.6rem' }} 
+                  className="nav_cta_boutique b2b_pack_btn"
                   onClick={() => window.location.href = `mailto:naamastudiospa@gmail.com?subject=Interés en Pack B2B: ${pack.name}`}
+                  aria-label={`Solicitar información sobre el Pack ${pack.name}`}
                  >
                    Solicitar Pack
                  </button>
@@ -73,32 +73,24 @@ const EmpresasPage = () => {
         </div>
       </section>
 
-      <section className="container reveal" style={{ marginBottom: '150px' }}>
+      <section className="container reveal b2b_cta_container">
         <div className="b2b_cta_section">
           <h2 className="cta_heading serif">Consulte nuestra propuesta B2B</h2>
           <p className="cta_sub">Diseñamos sesiones personalizadas según los objetivos de bienestar de su empresa.</p>
           
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '40px', marginBottom: '40px', color: 'rgba(43,43,43,0.4)', fontSize: '0.8rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="b2b_contact_info">
+            <div className="b2b_contact_row">
               <MapPin size={14} /> <span>San Miguel, Santiago</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="b2b_contact_row">
               <Mail size={14} /> <span>naamastudiospa@gmail.com</span>
             </div>
           </div>
 
           <button 
-            className="nav_cta_boutique" 
-            style={{ 
-              padding: '22px 50px', 
-              border: 'none', 
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-              letterSpacing: '0.3em',
-              fontSize: '0.7rem',
-              fontWeight: '800'
-            }}
+            className="nav_cta_boutique b2b_cta_main"
             onClick={() => window.location.href = 'mailto:naamastudiospa@gmail.com'}
+            aria-label="Solicitar información general para empresas"
           >
             Solicitar Información
           </button>

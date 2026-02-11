@@ -5,7 +5,7 @@ import { fuzzyMatch } from '../utils/searchUtils';
 import { mundos } from '../data/categories';
 import ServiceCard from '../components/UI/ServiceCard';
 import SEOHead from '../components/SEOHead';
-import { ArrowLeft, Search, Filter } from 'lucide-react';
+import { ArrowLeft, Search } from 'lucide-react';
 import '../styles/Global.css';
 import '../styles/WorldPage.css';
 
@@ -47,12 +47,12 @@ const WorldPage = () => {
 
   if (!mundo) {
     return (
-      <div className="world_page container">
+      <div className="world_page container world_not_found_container">
         <SEOHead title="Error 404" description="Mundo no encontrado." />
-        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '100px' }}>
+        <Link to="/" className="world_back_link" aria-label="Volver al inicio">
           <ArrowLeft size={16} /> Volver al Inicio
         </Link>
-        <h2 className="serif" style={{ marginTop: '40px' }}>Mundo no encontrado</h2>
+        <h2 className="serif world_not_found_title">Mundo no encontrado</h2>
       </div>
     );
   }
@@ -75,16 +75,20 @@ const WorldPage = () => {
               className="staff_input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Buscar servicios en este mundo"
             />
           </div>
           
           <div className="category_tabs_wrapper">
-            <div className="tabs_rail">
+            <div className="tabs_rail" role="tablist" aria-label="Categorías de servicios">
               {categories.map(cat => (
                 <button 
                   key={cat} 
                   className={`tab_btn ${activeTab === cat ? 'active' : ''}`}
                   onClick={() => setActiveTab(cat)}
+                  role="tab"
+                  aria-selected={activeTab === cat}
+                  aria-controls={`panel-${cat}`}
                 >
                   {cat}
                 </button>
@@ -97,7 +101,7 @@ const WorldPage = () => {
       <main className="services_grid_adaptive">
         {/* Desktop/Tablet View: Search + Tabs + Grid */}
         <div className="desktop_catalog_view">
-          <div className="services_grid">
+          <div className="services_grid" role="tabpanel" id={`panel-${activeTab}`}>
             {filteredServices.length > 0 ? (
               filteredServices.map((service, index) => (
                 <div key={`${service.name}-${index}`} className="service_card_wrapper">
@@ -135,10 +139,10 @@ const WorldPage = () => {
         </div>
       </main>
 
-      <section className="container section-padding reveal" style={{ textAlign: 'center' }}>
-         <p className="text-uppercase" style={{ marginBottom: '20px', opacity: 0.4 }}>Próxima Sesión</p>
-         <h2 className="serif" style={{ fontSize: '2rem' }}>Recupera tu tiempo de descanso.</h2>
-         <Link to="/" className="nav_item" style={{ marginTop: '30px', display: 'inline-block', opacity: 1, borderBottom: '1px solid var(--sand-beige)' }}>
+      <section className="container section-padding reveal world_session_section">
+         <p className="text-uppercase world_session_text">Próxima Sesión</p>
+         <h2 className="serif world_session_title">Recupera tu tiempo de descanso.</h2>
+         <Link to="/" className="nav_item world_gallery_link">
             Volver a la Galería
          </Link>
       </section>

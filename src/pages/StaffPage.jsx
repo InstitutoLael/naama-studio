@@ -50,10 +50,19 @@ const StaffPage = () => {
                 searchSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
               }
             }}
+            role="button"
+            tabIndex={0}
+            aria-label={`Ver servicios de ${pro.name}`}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                setSearchTerm(pro.name);
+                document.querySelector('.staff_search_section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
           >
             <h3 className="specialist_name serif">{pro.name}</h3>
             <p className="specialist_role">{pro.specialty}</p>
-            <button className="specialist_view_btn">Ver sus servicios</button>
+            <button className="specialist_view_btn" tabIndex={-1}>Ver sus servicios</button>
           </div>
         ))}
       </main>
@@ -62,11 +71,11 @@ const StaffPage = () => {
         <div className="section_header_boutique">
            <div className="header_left">
              <span className="world_item_tag">Transparencia Técnica</span>
-             <h2 className="serif" style={{ fontSize: '2.5rem' }}>Consulta de Valores</h2>
+             <h2 className="serif staff_search_heading">Consulta de Valores</h2>
            </div>
         </div>
 
-        <div className="discovery_bar" style={{ margin: '40px 60px 80px' }}>
+        <div className="discovery_bar staff_search_bar_container">
           <div className="search_wrapper">
             <Search size={22} strokeWidth={1} className="search_icon" />
             <input 
@@ -75,7 +84,7 @@ const StaffPage = () => {
               className="staff_input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{ fontSize: '1.2rem' }}
+              aria-label="Buscar servicios o especialistas"
             />
           </div>
         </div>
@@ -97,9 +106,9 @@ const StaffPage = () => {
         </div>
       </section>
 
-      <section className="container section-padding reveal" style={{ textAlign: 'center', marginTop: '100px' }}>
-         <h2 className="serif" style={{ fontSize: '1.8rem' }}>La maestría no necesita filtros.</h2>
-         <p style={{ opacity: 0.5, marginTop: '20px' }}>Solo técnica, silencio y hospitalidad.</p>
+      <section className="container section-padding reveal text-center staff_footer_section">
+         <h2 className="serif staff_footer_heading">La maestría no necesita filtros.</h2>
+         <p className="staff_footer_text">Solo técnica, silencio y hospitalidad.</p>
       </section>
     </div>
   );

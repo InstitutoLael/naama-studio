@@ -23,13 +23,21 @@
   max-width: 700px;
 }
 
+[data-theme="dark"] .staff_subtitle {
+  color: rgba(232, 228, 220, 0.6);
+}
+
 .specialist_gallery {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 1.5px;
-  background: rgba(43, 43, 43, 0.08);
+  background: rgba(43, 43, 43, 0.08); /* Grid lines color */
   border-top: var(--border-fine);
   border-bottom: var(--border-fine);
+}
+
+[data-theme="dark"] .specialist_gallery {
+  background: rgba(232, 228, 220, 0.08);
 }
 
 .specialist_item {
@@ -43,6 +51,12 @@
 .specialist_item:hover {
   background: #fff;
   box-shadow: inset 0 0 0 1px var(--accent-clay);
+  z-index: 10;
+  position: relative;
+}
+
+[data-theme="dark"] .specialist_item:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .specialist_name {
@@ -68,6 +82,11 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   transition: var(--transition-fast);
+  color: var(--text-slate);
+}
+
+[data-theme="dark"] .specialist_view_btn {
+  border-color: rgba(232, 228, 220, 0.1);
 }
 
 .specialist_item:hover .specialist_view_btn {
@@ -76,48 +95,13 @@
   border-color: var(--text-slate);
 }
 
-.staff_link_hint {
-  font-size: 0.55rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--accent-clay);
-  opacity: 0;
-  transform: translateY(10px);
-  transition: var(--transition-luxe);
-}
-
-.staff_card_editorial:hover .staff_link_hint {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Hover Effect: Color Inversion */
-.staff_card_editorial:hover {
-  background-color: var(--text-slate);
-}
-
-.staff_card_editorial:hover .staff_placeholder_initial {
-  color: var(--bg-linen);
-  transform: scale(1.1);
-}
-
-.staff_card_editorial:hover .staff_full_name {
-  color: var(--bg-linen);
-}
-
-.staff_card_editorial:hover .staff_specialty {
-  color: rgba(244, 241, 234, 0.5);
-}
-
 .staff_search_section {
   margin-top: 150px;
   padding-bottom: 100px;
 }
 
-.staff_search_section .section_header_boutique {
-  padding: 0 60px;
-  margin-bottom: 20px;
+.staff_search_heading {
+  font-size: 2.5rem;
 }
 
 /* Discovery & Search Shared System */
@@ -125,6 +109,10 @@
   display: flex;
   flex-direction: column;
   gap: 40px;
+}
+
+.staff_search_bar_container {
+  margin: 40px 60px 80px;
 }
 
 .search_wrapper {
@@ -144,6 +132,10 @@
   color: rgba(43, 43, 43, 0.2);
 }
 
+[data-theme="dark"] .search_icon {
+  color: rgba(232, 228, 220, 0.2);
+}
+
 .staff_input {
   background: transparent;
   border: none;
@@ -151,14 +143,19 @@
   font-family: var(--font-serif);
   color: var(--text-slate);
   outline: none;
+  font-size: 1.2rem;
 }
 
 .staff_input::placeholder {
-  color: rgba(43, 43, 43, 0.4); /* Increased from 0.15 for better contrast */
+  color: rgba(43, 43, 43, 0.4);
   font-style: italic;
 }
 
-/* Reusing grid architecture from WorldPage for consistency */
+[data-theme="dark"] .staff_input::placeholder {
+  color: rgba(232, 228, 220, 0.4);
+}
+
+/* Reusing grid architecture */
 .services_grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -166,6 +163,10 @@
   background-color: rgba(43, 43, 43, 0.08);
   border-top: var(--border-fine);
   border-bottom: var(--border-fine);
+}
+
+[data-theme="dark"] .services_grid {
+  background-color: rgba(232, 228, 220, 0.08);
 }
 
 .service_card_wrapper {
@@ -179,6 +180,19 @@
   opacity: 0.3;
 }
 
+.staff_footer_section {
+  margin-top: 100px;
+}
+
+.staff_footer_heading {
+  font-size: 1.8rem;
+}
+
+.staff_footer_text {
+  opacity: 0.5;
+  margin-top: 20px;
+}
+
 @media (max-width: 1200px) {
   .services_grid { grid-template-columns: repeat(2, 1fr); }
   .specialist_gallery { grid-template-columns: repeat(3, 1fr); }
@@ -190,7 +204,6 @@
   .specialist_gallery { grid-template-columns: 1fr; }
   .specialist_item { padding: 60px 30px; }
   
-  .staff_search_section .section_header_boutique { padding: 0 30px; }
-  .staff_search_section .discovery_bar { margin: 40px 30px 60px !important; }
+  .staff_search_bar_container { margin: 40px 30px 60px !important; }
   .services_grid { grid-template-columns: 1fr; }
 }

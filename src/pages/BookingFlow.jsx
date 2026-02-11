@@ -40,7 +40,7 @@ const BookingFlow = () => {
         
         {step === 1 && (
           <div className="booking_step_content">
-            <span className="booking_label">Preparamos tu llegada</span>
+            <span className="booking_label">Paso 01 · El Origen</span>
             <h2 className="booking_question serif">"Cuéntanos cómo te sientes hoy para que podamos servirte mejor."</h2>
             
             <div className="options_grid">
@@ -49,6 +49,7 @@ const BookingFlow = () => {
                   key={n.id} 
                   className={`option_btn ${formData.need === n.id ? 'selected' : ''}`}
                   onClick={() => setFormData({ ...formData, need: n.id })}
+                  aria-pressed={formData.need === n.id}
                 >
                   <span className="option_title">{n.title}</span>
                   <span className="option_desc">{n.desc}</span>
@@ -65,7 +66,7 @@ const BookingFlow = () => {
         {step === 2 && (
           <div className="booking_step_content">
             <span className="booking_label">Paso 02 · El Momento</span>
-            <h2 className="booking_question serif">¿Cuándo deseas tu <br /> <span style={{ color: 'var(--accent-clay)' }}>sesión</span>?</h2>
+            <h2 className="booking_question serif">¿Cuándo deseas tu <br /> <span className="booking_highlight">sesión</span>?</h2>
             
             <div className="booking_input_area">
               <input 
@@ -73,6 +74,7 @@ const BookingFlow = () => {
                 className="booking_input" 
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                aria-label="Fecha deseada para la sesión"
               />
             </div>
             
@@ -86,15 +88,15 @@ const BookingFlow = () => {
         {step === 3 && (
           <div className="booking_step_content">
             <span className="booking_label">Paso 03 · Nota Técnica</span>
-            <h2 className="booking_question serif">¿Alguna nota para <br /> tu <span style={{ color: 'var(--accent-clay)' }}>especialista</span>?</h2>
+            <h2 className="booking_question serif">¿Alguna nota para <br /> tu <span className="booking_highlight">especialista</span>?</h2>
             
             <div className="booking_input_area">
               <textarea 
-                className="booking_input" 
-                style={{ height: '150px', resize: 'none' }}
+                className="booking_input booking_textarea" 
                 placeholder="Ej: Tengo poco tiempo / Quiero silencio total / Alergias..."
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                aria-label="Notas adicionales para el especialista"
               />
             </div>
             
@@ -106,28 +108,28 @@ const BookingFlow = () => {
         )}
 
         {step === 4 && (
-          <div className="booking_step_content" style={{ textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', padding: '20px', background: 'var(--bg-linen)', borderRadius: '100px', marginBottom: '40px', color: 'var(--accent-clay)' }}>
+          <div className="booking_step_content booking_completion_wrapper">
+            <div className="booking_icon_box">
               <Check size={40} strokeWidth={1} />
             </div>
-            <h2 className="serif" style={{ fontSize: '3rem', marginBottom: '20px' }}>Consulta <span style={{ color: 'var(--accent-clay)' }}>Completada</span></h2>
-            <p style={{ color: 'rgba(43,43,43,0.5)', marginBottom: '50px', fontSize: '1.2rem' }}>
+            <h2 className="serif booking_completion_title">Consulta <span className="booking_highlight">Completada</span></h2>
+            <p className="booking_completion_sub">
               "Tu espacio está siendo diseñado. Para garantizar la excelencia técnica, envía tu consulta a nuestro equipo ahora."
             </p>
             
-            <div className="booking_actions_vertical" style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'center' }}>
-               <button className="next_btn" style={{ padding: '25px 60px', width: '100%' }} onClick={sendWhatsApp}>
+            <div className="booking_actions_vertical">
+               <button className="next_btn booking_whatsapp_btn" onClick={sendWhatsApp}>
                  Enviar a WhatsApp Oficial
                </button>
                
-               <a href="https://naamastudio.setmore.com/" target="_blank" rel="noopener noreferrer" style={{ width: '100%' }}>
-                  <button className="back_btn" style={{ padding: '20px 60px', width: '100%', border: 'var(--border-fine)' }}>
+               <a href="https://naamastudio.setmore.com/" target="_blank" rel="noopener noreferrer" className="booking_setmore_container">
+                  <button className="back_btn booking_setmore_btn">
                     Ver Disponibilidad en Setmore
                   </button>
                </a>
             </div>
             
-            <p style={{ marginTop: '40px', fontSize: '0.8rem', color: 'rgba(43,43,43,0.3)' }}>
+            <p className="booking_completion_footer">
                Gracias por confiar en nuestra ingeniería del cuidado.
             </p>
           </div>

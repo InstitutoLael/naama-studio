@@ -54,6 +54,18 @@
   color: var(--text-slate);
 }
 
+.hero_subtitle {
+  font-size: 1.2rem;
+  max-width: 600px;
+  margin: 0 auto 40px;
+  color: rgba(43,43,43,0.7);
+  line-height: 1.4;
+}
+
+[data-theme="dark"] .hero_subtitle {
+  color: rgba(232, 228, 220, 0.7);
+}
+
 /* Essence: Meaningful Whitespace */
 .home_essence {
   padding: 180px 40px;
@@ -75,6 +87,11 @@
   display: block;
 }
 
+.essence_title {
+  font-size: 3rem;
+  margin-bottom: 40px;
+}
+
 .essence_text {
   font-size: clamp(1.5rem, 3vw, 2.8rem);
   line-height: 1.4;
@@ -82,10 +99,46 @@
   color: rgba(43, 43, 43, 0.85);
 }
 
+[data-theme="dark"] .essence_text {
+  color: rgba(232, 228, 220, 0.85);
+}
+
+.essence_text_secondary {
+  font-size: 1.5rem;
+  margin-top: -30px;
+  opacity: 0.9;
+}
+
+.essence_divider {
+  height: 1px;
+  background: var(--accent-clay);
+  width: 60px;
+  margin: 0 auto;
+}
+
+.text_clay { color: var(--accent-clay); }
+.text_sand { color: var(--accent-sand); }
+
 /* Mundos: Technical Gallery Grid */
 .home_worlds_section {
   padding: 180px 0;
   background: var(--bg-linen);
+}
+
+.worlds_heading {
+  font-size: 3.5rem;
+}
+
+.worlds_subtext {
+  max-width: 400px;
+  font-size: 0.9rem;
+  color: rgba(43,43,43,0.5);
+  text-align: right;
+  line-height: 1.6;
+}
+
+[data-theme="dark"] .worlds_subtext {
+  color: rgba(232, 228, 220, 0.5);
 }
 
 .worlds_gallery_grid {
@@ -103,6 +156,10 @@
   border: var(--border-fine);
 }
 
+[data-theme="dark"] .world_gallery_item {
+  background: rgba(232, 228, 220, 0.03);
+}
+
 .world_gallery_img_box {
   width: 100%;
   height: 100%;
@@ -113,8 +170,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 1.5s var(--transition-luxe);
-  filter: grayscale(100%) contrast(1.1);
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .world_gallery_item:hover .world_gallery_img {
@@ -179,8 +235,24 @@
   margin: 0 auto;
 }
 
+.teaser_tag {
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 30px;
+}
+
+.teaser_heading {
+  font-size: 3.5rem;
+  margin-bottom: 30px;
+}
+
+.teaser_text {
+  color: rgba(255,255,255,0.5);
+  max-width: 600px;
+  margin: 0 auto 40px;
+}
+
 .teaser_btn_gold {
-  background: var(--accent-sand); /* Changed from linen to accent-sand for 'Gold' feel */
+  background: var(--accent-sand);
   color: var(--text-slate);
   padding: 22px 50px;
   border: none;
@@ -200,13 +272,72 @@
   box-shadow: 0 15px 40px rgba(0,0,0,0.3);
 }
 
-/* Instagram Section: Pure Luxe */
+/* Gift Cards Home Section */
+.home_giftcard {
+  padding: 180px 0;
+  border-top: var(--border-fine);
+  border-bottom: var(--border-fine);
+}
+
+.giftcard_content {
+  max-width: 700px;
+}
+
+.giftcard_text_side {
+  text-align: center;
+}
+
+.giftcard_heading {
+  font-size: 3rem;
+  margin-bottom: 25px;
+}
+
+.giftcard_desc {
+  color: rgba(43,43,43,0.6);
+  max-width: 500px;
+  margin: 0 auto 40px;
+  line-height: 1.8;
+}
+
+[data-theme="dark"] .giftcard_desc {
+  color: rgba(232, 228, 220, 0.6);
+}
+
+.giftcard_cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--text-slate);
+  color: var(--bg-linen);
+  padding: 18px 45px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  transition: var(--transition-fast);
+}
+
+.giftcard_cta:hover {
+  background: var(--accent-clay);
+  transform: translateY(-3px);
+}
+
+/* Instagram Section */
 .home_instagram {
   padding: 180px 0;
   background: #fff;
   text-align: center;
   border-top: var(--border-fine);
   border-bottom: var(--border-fine);
+}
+
+[data-theme="dark"] .home_instagram {
+  background: rgba(232, 228, 220, 0.03);
+}
+
+.instagram_heading {
+  font-size: 3rem;
+  margin-bottom: 50px;
 }
 
 .instagram_grid {
@@ -238,47 +369,106 @@
   filter: sepia(0);
 }
 
-/* Diario Section: Editorial Rail */
-.home_diario {
-  padding: 180px 0;
+.instagram_profile_link {
+  margin-top: 50px;
+  display: inline-block;
+  opacity: 1;
+  border-bottom: 1px solid var(--accent-sand);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding-bottom: 5px;
+  transition: var(--transition-fast);
 }
 
-.diario_rail {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
-  margin-top: 80px;
+.instagram_profile_link:hover {
+  border-bottom-color: var(--accent-clay);
+  color: var(--accent-clay);
 }
 
-.diario_card {
+/* B2B Section */
+.b2b_heading {
+  font-size: 3rem;
+  margin-bottom: 40px;
+}
+
+.b2b_desc {
+  max-width: 600px;
+  margin: 0 auto 50px;
+  color: rgba(43,43,43,0.6);
+  line-height: 1.8;
+}
+
+[data-theme="dark"] .b2b_desc {
+  color: rgba(232, 228, 220, 0.6);
+}
+
+.b2b_cta {
+  padding: 20px 50px;
+  font-size: 0.7rem;
+}
+
+/* ========== Buttons Shared ========== */
+.next_btn, .back_btn {
+  padding: 18px 40px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
   cursor: pointer;
-  transition: var(--transition-luxe);
+  transition: var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.diario_img_wrapper {
-  height: 400px;
-  overflow: hidden;
-  margin-bottom: 30px;
-  border: var(--border-fine);
+.next_btn {
+  background: var(--text-slate);
+  color: var(--bg-linen);
+  border: none;
 }
 
-.diario_img_wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: var(--transition-luxe);
+.next_btn:hover {
+  background: var(--accent-clay);
+  transform: translateY(-2px);
 }
 
-.diario_card:hover .diario_img_wrapper img {
-  transform: scale(1.05);
+.next_btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.diario_info {
-  padding: 0 10px;
+.back_btn {
+  background: transparent;
+  border: var(--border-medium);
+  color: var(--text-slate);
 }
 
+.back_btn:hover {
+  border-color: var(--text-slate);
+}
+
+/* ========== Responsive ========== */
 @media (max-width: 1024px) {
   .instagram_grid { grid-template-columns: 1fr 1fr; padding: 0 40px; }
-  .diario_rail { grid-template-columns: 1fr; padding: 0 40px; }
-  .diario_img_wrapper { height: 300px; }
+  .worlds_gallery_grid { grid-template-columns: 1fr; gap: 20px; }
+  .world_gallery_item { height: 350px; }
+  .section_header_boutique { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .worlds_subtext { text-align: left; }
+}
+
+@media (max-width: 768px) {
+  .home_hero { padding: 0 30px; }
+  .home_essence { padding: 100px 30px; }
+  .home_worlds_section { padding: 100px 0; }
+  .booking_teaser { padding: 100px 30px; }
+  .home_instagram { padding: 100px 0; }
+  .home_giftcard { padding: 100px 0; }
+  .instagram_grid { padding: 0 30px; }
+  .worlds_heading { font-size: 2.5rem; }
+  .teaser_heading { font-size: 2.5rem; }
+  .instagram_heading { font-size: 2.5rem; }
+  .giftcard_heading { font-size: 2.5rem; }
+  .b2b_heading { font-size: 2.5rem; }
 }

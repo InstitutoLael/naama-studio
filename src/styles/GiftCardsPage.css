@@ -1,0 +1,262 @@
+.giftcards_page {
+  background-color: var(--bg-linen);
+  min-height: 100vh;
+  padding-top: 180px;
+  padding-bottom: 120px;
+}
+
+.gc_header {
+  max-width: 1000px;
+  margin: 0 auto 80px;
+  text-align: center;
+  padding: 0 60px;
+}
+
+.gc_title {
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  line-height: 1;
+  margin-bottom: 30px;
+}
+
+/* ========== Builder ========== */
+.gc_builder {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.gc_step {
+  background: #fff;
+  padding: 60px;
+  border: var(--border-fine);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="dark"] .gc_step {
+  background: rgba(232, 228, 220, 0.03);
+}
+
+.gc_step_label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent-clay);
+  margin-bottom: 15px;
+  display: block;
+}
+
+.gc_step_title {
+  font-size: 2.2rem;
+  margin-bottom: 40px;
+}
+
+/* Templates */
+.gc_templates_grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.gc_template_option {
+  background: transparent;
+  border: var(--border-medium);
+  padding: 0;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  overflow: hidden;
+}
+
+.gc_template_option.selected {
+  border-color: var(--accent-clay);
+  box-shadow: 0 0 0 1px var(--accent-clay);
+}
+
+.gc_template_preview {
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.gc_template_name {
+  display: block;
+  padding: 12px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  background: var(--bg-linen);
+  width: 100%;
+  text-align: center;
+}
+
+/* Amounts */
+.gc_amounts_grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.gc_amount_btn {
+  background: transparent;
+  border: var(--border-medium);
+  padding: 25px 15px;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--text-slate);
+}
+
+.gc_amount_btn:hover,
+.gc_amount_btn.selected {
+  border-color: var(--text-slate);
+  background: var(--bg-linen);
+}
+
+.gc_custom_amount {
+  margin-top: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Form fields */
+.gc_form_fields {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.gc_textarea {
+  height: 80px;
+  resize: none;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+}
+
+/* Actions */
+.gc_actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 30px;
+}
+
+.gc_actions_between {
+  justify-content: space-between;
+}
+
+/* Preview */
+.gc_preview_step {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  text-align: center;
+}
+
+.gc_card_preview {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.gc_card_face {
+  padding: 50px 40px;
+  border-radius: 8px;
+  text-align: left;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+  margin-bottom: 40px;
+}
+
+.gc_card_header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.gc_card_body {
+  margin-bottom: 40px;
+}
+
+.gc_card_amount {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.gc_card_footer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gc_preview_actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.gc_send_btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.gc_note {
+  margin-top: 20px;
+  font-size: 0.75rem;
+  color: rgba(43, 43, 43, 0.4);
+}
+
+[data-theme="dark"] .gc_note {
+  color: rgba(232, 228, 220, 0.4);
+}
+
+/* Unbox Animation */
+.gc_unbox_overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.gc_unbox_envelope {
+  text-align: center;
+  padding: 80px;
+}
+
+.gc_reveal_btn {
+  background: var(--text-slate);
+  color: var(--bg-linen);
+  padding: 18px 45px;
+  border: none;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  margin-top: 30px;
+  transition: var(--transition-fast);
+}
+
+.gc_reveal_btn:hover {
+  background: var(--accent-clay);
+  transform: translateY(-2px);
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 768px) {
+  .giftcards_page { padding-top: 120px; }
+  .gc_header { padding: 0 30px; }
+  .gc_step { padding: 40px 25px; }
+  .gc_templates_grid { grid-template-columns: 1fr; }
+  .gc_amounts_grid { grid-template-columns: repeat(2, 1fr); }
+  .gc_card_face { padding: 35px 25px; }
+  .gc_card_amount { font-size: 2.2rem; }
+}

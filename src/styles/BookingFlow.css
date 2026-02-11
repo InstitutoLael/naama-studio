@@ -17,6 +17,10 @@
   position: relative;
 }
 
+[data-theme="dark"] .booking_card {
+  background: rgba(232, 228, 220, 0.05);
+}
+
 .step_indicator {
   position: absolute;
   top: 0;
@@ -50,6 +54,11 @@
   font-size: 2.5rem;
   margin-bottom: 50px;
   line-height: 1.1;
+  color: var(--text-slate);
+}
+
+.booking_highlight {
+  color: var(--accent-clay);
 }
 
 /* Options Grid */
@@ -72,9 +81,19 @@
   gap: 10px;
 }
 
+[data-theme="dark"] .option_btn {
+  border-color: rgba(232, 228, 220, 0.1);
+}
+
 .option_btn:hover, .option_btn.selected {
   border-color: var(--text-slate);
   background: var(--bg-linen);
+}
+
+[data-theme="dark"] .option_btn:hover, 
+[data-theme="dark"] .option_btn.selected {
+  background: rgba(232, 228, 220, 0.1);
+  border-color: rgba(232, 228, 220, 0.5);
 }
 
 .option_title {
@@ -86,6 +105,10 @@
 .option_desc {
   font-size: 0.8rem;
   color: rgba(43, 43, 43, 0.5);
+}
+
+[data-theme="dark"] .option_desc {
+  color: rgba(232, 228, 220, 0.5);
 }
 
 /* Date/Time Placeholder */
@@ -106,8 +129,21 @@
   transition: var(--transition-fast);
 }
 
+.booking_textarea {
+  height: 150px;
+  resize: none;
+}
+
 .booking_input:focus {
   border-bottom-color: var(--text-slate);
+}
+
+[data-theme="dark"] .booking_input {
+  border-bottom-color: rgba(232, 228, 220, 0.1);
+}
+
+[data-theme="dark"] .booking_input:focus {
+  border-bottom-color: var(--accent-clay);
 }
 
 .booking_actions {
@@ -127,6 +163,10 @@
   color: rgba(43, 43, 43, 0.4);
 }
 
+[data-theme="dark"] .back_btn {
+  color: rgba(232, 228, 220, 0.4);
+}
+
 .next_btn {
   background: var(--text-slate);
   color: #fff;
@@ -139,13 +179,89 @@
   cursor: pointer;
   transition: var(--transition-fast);
 }
+[data-theme="dark"] .next_btn {
+  color: var(--bg-linen); /* Ensure enough contrast on dark button or dark background */
+}
 
 .next_btn:hover {
   background: var(--accent-clay);
+}
+
+.next_btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: rgba(43, 43, 43, 0.2);
+}
+
+/* Completion Step */
+.booking_completion_wrapper {
+  text-align: center;
+}
+
+.booking_icon_box {
+  display: inline-flex;
+  padding: 20px;
+  background: var(--bg-linen);
+  border-radius: 100px;
+  margin-bottom: 40px;
+  color: var(--accent-clay);
+}
+
+[data-theme="dark"] .booking_icon_box {
+  background: rgba(232, 228, 220, 0.1);
+}
+
+.booking_completion_title {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: var(--text-slate);
+}
+
+.booking_completion_sub {
+  color: rgba(43,43,43,0.5);
+  margin-bottom: 50px;
+  font-size: 1.2rem;
+}
+
+[data-theme="dark"] .booking_completion_sub {
+  color: rgba(232, 228, 220, 0.5);
+}
+
+.booking_actions_vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.booking_whatsapp_btn {
+  padding: 25px 60px;
+  width: 100%;
+}
+
+.booking_setmore_container {
+  width: 100%;
+}
+
+.booking_setmore_btn {
+  padding: 20px 60px;
+  width: 100%;
+  border: var(--border-fine);
+}
+
+.booking_completion_footer {
+  margin-top: 40px;
+  font-size: 0.8rem;
+  color: rgba(43,43,43,0.3);
+}
+
+[data-theme="dark"] .booking_completion_footer {
+  color: rgba(232, 228, 220, 0.3);
 }
 
 @media (max-width: 768px) {
   .booking_card { padding: 50px 30px; }
   .booking_question { font-size: 1.8rem; }
   .options_grid { grid-template-columns: 1fr; }
+  .booking_completion_title { font-size: 2.2rem; }
 }

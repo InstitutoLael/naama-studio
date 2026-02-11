@@ -1,26 +1,37 @@
 :root {
   /* "La Creación" Palette - God Level Elevation */
-  /* Focus: Raw materials, technical grace, hospital-level pulcritud */
-  --bg-linen: #F4F1EA;
-  --text-slate: #2B2B2B;
-  --accent-clay: #B08D79;
-  --accent-sand: #E5D3B3;
-  --secondary-olive: #6D7363;
-  
+  --bg-linen: #f4f1ea;
+  --text-slate: #2b2b2b;
+  --accent-clay: #b08d79;
+  --accent-sand: #e5d3b3;
+  --secondary-olive: #6d7363;
+
   --border-fine: 1px solid rgba(43, 43, 43, 0.08);
   --border-medium: 1px solid rgba(43, 43, 43, 0.15);
-  
+
   /* Typography - Editorial Architecture */
-  --font-serif: 'Playfair Display', serif;
-  --font-sans: 'Inter', sans-serif;
-  
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+
   /* Spacing & Experience */
   --transition-luxe: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --max-width: 1400px;
-  
+
   /* UX Helpers */
   --safe-bottom: env(safe-area-inset-bottom, 20px);
+}
+
+/* ========== Dark Mode Variables ========== */
+[data-theme="dark"] {
+  --bg-linen: #1a1816;
+  --text-slate: #e8e4dc;
+  --accent-clay: #c9a48e;
+  --accent-sand: #8b7d6b;
+  --secondary-olive: #8a9180;
+
+  --border-fine: 1px solid rgba(232, 228, 220, 0.08);
+  --border-medium: 1px solid rgba(232, 228, 220, 0.15);
 }
 
 * {
@@ -34,12 +45,19 @@ body {
   color: var(--text-slate);
   font-family: var(--font-sans);
   overflow-x: hidden;
-  line-height: 1.6; /* Generous line height for restful reading */
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   cursor: default;
+  transition:
+    background-color 0.6s ease,
+    color 0.6s ease;
 }
 
-h1, h2, h3, h4, .serif {
+h1,
+h2,
+h3,
+h4,
+.serif {
   font-family: var(--font-serif);
   font-weight: 400;
   letter-spacing: -0.01em;
@@ -63,19 +81,97 @@ img {
   display: block;
 }
 
-/* Luxury Polish: Glassmorphism & Fades */
+/* ========== Utility Classes ========== */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 60px;
+}
+
+.section-padding {
+  padding: 180px 0;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ========== Shared Section Headers ========== */
+.section_header_boutique {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 60px;
+  margin-bottom: 80px;
+}
+
+.world_item_tag {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent-clay);
+  margin-bottom: 15px;
+  display: block;
+}
+
+.world_category_label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  color: var(--accent-clay);
+  margin-bottom: 30px;
+  display: block;
+}
+
+.world_description {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: rgba(43, 43, 43, 0.6);
+  max-width: 700px;
+}
+
+[data-theme="dark"] .world_description {
+  color: rgba(232, 228, 220, 0.6);
+}
+
+/* ========== Glassmorphism ========== */
 .glass {
   background: rgba(244, 241, 234, 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
-/* Animations: Blur-In Elevation */
+[data-theme="dark"] .glass {
+  background: rgba(26, 24, 22, 0.85);
+}
+
+/* ========== Animations: Blur-In Elevation ========== */
 [class*="reveal"] {
   opacity: 0;
   filter: blur(10px);
   transform: translateY(30px);
-  transition: opacity 1.2s ease, transform 1s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s ease;
+  transition:
+    opacity 1.2s ease,
+    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 1.2s ease;
 }
 
 .reveal-visible {
@@ -84,17 +180,57 @@ img {
   transform: translateY(0);
 }
 
-.delay-1 { transition-delay: 0.1s; }
-.delay-2 { transition-delay: 0.2s; }
-.delay-3 { transition-delay: 0.4s; }
-
-/* Responsive Typography Adjustment */
-@media (max-width: 768px) {
-  h1 { font-size: 2.8rem; }
-  p { font-size: 0.95rem; }
+.delay-1 {
+  transition-delay: 0.1s;
+}
+.delay-2 {
+  transition-delay: 0.2s;
+}
+.delay-3 {
+  transition-delay: 0.4s;
 }
 
-/* Performance: Image Hover effects */
+/* ========== Focus States (Accessibility) ========== */
+:focus-visible {
+  outline: 2px solid var(--accent-clay);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--accent-clay);
+  outline-offset: 3px;
+}
+
+/* Remove outline for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ========== Responsive Typography ========== */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.8rem;
+  }
+  p {
+    font-size: 0.95rem;
+  }
+  .container {
+    padding: 0 30px;
+  }
+  .section_header_boutique {
+    padding: 0 30px;
+  }
+  .section-padding {
+    padding: 100px 0;
+  }
+}
+
+/* ========== Image Hover Effects ========== */
 .image-reveal {
   overflow: hidden;
   position: relative;
@@ -108,12 +244,95 @@ img {
   transform: scale(1.05);
 }
 
-/* Editorial Architecture: God Level Consistency */
-img:not(.logo_img) {
+/* Editorial B&W + Color on Hover */
+img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]) {
   filter: grayscale(100%) contrast(110%);
   transition: var(--transition-luxe);
 }
 
-img:not(.logo_img):hover {
+img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]):hover {
   filter: grayscale(0%) contrast(100%);
+}
+
+/* ========== Shimmer Skeleton Animation ========== */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ========== Scroll Progress Bar ========== */
+.scroll_progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent-clay), var(--accent-sand));
+  z-index: 9999;
+  transition: width 0.1s linear;
+  pointer-events: none;
+}
+
+/* ========== Custom Cursor (Desktop Only) ========== */
+@media (pointer: fine) {
+  .custom_cursor_dot {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: var(--accent-clay);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition:
+      width 0.2s ease,
+      height 0.2s ease,
+      background 0.2s ease;
+    mix-blend-mode: difference;
+  }
+
+  .custom_cursor_ring {
+    position: fixed;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--accent-clay);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition:
+      width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.3s ease,
+      opacity 0.3s ease;
+    opacity: 0.4;
+  }
+
+  .custom_cursor_dot.hovering {
+    width: 12px;
+    height: 12px;
+    background: var(--accent-sand);
+  }
+
+  .custom_cursor_ring.hovering {
+    width: 50px;
+    height: 50px;
+    opacity: 0.6;
+    border-color: var(--accent-sand);
+  }
+}
+
+/* ========== Number Counter Animation ========== */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
