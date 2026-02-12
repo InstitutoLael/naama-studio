@@ -224,6 +224,8 @@
   align-items: center;
   justify-content: center;
   min-height: 400px;
+  position: relative;
+  z-index: 10;
 }
 
 .gc_unbox_envelope {

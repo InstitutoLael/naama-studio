@@ -35,50 +35,7 @@
   gap: 35px;
 }
 
-.form_group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.form_label {
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--accent-clay);
-}
-
-.form_input {
-  background: transparent;
-  border: none;
-  border-bottom: var(--border-medium);
-  padding: 15px 0;
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  color: var(--text-slate);
-  outline: none;
-  transition: var(--transition-fast);
-}
-
-.form_input:focus {
-  border-bottom-color: var(--accent-clay);
-}
-
-.form_input::placeholder {
-  color: rgba(43, 43, 43, 0.3);
-}
-
-[data-theme="dark"] .form_input::placeholder {
-  color: rgba(232, 228, 220, 0.3);
-}
-
-.form_textarea {
-  height: 120px;
-  resize: none;
-  font-family: var(--font-sans);
-  font-size: 1rem;
-}
+/* Form styles now in Global.css */
 
 .contact_submit_btn {
   display: flex;
