@@ -239,14 +239,23 @@
   width: 100%;
 }
 
-.booking_setmore_container {
-  width: 100%;
+.booking_instagram_link {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(43, 43, 43, 0.4);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  margin-top: 5px;
 }
 
-.booking_setmore_btn {
-  padding: 20px 60px;
-  width: 100%;
-  border: var(--border-fine);
+[data-theme="dark"] .booking_instagram_link {
+  color: rgba(232, 228, 220, 0.4);
+}
+
+.booking_instagram_link:hover {
+  color: var(--accent-clay);
 }
 
 .booking_completion_footer {

@@ -9,10 +9,9 @@ import '../styles/StaffPage.css';
 
 const specialists = [
   { name: "Allison", specialty: "Make-up & Hair Styling" },
-  { name: "Cami", specialty: "Technical Color & Esthetics" },
   { name: "Valeria", specialty: "Master Alisados & Cutting" },
-  { name: "Gaby", specialty: "Dermo-Nails & Depilation" },
-  { name: "Vivy", specialty: "High-End Facials & Maderotherapy" }
+  { name: "Gaby", specialty: "Dermo-Nails & Depilación" },
+  { name: "Vivy", specialty: "High-End Facials & Maderoterapia" }
 ];
 
 const StaffPage = () => {
@@ -109,6 +108,17 @@ const StaffPage = () => {
       <section className="container section-padding reveal text-center staff_footer_section">
          <h2 className="serif staff_footer_heading">La maestría no necesita filtros.</h2>
          <p className="staff_footer_text">Solo técnica, silencio y hospitalidad.</p>
+         <a
+           href="https://wa.me/56979520623?text=Hola! Vi los precios en la web y me gustaría agendar una sesión en Naamá Studio. ¿Tienen disponibilidad?"
+           target="_blank"
+           rel="noopener noreferrer"
+           style={{ display: 'inline-block', marginTop: '2rem' }}
+           aria-label="Agendar por WhatsApp"
+         >
+           <button className="nav_cta_boutique" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>
+             📲 Agendar por WhatsApp
+           </button>
+         </a>
       </section>
     </div>
   );

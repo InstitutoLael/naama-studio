@@ -160,13 +160,26 @@ const ContactPage = () => {
       {/* Google Maps */}
       <section className="contact_map_section reveal">
         <iframe
-          title="Ubicación de Naamá Studio en Google Maps"
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3328.8!2d-70.6483!3d-33.4969!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDI5JzQ4LjgiUyA3MMKwMzgnNTMuOSJX!5e0!3m2!1ses!2scl!4v1"
+          title="Ubicación de Naamá Studio en Google Maps — Arcadia 1297, San Miguel"
+          src="https://maps.google.com/maps?q=Arcadia+1297,+San+Miguel,+Santiago,+Chile&t=&z=16&ie=UTF8&iwloc=&output=embed"
           className="contact_map"
           loading="lazy"
           referrerPolicy="no-referrer-when-downgrade"
           allowFullScreen
         />
+        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+          <a
+            href="https://www.google.com/maps/search/Arcadia+1297,+San+Miguel,+Santiago,+Chile"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="contact_submit_btn"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
+            aria-label="Abrir en Google Maps para llegar a Naamá Studio"
+          >
+            <MapPin size={16} strokeWidth={1.5} />
+            ¿Cómo llegar? Abrir en Google Maps
+          </a>
+        </div>
       </section>
 
       {/* FAQ */}

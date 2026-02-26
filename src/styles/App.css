@@ -64,7 +64,8 @@
   transition: var(--transition-luxe);
 }
 
-.nav_item:hover, .nav_item.active {
+.nav_item:hover,
+.nav_item.active {
   opacity: 1;
 }
 
@@ -222,18 +223,91 @@
     background: var(--bg-linen);
     border-bottom: var(--border-fine);
   }
-  .nav_container { 
-    padding: 0 30px; 
+  .nav_container {
+    padding: 0 30px;
     justify-content: space-between;
   }
-  .nav_links { display: none; }
-  .footer_grid { grid-template-columns: 1fr; gap: 60px; }
-  .footer { padding-bottom: 150px; padding-left: 30px; padding-right: 30px; } /* Space for BottomNav */
-  .footer_nav_col { display: none; } /* Hide nav links on mobile to simplify */
+  .nav_links {
+    display: none;
+  }
+  .footer_grid {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+  .footer {
+    padding-bottom: 150px;
+    padding-left: 30px;
+    padding-right: 30px;
+  } /* Space for BottomNav */
+  .footer_nav_col {
+    display: none;
+  } /* Hide nav links on mobile to simplify */
 }
 
 /* Ensure Logo is white in dark mode if needed, or adjust filter */
 [data-theme="dark"] .nav_logo,
 [data-theme="dark"] .footer_logo {
   filter: brightness(0) invert(1) opacity(0.8);
+}
+
+/* =============================================
+   Botones Flotantes: WhatsApp e Instagram
+   ============================================= */
+.floating_buttons {
+  position: fixed;
+  bottom: 30px;
+  right: 24px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.float_btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  text-decoration: none;
+  color: #fff;
+}
+
+.float_btn:hover {
+  transform: translateY(-4px) scale(1.07);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.float_whatsapp {
+  background: #25d366;
+}
+
+.float_instagram {
+  background: radial-gradient(
+    circle at 30% 107%,
+    #fdf497 0%,
+    #fdf497 5%,
+    #fd5949 45%,
+    #d6249f 60%,
+    #285aeb 90%
+  );
+}
+
+/* En móvil, mover los botones flotantes un poco más arriba para no tapar el BottomNav */
+@media (max-width: 1024px) {
+  .floating_buttons {
+    bottom: 90px;
+    right: 16px;
+  }
+
+  .float_btn {
+    width: 46px;
+    height: 46px;
+  }
 }

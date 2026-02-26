@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, MapPin } from 'lucide-react';
+import { MessageCircle, Mail, MapPin } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
 import { b2bPacks } from '../data/b2bPacks';
 import '../styles/Global.css';
@@ -62,7 +62,7 @@ const EmpresasPage = () => {
                  <button 
                   id={`btn_pack_${pack.id}`}
                   className="nav_cta_boutique b2b_pack_btn"
-                  onClick={() => window.location.href = `mailto:naamastudiospa@gmail.com?subject=Interés en Pack B2B: ${pack.name}`}
+                  onClick={() => window.open(`https://wa.me/56979520623?text=Hola! Me interesa el Pack B2B: ${pack.name}. ¿Podrían darme más información?`, '_blank')}
                   aria-label={`Solicitar información sobre el Pack ${pack.name}`}
                  >
                    Solicitar Pack
@@ -83,17 +83,29 @@ const EmpresasPage = () => {
               <MapPin size={14} /> <span>San Miguel, Santiago</span>
             </div>
             <div className="b2b_contact_row">
-              <Mail size={14} /> <span>naamastudiospa@gmail.com</span>
+              <Mail size={14} /> 
+              <a href="mailto:naamastudiospa@gmail.com" style={{ color: 'inherit' }}>naamastudiospa@gmail.com</a>
             </div>
           </div>
 
-          <button 
-            className="nav_cta_boutique b2b_cta_main"
-            onClick={() => window.location.href = 'mailto:naamastudiospa@gmail.com'}
-            aria-label="Solicitar información general para empresas"
-          >
-            Solicitar Información
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '1.5rem' }}>
+            <button 
+              className="nav_cta_boutique b2b_cta_main"
+              onClick={() => window.open('https://wa.me/56979520623?text=Hola! Soy de una empresa y me gustaría solicitar información sobre sus servicios B2B. ¿Podrían contactarme?', '_blank')}
+              aria-label="Solicitar información para empresas por WhatsApp"
+            >
+              <MessageCircle size={16} style={{ marginRight: '8px' }} />
+              Escribir por WhatsApp
+            </button>
+            <button 
+              className="back_btn"
+              onClick={() => window.location.href = 'mailto:naamastudiospa@gmail.com?subject=Consulta B2B Naamá Studio'}
+              aria-label="Solicitar información para empresas por email"
+              style={{ padding: '0.9rem 2rem' }}
+            >
+              Enviar un Email
+            </button>
+          </div>
         </div>
       </section>
     </div>

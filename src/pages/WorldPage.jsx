@@ -140,11 +140,23 @@ const WorldPage = () => {
       </main>
 
       <section className="container section-padding reveal world_session_section">
-         <p className="text-uppercase world_session_text">Próxima Sesión</p>
-         <h2 className="serif world_session_title">Recupera tu tiempo de descanso.</h2>
-         <Link to="/" className="nav_item world_gallery_link">
-            Volver a la Galería
-         </Link>
+         <p className="text-uppercase world_session_text">¿Te gustó lo que viste?</p>
+         <h2 className="serif world_session_title">Agenda tu sesión ahora mismo.</h2>
+         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '1.5rem' }}>
+           <a
+             href="https://wa.me/56979520623?text=Hola! Vi los servicios en la web y me gustaría agendar una sesión en Naamá Studio. ¿Tienen disponibilidad?"
+             target="_blank"
+             rel="noopener noreferrer"
+             className="nav_cta_boutique"
+             style={{ padding: '0.9rem 2rem', textDecoration: 'none' }}
+             aria-label="Agendar por WhatsApp"
+           >
+             📲 Agendar por WhatsApp
+           </a>
+           <Link to="/reservar" className="nav_item world_gallery_link" style={{ alignSelf: 'center' }}>
+             O usa el formulario de reserva
+           </Link>
+         </div>
       </section>
     </div>
   );
