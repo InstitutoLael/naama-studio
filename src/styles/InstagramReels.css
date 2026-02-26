@@ -1,0 +1,140 @@
+/* InstagramReels.css */
+.reels_container {
+  padding: 100px 60px;
+  background: var(--surface-card);
+  border-top: var(--border-fine);
+  border-bottom: var(--border-fine);
+}
+
+.reels_title {
+  font-size: 3.5rem;
+  margin-bottom: 15px;
+  color: var(--text-slate);
+}
+
+.reels_subtitle {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 60px;
+}
+
+.reels_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 30px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.reel_card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-linen);
+  border: var(--border-fine);
+  transition: var(--transition-luxe);
+}
+
+.reel_card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.reel_link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.reel_video_placeholder {
+  position: relative;
+  aspect-ratio: 9/16;
+  width: 100%;
+  background: var(--text-slate);
+  overflow: hidden;
+}
+
+.reel_thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reel_card:hover .reel_thumbnail {
+  transform: scale(1.05);
+}
+
+.reel_fallback_gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--accent-clay) 0%, var(--secondary-olive) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+}
+
+.reel_play_overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.2);
+  transition: var(--transition-fast);
+}
+
+.reel_card:hover .reel_play_overlay {
+  background: rgba(0,0,0,0.4);
+}
+
+.play_button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.4);
+  transition: var(--transition-fast);
+}
+
+.reel_card:hover .play_button {
+  transform: scale(1.1);
+  background: rgba(255,255,255,0.3);
+}
+
+.reel_info {
+  padding: 20px;
+  background: var(--surface-card);
+}
+
+.reel_category {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent-clay);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.reel_card_title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-slate);
+  line-height: 1.4;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .reels_container { padding: 60px 30px; }
+  .reels_title { font-size: 2.5rem; }
+  .reels_grid { display: flex; overflow-x: auto; gap: 20px; scroll-snap-type: x mandatory; padding-bottom: 20px; }
+  .reel_card { flex: 0 0 260px; scroll-snap-align: start; }
+}

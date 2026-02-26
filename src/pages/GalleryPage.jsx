@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import SEOHead from '../components/SEOHead';
+import InstagramReels from '../components/InstagramReels';
 import '../styles/Global.css';
 import '../styles/GalleryPage.css';
 
@@ -161,6 +162,36 @@ const GalleryPage = () => {
         <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '20px' }}>¿Te gustaría reservar?</h2>
         <a href="/reservar" className="notfound_btn" aria-label="Reservar sesión">Agendar Sesión</a>
       </section>
+      {/* Real Instagram Reels */}
+      <InstagramReels 
+        reels={[
+          {
+            url: "https://www.instagram.com/reel/DU67OwaDr2-/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+            title: "Resultados increíbles con técnica Balayage 🤎",
+            category: "Colorimetría"
+          },
+          {
+            url: "https://www.instagram.com/reel/DTvTUX5jnvw/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+            title: "Proceso de iluminación y matiz",
+            category: "Corte & Estilo"
+          },
+          {
+            url: "https://www.instagram.com/reel/DRhY5Z9jtAg/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+            title: "Transformación radical y saludable ✨",
+            category: "Tratamientos"
+          },
+          {
+            url: "https://www.instagram.com/reel/DR4nT54jlQ-/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+            title: "Rubio perfecto sin dañar la fibra capilar",
+            category: "Colorimetría"
+          },
+          {
+            url: "https://www.instagram.com/reel/DPO7EA0Dphm/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+            title: "Expectativa vs Realidad 😂 (Humor Salón)",
+            category: "Naamá Vibe"
+          }
+        ]}
+      />
     </div>
   );
 };
