@@ -150,6 +150,9 @@ const ContactPage = () => {
             <a href="https://wa.me/56979520623" target="_blank" rel="noopener noreferrer" className="info_link">
               WhatsApp: +56 9 7952 0623
             </a>
+            <a href="https://www.instagram.com/naamastudio_/" target="_blank" rel="noopener noreferrer" className="info_link">
+              Instagram: @naamastudio_
+            </a>
             <a href="mailto:naamastudiospa@gmail.com" className="info_link">
               naamastudiospa@gmail.com
             </a>

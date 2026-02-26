@@ -130,6 +130,27 @@ const GalleryPage = () => {
               <h3 className="serif" style={{ fontSize: '1.8rem', margin: '10px 0' }}>{lightbox.title}</h3>
               <p className="lightbox_desc">{lightbox.desc}</p>
               <span className="gallery_item_specialist">Realiza: {lightbox.specialist}</span>
+              <a
+                href={`https://wa.me/56979520623?text=Hola! Vi el trabajo "${lightbox.title}" en la galería de Naamá Studio y me gustaría agendar algo similar. ¿Tienen disponibilidad?`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-block',
+                  marginTop: '20px',
+                  background: '#25D366',
+                  color: '#fff',
+                  padding: '12px 24px',
+                  borderRadius: '2px',
+                  fontSize: '0.7rem',
+                  fontWeight: '800',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.15em',
+                  textDecoration: 'none'
+                }}
+                aria-label="Agendar este servicio por WhatsApp"
+              >
+                📲 Quiero algo así — Agendar por WhatsApp
+              </a>
             </div>
           </div>
         </div>
