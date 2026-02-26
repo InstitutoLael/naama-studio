@@ -2,21 +2,42 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="./src/assets/naama-studio.png" />
+    <link rel="icon" type="image/png" href="/assets/naama-studio.png" />
+    <link rel="apple-touch-icon" href="/assets/naama-studio.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#B08D79" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Naamá Studio" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Naamá Studio | Belleza, Bienestar & Armonía</title>
-    
-    <!-- Open Graph / WhatsApp -->
+
+    <!-- Open Graph / WhatsApp / Instagram -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Naamá Studio | Belleza, Bienestar & Armonía" />
-    <meta property="og:description" content="Naamá Studio - Belleza, Bienestar & Armonía en San Miguel, Santiago. Ven a vivir una experiencia única." />
-    <meta property="og:image" content="https://naamastudio.cl/assets/naama-studio.png" />
+    <meta property="og:description" content="Naamá Studio — Belleza experta en San Miguel, Santiago. Servicios de hair, make-up, uñas, faciales y más. Agenda por WhatsApp." />
+    <!-- Cuando compartan el link, se verá esta imagen en WhatsApp -->
+    <meta property="og:image" content="https://naamastudio.cl/assets/salon-arch.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
     <meta property="og:url" content="https://naamastudio.cl/" />
+    <meta property="og:locale" content="es_CL" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://naamastudio.cl/assets/salon-arch.png" />
+
+    <!-- Preload crítico: logo navbar (elemento LCP) -->
+    <link
+      rel="preload"
+      href="/assets/naama-studio-DNMa7Wt5.png"
+      as="image"
+      fetchpriority="high"
+    />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
       rel="stylesheet"
     />
   </head>

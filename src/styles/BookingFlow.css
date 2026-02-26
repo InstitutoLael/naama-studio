@@ -10,16 +10,13 @@
 .booking_card {
   width: 100%;
   max-width: 700px;
-  background: #fff;
+  background: var(--surface-card);
   padding: 80px 60px;
   border: var(--border-fine);
   box-shadow: 0 40px 100px rgba(0,0,0,0.03);
   position: relative;
 }
 
-[data-theme="dark"] .booking_card {
-  background: rgba(232, 228, 220, 0.05);
-}
 
 .step_indicator {
   position: absolute;

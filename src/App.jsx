@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
-import WorldPage from './pages/WorldPage';
-import StaffPage from './pages/StaffPage';
-import EmpresasPage from './pages/EmpresasPage';
-import BookingFlow from './pages/BookingFlow';
-import NuestraHistoria from './pages/NuestraHistoria';
-import ContactPage from './pages/ContactPage';
-import GalleryPage from './pages/GalleryPage';
-import GiftCardsPage from './pages/GiftCardsPage';
-import NotFound from './pages/NotFound';
+// Lazy-load páginas pesadas para mejorar performance en móvil
+const WorldPage = lazy(() => import('./pages/WorldPage'));
+const StaffPage = lazy(() => import('./pages/StaffPage'));
+const EmpresasPage = lazy(() => import('./pages/EmpresasPage'));
+const BookingFlow = lazy(() => import('./pages/BookingFlow'));
+const NuestraHistoria = lazy(() => import('./pages/NuestraHistoria'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const GalleryPage = lazy(() => import('./pages/GalleryPage'));
+const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 import BottomNav from './components/UI/BottomNav';
+import WhatsAppPopup from './components/UI/WhatsAppPopup';
 import ScrollProgress from './components/UI/ScrollProgress';
 import CustomCursor from './components/UI/CustomCursor';
 import ThemeToggle from './components/UI/ThemeToggle';
@@ -77,7 +79,15 @@ const App = () => {
       <nav className={`main_nav ${scrolled ? 'nav_scrolled' : ''}`} aria-label="Navegación principal">
         <div className="nav_container">
           <Link to="/" className="logo_link" aria-label="Ir al inicio de Naamá Studio">
-            <img src={Logo} alt="Naamá Studio" className="nav_logo" />
+            <img
+              src={Logo}
+              alt="Naamá Studio"
+              className="nav_logo"
+              fetchpriority="high"
+              loading="eager"
+              width="135"
+              height="45"
+            />
           </Link>
           <div className="nav_links">
             <Link to="/" className={`nav_item ${location.pathname === '/' ? 'active' : ''}`}>Inicio</Link>
@@ -92,24 +102,29 @@ const App = () => {
       </nav>
 
       <main className="main_content">
-        <PageTransition>
-          <Routes location={location}>
-            <Route path="/" element={<Home />} />
-            <Route path="/mundo/:mundoId" element={<WorldPage />} />
-            <Route path="/staff" element={<StaffPage />} />
-            <Route path="/empresas" element={<EmpresasPage />} />
-            <Route path="/reservar" element={<BookingFlow />} />
-            <Route path="/nuestra-historia" element={<NuestraHistoria />} />
-            <Route path="/contacto" element={<ContactPage />} />
-            <Route path="/galeria" element={<GalleryPage />} />
-            <Route path="/gift-cards" element={<GiftCardsPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </PageTransition>
+        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+          <PageTransition>
+            <Routes location={location}>
+              <Route path="/" element={<Home />} />
+              <Route path="/mundo/:mundoId" element={<WorldPage />} />
+              <Route path="/staff" element={<StaffPage />} />
+              <Route path="/empresas" element={<EmpresasPage />} />
+              <Route path="/reservar" element={<BookingFlow />} />
+              <Route path="/nuestra-historia" element={<NuestraHistoria />} />
+              <Route path="/contacto" element={<ContactPage />} />
+              <Route path="/galeria" element={<GalleryPage />} />
+              <Route path="/gift-cards" element={<GiftCardsPage />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </PageTransition>
+        </Suspense>
       </main>
 
       {/* Mobile Navigation (Ergonomic Bottom Nav) */}
       <BottomNav />
+
+      {/* WhatsApp Lead Capture Popup */}
+      <WhatsAppPopup />
 
       {/* Botones Flotantes: WhatsApp e Instagram */}
       <div className="floating_buttons">

@@ -1,7 +1,9 @@
 :root {
-  /* "La Creación" Palette - God Level Elevation */
+  /* "La Creación" Palette */
   --bg-linen: #f4f1ea;
+  --surface-card: #ffffff;
   --text-slate: #2b2b2b;
+  --text-muted: rgba(43, 43, 43, 0.55);
   --accent-clay: #b08d79;
   --accent-sand: #e5d3b3;
   --secondary-olive: #6d7363;
@@ -9,29 +11,30 @@
   --border-fine: 1px solid rgba(43, 43, 43, 0.08);
   --border-medium: 1px solid rgba(43, 43, 43, 0.15);
 
-  /* Typography - Editorial Architecture */
+  /* Typography */
   --font-serif: "Playfair Display", serif;
   --font-sans: "Inter", sans-serif;
 
-  /* Spacing & Experience */
+  /* Transitions */
   --transition-luxe: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --max-width: 1400px;
 
-  /* UX Helpers */
   --safe-bottom: env(safe-area-inset-bottom, 20px);
 }
 
-/* ========== Dark Mode Variables ========== */
+/* ========== Dark Mode — Rediseñado ========== */
 [data-theme="dark"] {
-  --bg-linen: #1a1816;
-  --text-slate: #e8e4dc;
-  --accent-clay: #c9a48e;
-  --accent-sand: #8b7d6b;
-  --secondary-olive: #8a9180;
+  --bg-linen: #18160f;           /* Fondo: negro muy cálido, casi marrón */
+  --surface-card: #232018;       /* Tarjetas: un tono más claro para que sobresalgan */
+  --text-slate: #f0ebe0;         /* Texto: crema brillante, bien legible */
+  --text-muted: rgba(240, 235, 224, 0.5);
+  --accent-clay: #d4a98a;        /* Clay más brillante y visible en oscuro */
+  --accent-sand: #c4a882;        /* Sand dorado visible */
+  --secondary-olive: #9aa190;
 
-  --border-fine: 1px solid rgba(232, 228, 220, 0.08);
-  --border-medium: 1px solid rgba(232, 228, 220, 0.15);
+  --border-fine: 1px solid rgba(240, 235, 224, 0.09);
+  --border-medium: 1px solid rgba(240, 235, 224, 0.18);
 }
 
 * {

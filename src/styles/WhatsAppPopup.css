@@ -1,0 +1,192 @@
+.wa_popup_overlay {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  z-index: 10000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  pointer-events: none; /* Allows clicking through the overlay itself */
+  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wa_popup_card {
+  width: 320px;
+  background: var(--surface-card);
+  border: var(--border-medium);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  position: relative;
+  pointer-events: auto; /* Re-enable clicks on the card */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.wa_popup_close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: var(--transition-fast);
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.wa_popup_close:hover {
+  color: var(--text-slate);
+  background: rgba(43, 43, 43, 0.05);
+}
+
+[data-theme="dark"] .wa_popup_close:hover {
+  background: rgba(232, 228, 220, 0.05);
+}
+
+.wa_popup_header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wa_popup_icon {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-clay);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  position: relative;
+}
+
+.pulse_ring {
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--accent-clay);
+  border-radius: 50%;
+  animation: ringPulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  opacity: 0;
+}
+
+@keyframes ringPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+
+.wa_popup_header h3 {
+  font-size: 1.3rem;
+  color: var(--text-slate);
+  margin: 0;
+}
+
+.wa_popup_text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.wa_popup_text strong {
+  color: var(--accent-clay);
+  font-weight: 600;
+}
+
+.wa_popup_actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.wa_popup_btn_primary {
+  width: 100%;
+  background: #25d366; /* WhatsApp Green */
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.wa_popup_btn_primary:hover {
+  background: #20ba56;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.wa_popup_btn_text {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 8px;
+  transition: var(--transition-fast);
+}
+
+.wa_popup_btn_text:hover {
+  color: var(--text-slate);
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .wa_popup_overlay {
+    bottom: auto;
+    top: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
+    padding: 0 16px;
+  }
+
+  .wa_popup_card {
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  @keyframes slideUpFade {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) translateX(50%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) translateX(50%);
+    }
+  }
+}

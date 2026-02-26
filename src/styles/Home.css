@@ -152,13 +152,11 @@
   height: 500px;
   overflow: hidden;
   cursor: pointer;
-  background: #fff;
+  background: var(--surface-card);
   border: var(--border-fine);
 }
 
-[data-theme="dark"] .world_gallery_item {
-  background: rgba(232, 228, 220, 0.03);
-}
+
 
 .world_gallery_img_box {
   width: 100%;
@@ -325,14 +323,14 @@
 /* Instagram Section */
 .home_instagram {
   padding: 180px 0;
-  background: #fff;
+  background: var(--surface-card);
   text-align: center;
   border-top: var(--border-fine);
   border-bottom: var(--border-fine);
 }
 
 [data-theme="dark"] .home_instagram {
-  background: rgba(232, 228, 220, 0.03);
+  background: var(--surface-card);
 }
 
 .instagram_heading {

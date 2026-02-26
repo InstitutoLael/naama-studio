@@ -12,12 +12,10 @@
   padding: 100px 60px;
   border-top: var(--border-fine);
   border-bottom: var(--border-fine);
-  background: #fff;
+  background: var(--surface-card);
 }
 
-[data-theme="dark"] .stats_bar {
-  background: rgba(232, 228, 220, 0.03);
-}
+
 
 .stat_item {
   display: flex;

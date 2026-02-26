@@ -69,13 +69,10 @@
 
 .contact_status_card {
   padding: 25px 30px;
-  background: #fff;
+  background: var(--surface-card);
   border: var(--border-fine);
 }
 
-[data-theme="dark"] .contact_status_card {
-  background: rgba(232, 228, 220, 0.05);
-}
 
 .status_indicator {
   display: flex;
