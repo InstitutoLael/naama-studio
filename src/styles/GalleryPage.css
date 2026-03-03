@@ -48,6 +48,13 @@
   border-color: var(--text-slate);
 }
 
+[data-theme="dark"] .filter_btn:hover, 
+[data-theme="dark"] .filter_btn.active {
+  background: var(--text-slate); 
+  color: var(--bg-linen); /* En modo oscuro, var(--bg-linen) es oscuro (#18160f) y --text-slate es claro (#f0ebe0) */
+  border-color: var(--text-slate);
+}
+
 /* ========== Masonry Grid ========== */
 .gallery_masonry {
   columns: 3;

@@ -136,6 +136,12 @@
   border-color: var(--text-slate);
 }
 
+[data-theme="dark"] .carousel_btn:hover {
+  background: var(--text-slate);
+  color: var(--bg-linen); /* En modo oscuro, var(--bg-linen) #18160f (oscuro) y --text-slate #f0ebe0 (claro) */
+  border-color: var(--text-slate);
+}
+
 .carousel_dots {
   display: flex;
   gap: 8px;

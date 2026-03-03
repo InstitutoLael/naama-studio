@@ -89,8 +89,17 @@
 
 [data-theme="dark"] .option_btn:hover, 
 [data-theme="dark"] .option_btn.selected {
-  background: rgba(232, 228, 220, 0.1);
-  border-color: rgba(232, 228, 220, 0.5);
+  background: var(--text-slate); /* Fondo oscuro grisáceo */
+  border-color: var(--text-slate);
+  color: var(--bg-linen); /* Texto claro (#f0ebe0) */
+}
+
+/* Forzar que el título y la descripción dentro del botón hereden el color correcto al estar seleccionados en modo oscuro */
+[data-theme="dark"] .option_btn:hover .option_title,
+[data-theme="dark"] .option_btn.selected .option_title,
+[data-theme="dark"] .option_btn:hover .option_desc,
+[data-theme="dark"] .option_btn.selected .option_desc {
+  color: var(--bg-linen);
 }
 
 .option_title {
