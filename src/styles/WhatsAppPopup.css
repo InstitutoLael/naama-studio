@@ -1,192 +1,164 @@
-.wa_popup_overlay {
+/* ============================================================
+   NAAMÁ STUDIO — WhatsAppPopup.css
+   ============================================================ */
+
+.wa_popup_backdrop {
   position: fixed;
-  bottom: 100px;
-  right: 24px;
-  z-index: 10000;
+  inset: 0;
+  z-index: 1000;
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-  pointer-events: none; /* Allows clicking through the overlay itself */
-  animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  padding: 30px;
+  pointer-events: none; /* el backdrop es clickeable pero no bloquea la UI */
+  background: transparent;
 }
 
 .wa_popup_card {
-  width: 320px;
-  background: var(--surface-card);
+  pointer-events: all;
+  background: var(--bg-linen);
   border: var(--border-medium);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  padding: 32px 28px 24px;
+  width: 100%;
+  max-width: 320px;
   position: relative;
-  pointer-events: auto; /* Re-enable clicks on the card */
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  box-shadow: 0 20px 60px rgba(26, 26, 26, 0.12);
+  animation: wa_slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.wa_popup_close {
+[data-theme="dark"] .wa_popup_card {
+  background: var(--surface-card);
+  border-color: rgba(240, 235, 224, 0.12);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes wa_slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Cerrar */
+.wa_close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 14px;
+  right: 14px;
   background: transparent;
   border: none;
+  color: var(--text-faint);
   cursor: pointer;
-  color: var(--text-muted);
-  transition: var(--transition-fast);
   padding: 4px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+  transition: color 0.2s ease;
 }
 
-.wa_popup_close:hover {
+.wa_close:hover {
   color: var(--text-slate);
-  background: rgba(43, 43, 43, 0.05);
 }
 
-[data-theme="dark"] .wa_popup_close:hover {
-  background: rgba(232, 228, 220, 0.05);
-}
-
-.wa_popup_header {
+/* Header */
+.wa_header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
-.wa_popup_icon {
-  width: 40px;
-  height: 40px;
-  background: var(--accent-clay);
+.wa_icon_wrap {
+  width: 42px;
+  height: 42px;
+  background: #25D366;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  position: relative;
+  flex-shrink: 0;
 }
 
-.pulse_ring {
-  position: absolute;
-  inset: -4px;
-  border: 2px solid var(--accent-clay);
-  border-radius: 50%;
-  animation: ringPulse 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-  opacity: 0;
+.wa_eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent-gold);
+  display: block;
+  margin-bottom: 2px;
 }
 
-@keyframes ringPulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(1.4);
-    opacity: 0;
-  }
-}
-
-.wa_popup_header h3 {
-  font-size: 1.3rem;
+.wa_title {
+  font-size: 1.2rem;
+  font-weight: 400;
   color: var(--text-slate);
   margin: 0;
 }
 
-.wa_popup_text {
-  font-size: 0.9rem;
-  line-height: 1.5;
+/* Cuerpo */
+.wa_body {
+  font-size: 0.88rem;
+  line-height: 1.75;
   color: var(--text-muted);
-  margin: 0;
+  margin-bottom: 22px;
 }
 
-.wa_popup_text strong {
-  color: var(--accent-clay);
+.wa_body strong {
+  color: var(--text-slate);
   font-weight: 600;
 }
 
-.wa_popup_actions {
+/* Acciones */
+.wa_actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 5px;
+  gap: 10px;
 }
 
-.wa_popup_btn_primary {
-  width: 100%;
-  background: #25d366; /* WhatsApp Green */
-  color: #fff;
+.wa_btn_primary {
+  background: var(--accent-walnut);
+  color: var(--bg-linen);
   border: none;
-  border-radius: 6px;
-  padding: 12px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  padding: 13px 20px;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
   cursor: pointer;
   transition: var(--transition-fast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  width: 100%;
 }
 
-.wa_popup_btn_primary:hover {
-  background: #20ba56;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+.wa_btn_primary:hover {
+  background: var(--text-slate);
 }
 
-.wa_popup_btn_text {
+.wa_btn_ghost {
   background: transparent;
   border: none;
-  color: var(--text-muted);
-  font-size: 0.75rem;
+  color: var(--text-faint);
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
   cursor: pointer;
-  padding: 8px;
-  transition: var(--transition-fast);
+  padding: 6px;
+  transition: color 0.2s ease;
+  text-align: center;
+  width: 100%;
 }
 
-.wa_popup_btn_text:hover {
-  color: var(--text-slate);
-  text-decoration: underline;
+.wa_btn_ghost:hover {
+  color: var(--text-muted);
 }
 
-@media (max-width: 768px) {
-  .wa_popup_overlay {
-    bottom: auto;
-    top: 20px;
-    right: 50%;
-    transform: translateX(50%);
-    align-items: flex-start;
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .wa_popup_backdrop {
+    padding: 16px;
+    align-items: flex-end;
     justify-content: center;
-    width: 100%;
-    padding: 0 16px;
   }
 
   .wa_popup_card {
-    width: 100%;
-    max-width: 360px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  }
-
-  @keyframes slideUpFade {
-    from {
-      opacity: 0;
-      transform: translateY(-20px) translateX(50%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) translateX(50%);
-    }
+    max-width: 100%;
   }
 }
