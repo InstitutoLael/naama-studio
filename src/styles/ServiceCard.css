@@ -1,166 +1,249 @@
-/* ServiceCard: Technical Precision & Quiet Luxury */
-.service_card {
-  padding: 20px 25px;
-  height: auto;
+/* ============================================================
+   NAAMÁ STUDIO — ServiceCard.css
+   Tarjeta de servicio con expansión y modo oscuro correcto
+   ============================================================ */
+
+.svc_card {
+  background: var(--bg-linen);
+  border-bottom: var(--border-fine);
+  transition: background 0.25s ease;
+}
+
+.svc_card:last-child {
+  border-bottom: none;
+}
+
+/* ── Fila principal ── */
+.svc_main {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 20px;
+  padding: 24px 28px;
+  cursor: default;
+  transition: background 0.2s ease;
+  min-height: 80px;
+}
+
+/* Si tiene detalle expandible, mostrar cursor pointer */
+.svc_card:has(.svc_chevron) .svc_main {
+  cursor: pointer;
+}
+
+.svc_card:has(.svc_chevron) .svc_main:hover {
+  background: var(--surface-card);
+}
+
+[data-theme="dark"] .svc_card {
+  background: var(--surface-card);
+}
+
+[data-theme="dark"] .svc_card:has(.svc_chevron) .svc_main:hover {
+  background: var(--surface-warm);
+}
+
+/* Nombre + categoría */
+.svc_name_col {
   display: flex;
   flex-direction: column;
-  transition: var(--transition-luxe);
-  cursor: pointer;
-  border-bottom: var(--border-fine);
-  background-color: transparent;
-  position: relative;
+  gap: 5px;
+  min-width: 0;
 }
 
-.service_card.no_expand {
-  cursor: default;
-}
-
-.service_card:not(.no_expand):hover {
-  background-color: rgba(255, 255, 255, 0.4);
-}
-
-.service_card.expanded {
-  background-color: #fff;
-  padding-bottom: 30px;
-}
-
-.card_top {
-  margin-bottom: 0px;
-}
-
-.service_name_row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
-}
-
-.service_name_text {
-  font-size: 1.3rem;
-  line-height: 1.2;
+.svc_name {
+  font-size: 1.05rem;
+  font-weight: 400;
   color: var(--text-slate);
-  max-width: 80%;
+  line-height: 1.3;
+  margin: 0;
 }
 
-.service_price_text {
-  font-family: var(--font-serif);
-  font-size: 1.1rem;
-  color: var(--accent-clay);
+.svc_cat {
+  font-family: var(--font-sans);
+  font-size: 0.58rem;
   font-weight: 500;
-}
-
-.service_meta_data {
-  display: flex;
-  gap: 15px;
-  margin-top: 10px;
-}
-
-.meta_tag {
-  font-size: 0.55rem;
-  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: rgba(43, 43, 43, 0.4);
+  color: var(--accent-gold);
+  opacity: 0.8;
 }
 
-.service_description_text {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: rgba(43, 43, 43, 0.7);
-  max-width: 90%;
-}
-
-/* Expanded Content: Technical Focus */
-.card_expanded_content {
-  margin-top: 25px;
-  border-top: 1px solid rgba(43, 43, 43, 0.05);
-  padding-top: 25px;
+/* Meta: duración + worker */
+.svc_meta_col {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  align-items: flex-end;
+  gap: 5px;
+  white-space: nowrap;
 }
 
-.expanded_technical_grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 25px;
-}
-
-.technical_info_item {
+.svc_meta_item {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.technical_meta_item {
-  display: none; /* Hide redundant meta in mobile/compact view */
-}
-
-.detail_label {
-  font-size: 0.5rem;
-  font-weight: 800;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--accent-clay);
-  display: block;
-  margin-bottom: 10px;
+  letter-spacing: 0.08em;
 }
 
-.detail_text {
-  font-size: 0.85rem;
-  line-height: 1.6;
+.svc_meta_item svg {
+  color: var(--accent-gold);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+/* Precio + chevron */
+.svc_price_col {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  white-space: nowrap;
+  min-width: 100px;
+  justify-content: flex-end;
+}
+
+.svc_price_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.svc_old_price {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+.svc_price {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 400;
   color: var(--text-slate);
+  letter-spacing: 0.01em;
 }
 
-.service_description_block {
-  max-width: 100%;
-}
-
-.service_description_text {
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: rgba(43, 43, 43, 0.6);
-}
-
-.card_cta_row {
-  margin-top: 10px;
-  display: flex;
-  justify-content: flex-start;
-}
-
-.service_booking_btn {
-  background: var(--text-slate);
-  color: #fff;
-  border: none;
-  padding: 18px 40px;
-  font-size: 0.65rem;
-  font-weight: 800;
+.svc_price_consult {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  cursor: pointer;
-  transition: var(--transition-fast);
+  letter-spacing: 0.1em;
+  color: var(--accent-gold);
 }
 
-.service_booking_btn:hover {
-  background: var(--accent-clay);
-  transform: translateY(-2px);
+/* Flecha expandir */
+.svc_chevron {
+  color: var(--text-faint);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.2s ease;
+  flex-shrink: 0;
 }
 
-.expand_hint {
-  position: absolute;
-  top: 30px;
-  right: 25px;
-  opacity: 0.2;
-  transition: var(--transition-luxe);
+.svc_main:hover .svc_chevron {
+  color: var(--accent-gold);
 }
 
-.service_card:hover .expand_hint {
-  opacity: 1;
-  transform: translateY(-5px);
+.svc_chevron.rotated {
+  transform: rotate(180deg);
 }
 
-@media (max-width: 768px) {
-  .service_card { padding: 25px 20px; }
-  .service_name_text { font-size: 1.15rem; }
-  .service_price_text { font-size: 1rem; }
+/* ── Sección expandida ── */
+.svc_detail {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.svc_detail_open {
+  grid-template-rows: 1fr;
+}
+
+.svc_detail_inner {
+  overflow: hidden;
+  padding: 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.svc_detail_open .svc_detail_inner {
+  padding-bottom: 24px;
+}
+
+.svc_detail_block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.svc_detail_label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sans);
+  font-size: 0.58rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent-gold);
+}
+
+.svc_detail_text {
+  font-size: 0.88rem;
+  line-height: 1.75;
+  color: var(--text-muted);
+  max-width: 680px;
+}
+
+.svc_detail_why {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  opacity: 0.85;
+}
+
+/* Estado activo completo */
+.svc_expanded {
+  border-left: 2px solid var(--accent-gold);
+}
+
+[data-theme="dark"] .svc_expanded {
+  border-left-color: var(--accent-gold);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .svc_main {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 20px 20px;
+  }
+
+  .svc_meta_col {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .svc_price_col {
+    justify-content: flex-start;
+    min-width: auto;
+  }
+
+  .svc_detail_inner {
+    padding: 0 20px;
+  }
+
+  .svc_detail_open .svc_detail_inner {
+    padding-bottom: 20px;
+  }
 }

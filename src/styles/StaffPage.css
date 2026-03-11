@@ -413,6 +413,14 @@
   background-color: var(--surface-card);
 }
 
+[data-theme="dark"] .catalog_cell {
+  background-color: var(--surface-card);
+}
+
+[data-theme="dark"] .catalog_cell:hover {
+  background-color: var(--surface-warm);
+}
+
 /* Estado vacío */
 .catalog_empty {
   grid-column: 1 / -1;

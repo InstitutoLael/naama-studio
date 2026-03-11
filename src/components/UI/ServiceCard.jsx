@@ -1,71 +1,115 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import '../../styles/ServiceCard.css';
+import { ChevronDown, Clock, User, Tag, TrendingDown } from 'lucide-react';
+import './ServiceCard.css';
 
+/**
+ * ServiceCard — Naamá Studio
+ * Campos del servicio:
+ *   name    → Nombre del servicio
+ *   worker  → Especialista(s)
+ *   cat     → Categoría
+ *   price   → Precio actual
+ *   old     → Precio anterior (si existe y no es "---")
+ *   time    → Duración
+ *   desc    → Descripción corta
+ *   why     → Por qué elegirlo (texto extra)
+ */
 const ServiceCard = ({ service, defaultExpanded = false }) => {
-  const hasDetails = service.why || service.desc;
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded && hasDetails);
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
-  const toggleExpand = () => {
-    if (hasDetails) {
-      setIsExpanded(!isExpanded);
-    }
-  };
+  const hasOldPrice = service.old && service.old !== '---' && service.old !== '';
+  const hasDesc     = service.desc && service.desc.trim() !== '';
+  const hasWhy      = service.why  && service.why.trim()  !== '';
+  const hasExtra    = hasDesc || hasWhy;
 
   return (
-    <div 
-      className={`service_card ${isExpanded ? 'expanded' : ''} ${!hasDetails ? 'no_expand' : ''}`} 
-      onClick={toggleExpand}
+    <article
+      className={`svc_card ${expanded ? 'svc_expanded' : ''}`}
+      aria-label={`Servicio: ${service.name}`}
     >
-      <div className="card_top">
-        <div className="service_name_row">
-          <h3 className="service_name_text serif">{service.name}</h3>
-          <span className="service_price_text">${service.price}</span>
+      {/* ── FILA PRINCIPAL (siempre visible) ── */}
+      <div
+        className="svc_main"
+        onClick={() => hasExtra && setExpanded(!expanded)}
+        role={hasExtra ? 'button' : undefined}
+        tabIndex={hasExtra ? 0 : undefined}
+        aria-expanded={hasExtra ? expanded : undefined}
+        onKeyDown={(e) => hasExtra && e.key === 'Enter' && setExpanded(!expanded)}
+      >
+        {/* Nombre + categoría */}
+        <div className="svc_name_col">
+          <h3 className="svc_name serif">{service.name}</h3>
+          {service.cat && (
+            <span className="svc_cat">{service.cat}</span>
+          )}
         </div>
-        
-        <div className="service_meta_data">
-          <span className="meta_tag">{service.time}</span>
-          <span>·</span>
-          <span className="meta_tag">{service.worker}</span>
+
+        {/* Meta: duración + worker */}
+        <div className="svc_meta_col">
+          {service.time && (
+            <span className="svc_meta_item">
+              <Clock size={11} strokeWidth={1.5} aria-hidden="true" />
+              {service.time}
+            </span>
+          )}
+          {service.worker && (
+            <span className="svc_meta_item">
+              <User size={11} strokeWidth={1.5} aria-hidden="true" />
+              {service.worker}
+            </span>
+          )}
+        </div>
+
+        {/* Precio + chevron */}
+        <div className="svc_price_col">
+          <div className="svc_price_wrap">
+            {hasOldPrice && (
+              <span className="svc_old_price">${service.old}</span>
+            )}
+            <span className="svc_price">
+              {service.price
+                ? `$${service.price}`
+                : <span className="svc_price_consult">Consultar</span>
+              }
+            </span>
+          </div>
+          {hasExtra && (
+            <ChevronDown
+              size={15}
+              strokeWidth={1.5}
+              className={`svc_chevron ${expanded ? 'rotated' : ''}`}
+              aria-hidden="true"
+            />
+          )}
         </div>
       </div>
 
-      {isExpanded && (
-        <div className="card_expanded_content reveal">
-          {service.why && (
-            <div className="technical_info_item">
-              <span className="detail_label">Protocolo Técnico</span>
-              <p className="detail_text">{service.why}</p>
-            </div>
-          )}
-          
-          {service.desc && (
-            <div className="service_description_block">
-              <span className="detail_label">Descripción</span>
-              <p className="service_description_text">{service.desc}</p>
-            </div>
-          )}
-          
-          <div className="card_cta_row">
-            <button 
-              className="service_booking_btn"
-              onClick={(e) => {
-                e.stopPropagation();
-                window.open(`https://wa.me/56979520623?text=Hola, me interesa el servicio: *${service.name}*`, '_blank');
-              }}
-            >
-              Consultar Disponibilidad
-            </button>
+      {/* ── DETALLE EXPANDIDO ── */}
+      {hasExtra && (
+        <div className={`svc_detail ${expanded ? 'svc_detail_open' : ''}`}>
+          <div className="svc_detail_inner">
+            {hasDesc && (
+              <div className="svc_detail_block">
+                <span className="svc_detail_label">
+                  <Tag size={10} strokeWidth={1.5} aria-hidden="true" />
+                  Descripción
+                </span>
+                <p className="svc_detail_text">{service.desc}</p>
+              </div>
+            )}
+            {hasWhy && (
+              <div className="svc_detail_block">
+                <span className="svc_detail_label">
+                  <TrendingDown size={10} strokeWidth={1.5} aria-hidden="true" />
+                  ¿Por qué elegirlo?
+                </span>
+                <p className="svc_detail_text svc_detail_why">{service.why}</p>
+              </div>
+            )}
           </div>
         </div>
       )}
-
-      {hasDetails && (
-        <div className="expand_hint">
-          {isExpanded ? <ChevronUp size={14} strokeWidth={1} /> : <ChevronDown size={14} strokeWidth={1} />}
-        </div>
-      )}
-    </div>
+    </article>
   );
 };
 
