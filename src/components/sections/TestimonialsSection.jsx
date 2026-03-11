@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Star, Shield, Leaf, Award } from 'lucide-react';
-import AnimatedCounter from '../UI/AnimatedCounter';
+import AnimatedCounter from '../ui/AnimatedCounter';
 import '../../styles/TestimonialsSection.css';
 
 // ── Reseñas propias (no Google) ──
