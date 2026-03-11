@@ -1,16 +1,18 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
+
 // Lazy-load páginas pesadas para mejorar performance en móvil
 const WorldPage = lazy(() => import('./pages/WorldPage'));
 const StaffPage = lazy(() => import('./pages/StaffPage'));
 const EmpresasPage = lazy(() => import('./pages/EmpresasPage'));
 const BookingFlow = lazy(() => import('./pages/BookingFlow'));
-const NuestraHistoria = lazy(() => import('./pages/NuestraHistoria'));
+const NuestraHistoria = lazy(() => import('./pages/NuestraHistoria')); // Existe pero no se muestra
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const GalleryPage = lazy(() => import('./pages/GalleryPage'));
 const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+
 import BottomNav from './components/UI/BottomNav';
 import WhatsAppPopup from './components/UI/WhatsAppPopup';
 import ScrollProgress from './components/UI/ScrollProgress';
@@ -21,7 +23,7 @@ import Logo from './assets/naama-studio.png';
 import './styles/Global.css';
 import './styles/App.css';
 
-// Scroll to top helper
+// Scroll to top en cada cambio de ruta
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -35,38 +37,27 @@ const App = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Reveal effect on scroll (Blur-in elevation)
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    };
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('reveal-visible');
+        });
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+    );
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('reveal-visible');
-        }
-      });
-    }, observerOptions);
-
-    // Slight delay to let DOM render after page transition
     const timer = setTimeout(() => {
-      const elements = document.querySelectorAll('[class*="reveal"]');
-      elements.forEach(el => observer.observe(el));
+      document.querySelectorAll('[class*="reveal"]').forEach(el => observer.observe(el));
     }, 100);
 
-    return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-    };
+    return () => { clearTimeout(timer); observer.disconnect(); };
   }, [location.pathname]);
 
   return (
@@ -74,8 +65,8 @@ const App = () => {
       <ScrollToTop />
       <ScrollProgress />
       <CustomCursor />
-      
-      {/* Desktop Navigation */}
+
+      {/* Navegación Desktop */}
       <nav className={`main_nav ${scrolled ? 'nav_scrolled' : ''}`} aria-label="Navegación principal">
         <div className="nav_container">
           <Link to="/" className="logo_link" aria-label="Ir al inicio de Naamá Studio">
@@ -102,7 +93,7 @@ const App = () => {
       </nav>
 
       <main className="main_content">
-        <Suspense fallback={<div style={{ minHeight: '100vh' }} />}>
+        <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--bg-linen)' }} />}>
           <PageTransition>
             <Routes location={location}>
               <Route path="/" element={<Home />} />
@@ -110,6 +101,7 @@ const App = () => {
               <Route path="/staff" element={<StaffPage />} />
               <Route path="/empresas" element={<EmpresasPage />} />
               <Route path="/reservar" element={<BookingFlow />} />
+              {/* NuestraHistoria: ruta activa pero sin acceso desde ningún menú */}
               <Route path="/nuestra-historia" element={<NuestraHistoria />} />
               <Route path="/contacto" element={<ContactPage />} />
               <Route path="/galeria" element={<GalleryPage />} />
@@ -120,13 +112,13 @@ const App = () => {
         </Suspense>
       </main>
 
-      {/* Mobile Navigation (Ergonomic Bottom Nav) */}
+      {/* Navegación Mobile (Bottom Nav) */}
       <BottomNav />
 
-      {/* WhatsApp Lead Capture Popup */}
+      {/* WhatsApp Popup */}
       <WhatsAppPopup />
 
-      {/* Botones Flotantes: WhatsApp e Instagram */}
+      {/* Botones Flotantes */}
       <div className="floating_buttons">
         <a
           href="https://wa.me/56979520623?text=Hola! Me gustaría saber más sobre los servicios de Naamá Studio."
@@ -159,18 +151,18 @@ const App = () => {
           <div className="footer_brand">
             <img src={Logo} alt="Naamá Studio" className="footer_logo" />
             <p className="footer_text">
-              Naamá Studio: El arte de cuidar, la belleza de descansar. 
+              Naamá Studio: El arte de cuidar, la belleza de descansar.
               Excelencia técnica en el corazón de San Miguel.
             </p>
           </div>
-          
+
           <div className="footer_nav_col">
             <span className="footer_label">Navegar</span>
             <Link to="/staff" className="footer_link">Precios & Staff</Link>
             <Link to="/galeria" className="footer_link">Galería</Link>
             <Link to="/gift-cards" className="footer_link">Gift Cards</Link>
             <Link to="/empresas" className="footer_link">Empresas</Link>
-            <Link to="/nuestra-historia" className="footer_link">Nuestra Historia</Link>
+            {/* "Nuestra Historia" eliminada del footer — nadie puede verla */}
             <Link to="/contacto" className="footer_link">Contacto</Link>
           </div>
 
@@ -193,7 +185,7 @@ const App = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="footer_credits">
           <p>© 2026 Naamá Studio. Todos los derechos reservados.</p>
           <p>Hospitalidad & Técnica</p>
