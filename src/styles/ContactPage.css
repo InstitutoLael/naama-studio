@@ -1,3 +1,8 @@
+/* ============================================================
+   NAAMÁ STUDIO — ContactPage.css
+   Paleta: Negro Humo / Blanco Lino / Café Nogal / Oro Viejo
+   ============================================================ */
+
 .contact_page {
   background-color: var(--bg-linen);
   min-height: 100vh;
@@ -5,8 +10,11 @@
   padding-bottom: 120px;
 }
 
+/* ============================================================
+   HEADER
+   ============================================================ */
 .contact_header {
-  max-width: 1000px;
+  max-width: 900px;
   margin: 0 auto 100px;
   text-align: center;
   padding: 0 60px;
@@ -14,65 +22,77 @@
 
 .contact_title {
   font-size: clamp(3rem, 7vw, 5.5rem);
-  line-height: 1;
-  margin-bottom: 30px;
+  font-weight: 300;
+  line-height: 1.05;
+  margin-bottom: 28px;
+  color: var(--text-slate);
 }
 
-.text_clay { color: var(--accent-clay); }
+.text_gold { color: var(--accent-gold); }
 
-/* ========== Grid: Form + Info ========== */
+/* ============================================================
+   GRID FORM + INFO
+   ============================================================ */
 .contact_grid {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   gap: 80px;
+  align-items: start;
   margin-bottom: 120px;
 }
 
-/* ========== Form ========== */
+/* ============================================================
+   FORMULARIO
+   ============================================================ */
 .contact_form {
   display: flex;
   flex-direction: column;
-  gap: 35px;
+  gap: 32px;
 }
 
-/* Form styles now in Global.css */
+/* form_group, form_label, form_input, form_textarea
+   vienen de Global.css */
 
 .contact_submit_btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
   background: var(--text-slate);
   color: var(--bg-linen);
-  padding: 20px 45px;
+  padding: 17px 40px;
   border: none;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   cursor: pointer;
   transition: var(--transition-fast);
   width: fit-content;
+  text-decoration: none;
 }
 
 .contact_submit_btn:hover {
-  background: var(--accent-clay);
+  background: var(--accent-walnut);
   transform: translateY(-2px);
 }
 
-/* ========== Info Sidebar ========== */
+/* ============================================================
+   INFO SIDEBAR
+   ============================================================ */
 .contact_info {
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  gap: 36px;
 }
 
+/* Tarjeta de estado: abierto / cerrado */
 .contact_status_card {
-  padding: 25px 30px;
+  padding: 22px 28px;
   background: var(--surface-card);
   border: var(--border-fine);
 }
-
 
 .status_indicator {
   display: flex;
@@ -84,168 +104,240 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  animation: pulse 2s ease infinite;
+  flex-shrink: 0;
 }
 
 .status_indicator.open .status_dot {
-  background: #4CAF50;
-  box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+  background: #5aad6a;
+  box-shadow: 0 0 8px rgba(90, 173, 106, 0.45);
+  animation: pulse_dot 2.2s ease infinite;
 }
 
 .status_indicator.closed .status_dot {
-  background: var(--accent-clay);
-  box-shadow: 0 0 8px rgba(176, 141, 121, 0.4);
-  animation: none;
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px rgba(166, 137, 102, 0.35);
 }
 
-@keyframes pulse {
+@keyframes pulse_dot {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.3); }
+  50%       { opacity: 0.6; transform: scale(1.35); }
 }
 
 .status_text {
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.2em;
+  color: var(--text-slate);
 }
 
+/* Bloques de info */
 .contact_info_block {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .info_icon_row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  color: var(--accent-clay);
+  gap: 9px;
+  color: var(--accent-gold);
+  margin-bottom: 4px;
 }
 
 .info_block_label {
+  font-family: var(--font-sans);
   font-size: 0.6rem;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--accent-clay);
+  letter-spacing: 0.22em;
+  color: var(--accent-gold);
 }
 
+/* Horarios */
 .schedule_row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  align-items: center;
+  padding: 9px 0;
   border-bottom: var(--border-fine);
 }
 
+.schedule_row:last-child {
+  border-bottom: none;
+}
+
 .schedule_day {
+  font-family: var(--font-sans);
   font-size: 0.85rem;
   color: var(--text-slate);
 }
 
 .schedule_hours {
-  font-size: 0.85rem;
   font-family: var(--font-serif);
-  color: rgba(43, 43, 43, 0.6);
+  font-size: 0.85rem;
+  color: var(--text-muted);
 }
 
-[data-theme="dark"] .schedule_hours {
-  color: rgba(232, 228, 220, 0.6);
+.schedule_closed {
+  color: var(--text-faint);
+  font-style: italic;
 }
 
+/* Textos e íconos */
 .info_text {
   font-size: 0.9rem;
-  color: rgba(43, 43, 43, 0.6);
-  line-height: 1.6;
-}
-
-[data-theme="dark"] .info_text {
-  color: rgba(232, 228, 220, 0.6);
+  color: var(--text-muted);
+  line-height: 1.65;
 }
 
 .info_link {
+  display: block;
   font-size: 0.85rem;
   color: var(--text-slate);
-  transition: var(--transition-fast);
   padding: 5px 0;
+  transition: var(--transition-fast);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
 }
 
 .info_link:hover {
-  color: var(--accent-clay);
-  padding-left: 5px;
+  color: var(--accent-walnut);
+  border-bottom-color: var(--accent-gold);
+  padding-left: 4px;
 }
 
-/* ========== Map ========== */
+/* ============================================================
+   MAPA
+   ============================================================ */
 .contact_map_section {
   margin-bottom: 120px;
 }
 
 .contact_map {
   width: 100%;
-  height: 400px;
+  height: 420px;
   border: none;
-  filter: grayscale(100%) contrast(110%);
-  transition: filter 0.6s ease;
+  display: block;
+  filter: grayscale(100%) contrast(108%) brightness(0.96);
+  transition: filter 0.8s ease;
 }
 
 .contact_map:hover {
-  filter: grayscale(0%) contrast(100%);
+  filter: grayscale(0%) contrast(100%) brightness(1);
 }
 
-/* ========== FAQ ========== */
+.map_cta_row {
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.map_directions_btn {
+  background: transparent;
+  color: var(--text-slate);
+  border: var(--border-medium);
+}
+
+.map_directions_btn:hover {
+  background: var(--text-slate);
+  color: var(--bg-linen);
+  border-color: var(--text-slate);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
 .contact_faq {
-  padding-bottom: 100px;
+  padding-bottom: 80px;
 }
 
 .faq_title {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 300;
 }
 
 .faq_list {
-  margin-top: 60px;
+  margin-top: 56px;
 }
 
 .faq_item {
   border-bottom: var(--border-fine);
-  padding: 30px 0;
+  padding: 28px 0;
   cursor: pointer;
-  transition: var(--transition-fast);
+  transition: padding 0.3s ease;
+}
+
+.faq_item:first-child {
+  border-top: var(--border-fine);
 }
 
 .faq_item:hover {
-  padding-left: 10px;
+  padding-left: 6px;
+}
+
+.faq_item.open {
+  padding-left: 0;
 }
 
 .faq_question {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 1.2rem;
+  gap: 20px;
+  font-size: 1.1rem;
+  color: var(--text-slate);
+}
+
+.faq_item.open .faq_question {
+  color: var(--accent-walnut);
 }
 
 .faq_chevron {
-  transition: transform 0.3s ease;
-  opacity: 0.3;
   flex-shrink: 0;
+  color: var(--text-faint);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              color 0.3s ease;
+}
+
+.faq_item.open .faq_chevron {
+  color: var(--accent-gold);
 }
 
 .faq_chevron.rotated {
   transform: rotate(180deg);
 }
 
+/* Animación suave del contenido */
+.faq_answer_wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.faq_answer_wrapper.visible {
+  grid-template-rows: 1fr;
+}
+
+.faq_answer_wrapper > p {
+  overflow: hidden;
+}
+
 .faq_answer {
-  margin-top: 20px;
+  padding-top: 18px;
   font-size: 0.95rem;
-  line-height: 1.8;
-  color: rgba(43, 43, 43, 0.6);
-  max-width: 80%;
+  line-height: 1.85;
+  color: var(--text-muted);
+  max-width: 78%;
 }
 
-[data-theme="dark"] .faq_answer {
-  color: rgba(232, 228, 220, 0.6);
-}
-
-/* ========== Responsive ========== */
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
 @media (max-width: 1024px) {
   .contact_grid {
     grid-template-columns: 1fr;
@@ -256,6 +348,30 @@
 
 @media (max-width: 768px) {
   .contact_page { padding-top: 120px; }
-  .contact_map { height: 300px; }
-  .faq_question { font-size: 1rem; }
+
+  .contact_header {
+    margin-bottom: 60px;
+    padding: 0 24px;
+  }
+
+  .contact_title { font-size: 2.8rem; }
+
+  .contact_map   { height: 300px; }
+
+  .faq_question  { font-size: 0.95rem; }
+  .faq_answer    { max-width: 100%; }
+
+  .contact_submit_btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .map_directions_btn {
+    width: calc(100% - 48px);
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact_title { font-size: 2.2rem; }
 }
