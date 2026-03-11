@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { MapPin, Clock, Phone, Send, ChevronDown } from 'lucide-react';
-import SEOHead from '../components/SEOHead';
+import SEOHead from '../components/shared/SEOHead';
 import '../styles/Global.css';
 import '../styles/ContactPage.css';
 

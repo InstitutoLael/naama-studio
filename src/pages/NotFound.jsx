@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import SEOHead from '../components/SEOHead';
+import SEOHead from '../components/shared/SEOHead';
 import '../styles/NotFound.css';
 
 const NotFound = () => {

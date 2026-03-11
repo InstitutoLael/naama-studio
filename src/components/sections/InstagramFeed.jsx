@@ -1,6 +1,6 @@
 import React from 'react';
-import { useInstagramFeed } from '../hooks/useInstagramFeed';
-import '../styles/InstagramFeed.css';
+import { useInstagramFeed } from '../../hooks/useInstagramFeed';
+import '../../styles/InstagramFeed.css';
 
 const InstagramFeed = () => {
   // Use environment variable for the token

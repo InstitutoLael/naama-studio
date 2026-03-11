@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { mundos } from '../data/categories';
-import SEOHead from '../components/SEOHead';
-import TestimonialsSection from '../components/TestimonialsSection';
-import InstagramFeed from '../components/InstagramFeed';
+import SEOHead from '../components/shared/SEOHead';
+import TestimonialsSection from '../components/sections/TestimonialsSection';
+import InstagramFeed from '../components/sections/InstagramFeed';
 import { Gift, ArrowRight } from 'lucide-react';
 import SalonArch from '../assets/salon-arch.png';
 import '../styles/Global.css';

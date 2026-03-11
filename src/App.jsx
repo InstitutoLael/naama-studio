@@ -13,12 +13,12 @@ const GalleryPage = lazy(() => import('./pages/GalleryPage'));
 const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
-import BottomNav from './components/UI/BottomNav';
-import WhatsAppPopup from './components/UI/WhatsAppPopup';
-import ScrollProgress from './components/UI/ScrollProgress';
-import CustomCursor from './components/UI/CustomCursor';
-import ThemeToggle from './components/UI/ThemeToggle';
-import PageTransition from './components/PageTransition';
+import BottomNav from './components/layout/BottomNav';
+import WhatsAppPopup from './components/layout/WhatsAppPopup';
+import ScrollProgress from './components/ui/ScrollProgress';
+import CustomCursor from './components/ui/CustomCursor';
+import ThemeToggle from './components/ui/ThemeToggle';
+import PageTransition from './components/shared/PageTransition';
 import Logo from './assets/naama-studio.png';
 import './styles/Global.css';
 import './styles/App.css';

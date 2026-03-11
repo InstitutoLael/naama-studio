@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/InstagramReels.css';
+import '../../styles/InstagramReels.css';
 
 // Un utilitario simple para extraer el ID del reel desde el link de Instagram
 const getReelId = (url) => {

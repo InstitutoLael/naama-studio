@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, ArrowRight, X } from 'lucide-react';
 import { servicesData } from '../data/servicesData';
-import ServiceCard from '../components/UI/ServiceCard';
-import SEOHead from '../components/SEOHead';
+import ServiceCard from '../components/ui/ServiceCard';
+import SEOHead from '../components/shared/SEOHead';
 import '../styles/Global.css';
 import '../styles/StaffPage.css';
 

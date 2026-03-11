@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDown, Clock, User, Tag, TrendingDown } from 'lucide-react';
-import './ServiceCard.css';
+import '../../styles/ServiceCard.css';
 
 /**
  * ServiceCard — Naamá Studio

@@ -1,6 +1,6 @@
 import React from 'react';
 import { MessageCircle, Mail, MapPin } from 'lucide-react';
-import SEOHead from '../components/SEOHead';
+import SEOHead from '../components/shared/SEOHead';
 import { b2bPacks } from '../data/b2bPacks';
 import '../styles/Global.css';
 import '../styles/EmpresasPage.css';

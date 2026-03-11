@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Gift, Heart, Sparkles, Star, ArrowRight, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import SEOHead from '../components/SEOHead';
+import SEOHead from '../components/shared/SEOHead';
 import '../styles/Global.css';
 import '../styles/GiftCardsPage.css';
 

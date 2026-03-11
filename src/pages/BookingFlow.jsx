@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Check } from 'lucide-react';
-import SEOHead from '../components/SEOHead';
+import SEOHead from '../components/shared/SEOHead';
 import '../styles/BookingFlow.css';
 
 const BookingFlow = () => {
