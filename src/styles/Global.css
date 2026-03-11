@@ -1,81 +1,114 @@
+/* ============================================================
+   NAAMÁ STUDIO — Global.css
+   Rebranding 2025/2026 — "Lujo Silencioso / Minimalismo Cálido"
+   Paleta oficial:
+     Negro Humo  #1A1A1A — textos, logo
+     Blanco Lino #F9F7F2 — fondos
+     Café Nogal  #4B3621 — detalles madera
+     Oro Viejo   #A68966 — acentos, iconos
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap');
+
 :root {
-  /* "La Creación" Palette */
-  --bg-linen: #f4f1ea;
-  --surface-card: #ffffff;
-  --text-slate: #2b2b2b;
-  --text-muted: rgba(43, 43, 43, 0.55);
-  --accent-clay: #b08d79;
-  --accent-sand: #e5d3b3;
-  --secondary-olive: #6d7363;
+  /* ── Paleta oficial del rebranding ── */
+  --bg-linen:       #F9F7F2;   /* Blanco Lino — fondo principal */
+  --surface-card:   #FFFFFF;   /* Blanco puro — tarjetas */
+  --surface-warm:   #F2EDE4;   /* Tono intermedio cálido para superficies secundarias */
+  --text-slate:     #1A1A1A;   /* Negro Humo — textos principales */
+  --text-muted:     rgba(26, 26, 26, 0.50);
+  --text-faint:     rgba(26, 26, 26, 0.30);
+  --accent-gold:    #A68966;   /* Oro Viejo — acentos, iconos, highlights */
+  --accent-walnut:  #4B3621;   /* Café Nogal — detalles cálidos */
+  --accent-gold-light: rgba(166, 137, 102, 0.15);
 
-  --border-fine: 1px solid rgba(43, 43, 43, 0.08);
-  --border-medium: 1px solid rgba(43, 43, 43, 0.15);
+  /* Bordes */
+  --border-fine:    1px solid rgba(26, 26, 26, 0.08);
+  --border-medium:  1px solid rgba(26, 26, 26, 0.15);
+  --border-accent:  1px solid rgba(166, 137, 102, 0.40);
 
-  /* Typography */
-  --font-serif: "Playfair Display", serif;
-  --font-sans: "Inter", sans-serif;
+  /* Tipografía — Cormorant Garamond (serif elegante) + Outfit (sans moderno) */
+  --font-serif:     'Cormorant Garamond', Georgia, serif;
+  --font-sans:      'Outfit', system-ui, sans-serif;
 
-  /* Transitions */
+  /* Transiciones */
   --transition-luxe: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --max-width: 1400px;
 
+  --max-width: 1400px;
   --safe-bottom: env(safe-area-inset-bottom, 20px);
 }
 
-/* ========== Dark Mode — Rediseñado ========== */
+/* ── Modo Oscuro — Negro Humo cálido ── */
 [data-theme="dark"] {
-  --bg-linen: #18160f;           /* Fondo: negro muy cálido, casi marrón */
-  --surface-card: #232018;       /* Tarjetas: un tono más claro para que sobresalgan */
-  --text-slate: #f0ebe0;         /* Texto: crema brillante, bien legible */
-  --text-muted: rgba(240, 235, 224, 0.5);
-  --accent-clay: #d4a98a;        /* Clay más brillante y visible en oscuro */
-  --accent-sand: #c4a882;        /* Sand dorado visible */
-  --secondary-olive: #9aa190;
+  --bg-linen:       #141210;
+  --surface-card:   #1E1B17;
+  --surface-warm:   #252018;
+  --text-slate:     #F0EBE0;
+  --text-muted:     rgba(240, 235, 224, 0.52);
+  --text-faint:     rgba(240, 235, 224, 0.28);
+  --accent-gold:    #C4A07A;
+  --accent-walnut:  #8A6845;
+  --accent-gold-light: rgba(196, 160, 122, 0.12);
 
-  --border-fine: 1px solid rgba(240, 235, 224, 0.09);
-  --border-medium: 1px solid rgba(240, 235, 224, 0.18);
+  --border-fine:    1px solid rgba(240, 235, 224, 0.07);
+  --border-medium:  1px solid rgba(240, 235, 224, 0.14);
+  --border-accent:  1px solid rgba(196, 160, 122, 0.35);
 }
 
-* {
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background-color: var(--bg-linen);
   color: var(--text-slate);
   font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.65;
   overflow-x: hidden;
-  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   cursor: default;
+  /* Arregla el bug de pantalla negra: transición suave en lugar de flash */
   transition:
-    background-color 0.6s ease,
-    color 0.6s ease;
+    background-color 0.5s ease,
+    color 0.5s ease;
 }
 
-h1,
-h2,
-h3,
-h4,
-.serif {
+/* ── Tipografía ── */
+h1, h2, h3, h4, h5, .serif {
   font-family: var(--font-serif);
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.1;
+  color: var(--text-slate);
 }
+
+h1 { font-size: clamp(2.8rem, 6vw, 5.5rem); }
+h2 { font-size: clamp(2rem, 4vw, 3.5rem); }
+h3 { font-size: clamp(1.4rem, 2.5vw, 2rem); }
+h4 { font-size: clamp(1.1rem, 1.8vw, 1.4rem); }
 
 p {
   font-size: 1rem;
   letter-spacing: 0.01em;
+  color: var(--text-slate);
 }
 
 a {
   text-decoration: none;
   color: inherit;
-  transition: var(--transition-luxe);
+  transition: var(--transition-fast);
 }
 
 img {
@@ -84,7 +117,14 @@ img {
   display: block;
 }
 
-/* ========== Utility Classes ========== */
+button {
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+
+/* ============================================================
+   UTILIDADES
+   ============================================================ */
 .container {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -92,30 +132,35 @@ img {
 }
 
 .section-padding {
-  padding: 180px 0;
+  padding: 160px 0;
 }
 
-.text-center {
-  text-align: center;
-}
+.text-center   { text-align: center; }
+.text-uppercase { text-transform: uppercase; }
 
-.text-uppercase {
+/* Etiqueta de categoría — letras espaciadas doradas */
+.label-tag {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.3em;
+  color: var(--accent-gold);
 }
 
 .sr-only {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
 }
 
-/* ========== Global Form Styles ========== */
+/* ============================================================
+   FORMULARIOS
+   ============================================================ */
 .form_group {
   display: flex;
   flex-direction: column;
@@ -124,35 +169,31 @@ img {
 
 .form_label {
   font-size: 0.6rem;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--accent-clay);
+  letter-spacing: 0.22em;
+  color: var(--accent-gold);
 }
 
 .form_input {
   background: transparent;
   border: none;
   border-bottom: var(--border-medium);
-  padding: 15px 0;
+  padding: 14px 0;
   font-family: var(--font-serif);
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--text-slate);
   outline: none;
-  transition: var(--transition-fast);
+  transition: border-color 0.3s ease;
   width: 100%;
 }
 
 .form_input:focus {
-  border-bottom-color: var(--accent-clay);
+  border-bottom-color: var(--accent-gold);
 }
 
 .form_input::placeholder {
-  color: rgba(43, 43, 43, 0.3);
-}
-
-[data-theme="dark"] .form_input::placeholder {
-  color: rgba(232, 228, 220, 0.3);
+  color: var(--text-faint);
 }
 
 .form_textarea {
@@ -162,7 +203,9 @@ img {
   font-size: 1rem;
 }
 
-/* ========== Shared Section Headers ========== */
+/* ============================================================
+   ENCABEZADOS DE SECCIÓN COMPARTIDOS
+   ============================================================ */
 .section_header_boutique {
   display: flex;
   justify-content: space-between;
@@ -173,55 +216,55 @@ img {
 
 .world_item_tag {
   font-size: 0.6rem;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  color: var(--accent-clay);
+  color: var(--accent-gold);
   margin-bottom: 15px;
   display: block;
 }
 
 .world_category_label {
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5em;
-  color: var(--accent-clay);
+  color: var(--accent-gold);
   margin-bottom: 30px;
   display: block;
 }
 
 .world_description {
-  font-size: 1.25rem;
-  line-height: 1.8;
-  color: rgba(43, 43, 43, 0.6);
+  font-size: 1.2rem;
+  line-height: 1.85;
+  color: var(--text-muted);
   max-width: 700px;
 }
 
-[data-theme="dark"] .world_description {
-  color: rgba(232, 228, 220, 0.6);
-}
-
-/* ========== Glassmorphism ========== */
+/* ============================================================
+   GLASSMORPHISM
+   ============================================================ */
 .glass {
-  background: rgba(244, 241, 234, 0.85);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(249, 247, 242, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 [data-theme="dark"] .glass {
-  background: rgba(26, 24, 22, 0.85);
+  background: rgba(20, 18, 16, 0.88);
 }
 
-/* ========== Animations: Blur-In Elevation ========== */
+/* ============================================================
+   ANIMACIONES — Blur-In Elevation
+   ============================================================ */
 [class*="reveal"] {
   opacity: 0;
-  filter: blur(10px);
-  transform: translateY(30px);
+  filter: blur(8px);
+  transform: translateY(24px);
   transition:
-    opacity 1.2s ease,
+    opacity 1.1s ease,
     transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1.2s ease;
+    filter 1.1s ease;
 }
 
 .reveal-visible {
@@ -230,19 +273,16 @@ img {
   transform: translateY(0);
 }
 
-.delay-1 {
-  transition-delay: 0.1s;
-}
-.delay-2 {
-  transition-delay: 0.2s;
-}
-.delay-3 {
-  transition-delay: 0.4s;
-}
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.25s; }
+.delay-3 { transition-delay: 0.45s; }
+.delay-4 { transition-delay: 0.65s; }
 
-/* ========== Focus States (Accessibility) ========== */
+/* ============================================================
+   ACCESIBILIDAD — Focus States
+   ============================================================ */
 :focus-visible {
-  outline: 2px solid var(--accent-clay);
+  outline: 2px solid var(--accent-gold);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -252,103 +292,46 @@ a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--accent-clay);
+  outline: 2px solid var(--accent-gold);
   outline-offset: 3px;
 }
 
-/* Remove outline for mouse users */
 :focus:not(:focus-visible) {
   outline: none;
 }
 
-/* ========== Responsive Typography ========== */
-@media (max-width: 768px) {
-  h1 {
-    font-size: 2.8rem;
-  }
-  p {
-    font-size: 0.95rem;
-  }
-  .container {
-    padding: 0 30px;
-  }
-  .section_header_boutique {
-    padding: 0 30px;
-  }
-  .section-padding {
-    padding: 100px 0;
-  }
-}
-
-/* ========== Image Hover Effects ========== */
-.image-reveal {
-  overflow: hidden;
-  position: relative;
-}
-
-.image-reveal img {
-  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.image-reveal:hover img {
-  transform: scale(1.05);
-}
-
-/* Editorial B&W + Color on Hover */
-img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]) {
-  filter: grayscale(100%) contrast(110%);
-  transition: var(--transition-luxe);
-}
-
-img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]):hover {
-  filter: grayscale(0%) contrast(100%);
-}
-
-/* ========== Shimmer Skeleton Animation ========== */
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-/* ========== Scroll Progress Bar ========== */
+/* ============================================================
+   SCROLL PROGRESS BAR
+   ============================================================ */
 .scroll_progress {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--accent-clay), var(--accent-sand));
+  background: linear-gradient(90deg, var(--accent-walnut), var(--accent-gold));
   z-index: 9999;
   transition: width 0.1s linear;
   pointer-events: none;
 }
 
-/* ========== Custom Cursor (Desktop Only) ========== */
+/* ============================================================
+   CURSOR PERSONALIZADO (Solo desktop)
+   ============================================================ */
 @media (pointer: fine) {
   .custom_cursor_dot {
     position: fixed;
-    width: 6px;
-    height: 6px;
-    background: var(--accent-clay);
+    width: 6px; height: 6px;
+    background: var(--accent-gold);
     border-radius: 50%;
     pointer-events: none;
     z-index: 10000;
     transform: translate(-50%, -50%);
-    transition:
-      width 0.2s ease,
-      height 0.2s ease,
-      background 0.2s ease;
-    mix-blend-mode: difference;
+    transition: width 0.2s ease, height 0.2s ease, background 0.2s ease;
   }
 
   .custom_cursor_ring {
     position: fixed;
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--accent-clay);
+    width: 36px; height: 36px;
+    border: 1px solid var(--accent-gold);
     border-radius: 50%;
     pointer-events: none;
     z-index: 10000;
@@ -358,31 +341,97 @@ img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]):hover {
       height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
       border-color 0.3s ease,
       opacity 0.3s ease;
-    opacity: 0.4;
+    opacity: 0.35;
   }
 
   .custom_cursor_dot.hovering {
-    width: 12px;
-    height: 12px;
-    background: var(--accent-sand);
+    width: 10px; height: 10px;
+    background: var(--accent-walnut);
   }
 
   .custom_cursor_ring.hovering {
-    width: 50px;
-    height: 50px;
-    opacity: 0.6;
-    border-color: var(--accent-sand);
+    width: 48px; height: 48px;
+    opacity: 0.55;
+    border-color: var(--accent-walnut);
   }
 }
 
-/* ========== Number Counter Animation ========== */
+/* ============================================================
+   IMÁGENES — Efecto editorial B&W + color al hover
+   ============================================================ */
+.image-reveal {
+  overflow: hidden;
+  position: relative;
+}
+
+.image-reveal img {
+  transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.image-reveal:hover img {
+  transform: scale(1.04);
+}
+
+img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]) {
+  filter: grayscale(100%) contrast(108%);
+  transition: var(--transition-luxe);
+}
+
+img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]):hover {
+  filter: grayscale(0%) contrast(100%);
+}
+
+/* ============================================================
+   SKELETON / SHIMMER
+   ============================================================ */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-warm) 25%,
+    rgba(166, 137, 102, 0.08) 50%,
+    var(--surface-warm) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   CONTADOR ANIMADO
+   ============================================================ */
 @keyframes countUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .container { padding: 0 40px; }
+  .section_header_boutique { padding: 0 40px; }
+  .section-padding { padding: 120px 0; }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 24px; }
+  .section_header_boutique {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 0 24px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .section-padding { padding: 80px 0; }
+  h1 { font-size: 2.4rem; }
+  p  { font-size: 0.95rem; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0 18px; }
+  .section-padding { padding: 60px 0; }
 }
