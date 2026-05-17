@@ -2,9 +2,11 @@ import { useEffect } from 'react';
 
 export const useReveal = (dependency) => {
   useEffect(() => {
+    let observer = null;
+    
     // Add small delay to ensure all DOM elements are fully rendered before observing
     const timer = setTimeout(() => {
-      const observer = new IntersectionObserver(
+      observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
@@ -21,17 +23,14 @@ export const useReveal = (dependency) => {
 
       const elements = document.querySelectorAll('.reveal');
       elements.forEach((el) => observer.observe(el));
-
-      return () => {
-        elements.forEach((el) => {
-          try {
-            observer.unobserve(el);
-          } catch (e) {}
-        });
-      };
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (observer) {
+        observer.disconnect();
+      }
+    };
   }, [dependency]);
 };
 
