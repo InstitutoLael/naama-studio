@@ -19,6 +19,7 @@ import ScrollProgress from './components/ui/ScrollProgress';
 import CustomCursor from './components/ui/CustomCursor';
 import ThemeToggle from './components/ui/ThemeToggle';
 import PageTransition from './components/shared/PageTransition';
+import useReveal from './hooks/useReveal';
 const Logo = '/naama-studio.png'; // Desde /public/ — nombre estable, sin hash de Vite
 import './styles/Global.css';
 import './styles/App.css';
@@ -42,23 +43,9 @@ const App = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Reveal effect on scroll (Blur-in elevation)
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.classList.add('reveal-visible');
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
+  // Hook global de animaciones premium para observar todos los .reveal en cambio de ruta
+  useReveal(location.pathname);
 
-    const timer = setTimeout(() => {
-      document.querySelectorAll('[class*="reveal"]').forEach(el => observer.observe(el));
-    }, 100);
-
-    return () => { clearTimeout(timer); observer.disconnect(); };
-  }, [location.pathname]);
 
   return (
     <div className="naama_app">
@@ -147,48 +134,66 @@ const App = () => {
       </div>
 
       <footer className="footer" role="contentinfo">
-        <div className="footer_grid">
-          <div className="footer_brand">
-            <img src={Logo} alt="Naamá Studio" className="footer_logo" />
-            <p className="footer_text">
-              Naamá Studio: El arte de cuidar, la belleza de descansar.
-              Excelencia técnica en el corazón de San Miguel.
-            </p>
-          </div>
-
-          <div className="footer_nav_col">
-            <span className="footer_label">Navegar</span>
-            <Link to="/staff" className="footer_link">Precios & Staff</Link>
-            <Link to="/galeria" className="footer_link">Galería</Link>
-            <Link to="/gift-cards" className="footer_link">Gift Cards</Link>
-            <Link to="/empresas" className="footer_link">Empresas</Link>
-            {/* "Nuestra Historia" eliminada del footer — nadie puede verla */}
-            <Link to="/contacto" className="footer_link">Contacto</Link>
-          </div>
-
-          <div className="footer_location">
-            <span className="footer_label">Presencia</span>
-            <p className="footer_text">Arcadia 1297, San Miguel</p>
-            <p className="footer_text">SCL, Chile</p>
-            <span className="footer_label" style={{ marginTop: '20px' }}>Horarios</span>
-            <p className="footer_text" style={{ fontSize: '0.8rem' }}>Lun – Vie: 09:00 – 19:00</p>
-            <p className="footer_text" style={{ fontSize: '0.8rem' }}>Sábado: 09:00 – 17:00</p>
-            <p className="footer_text" style={{ fontSize: '0.8rem' }}>Domingo: Cerrado</p>
-          </div>
-
-          <div className="footer_social">
-            <span className="footer_label">Digital</span>
-            <div className="footer_social_links">
-              <a href="https://www.instagram.com/naamastudio_/" target="_blank" rel="noopener noreferrer" className="social_link" aria-label="Instagram de Naamá Studio">Instagram @naamastudio_</a>
-              <a href="https://wa.me/56979520623" target="_blank" rel="noopener noreferrer" className="social_link" aria-label="WhatsApp de Naamá Studio">WhatsApp +56 9 7952 0623</a>
-              <a href="mailto:naamastudiospa@gmail.com" className="social_link" aria-label="Email de Naamá Studio">naamastudiospa@gmail.com</a>
+        <div className="footer_upper">
+          {/* Columna 1 — Marca */}
+          <div className="footer_brand_col">
+            <h3 className="footer_brand_title serif">Naamá Studio</h3>
+            <span className="footer_brand_subtitle">Beauty & Wellness House</span>
+            <p className="footer_brand_tagline">"Tu bienestar, nuestra dedicación"</p>
+            <div className="footer_brand_socials">
+              <a 
+                href="https://www.instagram.com/naamastudio_/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="brand_social_btn"
+                aria-label="Instagram de Naamá Studio"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                </svg>
+              </a>
+              <a 
+                href="https://wa.me/56979520623" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="brand_social_btn"
+                aria-label="WhatsApp de Naamá Studio"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                  <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.455L0 24zm6.59-4.846c1.62.963 3.4 1.47 5.216 1.47 5.617 0 10.185-4.57 10.188-10.187.002-2.72-1.055-5.279-2.973-7.199-1.921-1.92-4.475-2.976-7.199-2.977-5.626 0-10.196 4.568-10.2 10.189-.001 1.897.501 3.75 1.455 5.378l-.961 3.51 3.593-.943zm11.13-7.794c-.302-.15-1.785-.882-2.057-.981-.273-.099-.471-.149-.669.149-.198.299-.768.98-.941 1.178-.173.198-.347.223-.649.074-.302-.15-1.272-.469-2.419-1.494-.893-.797-1.495-1.782-1.67-2.081-.174-.3-.018-.462.132-.61.135-.133.303-.35.454-.524.152-.173.202-.297.302-.497.1-.198.05-.371-.025-.521-.075-.15-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.568-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.785-.73 2.033-1.433.248-.704.248-1.306.173-1.433-.075-.127-.272-.201-.575-.351z" />
+                </svg>
+              </a>
             </div>
+          </div>
+
+          {/* Columna 2 — Navegación */}
+          <div className="footer_nav_col">
+            <h4 className="footer_col_title">Explora</h4>
+            <div className="footer_links_grid">
+              <Link to="/" className="footer_nav_link">Inicio</Link>
+              <Link to="/staff" className="footer_nav_link">Servicios</Link>
+              <Link to="/galeria" className="footer_nav_link">Galería</Link>
+              <Link to="/nuestra-historia" className="footer_nav_link">Nosotros</Link>
+              <Link to="/contacto" className="footer_nav_link">Contacto</Link>
+              <Link to="/reservar" className="footer_nav_link">Reservar</Link>
+            </div>
+          </div>
+
+          {/* Columna 3 — Contacto */}
+          <div className="footer_contact_col">
+            <h4 className="footer_col_title">Encuéntranos</h4>
+            <p className="footer_contact_text">Arcadia 1297, San Miguel, Santiago</p>
+            <p className="footer_contact_text font_serif">+56 9 7952 0623</p>
+            <p className="footer_contact_text email_small">naamastudiospa@gmail.com</p>
+            <p className="footer_contact_text sch_text">Horario: Lun-Vie 09-19h · Sáb 09-17h</p>
           </div>
         </div>
 
-        <div className="footer_credits">
-          <p>© 2026 Naamá Studio. Todos los derechos reservados.</p>
-          <p>Hospitalidad & Técnica</p>
+        <div className="footer_separator" />
+
+        <div className="footer_lower">
+          <span className="footer_copyright">© 2026 Naamá Studio SpA · Todos los derechos reservados</span>
+          <span className="footer_author">Desarrollado con ♥ por Instituto Lael</span>
         </div>
       </footer>
     </div>

@@ -127,29 +127,17 @@ const Home = () => {
       <section className="premium_essence">
         <div className="container premium_essence_layout">
           {/* Columna Izquierda: Elemento Visual */}
-          <motion.div 
-            className="premium_essence_visual"
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
+          <div className="premium_essence_visual reveal reveal-left">
             <img 
               src={EsenciaLogo} 
               alt="Naamá Studio Beauty & Wellness House" 
               className="essence_logo_img" 
               loading="lazy" 
             />
-          </motion.div>
+          </div>
 
           {/* Columna Derecha: Contenido */}
-          <motion.div 
-            className="premium_essence_content"
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          >
+          <div className="premium_essence_content reveal reveal-right">
             <span className="premium_essence_eyebrow">NUESTRA ESENCIA</span>
             <h2 className="premium_essence_heading">
               Más que estética,<br />
@@ -166,21 +154,21 @@ const Home = () => {
             </p>
             
             <div className="premium_essence_values">
-              <motion.div className="premium_value_item" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
+              <div className="premium_value_item reveal delay-1">
                 <span className="value_star">✦</span> Calidez genuina
-              </motion.div>
-              <motion.div className="premium_value_item" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.6 }}>
+              </div>
+              <div className="premium_value_item reveal delay-2">
                 <span className="value_star">✦</span> Técnica de excelencia
-              </motion.div>
-              <motion.div className="premium_value_item" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.8 }}>
+              </div>
+              <div className="premium_value_item reveal delay-3">
                 <span className="value_star">✦</span> Experiencia que perdura
-              </motion.div>
+              </div>
             </div>
             
             <Link to="/staff" className="premium_essence_cta">
               Conoce nuestro equipo →
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 

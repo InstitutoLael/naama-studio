@@ -47,7 +47,7 @@ const CustomCursor = () => {
 
     // Smooth ring follow with lerp
     const animateRing = () => {
-      const lerp = 0.15;
+      const lerp = 0.12;
       ringPos.current.x += (mousePos.current.x - ringPos.current.x) * lerp;
       ringPos.current.y += (mousePos.current.y - ringPos.current.y) * lerp;
       

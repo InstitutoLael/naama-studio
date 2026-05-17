@@ -153,8 +153,7 @@ const StaffPage = () => {
           {specialists.map((pro, index) => (
             <button
               key={pro.name}
-              className={`specialist_card ${activeSpecialist === pro.name ? 'active' : ''}`}
-              style={{ animationDelay: `${index * 0.07}s` }}
+              className={`specialist_card reveal delay-${index + 1} ${activeSpecialist === pro.name ? 'active' : ''}`}
               onClick={() => handleSpecialistClick(pro.name)}
               aria-label={`${activeSpecialist === pro.name ? 'Ocultar' : 'Ver'} servicios de ${pro.name}`}
               aria-pressed={activeSpecialist === pro.name}

@@ -37,7 +37,7 @@ const ServiceRow = ({ service, index }) => {
   const badgeColor = colorMap[service.worker] || "var(--accent-walnut)";
 
   return (
-    <div className={`service_row_wrap ${expanded ? 'expanded' : ''}`}>
+    <div className={`service_row_wrap reveal delay-${(index % 4) + 1} ${expanded ? 'expanded' : ''}`}>
       <div className="service_row" onClick={() => setExpanded(!expanded)}>
         <span className="sr_index">{(index + 1).toString().padStart(2, '0')}</span>
         <div className="sr_name_group">

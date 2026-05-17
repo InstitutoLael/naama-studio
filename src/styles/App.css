@@ -60,14 +60,34 @@
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--text-primary);
-  opacity: 0.4;
-  transition: var(--transition-luxe);
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+  position: relative;
+  padding-bottom: 6px;
+  cursor: pointer;
+}
+
+.nav_item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent-gold);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .nav_item:hover,
 .nav_item.active {
   opacity: 1;
 }
+
+.nav_item:hover::after,
+.nav_item.active::after {
+  width: 100%;
+}
+
 
 .nav_cta_boutique {
   background: var(--text-primary);
@@ -113,131 +133,188 @@
 
 /* Footer: Minimal & Technical */
 .footer {
-  padding: 150px 60px 80px;
-  background: var(--surface-card);
-  border-top: var(--border-fine);
+  padding: 60px 0 40px;
+  background-color: var(--color-verde-bosque) !important;
+  color: var(--color-arena);
+  border-top: none;
 }
 
-.footer_grid {
-  max-width: var(--max-width);
+.footer_upper {
+  max-width: 1100px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
+  grid-template-columns: 1.5fr 1fr 1.2fr;
   gap: 60px;
-  margin-bottom: 100px;
+  padding: 0 40px;
 }
 
-.footer_logo {
-  height: 50px;
-  margin-bottom: 30px;
+/* Columna 1: Marca */
+.footer_brand_col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer_brand_title {
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--color-arena);
+  margin-bottom: 4px;
+}
+
+.footer_brand_subtitle {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-dorado);
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.footer_brand_tagline {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 14px;
+  color: rgba(232,225,215,0.8);
+  margin-bottom: 24px;
+}
+
+.footer_brand_socials {
+  display: flex;
+  gap: 16px;
+}
+
+.brand_social_btn {
+  color: var(--color-arena);
+  transition: color 0.3s ease, transform 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand_social_btn:hover {
+  color: var(--color-dorado);
+  transform: translateY(-2px);
+}
+
+/* Títulos de Columna */
+.footer_col_title {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-dorado);
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+/* Columna 2: Navegación */
+.footer_links_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+}
+
+.footer_nav_link {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--color-arena);
+  text-decoration: none;
+  transition: color 0.2s ease, padding-left 0.2s ease;
+}
+
+.footer_nav_link:hover {
+  color: var(--color-dorado);
+  padding-left: 4px;
+}
+
+/* Columna 3: Contacto */
+.footer_contact_col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer_contact_text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: rgba(232,225,215,0.9);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.footer_contact_text.font_serif {
+  font-family: var(--font-serif);
+  font-size: 15px;
+}
+
+.footer_contact_text.email_small {
+  font-size: 12px;
   opacity: 0.8;
 }
 
-.footer_text {
-  font-size: 0.9rem;
-  line-height: 1.8;
-  color: rgba(43, 43, 43, 0.6);
-  max-width: 400px;
+.footer_contact_text.sch_text {
+  font-size: 12px;
+  color: var(--color-dorado);
+  margin-top: 6px;
 }
 
-[data-theme="dark"] .footer_text {
-  color: rgba(232, 228, 220, 0.6);
+/* Separador */
+.footer_separator {
+  max-width: 1100px;
+  margin: 40px auto 20px;
+  border-top: 1px solid rgba(183,154,91,0.3);
+  padding: 0 40px;
+  width: calc(100% - 80px);
 }
 
-.footer_label {
-  font-size: 0.6rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  color: var(--text-primary);
-  margin-bottom: 30px;
-  display: block;
-}
-
-.footer_nav_col {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.footer_link {
-  font-size: 0.85rem;
-  color: rgba(43, 43, 43, 0.6);
-  transition: var(--transition-fast);
-}
-
-[data-theme="dark"] .footer_link {
-  color: rgba(232, 228, 220, 0.6);
-}
-
-.footer_link:hover {
-  color: var(--accent-clay);
-  padding-left: 5px;
-}
-
-.footer_social_links {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.social_link {
-  font-size: 0.85rem;
-  color: rgba(43, 43, 43, 0.6);
-  transition: var(--transition-fast);
-}
-
-[data-theme="dark"] .social_link {
-  color: rgba(232, 228, 220, 0.6);
-}
-
-.social_link:hover {
-  color: var(--accent-clay);
-  padding-left: 5px;
-}
-
-.footer_credits {
-  max-width: var(--max-width);
+/* Columna Inferior */
+.footer_lower {
+  max-width: 1100px;
   margin: 0 auto;
-  padding-top: 40px;
-  border-top: var(--border-fine);
+  padding: 0 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.7rem;
-  color: rgba(43, 43, 43, 0.3);
-  letter-spacing: 0.05em;
 }
 
-[data-theme="dark"] .footer_credits {
-  color: rgba(232, 228, 220, 0.3);
+.footer_copyright, .footer_author {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: rgba(232,225,215,0.5);
 }
 
-@media (max-width: 1024px) {
-  .main_nav {
-    padding: 20px 0;
-    background: var(--bg-primary);
-    border-bottom: var(--border-fine);
-  }
-  .nav_container {
-    padding: 0 30px;
-    justify-content: space-between;
-  }
-  .nav_links {
-    display: none;
-  }
-  .footer_grid {
-    grid-template-columns: 1fr;
-    gap: 60px;
-  }
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
   .footer {
-    padding-bottom: 150px;
-    padding-left: 30px;
-    padding-right: 30px;
-  } /* Space for BottomNav */
-  .footer_nav_col {
-    display: none;
-  } /* Hide nav links on mobile to simplify */
+    padding: 48px 24px 80px !important; /* 80px bottom space for BottomNav */
+  }
+
+  .footer_upper {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    padding: 0;
+  }
+
+  .footer_col_title {
+    margin-bottom: 16px;
+  }
+
+  .footer_separator {
+    margin: 30px auto 20px;
+    width: 100%;
+    padding: 0;
+  }
+
+  .footer_lower {
+    padding: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+  }
 }
 
 /* Ensure Logo is white in dark mode if needed, or adjust filter */

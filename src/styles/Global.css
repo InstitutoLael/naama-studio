@@ -316,13 +316,13 @@ select:focus-visible {
 }
 
 /* ============================================================
-   SCROLL PROGRESS BAR
+    SCROLL PROGRESS BAR
    ============================================================ */
 .scroll_progress {
   position: fixed;
   top: 0; left: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--accent-walnut), var(--accent-gold));
+  background: linear-gradient(to right, var(--accent-verde), var(--accent-gold));
   z-index: 9999;
   transition: width 0.1s linear;
   pointer-events: none;
@@ -345,7 +345,7 @@ select:focus-visible {
 
   .custom_cursor_ring {
     position: fixed;
-    width: 36px; height: 36px;
+    width: 28px; height: 28px;
     border: 1px solid var(--accent-gold);
     border-radius: 50%;
     pointer-events: none;
@@ -356,18 +356,18 @@ select:focus-visible {
       height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
       border-color 0.3s ease,
       opacity 0.3s ease;
-    opacity: 0.35;
+    opacity: 0.4;
   }
 
   .custom_cursor_dot.hovering {
     width: 10px; height: 10px;
-    background: var(--accent-walnut);
+    background: var(--accent-gold);
   }
 
   .custom_cursor_ring.hovering {
-    width: 48px; height: 48px;
-    opacity: 0.55;
-    border-color: var(--accent-walnut);
+    width: 42px; height: 42px;
+    opacity: 0.7;
+    border-color: var(--accent-gold);
   }
 }
 
@@ -456,4 +456,89 @@ img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]):hover {
    ============================================================ */
 .text_clay {
   color: var(--accent-clay);
+}
+
+/* ============================================================
+   SISTEMA DE ANIMACIONES PREMIUM (Lujo Silencioso)
+   ============================================================ */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  transform: translateX(-24px);
+}
+
+.reveal-left.visible {
+  transform: translateX(0);
+}
+
+.reveal-right {
+  transform: translateX(24px);
+}
+
+.reveal-right.visible {
+  transform: translateX(0);
+}
+
+/* Delays escalonados */
+.delay-1 { transition-delay: 0.1s; }
+.delay-2 { transition-delay: 0.25s; }
+.delay-3 { transition-delay: 0.4s; }
+.delay-4 { transition-delay: 0.55s; }
+.delay-5 { transition-delay: 0.7s; }
+
+/* ============================================================
+   MICROINTERACCIONES DE BOTONES
+   ============================================================ */
+.btn_gold_solid, 
+.btn_outline, 
+.btn_map_directions, 
+.btn_world_hero, 
+.btn_whatsapp_confirm, 
+.btn_hero_primary, 
+.btn_hero_secondary, 
+.btn_primary, 
+.btn_ghost, 
+.btn_light,
+.nav_cta_boutique {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.btn_gold_solid:hover, 
+.btn_outline:hover, 
+.btn_map_directions:hover, 
+.btn_world_hero:hover, 
+.btn_whatsapp_confirm:hover, 
+.btn_hero_primary:hover, 
+.btn_hero_secondary:hover, 
+.btn_primary:hover, 
+.btn_ghost:hover, 
+.btn_light:hover,
+.nav_cta_boutique:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(183, 154, 91, 0.25) !important;
+}
+
+.btn_gold_solid:active, 
+.btn_outline:active, 
+.btn_map_directions:active, 
+.btn_world_hero:active, 
+.btn_whatsapp_confirm:active, 
+.btn_hero_primary:active, 
+.btn_hero_secondary:active, 
+.btn_primary:active, 
+.btn_ghost:active, 
+.btn_light:active,
+.nav_cta_boutique:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 4px 12px rgba(183, 154, 91, 0.1) !important;
 }
