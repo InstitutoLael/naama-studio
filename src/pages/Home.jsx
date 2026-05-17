@@ -5,10 +5,24 @@ import { mundos } from '../data/categories';
 import SEOHead from '../components/shared/SEOHead';
 import TestimonialsSection from '../components/sections/TestimonialsSection';
 import InstagramFeed from '../components/sections/InstagramFeed';
-import { Gift, ArrowRight } from 'lucide-react';
+import { Gift, ArrowRight, Scissors, Palette, Sparkles, Heart, Hand, ShieldCheck } from 'lucide-react';
 import SalonArch from '../assets/salon-arch.png';
+import LaborHands from '../assets/labor-hands.png';
+import HeroBg from '../assets/hero-bg.png';
+import MiradaBg from '../assets/mirada-bg.png';
+import NailsBg from '../assets/nails-bg.png';
+import WellnessBg from '../assets/wellness-bg.png';
 import '../styles/Global.css';
 import '../styles/Home.css';
+
+const editorialMundos = [
+  { id: 'capilar', name: 'Corte & Estilo', icon: Scissors, img: HeroBg },
+  { id: 'color', name: 'Colorimetría', icon: Palette, img: MiradaBg },
+  { id: 'tratamientos', name: 'Restauración', icon: Sparkles, img: SalonArch },
+  { id: 'bienestar', name: 'Bienestar', icon: Heart, img: WellnessBg },
+  { id: 'manos-pies', name: 'Uñas & Manos', icon: Hand, img: NailsBg },
+  { id: 'clinico', name: 'Podología', icon: ShieldCheck, img: LaborHands }
+];
 
 const Home = () => {
   const navigate = useNavigate();
@@ -174,44 +188,42 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── ECOSISTEMAS / MUNDOS ── */}
-      <section className="home_worlds_section">
-        <div className="section_header_boutique reveal">
-          <div className="header_left">
-            <span className="world_item_tag">Ingeniería Estética</span>
-            <h2 className="serif worlds_heading">Ecosistemas del Cuidado</h2>
-          </div>
-          <p className="worlds_subtext">
-            Cada sección es un universo técnico diseñado para tu restauración.
-            Explora nuestros protocolos basados en la ciencia del bienestar.
+      {/* ── ECOSISTEMAS / MUNDOS EDITORIAL ── */}
+      <section className="editorial_worlds_section">
+        <div className="editorial_header reveal">
+          <span className="editorial_eyebrow">NUESTROS SERVICIOS</span>
+          <h2 className="editorial_heading">
+            Seis formas de <br />
+            <em>cuidarte.</em>
+          </h2>
+          <p className="editorial_subtext">
+            Cada mundo es una experiencia completa diseñada para ti.
           </p>
         </div>
 
-        <div className="worlds_gallery_grid container">
-          {mundos.map((mundo, index) => (
+        <div className="editorial_grid container">
+          {editorialMundos.map((mundo, index) => (
             <div
               key={mundo.id}
-              className={`world_gallery_item reveal delay-${(index % 3) + 1}`}
+              className={`mundo_card reveal delay-${(index % 3) + 1}`}
               onClick={() => navigate(`/mundo/${mundo.id}`)}
               role="button"
               tabIndex={0}
               aria-label={`Explorar ${mundo.name}`}
               onKeyDown={(e) => e.key === 'Enter' && navigate(`/mundo/${mundo.id}`)}
             >
-              <div className="world_gallery_img_box">
-                <img
-                  src={mundo.image}
-                  alt={mundo.name}
-                  className="world_gallery_img"
-                  loading="lazy"
-                  width="600"
-                  height="750"
-                />
-                <div className="world_gallery_info_overlay">
-                  <span className="mosaic_tag">Protocolo 0{index + 1}</span>
-                  <h3 className="mosaic_title serif">{mundo.name}</h3>
-                  <span className="mosaic_link_btn">Explorar</span>
-                </div>
+              <img src={mundo.img} alt={mundo.name} className="mundo_bg" loading="lazy" />
+              <div className="mundo_overlay" />
+              
+              <span className="mundo_large_num">0{index + 1}</span>
+              
+              <div className="mundo_content">
+                <mundo.icon className="mundo_icon" />
+                <h3 className="mundo_name">{mundo.name}</h3>
+                <p className="mundo_desc">
+                  Descubre los protocolos y rituales especializados de esta área.
+                </p>
+                <span className="mundo_cta">Ver experiencia →</span>
               </div>
             </div>
           ))}
