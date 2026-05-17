@@ -108,30 +108,69 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── VALORES EN 3 PILARES ── */}
-      <section className="home_pillars">
-        <div className="container pillars_grid">
-          <div className="pillar_item reveal delay-1">
-            <span className="pillar_num">01</span>
-            <h3 className="pillar_title serif">Técnica sin Compromiso</h3>
-            <p className="pillar_text">
-              Insumos internacionales certificados y especialización constante en cada profesional del equipo.
+      {/* ── NUESTRA ESENCIA ── */}
+      <section className="premium_essence">
+        <div className="container premium_essence_layout">
+          {/* Columna Izquierda: Elemento Visual */}
+          <motion.div 
+            className="premium_essence_visual"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <div className="visual_graphic">
+              <div className="graphic_dots">
+                <span className="dot"></span>
+                <span className="dot"></span>
+                <span className="dot"></span>
+                <span className="dot"></span>
+                <span className="dot"></span>
+              </div>
+              <div className="graphic_arch"></div>
+              <p className="graphic_text">Beauty & Wellness House</p>
+            </div>
+          </motion.div>
+
+          {/* Columna Derecha: Contenido */}
+          <motion.div 
+            className="premium_essence_content"
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          >
+            <span className="premium_essence_eyebrow">NUESTRA ESENCIA</span>
+            <h2 className="premium_essence_heading">
+              Más que estética,<br />
+              <em>una experiencia de cuidado genuino.</em>
+            </h2>
+            <p className="premium_essence_main_text">
+              En Naamá Studio creemos que el cuidado personal es también
+              una forma de bienestar. Creamos un espacio cálido, elegante
+              y cercano donde cada detalle está pensado para que puedas
+              desconectarte, renovarte y volver a ti misma.
             </p>
-          </div>
-          <div className="pillar_item reveal delay-2">
-            <span className="pillar_num">02</span>
-            <h3 className="pillar_title serif">Higiene de Grado Médico</h3>
-            <p className="pillar_text">
-              Esterilización en autoclave, insumos desechables y protocolos de bioseguridad en cada servicio.
+            <p className="premium_essence_sub_text">
+              Porque mereces un momento que sea completamente tuyo.
             </p>
-          </div>
-          <div className="pillar_item reveal delay-3">
-            <span className="pillar_num">03</span>
-            <h3 className="pillar_title serif">Tiempo Exclusivo para Ti</h3>
-            <p className="pillar_text">
-              Bloques de atención personalizados. Sin apuros, sin esperas, con toda la atención en tu bienestar.
-            </p>
-          </div>
+            
+            <div className="premium_essence_values">
+              <motion.div className="premium_value_item" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
+                <span className="value_star">✦</span> Calidez genuina
+              </motion.div>
+              <motion.div className="premium_value_item" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.6 }}>
+                <span className="value_star">✦</span> Técnica de excelencia
+              </motion.div>
+              <motion.div className="premium_value_item" initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.8 }}>
+                <span className="value_star">✦</span> Experiencia que perdura
+              </motion.div>
+            </div>
+            
+            <Link to="/staff" className="premium_essence_cta">
+              Conoce nuestro equipo →
+            </Link>
+          </motion.div>
         </div>
       </section>
 
