@@ -1,48 +1,93 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { servicesData } from '../data/servicesData';
-import { fuzzyMatch } from '../utils/searchUtils';
 import { mundos } from '../data/categories';
-import ServiceCard from '../components/ui/ServiceCard';
 import SEOHead from '../components/shared/SEOHead';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
+
+import HeroBg from '../assets/hero-bg.png';
+import MiradaBg from '../assets/mirada-bg.png';
+import NailsBg from '../assets/nails-bg.png';
+import WellnessBg from '../assets/wellness-bg.png';
+import SalonArch from '../assets/salon-arch.png';
+import LaborHands from '../assets/labor-hands.png';
+
 import '../styles/Global.css';
 import '../styles/WorldPage.css';
 
+const mundoImages = {
+  'capilar': SalonArch,
+  'color': LaborHands,
+  'tratamientos': MiradaBg,
+  'bienestar': WellnessBg,
+  'manos-pies': NailsBg,
+  'clinico': HeroBg
+};
+
+const colorMap = {
+  "Valeria": "#3E4A3B",
+  "Vivy": "#C17A5A",
+  "Gaby": "#B79A5B",
+  "Allison": "#2A3228",
+  "Michelle": "#4A5A60"
+};
+
+const ServiceRow = ({ service, index }) => {
+  const [expanded, setExpanded] = useState(false);
+  const badgeColor = colorMap[service.worker] || "var(--accent-walnut)";
+
+  return (
+    <div className={`service_row_wrap ${expanded ? 'expanded' : ''}`}>
+      <div className="service_row" onClick={() => setExpanded(!expanded)}>
+        <span className="sr_index">{(index + 1).toString().padStart(2, '0')}</span>
+        <div className="sr_name_group">
+          <span className="sr_name">{service.name}</span>
+          {service.worker && (
+            <span className="sr_badge" style={{ backgroundColor: badgeColor }}>
+              {service.worker}
+            </span>
+          )}
+        </div>
+        <span className="sr_duration">{service.time}</span>
+        <span className="sr_price">${service.price || 'Consultar'}</span>
+        <button className={`sr_expand_btn ${expanded ? 'rotated' : ''}`} aria-hidden="true">
+          <ChevronDown size={16} strokeWidth={1.5} />
+        </button>
+      </div>
+      
+      <div className={`sr_detail ${expanded ? 'open' : ''}`}>
+        <div className="sr_detail_inner">
+          <p className="sr_desc">{service.desc}</p>
+          {service.why && <p className="sr_why">{service.why}</p>}
+          <a 
+            href={`https://wa.me/56979520623?text=Hola! Me interesa agendar el servicio: ${service.name}`} 
+            target="_blank" rel="noopener noreferrer" 
+            className="sr_cta_btn"
+          >
+            Agendar este servicio → WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const WorldPage = () => {
   const { mundoId } = useParams();
-  const [activeTab, setActiveTab] = useState('Todos');
-  const [searchTerm, setSearchTerm] = useState('');
   
   const mundo = useMemo(() => mundos.find(m => m.id === mundoId), [mundoId]);
   
-  const categories = useMemo(() => {
-    if (!mundo) return [];
-    return ['Todos', ...new Set(servicesData.filter(s => mundo.categories.includes(s.cat)).map(s => s.cat))];
-  }, [mundo]);
-
   const filteredServices = useMemo(() => {
     if (!mundo) return [];
-    let services = servicesData.filter(service => mundo.categories.includes(service.cat));
-    
-    if (activeTab !== 'Todos') {
-      services = services.filter(s => s.cat === activeTab);
-    }
-    
-    if (searchTerm) {
-      services = services.filter(s => {
-        const searchableText = `${s.name} ${s.worker} ${s.cat}`.toLowerCase();
-        return fuzzyMatch(searchTerm, searchableText);
-      });
-    }
-    
-    return services;
-  }, [mundo, activeTab, searchTerm]);
+    return servicesData.filter(service => mundo.categories.includes(service.cat));
+  }, [mundo]);
+
+  const relatedWorlds = useMemo(() => {
+    return mundos.filter(m => m.id !== mundoId).slice(0, 3);
+  }, [mundoId]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setActiveTab('Todos');
-    setSearchTerm('');
   }, [mundoId]);
 
   if (!mundo) {
@@ -57,106 +102,57 @@ const WorldPage = () => {
     );
   }
 
+  const bgImage = mundoImages[mundo.id];
+  const worldIndex = mundos.findIndex(m => m.id === mundo.id) + 1;
+
   return (
     <div className="world_page">
       <SEOHead title={mundo.name} description={mundo.description} />
       
-      <header className="world_header reveal">
-        <span className="world_category_label">Catálogo Técnico</span>
-        <h1 className="world_title serif">{mundo.name}</h1>
-        <p className="world_description">{mundo.description}</p>
-        
-        <div className="discovery_bar">
-          <div className="search_wrapper">
-            <Search size={18} strokeWidth={1} className="search_icon" />
-            <input 
-              type="text" 
-              placeholder="Staff Search: Nombre o técnico..." 
-              className="staff_input"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Buscar servicios en este mundo"
-            />
-          </div>
-          
-          <div className="category_tabs_wrapper">
-            <div className="tabs_rail" role="tablist" aria-label="Categorías de servicios">
-              {categories.map(cat => (
-                <button 
-                  key={cat} 
-                  className={`tab_btn ${activeTab === cat ? 'active' : ''}`}
-                  onClick={() => setActiveTab(cat)}
-                  role="tab"
-                  aria-selected={activeTab === cat}
-                  aria-controls={`panel-${cat}`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
+      <header className="world_hero" style={{ backgroundImage: `url(${bgImage})` }}>
+        <div className="world_hero_overlay" />
+        <div className="world_hero_content reveal">
+          <span className="world_eyebrow">ECOSISTEMA 0{worldIndex}</span>
+          <h1 className="world_hero_title serif">{mundo.name}</h1>
+          <p className="world_hero_desc">{mundo.description}</p>
+          <a 
+            href="https://wa.me/56979520623?text=Hola! Quiero agendar una sesión en Naamá Studio." 
+            target="_blank" rel="noopener noreferrer" 
+            className="btn_world_hero"
+          >
+            Reservar este servicio
+          </a>
         </div>
       </header>
 
-      <main className="services_grid_adaptive">
-        {/* Desktop/Tablet View: Search + Tabs + Grid */}
-        <div className="desktop_catalog_view">
-          <div className="services_grid" role="tabpanel" id={`panel-${activeTab}`}>
-            {filteredServices.length > 0 ? (
-              filteredServices.map((service, index) => (
-                <div key={`${service.name}-${index}`} className="service_card_wrapper">
-                  <ServiceCard service={service} />
-                </div>
-              ))
-            ) : (
-              <div className="empty_selection">
-                <p className="serif">No se encontraron servicios bajo esta selección.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Mobile View: Accordion-first architecture */}
-        <div className="mobile_catalog_view">
-           {categories.filter(c => c !== 'Todos').map((cat) => {
-             const catServices = filteredServices.filter(s => s.cat === cat);
-             if (catServices.length === 0 && searchTerm) return null;
-             
-             return (
-               <details key={cat} className="category_accordion reveal">
-                 <summary className="accordion_header serif">
-                   <span>{cat}</span>
-                   <span className="count_badge">{catServices.length}</span>
-                 </summary>
-                 <div className="accordion_content">
-                   {catServices.map((service, idx) => (
-                     <ServiceCard key={`${service.name}-${idx}`} service={service} />
-                   ))}
-                 </div>
-               </details>
-             );
-           })}
+      <main className="world_main container">
+        <div className="services_list">
+          {filteredServices.length > 0 ? (
+            filteredServices.map((service, index) => (
+              <ServiceRow key={`${service.name}-${index}`} service={service} index={index} />
+            ))
+          ) : (
+            <div className="empty_selection">
+              <p className="serif">No se encontraron servicios bajo esta selección.</p>
+            </div>
+          )}
         </div>
       </main>
 
-      <section className="container section-padding reveal world_session_section">
-         <p className="text-uppercase world_session_text">¿Te gustó lo que viste?</p>
-         <h2 className="serif world_session_title">Agenda tu sesión ahora mismo.</h2>
-         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '1.5rem' }}>
-           <a
-             href="https://wa.me/56979520623?text=Hola! Vi los servicios en la web y me gustaría agendar una sesión en Naamá Studio. ¿Tienen disponibilidad?"
-             target="_blank"
-             rel="noopener noreferrer"
-             className="nav_cta_boutique"
-             style={{ padding: '0.9rem 2rem', textDecoration: 'none' }}
-             aria-label="Agendar por WhatsApp"
-           >
-             📲 Agendar por WhatsApp
-           </a>
-           <Link to="/reservar" className="nav_item world_gallery_link" style={{ alignSelf: 'center' }}>
-             O usa el formulario de reserva
-           </Link>
-         </div>
+      <section className="related_worlds_section container reveal">
+        <h3 className="related_title serif">También en Naamá Studio</h3>
+        <div className="related_grid">
+          {relatedWorlds.map((rel, idx) => (
+            <Link key={rel.id} to={`/mundo/${rel.id}`} className={`related_card delay-${(idx % 3) + 1}`}>
+              <img src={mundoImages[rel.id]} alt={rel.name} className="related_img" />
+              <div className="related_overlay" />
+              <div className="related_content">
+                <span className="related_tag">ECOSISTEMA 0{mundos.findIndex(m => m.id === rel.id) + 1}</span>
+                <h4 className="related_name serif">{rel.name}</h4>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
     </div>
   );
