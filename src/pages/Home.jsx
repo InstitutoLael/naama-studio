@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import { mundos } from '../data/categories';
 import SEOHead from '../components/shared/SEOHead';
@@ -24,7 +25,7 @@ const Home = () => {
       />
 
       {/* ── HERO ── */}
-      <section className="home_hero">
+      <section className="hero_section">
         <img
           src={SalonArch}
           alt="Interior de Naamá Studio"
@@ -34,34 +35,76 @@ const Home = () => {
           height="1080"
         />
         <div className="hero_overlay" />
+        
         <div className="hero_content">
-          <span className="hero_eyebrow reveal">Naamá Studio · San Miguel, Santiago</span>
-          <h1 className="hero_statement serif reveal delay-1">
-            Gracia. Pausa.<br />Restauración.
-          </h1>
-          <p className="hero_subtitle reveal delay-2">
-            Un refugio de paz donde la tradición de una casa patrimonial
-            se encuentra con la alta tecnología del bienestar.
-          </p>
-          <div className="hero_actions reveal delay-3">
-            <button
-              className="btn_primary"
-              onClick={() => navigate('/reservar')}
-              aria-label="Agendar una sesión"
+          <motion.span 
+            className="hero_eyebrow"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            Beauty & Wellness House · San Miguel, Santiago
+          </motion.span>
+          
+          <h1 className="hero_statement">
+            <motion.div
+              className="line_1"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
             >
-              Agenda tu sesión
-              <ArrowRight size={15} strokeWidth={1.5} />
-            </button>
-            <Link to="/staff" className="btn_ghost">
-              Ver servicios & precios
+              Tu momento
+            </motion.div>
+            <motion.div
+              className="line_2"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.55, duration: 0.8, ease: "easeOut" }}
+            >
+              de volver
+            </motion.div>
+            <motion.div
+              className="line_3"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
+            >
+              a ti.
+            </motion.div>
+          </h1>
+          
+          <motion.p 
+            className="hero_subtitle"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+          >
+            Servicios de belleza y bienestar en un espacio pensado
+            para que te reconectes contigo misma.
+          </motion.p>
+          
+          <motion.div 
+            className="hero_actions"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1, duration: 0.8 }}
+          >
+            <Link to="/reservar" className="btn_hero_primary">
+              Reservar mi experiencia
             </Link>
-          </div>
+            <Link to="/staff" className="btn_hero_secondary">
+              Ver servicios →
+            </Link>
+          </motion.div>
         </div>
 
-        {/* Scroll indicator */}
         <div className="hero_scroll_hint" aria-hidden="true">
+          <span className="scroll_label">Descubre</span>
           <span className="scroll_line" />
-          <span className="scroll_label">Explorar</span>
+        </div>
+
+        <div className="hero_stats">
+          180+ Clientas · 5 Especialistas · 4.9★ Google
         </div>
       </section>
 
