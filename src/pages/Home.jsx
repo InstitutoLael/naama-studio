@@ -12,6 +12,7 @@ import HeroBg from '../assets/hero-bg.png';
 import MiradaBg from '../assets/mirada-bg.png';
 import NailsBg from '../assets/nails-bg.png';
 import WellnessBg from '../assets/wellness-bg.png';
+import NaamaLogo from '../assets/naama-studio.png';
 import '../styles/Global.css';
 import '../styles/Home.css';
 
@@ -133,17 +134,12 @@ const Home = () => {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
-            <div className="visual_graphic">
-              <div className="graphic_dots">
-                <span className="dot"></span>
-                <span className="dot"></span>
-                <span className="dot"></span>
-                <span className="dot"></span>
-                <span className="dot"></span>
-              </div>
-              <div className="graphic_arch"></div>
-              <p className="graphic_text">Beauty & Wellness House</p>
-            </div>
+            <img 
+              src={NaamaLogo} 
+              alt="Naamá Studio Beauty & Wellness House" 
+              className="essence_logo_img" 
+              loading="lazy" 
+            />
           </motion.div>
 
           {/* Columna Derecha: Contenido */}
