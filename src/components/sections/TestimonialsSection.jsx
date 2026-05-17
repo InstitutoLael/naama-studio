@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight, Star, Shield, Leaf, Award } from 'lucide-rea
 import AnimatedCounter from '../ui/AnimatedCounter';
 import '../../styles/TestimonialsSection.css';
 
+const GOOGLE_PLACE_URL = "https://share.google/ejzCWM9jJxfZLy9JJ";
+
 // ── Reseñas propias (no Google) ──
 const ownTestimonials = [
   {
@@ -37,28 +39,28 @@ const ownTestimonials = [
   }
 ];
 
-// ── Reseñas de Google Maps (actualizadas manualmente desde el panel) ──
+// ── Reseñas propias (aproximadas de clientas) ──
 // Para automatizarlas: conectar Google Places API en backend
 const googleTestimonials = [
   {
     name: 'Patricia G.',
     text: '"Excelente atención. El lugar es acogedor y las especialistas súper profesionales. Volvería mil veces."',
     service: 'Limpieza Facial',
-    source: 'google',
+    source: 'frequent',
     rating: 5
   },
   {
     name: 'Daniela R.',
     text: '"Fui por primera vez y quedé encantada. Michelle es increíble en podología, muy delicada y precisa."',
     service: 'Podología Clínica',
-    source: 'google',
+    source: 'frequent',
     rating: 5
   },
   {
     name: 'Sofía T.',
     text: '"El ambiente es precioso, como un refugio de paz en medio de la ciudad. Valeria me hizo el mejor balayage de mi vida."',
     service: 'Balayage',
-    source: 'google',
+    source: 'frequent',
     rating: 5
   }
 ];
@@ -156,7 +158,7 @@ const TestimonialsSection = () => {
             </div>
             {t.source === 'google' && (
               <a
-                href="https://www.google.com/maps/search/Naama+Studio+San+Miguel"
+                href={GOOGLE_PLACE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="google_badge"
@@ -166,6 +168,12 @@ const TestimonialsSection = () => {
                 <GoogleIcon />
                 <span>Google</span>
               </a>
+            )}
+            {t.source === 'frequent' && (
+              <div className="google_badge" style={{ background: 'var(--surface-warm)', border: '1px solid rgba(0,0,0,0.05)', color: 'var(--text-slate)' }}>
+                <Star size={12} fill="var(--accent-gold)" stroke="var(--accent-gold)" />
+                <span>Clienta Frecuente</span>
+              </div>
             )}
           </div>
         </div>
@@ -179,7 +187,7 @@ const TestimonialsSection = () => {
             {allTestimonials.map((_, i) => (
               <button
                 key={i}
-                className={`carousel_dot ${current === i ? 'active' : ''} ${allTestimonials[i].source === 'google' ? 'dot_google' : ''}`}
+                className={`carousel_dot ${current === i ? 'active' : ''} ${allTestimonials[i].source === 'frequent' || allTestimonials[i].source === 'google' ? 'dot_google' : ''}`}
                 onClick={() => goTo(i)}
                 aria-label={`Ver testimonio ${i + 1}`}
                 role="tab"
@@ -194,7 +202,7 @@ const TestimonialsSection = () => {
 
         {/* Link directo a Google Reviews */}
         <a
-          href="https://www.google.com/maps/search/Naama+Studio+San+Miguel"
+          href={GOOGLE_PLACE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="google_reviews_link"

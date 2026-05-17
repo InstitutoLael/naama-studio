@@ -2,7 +2,7 @@ export const mundos = [
   {
     id: 'capilar',
     name: 'Corte y Estilo',
-    categories: ["Cortes", "Peinado", "Estilismo"],
+    categories: ["Peluquería", "Adicional"],
     description: "Arquitectura para tu cabello. Diseñamos formas que respetan tu textura natural.",
     icon: "Scissors",
     image: "/assets/salon-arch.png"
@@ -12,12 +12,13 @@ export const mundos = [
     name: "Colorimetría",
     description: "Luz y profundidad. Técnicas avanzadas para un color que se ve nacido, no puesto.",
     icon: "Palette",
-    categories: ["Coloración", "Balayage", "Reflejos"],
+    categories: ["Peluquería"],
     image: "/assets/labor-hands.png"
   },
   {
     id: "tratamientos",
     name: "Restauración",
+    categories: ["Tratamiento Capilar"],
     description: "Ciencia dedicada a recuperar la fuerza y el brillo de tu fibra capilar.",
     icon: "Zap",
     image: '/assets/mirada-bg.png'
@@ -25,7 +26,7 @@ export const mundos = [
   {
     id: 'bienestar',
     name: 'Terapias de Descanso',
-    categories: ['Masaje'],
+    categories: ['Masaje', 'Estetica'],
     description: 'Sesiones de descompresión muscular y recuperación física profunda.',
     icon: 'Info',
     image: '/assets/wellness-bg.png'

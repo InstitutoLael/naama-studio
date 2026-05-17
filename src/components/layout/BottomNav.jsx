@@ -1,55 +1,51 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, LayoutGrid, CalendarCheck, Map } from 'lucide-react';
+import { Home, Scissors, Calendar, Image, MapPin } from 'lucide-react';
 import '../../styles/BottomNav.css';
+
+const navItems = [
+  { path: "/", label: "Inicio", icon: Home },
+  { path: "/staff", label: "Servicios", icon: Scissors },
+  { path: "/reservar", label: "Agendar", icon: Calendar, highlight: true },
+  // { path: "/galeria", label: "Galería", icon: Image },
+  { path: "/contacto", label: "Contacto", icon: MapPin },
+];
 
 const BottomNav = () => {
   return (
     <nav className="bottom_nav" aria-label="Navegación principal móvil">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        
+        if (item.highlight) {
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `bnav_item bnav_center ${isActive ? 'active' : ''}`}
+              aria-label={item.label}
+            >
+              <div className="bnav_center_bubble">
+                <Icon size={22} strokeWidth={1.5} />
+              </div>
+              <span>{item.label}</span>
+            </NavLink>
+          );
+        }
 
-      <NavLink
-        to="/"
-        end
-        className={({ isActive }) => `bnav_item ${isActive ? 'active' : ''}`}
-        aria-label="Inicio"
-      >
-        <Home size={20} strokeWidth={1.5} />
-        <span>Inicio</span>
-      </NavLink>
-
-      <NavLink
-        to="/staff"
-        className={({ isActive }) => `bnav_item ${isActive ? 'active' : ''}`}
-        aria-label="Precios"
-      >
-        <LayoutGrid size={20} strokeWidth={1.5} />
-        <span>Precios</span>
-      </NavLink>
-
-      {/* Botón central destacado — Agendar */}
-      <NavLink
-        to="/reservar"
-        className={({ isActive }) => `bnav_item bnav_center ${isActive ? 'active' : ''}`}
-        aria-label="Agendar sesión"
-      >
-        <div className="bnav_center_bubble">
-          <CalendarCheck size={22} strokeWidth={1.5} />
-        </div>
-        <span>Agendar</span>
-      </NavLink>
-
-      {/* Google Maps — llegar al estudio */}
-      <a
-        href="https://www.google.com/maps/search/Arcadia+1297,+San+Miguel,+Santiago,+Chile"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="bnav_item"
-        aria-label="Cómo llegar a Naamá Studio"
-      >
-        <Map size={20} strokeWidth={1.5} />
-        <span>Llegar</span>
-      </a>
-
+        return (
+          <NavLink
+            key={item.path}
+            to={item.path}
+            end={item.path === '/'}
+            className={({ isActive }) => `bnav_item ${isActive ? 'active' : ''}`}
+            aria-label={item.label}
+          >
+            <Icon size={20} strokeWidth={1.5} />
+            <span>{item.label}</span>
+          </NavLink>
+        );
+      })}
     </nav>
   );
 };

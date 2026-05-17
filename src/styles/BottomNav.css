@@ -53,7 +53,7 @@
 
   .bnav_item span {
     font-family: var(--font-sans);
-    font-size: 0.58rem;
+    font-size: 9px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.1em;

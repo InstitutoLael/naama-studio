@@ -11,6 +11,36 @@ const BookingFlow = () => {
     date: '',
     notes: ''
   });
+  const [dateError, setDateError] = useState('');
+
+  // Helpers de fecha
+  const getTodayString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getMaxDateString = () => {
+    const max = new Date();
+    max.setMonth(max.getMonth() + 3);
+    const year = max.getFullYear();
+    const month = String(max.getMonth() + 1).padStart(2, '0');
+    const day = String(max.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const handleDateChange = (value) => {
+    setDateError('');
+    const selected = new Date(value + 'T12:00:00');
+    if (selected.getDay() === 0) {
+      setDateError('El salón no abre los domingos. Elige otro día.');
+      setFormData({ ...formData, date: value });
+      return;
+    }
+    setFormData({ ...formData, date: value });
+  };
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
@@ -111,16 +141,30 @@ const BookingFlow = () => {
             <div className="booking_input_area">
               <input 
                 type="date" 
-                className="booking_input" 
+                className={`booking_input${dateError ? ' booking_input_error' : ''}`}
                 value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                min={getTodayString()}
+                max={getMaxDateString()}
+                onChange={(e) => handleDateChange(e.target.value)}
                 aria-label="Fecha deseada para la sesión"
+                aria-describedby={dateError ? 'date_error_msg' : undefined}
               />
+              {dateError && (
+                <p id="date_error_msg" className="booking_date_error" role="alert">
+                  {dateError}
+                </p>
+              )}
             </div>
             
             <div className="booking_actions">
               <button className="back_btn" onClick={prevStep}>Atrás</button>
-              <button className="next_btn" disabled={!formData.date} onClick={nextStep}>Siguiente</button>
+              <button
+                className="next_btn"
+                disabled={!formData.date || !!dateError}
+                onClick={nextStep}
+              >
+                Siguiente
+              </button>
             </div>
           </div>
         )}

@@ -14,17 +14,17 @@ const WhatsAppPopup = () => {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    const wasDismissed = localStorage.getItem('naama_wa_popup');
+    const wasDismissed = localStorage.getItem('naama_popup_seen');
     if (wasDismissed) { setDismissed(true); return; }
 
-    const timer = setTimeout(() => setVisible(true), 7000);
+    const timer = setTimeout(() => setVisible(true), 45000);
     return () => clearTimeout(timer);
   }, []);
 
   const dismiss = () => {
     setVisible(false);
     setDismissed(true);
-    localStorage.setItem('naama_wa_popup', 'true');
+    localStorage.setItem('naama_popup_seen', 'true');
   };
 
   const joinVIP = () => {
@@ -54,15 +54,16 @@ const WhatsAppPopup = () => {
             <WhatsAppIcon />
           </div>
           <div className="wa_header_text">
-            <span className="wa_eyebrow">Lista VIP</span>
-            <h3 className="serif wa_title">Naamá Studio</h3>
+            <span className="wa_eyebrow">Naamá Studio</span>
+            <h3 className="serif wa_title">¿Lista para tu momento Naamá?
+            </h3>
           </div>
         </div>
 
         {/* Cuerpo */}
         <p className="wa_body">
-          Recibe <strong>promociones exclusivas</strong> y alertas de disponibilidad
-          por WhatsApp antes que nadie.
+          Escríbenos por WhatsApp y te ayudamos a elegir
+          <strong> el servicio y la especialista</strong> perfectos para ti.
         </p>
 
         {/* Acciones */}

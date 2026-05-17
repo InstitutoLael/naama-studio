@@ -55,6 +55,43 @@
   border-color: var(--text-slate);
 }
 
+/* ========== Empty State ========== */
+.gallery_empty {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--surface-card);
+  border: var(--border-fine);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .gallery_empty {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(240, 235, 224, 0.08);
+}
+
+.empty_title {
+  font-size: 2rem;
+  color: var(--text-slate);
+  margin-bottom: 15px;
+}
+
+.empty_text {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.empty_text a {
+  color: var(--accent-clay);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.empty_text a:hover {
+  color: var(--text-slate);
+}
+
 /* ========== Masonry Grid ========== */
 .gallery_masonry {
   columns: 3;

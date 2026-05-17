@@ -19,7 +19,7 @@ import ScrollProgress from './components/ui/ScrollProgress';
 import CustomCursor from './components/ui/CustomCursor';
 import ThemeToggle from './components/ui/ThemeToggle';
 import PageTransition from './components/shared/PageTransition';
-import Logo from './assets/naama-studio.png';
+const Logo = '/naama-studio.png'; // Desde /public/ — nombre estable, sin hash de Vite
 import './styles/Global.css';
 import './styles/App.css';
 
@@ -83,7 +83,7 @@ const App = () => {
           <div className="nav_links">
             <Link to="/" className={`nav_item ${location.pathname === '/' ? 'active' : ''}`}>Inicio</Link>
             <Link to="/staff" className={`nav_item ${location.pathname === '/staff' ? 'active' : ''}`}>Precios</Link>
-            <Link to="/galeria" className={`nav_item ${location.pathname === '/galeria' ? 'active' : ''}`}>Galería</Link>
+            {/* <Link to="/galeria" className={`nav_item ${location.pathname === '/galeria' ? 'active' : ''}`}>Galería</Link> */}
             <Link to="/empresas" className={`nav_item ${location.pathname === '/empresas' ? 'active' : ''}`}>Empresas</Link>
             <Link to="/contacto" className={`nav_item ${location.pathname === '/contacto' ? 'active' : ''}`}>Contacto</Link>
             <ThemeToggle />

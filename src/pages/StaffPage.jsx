@@ -34,8 +34,11 @@ const specialists = [
   {
     name: "Michelle",
     initial: "M",
-    specialty: "Podología Clínica",
-    services: ["Podología Básica", "Podología Avanzada", "Esterilización Clínica"]
+    role: "Podóloga Clínica",
+    specialty: "Podología Básica y Avanzada",
+    description: "Especialista en salud podal con formación clínica. Trata desde hiperqueratosis y uñeros hasta patologías como el pie diabético, con protocolos de bioseguridad de grado médico.",
+    services: ["Podología Clínica Básica", "Podología Clínica Avanzada"],
+    available: true
   }
 ];
 

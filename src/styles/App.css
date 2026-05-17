@@ -114,12 +114,8 @@
 /* Footer: Minimal & Technical */
 .footer {
   padding: 150px 60px 80px;
-  background: #fff;
+  background: var(--surface-card);
   border-top: var(--border-fine);
-}
-
-[data-theme="dark"] .footer {
-  background: rgba(232, 228, 220, 0.05);
 }
 
 .footer_grid {

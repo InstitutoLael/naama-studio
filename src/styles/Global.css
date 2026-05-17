@@ -20,6 +20,7 @@
   --text-faint:     rgba(26, 26, 26, 0.30);
   --accent-gold:    #A68966;   /* Oro Viejo — acentos, iconos, highlights */
   --accent-walnut:  #4B3621;   /* Café Nogal — detalles cálidos */
+  --accent-clay:    #C4956A;   /* Arcilla/Terracota — hover states, CTAs */
   --accent-gold-light: rgba(166, 137, 102, 0.15);
 
   /* Bordes */
@@ -49,6 +50,7 @@
   --text-faint:     rgba(240, 235, 224, 0.28);
   --accent-gold:    #C4A07A;
   --accent-walnut:  #8A6845;
+  --accent-clay:    #D4A57A;   /* Arcilla más cálida para dark mode */
   --accent-gold-light: rgba(196, 160, 122, 0.12);
 
   --border-fine:    1px solid rgba(240, 235, 224, 0.07);
@@ -434,4 +436,11 @@ img:not(.logo_img):not(.nav_logo):not(.footer_logo):not([data-color]):hover {
 @media (max-width: 480px) {
   .container { padding: 0 18px; }
   .section-padding { padding: 60px 0; }
+}
+
+/* ============================================================
+   UTILIDAD — Color Arcilla
+   ============================================================ */
+.text_clay {
+  color: var(--accent-clay);
 }

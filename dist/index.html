@@ -2,8 +2,8 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/assets/naama-studio.png" />
-    <link rel="apple-touch-icon" href="/assets/naama-studio.png" />
+    <link rel="icon" type="image/png" href="/naama-studio.png" />
+    <link rel="apple-touch-icon" href="/naama-studio.png" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#B08D79" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -26,22 +26,16 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://naamastudio.cl/assets/salon-arch.png" />
 
-    <!-- Preload crítico: logo navbar (elemento LCP) -->
+    <!-- Preload crítico: logo navbar — /public/ garantiza nombre estable entre builds -->
     <link
       rel="preload"
-      href="/assets/naama-studio-DNMa7Wt5.png"
+      href="/naama-studio.png"
       as="image"
       fetchpriority="high"
     />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
-      rel="stylesheet"
-    />
-    <script type="module" crossorigin src="/assets/index-CDFfXxj7.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-B94Z69r6.css">
+    <script type="module" crossorigin src="/assets/index-DDnMMM8h.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BStU5Uvb.css">
   </head>
   <body>
     <div id="root"></div>

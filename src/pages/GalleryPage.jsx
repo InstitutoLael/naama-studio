@@ -8,19 +8,16 @@ import '../styles/GalleryPage.css';
 const galleryCategories = ['Todos', 'Corte & Estilo', 'Colorimetría', 'Manicure', 'Pedicure', 'Maquillaje', 'Tratamientos'];
 
 // Placeholder gallery using existing assets + trend descriptions
-const galleryItems = [
-  { id: 1, src: '/assets/salon-arch.png', cat: 'Corte & Estilo', title: 'Bob Estructurado', specialist: 'Valeria', desc: 'Corte de precisión con textura y movimiento natural.' },
-  { id: 2, src: '/assets/labor-hands.png', cat: 'Colorimetría', title: 'Balayage Caramelo', specialist: 'Cami', desc: 'Técnica de mano alzada para un rubio natural y luminoso.' },
-  { id: 3, src: '/assets/mirada-bg.png', cat: 'Maquillaje', title: 'Diseño de Mirada', specialist: 'Allison', desc: 'Laminado de cejas + lifting de pestañas para mirada abierta.' },
-  { id: 4, src: '/assets/nails-bg.png', cat: 'Manicure', title: 'Semipermanente French', specialist: 'Gaby', desc: 'Acabado limpio con línea de sonrisa perfecta.' },
-  { id: 5, src: '/assets/wellness-bg.png', cat: 'Tratamientos', title: 'Masaje Térmico', specialist: 'Vivy', desc: 'Sesión de descompresión profunda con piedras calientes.' },
-  { id: 6, src: '/assets/hero-bg.png', cat: 'Pedicure', title: 'Pedicure Clínico', specialist: 'Gaby', desc: 'Tratamiento podológico con higiene hospitalaria.' },
-  { id: 7, src: '/assets/salon-arch.png', cat: 'Corte & Estilo', title: 'Pixie Texturizado', specialist: 'Valeria', desc: 'Corte corto con capas internas para volumen natural.' },
-  { id: 8, src: '/assets/labor-hands.png', cat: 'Colorimetría', title: 'Reflejos Ceniza', specialist: 'Cami', desc: 'Tonos fríos con técnica de papel para máxima definición.' },
-  { id: 9, src: '/assets/mirada-bg.png', cat: 'Maquillaje', title: 'Glam Natural', specialist: 'Allison', desc: 'Base impecable con acabado luminoso para eventos.' },
-  { id: 10, src: '/assets/nails-bg.png', cat: 'Manicure', title: 'Nail Art Minimalista', specialist: 'Gaby', desc: 'Diseños geométricos finos en tonos nude.' },
-  { id: 11, src: '/assets/wellness-bg.png', cat: 'Tratamientos', title: 'Facial Hidratante', specialist: 'Vivy', desc: 'Protocolo de limpieza profunda + hidratación con ácido hialurónico.' },
-  { id: 12, src: '/assets/hero-bg.png', cat: 'Pedicure', title: 'Spa Pedicure', specialist: 'Gaby', desc: 'Exfoliación, hidratación y esmaltado premium.' }
+export const galleryItems = [
+  // Agregar items así cuando tengas fotos:
+  // { 
+  //   id: 1, 
+  //   src: '/galeria/balayage-valeria-01.jpg', 
+  //   cat: 'Colorimetría', 
+  //   title: 'Balayage Caramelo', 
+  //   specialist: 'Valeria', 
+  //   desc: 'Técnica de mano alzada para un rubio natural y luminoso.' 
+  // },
 ];
 
 const GalleryPage = () => {
@@ -82,33 +79,42 @@ const GalleryPage = () => {
         ))}
       </div>
 
-      {/* Masonry Grid */}
-      <div className="gallery_masonry container reveal delay-2">
-        {filtered.map((item, idx) => (
-          <div 
-            key={item.id} 
-            className={`gallery_item ${idx % 5 === 0 ? 'tall' : ''}`}
-            onClick={() => openLightbox(item)}
-            role="button"
-            tabIndex={0}
-            aria-label={`Ver ${item.title}`}
-            onKeyDown={(e) => e.key === 'Enter' && openLightbox(item)}
-          >
-            <img 
-              src={item.src} 
-              alt={item.title} 
-              loading="lazy"
-              width="400"
-              height="500"
-            />
-            <div className="gallery_item_overlay">
-              <span className="gallery_item_cat">{item.cat}</span>
-              <h3 className="gallery_item_title serif">{item.title}</h3>
-              <span className="gallery_item_specialist">por {item.specialist}</span>
+      {/* Masonry Grid o Estado Vacío */}
+      {galleryItems.length === 0 ? (
+        <div className="gallery_empty container reveal delay-2">
+          <p className="empty_title serif">Próximamente — Nuestros trabajos</p>
+          <p className="empty_text">
+            Sigue nuestra cuenta <a href="https://www.instagram.com/naamastudio_" target="_blank" rel="noopener noreferrer">@naamastudio_</a> en Instagram para ver los trabajos más recientes.
+          </p>
+        </div>
+      ) : (
+        <div className="gallery_masonry container reveal delay-2">
+          {filtered.map((item, idx) => (
+            <div 
+              key={item.id} 
+              className={`gallery_item ${idx % 5 === 0 ? 'tall' : ''}`}
+              onClick={() => openLightbox(item)}
+              role="button"
+              tabIndex={0}
+              aria-label={`Ver ${item.title}`}
+              onKeyDown={(e) => e.key === 'Enter' && openLightbox(item)}
+            >
+              <img 
+                src={item.src} 
+                alt={item.title} 
+                loading="lazy"
+                width="400"
+                height="500"
+              />
+              <div className="gallery_item_overlay">
+                <span className="gallery_item_cat">{item.cat}</span>
+                <h3 className="gallery_item_title serif">{item.title}</h3>
+                <span className="gallery_item_specialist">por {item.specialist}</span>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Lightbox Modal */}
       {lightbox && (

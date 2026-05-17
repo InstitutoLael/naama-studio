@@ -152,6 +152,27 @@
   border-bottom-color: var(--accent-clay);
 }
 
+.booking_input_error {
+  border-bottom-color: #C0392B;
+}
+
+[data-theme="dark"] .booking_input_error {
+  border-bottom-color: #E74C3C;
+}
+
+.booking_date_error {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #C0392B;
+  margin-top: 10px;
+}
+
+[data-theme="dark"] .booking_date_error {
+  color: #E74C3C;
+}
+
 .booking_actions {
   display: flex;
   justify-content: space-between;
