@@ -1,5 +1,5 @@
 .gallery_page {
-  background-color: var(--bg-linen);
+  background-color: var(--bg-primary);
   min-height: 100vh;
   padding-top: 180px;
   padding-bottom: 60px;
@@ -39,20 +39,20 @@
   letter-spacing: 0.15em;
   cursor: pointer;
   transition: var(--transition-fast);
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .filter_btn:hover, .filter_btn.active {
-  background: var(--text-slate);
-  color: var(--bg-linen);
-  border-color: var(--text-slate);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
 }
 
 [data-theme="dark"] .filter_btn:hover, 
 [data-theme="dark"] .filter_btn.active {
-  background: var(--text-slate); 
-  color: var(--bg-linen); /* En modo oscuro, var(--bg-linen) es oscuro (#18160f) y --text-slate es claro (#f0ebe0) */
-  border-color: var(--text-slate);
+  background: var(--text-primary); 
+  color: var(--bg-primary); /* En modo oscuro, var(--bg-primary) es oscuro (#18160f) y --text-slate es claro (#f0ebe0) */
+  border-color: var(--text-primary);
 }
 
 /* ========== Empty State ========== */
@@ -71,7 +71,7 @@
 
 .empty_title {
   font-size: 2rem;
-  color: var(--text-slate);
+  color: var(--text-primary);
   margin-bottom: 15px;
 }
 
@@ -89,7 +89,7 @@
 }
 
 .empty_text a:hover {
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 /* ========== Masonry Grid ========== */

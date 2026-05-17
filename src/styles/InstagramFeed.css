@@ -35,7 +35,7 @@
   overflow: hidden;
   border: var(--border-fine);
   position: relative;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
 }
 
 .insta_item img {
@@ -104,7 +104,7 @@
   font-weight: 600;
   letter-spacing: 0.05em;
   padding-bottom: 5px;
-  color: var(--text-slate);
+  color: var(--text-primary);
   transition: var(--transition-fast);
 }
 

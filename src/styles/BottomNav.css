@@ -18,7 +18,7 @@
     right: 0;
     z-index: 900;
 
-    background: var(--bg-linen);
+    background: var(--bg-primary);
     border-top: var(--border-fine);
     padding-bottom: var(--safe-bottom);
     padding-top: 8px;
@@ -77,7 +77,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--bg-linen);
+    color: var(--bg-primary);
     margin-top: -22px;
     box-shadow: 0 4px 16px rgba(75, 54, 33, 0.35);
     transition: transform 0.25s ease, background 0.25s ease;
@@ -85,7 +85,7 @@
 
   .bnav_center:hover .bnav_center_bubble,
   .bnav_center.active .bnav_center_bubble {
-    background: var(--text-slate);
+    background: var(--text-primary);
     transform: scale(1.08);
   }
 

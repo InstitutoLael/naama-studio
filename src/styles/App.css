@@ -2,7 +2,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-linen);
+  background-color: var(--bg-primary);
 }
 
 .main_content {
@@ -59,7 +59,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.25em;
-  color: var(--text-slate);
+  color: var(--text-primary);
   opacity: 0.4;
   transition: var(--transition-luxe);
 }
@@ -70,8 +70,8 @@
 }
 
 .nav_cta_boutique {
-  background: var(--text-slate);
-  color: var(--bg-linen);
+  background: var(--text-primary);
+  color: var(--bg-primary);
   padding: 12px 25px;
   font-size: 0.6rem;
   font-weight: 700;
@@ -97,7 +97,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--text-slate);
+  color: var(--text-primary);
   transition: var(--transition-fast);
 }
 
@@ -106,9 +106,9 @@
 }
 
 .theme_toggle_btn:hover {
-  background: var(--text-slate);
-  color: var(--bg-linen);
-  border-color: var(--text-slate);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
 }
 
 /* Footer: Minimal & Technical */
@@ -149,7 +149,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  color: var(--text-slate);
+  color: var(--text-primary);
   margin-bottom: 30px;
   display: block;
 }
@@ -216,7 +216,7 @@
 @media (max-width: 1024px) {
   .main_nav {
     padding: 20px 0;
-    background: var(--bg-linen);
+    background: var(--bg-primary);
     border-bottom: var(--border-fine);
   }
   .nav_container {

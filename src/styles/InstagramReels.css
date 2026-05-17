@@ -9,7 +9,7 @@
 .reels_title {
   font-size: 3.5rem;
   margin-bottom: 15px;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .reels_subtitle {
@@ -30,7 +30,7 @@
   position: relative;
   border-radius: 12px;
   overflow: hidden;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
   border: var(--border-fine);
   transition: var(--transition-luxe);
 }
@@ -50,7 +50,7 @@
   position: relative;
   aspect-ratio: 9/16;
   width: 100%;
-  background: var(--text-slate);
+  background: var(--text-primary);
   overflow: hidden;
 }
 
@@ -127,7 +127,7 @@
 .reel_card_title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-slate);
+  color: var(--text-primary);
   line-height: 1.4;
   margin: 0;
 }

@@ -1,7 +1,7 @@
 .booking_flow_container {
   min-height: 100vh;
   padding: 180px 40px;
-  background-color: var(--bg-linen);
+  background-color: var(--bg-primary);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -51,7 +51,7 @@
   font-size: 2.5rem;
   margin-bottom: 50px;
   line-height: 1.1;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .booking_highlight {
@@ -83,15 +83,15 @@
 }
 
 .option_btn:hover, .option_btn.selected {
-  border-color: var(--text-slate);
-  background: var(--bg-linen);
+  border-color: var(--text-primary);
+  background: var(--bg-primary);
 }
 
 [data-theme="dark"] .option_btn:hover, 
 [data-theme="dark"] .option_btn.selected {
-  background: var(--text-slate); /* Fondo oscuro grisáceo */
-  border-color: var(--text-slate);
-  color: var(--bg-linen); /* Texto claro (#f0ebe0) */
+  background: var(--text-primary); /* Fondo oscuro grisáceo */
+  border-color: var(--text-primary);
+  color: var(--bg-primary); /* Texto claro (#f0ebe0) */
 }
 
 /* Forzar que el título y la descripción dentro del botón hereden el color correcto al estar seleccionados en modo oscuro */
@@ -99,13 +99,13 @@
 [data-theme="dark"] .option_btn.selected .option_title,
 [data-theme="dark"] .option_btn:hover .option_desc,
 [data-theme="dark"] .option_btn.selected .option_desc {
-  color: var(--bg-linen);
+  color: var(--bg-primary);
 }
 
 .option_title {
   font-size: 1.1rem;
   font-weight: 600;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .option_desc {
@@ -129,7 +129,7 @@
   border-bottom: var(--border-medium);
   font-size: 1.5rem;
   font-family: var(--font-serif);
-  color: var(--text-slate);
+  color: var(--text-primary);
   background: transparent;
   outline: none;
   transition: var(--transition-fast);
@@ -141,7 +141,7 @@
 }
 
 .booking_input:focus {
-  border-bottom-color: var(--text-slate);
+  border-bottom-color: var(--text-primary);
 }
 
 [data-theme="dark"] .booking_input {
@@ -195,7 +195,7 @@
 }
 
 .next_btn {
-  background: var(--text-slate);
+  background: var(--text-primary);
   color: #fff;
   padding: 20px 45px;
   border: none;
@@ -207,7 +207,7 @@
   transition: var(--transition-fast);
 }
 [data-theme="dark"] .next_btn {
-  color: var(--bg-linen); /* Ensure enough contrast on dark button or dark background */
+  color: var(--bg-primary); /* Ensure enough contrast on dark button or dark background */
 }
 
 .next_btn:hover {
@@ -228,7 +228,7 @@
 .booking_icon_box {
   display: inline-flex;
   padding: 20px;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
   border-radius: 100px;
   margin-bottom: 40px;
   color: var(--accent-clay);
@@ -241,7 +241,7 @@
 .booking_completion_title {
   font-size: 3rem;
   margin-bottom: 20px;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .booking_completion_sub {

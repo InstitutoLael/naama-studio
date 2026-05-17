@@ -2,60 +2,73 @@
    NAAMÁ STUDIO — Global.css
    Rebranding 2025/2026 — "Lujo Silencioso / Minimalismo Cálido"
    Paleta oficial:
-     Negro Humo  #1A1A1A — textos, logo
-     Blanco Lino #F9F7F2 — fondos
-     Café Nogal  #4B3621 — detalles madera
-     Oro Viejo   #A68966 — acentos, iconos
+     Negro Humo  var(--text-primary) — textos, logo
+     Blanco Lino var(--bg-primary) — fondos
+     Café Nogal  var(--accent-walnut) — detalles madera
+     Oro Viejo   var(--accent-gold) — acentos, iconos
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap');
+
 
 :root {
-  /* ── Paleta oficial del rebranding ── */
-  --bg-linen:       #F9F7F2;   /* Blanco Lino — fondo principal */
-  --surface-card:   #FFFFFF;   /* Blanco puro — tarjetas */
-  --surface-warm:   #F2EDE4;   /* Tono intermedio cálido para superficies secundarias */
-  --text-slate:     #1A1A1A;   /* Negro Humo — textos principales */
-  --text-muted:     rgba(26, 26, 26, 0.50);
-  --text-faint:     rgba(26, 26, 26, 0.30);
-  --accent-gold:    #A68966;   /* Oro Viejo — acentos, iconos, highlights */
-  --accent-walnut:  #4B3621;   /* Café Nogal — detalles cálidos */
-  --accent-clay:    #C4956A;   /* Arcilla/Terracota — hover states, CTAs */
-  --accent-gold-light: rgba(166, 137, 102, 0.15);
+  /* PALETA PRINCIPAL */
+  --color-verde-bosque: #3E4A3B;
+  --color-arena: #E8E1D7;
+  --color-dorado: #B79A5B;
+  --color-terracota: #C17A5A;
+  --color-negro: #111111;
+  --color-blanco: #FFFFFF;
+  /* FONDOS */
+  --bg-primary: #E8E1D7;
+  --bg-secondary: #F4F0EA;
+  --surface-card: #FFFFFF;
+  --surface-warm: #EDE8E0;
+  /* TEXTOS */
+  --text-primary: #111111;
+  --text-secondary:#3E4A3B;
+  --text-muted: rgba(17,17,17,0.55);
+  --text-light: #FFFFFF;
+  /* ACENTOS */
+  --accent-gold: #B79A5B;
+  --accent-gold-light: #D4BC86;
+  --accent-verde: #3E4A3B;
+  --accent-clay: #C17A5A;
+  --accent-walnut: #2A3228;
+  /* TIPOGRAFÍA */
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Montserrat", Arial, sans-serif;
+  --font-size-base: 16px;
+  /* ESPACIADO */
+  --container-max: 1400px;
+  --section-padding: 120px;
+  --card-radius: 4px;
+  --border-subtle: rgba(62,74,59,0.12);
 
-  /* Bordes */
-  --border-fine:    1px solid rgba(26, 26, 26, 0.08);
-  --border-medium:  1px solid rgba(26, 26, 26, 0.15);
-  --border-accent:  1px solid rgba(166, 137, 102, 0.40);
-
-  /* Tipografía — Cormorant Garamond (serif elegante) + Outfit (sans moderno) */
-  --font-serif:     'Cormorant Garamond', Georgia, serif;
-  --font-sans:      'Outfit', system-ui, sans-serif;
-
-  /* Transiciones */
+  /* UTILITIES */
+  --border-fine:    1px solid rgba(17, 17, 17, 0.08);
+  --border-medium:  1px solid rgba(17, 17, 17, 0.15);
+  --border-accent:  1px solid rgba(183, 154, 91, 0.40);
   --transition-luxe: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-fast: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
   --max-width: 1400px;
   --safe-bottom: env(safe-area-inset-bottom, 20px);
 }
 
-/* ── Modo Oscuro — Negro Humo cálido ── */
 [data-theme="dark"] {
-  --bg-linen:       #141210;
-  --surface-card:   #1E1B17;
-  --surface-warm:   #252018;
-  --text-slate:     #F0EBE0;
-  --text-muted:     rgba(240, 235, 224, 0.52);
-  --text-faint:     rgba(240, 235, 224, 0.28);
-  --accent-gold:    #C4A07A;
-  --accent-walnut:  #8A6845;
-  --accent-clay:    #D4A57A;   /* Arcilla más cálida para dark mode */
-  --accent-gold-light: rgba(196, 160, 122, 0.12);
+  --bg-primary: #1A1E1A;
+  --bg-secondary: #141814;
+  --surface-card: #1E241E;
+  --surface-warm: #222822;
+  --text-primary: #E8E1D7;
+  --text-secondary:#C4B99A;
+  --text-muted: rgba(232,225,215,0.50);
+  --accent-gold: #C4A97A;
+  --accent-clay: #D4957A;
+  --border-subtle: rgba(183,154,91,0.15);
 
-  --border-fine:    1px solid rgba(240, 235, 224, 0.07);
-  --border-medium:  1px solid rgba(240, 235, 224, 0.14);
-  --border-accent:  1px solid rgba(196, 160, 122, 0.35);
+  --border-fine:    1px solid rgba(232, 225, 215, 0.07);
+  --border-medium:  1px solid rgba(232, 225, 215, 0.14);
+  --border-accent:  1px solid rgba(196, 169, 122, 0.35);
 }
 
 /* ============================================================
@@ -72,8 +85,8 @@ html {
 }
 
 body {
-  background-color: var(--bg-linen);
-  color: var(--text-slate);
+  background-color: var(--bg-primary); /* Arena Suave */
+  color: var(--text-primary);
   font-family: var(--font-sans);
   font-weight: 400;
   line-height: 1.65;
@@ -93,7 +106,7 @@ h1, h2, h3, h4, h5, .serif {
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.1;
-  color: var(--text-slate);
+  color: var(--text-secondary);
 }
 
 h1 { font-size: clamp(2.8rem, 6vw, 5.5rem); }
@@ -104,7 +117,7 @@ h4 { font-size: clamp(1.1rem, 1.8vw, 1.4rem); }
 p {
   font-size: 1rem;
   letter-spacing: 0.01em;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 a {
@@ -184,7 +197,7 @@ button {
   padding: 14px 0;
   font-family: var(--font-serif);
   font-size: 1.05rem;
-  color: var(--text-slate);
+  color: var(--text-primary);
   outline: none;
   transition: border-color 0.3s ease;
   width: 100%;

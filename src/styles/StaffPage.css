@@ -5,7 +5,7 @@
 
 /* ── Fix: evita pantalla en blanco al navegar a esta página ── */
 .staff_page {
-  background-color: var(--bg-linen);
+  background-color: var(--bg-primary);
   min-height: 100vh;
   padding-top: 0;
   opacity: 0;
@@ -42,7 +42,7 @@
   font-weight: 300;
   line-height: 1.08;
   margin: 20px 0 28px;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .staff_title em {
@@ -77,7 +77,7 @@
    ============================================================ */
 .staff_team_section {
   padding: 80px 0 0;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
 }
 
 .staff_team_grid {
@@ -91,7 +91,7 @@
 /* ── Tarjeta de especialista ── */
 .specialist_card {
   position: relative;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
   border: none;
   border-right: var(--border-fine);
   padding: 52px 30px 40px;
@@ -168,7 +168,7 @@
 
 .specialist_card.active .card_initial {
   opacity: 0.25;
-  color: var(--bg-linen);
+  color: var(--bg-primary);
 }
 
 /* Cuerpo */
@@ -180,12 +180,12 @@
   font-size: 1.9rem;
   font-weight: 400;
   margin-bottom: 6px;
-  color: var(--text-slate);
+  color: var(--text-primary);
   transition: color 0.3s ease;
 }
 
 .specialist_card.active .card_name {
-  color: var(--bg-linen);
+  color: var(--bg-primary);
 }
 
 .card_specialty {
@@ -286,7 +286,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
 }
 
 /* ============================================================
@@ -294,7 +294,7 @@
    ============================================================ */
 .staff_catalog {
   padding: 100px 0 80px;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
 }
 
 /* Encabezado */
@@ -353,7 +353,7 @@
   flex: 1;
   font-family: var(--font-serif);
   font-size: 1.1rem;
-  color: var(--text-slate);
+  color: var(--text-primary);
   outline: none;
 }
 
@@ -405,7 +405,7 @@
 }
 
 .catalog_cell {
-  background-color: var(--bg-linen);
+  background-color: var(--bg-primary);
   transition: background 0.25s ease;
 }
 
@@ -430,7 +430,7 @@
   flex-direction: column;
   align-items: center;
   gap: 18px;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
 }
 
 .empty_glyph {
@@ -462,9 +462,9 @@
 }
 
 .empty_reset_btn:hover {
-  background: var(--text-slate);
-  color: var(--bg-linen);
-  border-color: var(--text-slate);
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border-color: var(--text-primary);
 }
 
 /* ============================================================
@@ -492,7 +492,7 @@
   align-items: center;
   gap: 10px;
   background: var(--accent-walnut);
-  color: var(--bg-linen);
+  color: var(--bg-primary);
   padding: 17px 42px;
   font-family: var(--font-sans);
   font-size: 0.7rem;
@@ -504,7 +504,7 @@
 }
 
 .staff_cta_btn:hover {
-  background: var(--text-slate);
+  background: var(--text-primary);
   transform: translateY(-2px);
 }
 

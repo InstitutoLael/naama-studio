@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-linen);
+  background-color: var(--bg-primary);
   padding: 40px;
   text-align: center;
 }
@@ -22,7 +22,7 @@
 .notfound_title {
   font-size: clamp(3rem, 7vw, 5rem);
   margin-bottom: 20px;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .notfound_text {
@@ -37,8 +37,8 @@
 }
 
 .notfound_btn {
-  background: var(--text-slate);
-  color: var(--bg-linen);
+  background: var(--text-primary);
+  color: var(--bg-primary);
   padding: 18px 45px;
   border: none;
   font-size: 0.7rem;

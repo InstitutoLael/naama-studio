@@ -31,7 +31,7 @@
 .stat_number {
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 300;
-  color: var(--text-slate);
+  color: var(--text-primary);
   line-height: 1;
 }
 
@@ -92,7 +92,7 @@
   font-weight: 300;
   font-style: italic;
   line-height: 1.6;
-  color: var(--text-slate);
+  color: var(--text-primary);
   max-width: 680px;
 }
 
@@ -117,7 +117,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .author_service {
@@ -146,7 +146,7 @@
 
 .google_badge:hover {
   border-color: var(--accent-gold);
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 /* Controles */
@@ -223,7 +223,7 @@
 }
 
 .google_reviews_link:hover {
-  color: var(--text-slate);
+  color: var(--text-primary);
   border-bottom-color: var(--accent-gold);
   opacity: 1;
 }
@@ -261,7 +261,7 @@
 }
 
 .badge_item:hover {
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 /* ── Responsive ── */

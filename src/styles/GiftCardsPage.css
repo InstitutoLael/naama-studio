@@ -1,5 +1,5 @@
 .giftcards_page {
-  background-color: var(--bg-linen);
+  background-color: var(--bg-primary);
   min-height: 100vh;
   padding-top: 180px;
   padding-bottom: 120px;
@@ -87,7 +87,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  background: var(--bg-linen);
+  background: var(--bg-primary);
   width: 100%;
   text-align: center;
 }
@@ -108,13 +108,13 @@
   transition: var(--transition-fast);
   text-align: center;
   font-size: 1.1rem;
-  color: var(--text-slate);
+  color: var(--text-primary);
 }
 
 .gc_amount_btn:hover,
 .gc_amount_btn.selected {
-  border-color: var(--text-slate);
-  background: var(--bg-linen);
+  border-color: var(--text-primary);
+  background: var(--bg-primary);
 }
 
 .gc_custom_amount {
@@ -234,8 +234,8 @@
 }
 
 .gc_reveal_btn {
-  background: var(--text-slate);
-  color: var(--bg-linen);
+  background: var(--text-primary);
+  color: var(--bg-primary);
   padding: 18px 45px;
   border: none;
   font-size: 0.7rem;
