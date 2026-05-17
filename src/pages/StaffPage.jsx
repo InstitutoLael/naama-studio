@@ -10,33 +10,41 @@ const specialists = [
   {
     name: "Valeria",
     initial: "V",
-    specialty: "Colorista & Alisados",
+    role: "Colorista & Alisados",
+    color: "#3E4A3B",
+    specialties: ["Balayage", "Alisado Brasileño", "Cortes"],
     services: ["Balayage", "Babylights", "Alisado Brasileño", "Botox Capilar", "Tintes & Mechas", "Cortes"]
   },
   {
     name: "Vivy",
     initial: "V",
-    specialty: "Facial & Bienestar",
+    role: "Facial & Bienestar",
+    color: "#C17A5A",
+    specialties: ["Limpiezas Faciales", "Masajes", "Maderoterapia"],
     services: ["Limpiezas Faciales", "Masajes", "Maderoterapia", "Tratamientos Capilares"]
   },
   {
     name: "Gaby",
     initial: "G",
-    specialty: "Nails & Cejas",
+    role: "Nails & Cejas",
+    color: "#B79A5B",
+    specialties: ["Manicure", "Pedicure", "Lifting"],
     services: ["Manicure", "Pedicure", "Depilación", "Lifting de Pestañas", "Diseño de Cejas"]
   },
   {
     name: "Allison",
     initial: "A",
-    specialty: "Make-up & Peinados",
+    role: "Make-up & Peinados",
+    color: "#2A3228",
+    specialties: ["Maquillaje Social", "Peinados"],
     services: ["Maquillaje Social", "Maquillaje Artístico", "Peinados para Eventos"]
   },
   {
     name: "Michelle",
     initial: "M",
-    role: "Podóloga Clínica",
-    specialty: "Podología Básica y Avanzada",
-    description: "Especialista en salud podal con formación clínica. Trata desde hiperqueratosis y uñeros hasta patologías como el pie diabético, con protocolos de bioseguridad de grado médico.",
+    role: "Podología Clínica",
+    color: "#4A5A60",
+    specialties: ["Podología Básica", "Avanzada"],
     services: ["Podología Clínica Básica", "Podología Clínica Avanzada"],
     available: true
   }
@@ -128,18 +136,15 @@ const StaffPage = () => {
       {/* ── HERO ── */}
       <header className="staff_hero">
         <div className="staff_hero_inner">
-          <span className="world_category_label">Nuestro Equipo</span>
+          <span className="world_category_label">NUESTRO EQUIPO</span>
           <h1 className="staff_title serif">
-            Cinco especialistas.<br />
-            <em>Un solo estándar.</em>
+            Las manos<br />
+            <em>detrás de tu transformación.</em>
           </h1>
           <p className="staff_subtitle">
-            Técnica certificada, hospitalidad de alto nivel y dedicación absoluta
-            al arte del cuidado personal. Selecciona a tu especialista para
-            explorar sus servicios y precios.
+            5 especialistas. Una sola pasión: que te veas y te sientas increíble.
           </p>
         </div>
-        <span className="staff_hero_deco serif" aria-hidden="true">N.</span>
       </header>
 
       {/* ── TARJETAS DEL EQUIPO ── */}
@@ -154,37 +159,29 @@ const StaffPage = () => {
               aria-label={`${activeSpecialist === pro.name ? 'Ocultar' : 'Ver'} servicios de ${pro.name}`}
               aria-pressed={activeSpecialist === pro.name}
             >
-              <span className="card_index" aria-hidden="true">0{index + 1}</span>
-
-              <div className="card_initial_wrap" aria-hidden="true">
-                <span className="card_initial serif">{pro.initial}</span>
+              <div className="card_top_area" style={{ backgroundColor: pro.color }}>
+                <span className="card_initial serif" aria-hidden="true">{pro.initial}</span>
               </div>
 
-              <div className="card_body">
+              <div className="card_bottom_area">
                 <h3 className="card_name serif">{pro.name}</h3>
-                <p className="card_specialty">{pro.specialty}</p>
-                <ul className="card_services_list">
-                  {pro.services.map((s) => (
-                    <li key={s}>{s}</li>
+                <p className="card_role">{pro.role}</p>
+                <div className="card_pills">
+                  {pro.specialties.map((tag) => (
+                    <span key={tag} className="specialty_pill">{tag}</span>
                   ))}
-                </ul>
-              </div>
+                </div>
 
-              <div className="card_footer_row">
-                <span className="card_cta_label">
-                  {activeSpecialist === pro.name ? 'Ocultar' : 'Ver precios'}
-                </span>
-                <ArrowRight
-                  size={13}
-                  strokeWidth={1.5}
-                  className={`card_arrow_icon ${activeSpecialist === pro.name ? 'rotated' : ''}`}
-                  aria-hidden="true"
-                />
+                <div className="card_footer_row">
+                  <span className="card_cta_label">Ver servicios</span>
+                  <ArrowRight
+                    size={14}
+                    strokeWidth={1.5}
+                    className="card_arrow_icon"
+                    aria-hidden="true"
+                  />
+                </div>
               </div>
-
-              {activeSpecialist === pro.name && (
-                <span className="card_active_bar" aria-hidden="true" />
-              )}
             </button>
           ))}
         </div>
@@ -211,14 +208,13 @@ const StaffPage = () => {
           </p>
         </div>
 
-        {/* Barra de búsqueda */}
+        {/* Barra de búsqueda y Filtros */}
         <div className="catalog_searchbar container">
-          <div className={`searchbar_inner ${searchTerm ? 'has_value' : ''}`}>
-            <Search size={18} strokeWidth={1.2} className="sb_icon" aria-hidden="true" />
+          <div className="premium_search_wrapper">
             <input
               type="text"
-              placeholder="Ej: balayage, manicure, Valeria, masaje..."
-              className="sb_input"
+              placeholder="Busca un servicio..."
+              className="premium_search_input serif"
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -228,13 +224,25 @@ const StaffPage = () => {
             />
             {searchTerm && (
               <button
-                className="sb_clear"
+                className="premium_search_clear"
                 onClick={clearSearch}
                 aria-label="Limpiar búsqueda"
               >
                 <X size={15} strokeWidth={1.5} />
               </button>
             )}
+          </div>
+
+          <div className="specialist_filters">
+            {specialists.map(pro => (
+              <button
+                key={pro.name}
+                className={`filter_pill ${activeSpecialist === pro.name ? 'active' : ''}`}
+                onClick={() => handleSpecialistClick(pro.name)}
+              >
+                {pro.name}
+              </button>
+            ))}
           </div>
 
           {/* Contador de resultados */}

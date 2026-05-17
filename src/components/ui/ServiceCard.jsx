@@ -29,57 +29,37 @@ const ServiceCard = ({ service, defaultExpanded = false }) => {
     >
       {/* ── FILA PRINCIPAL (siempre visible) ── */}
       <div
-        className="svc_main"
+        className="svc_main premium_horizontal"
         onClick={() => hasExtra && setExpanded(!expanded)}
         role={hasExtra ? 'button' : undefined}
         tabIndex={hasExtra ? 0 : undefined}
         aria-expanded={hasExtra ? expanded : undefined}
         onKeyDown={(e) => hasExtra && e.key === 'Enter' && setExpanded(!expanded)}
       >
-        {/* Nombre + categoría */}
-        <div className="svc_name_col">
+        <div className="svc_left_col">
           <h3 className="svc_name serif">{service.name}</h3>
-          {service.cat && (
-            <span className="svc_cat">{service.cat}</span>
-          )}
-        </div>
-
-        {/* Meta: duración + worker */}
-        <div className="svc_meta_col">
-          {service.time && (
-            <span className="svc_meta_item">
-              <Clock size={11} strokeWidth={1.5} aria-hidden="true" />
-              {service.time}
-            </span>
-          )}
-          {service.worker && (
-            <span className="svc_meta_item">
-              <User size={11} strokeWidth={1.5} aria-hidden="true" />
-              {service.worker}
-            </span>
-          )}
-        </div>
-
-        {/* Precio + chevron */}
-        <div className="svc_price_col">
-          <div className="svc_price_wrap">
-            {hasOldPrice && (
-              <span className="svc_old_price">${service.old}</span>
+          <div className="svc_meta_badges">
+            {service.cat && <span className="svc_badge_cat">{service.cat}</span>}
+            {service.time && (
+              <span className="svc_badge_time">
+                <Clock size={10} strokeWidth={1.5} aria-hidden="true" />
+                {service.time}
+              </span>
             )}
-            <span className="svc_price">
-              {service.price
-                ? `$${service.price}`
-                : <span className="svc_price_consult">Consultar</span>
-              }
+          </div>
+        </div>
+
+        <div className="svc_right_col">
+          <div className="svc_price_wrap">
+            {hasOldPrice && <span className="svc_old_price">${service.old}</span>}
+            <span className="svc_price serif">
+              {service.price ? `$${service.price}` : <span className="svc_price_consult">Consultar</span>}
             </span>
           </div>
           {hasExtra && (
-            <ChevronDown
-              size={15}
-              strokeWidth={1.5}
-              className={`svc_chevron ${expanded ? 'rotated' : ''}`}
-              aria-hidden="true"
-            />
+            <button className={`svc_expand_btn ${expanded ? 'rotated' : ''}`} aria-hidden="true">
+              <ChevronDown size={18} strokeWidth={1.5} />
+            </button>
           )}
         </div>
       </div>

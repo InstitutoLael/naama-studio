@@ -12,7 +12,7 @@ import HeroBg from '../assets/hero-bg.png';
 import MiradaBg from '../assets/mirada-bg.png';
 import NailsBg from '../assets/nails-bg.png';
 import WellnessBg from '../assets/wellness-bg.png';
-import NaamaLogo from '../assets/naama-studio.png';
+import EsenciaLogo from '../assets/esencia-logo.png';
 import '../styles/Global.css';
 import '../styles/Home.css';
 
@@ -135,7 +135,7 @@ const Home = () => {
             transition={{ duration: 0.8, ease: "easeOut" }}
           >
             <img 
-              src={NaamaLogo} 
+              src={EsenciaLogo} 
               alt="Naamá Studio Beauty & Wellness House" 
               className="essence_logo_img" 
               loading="lazy" 
