@@ -1,19 +1,54 @@
-import React, { useState } from 'react';
-import { Check } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
+import { servicesData } from '../data/servicesData';
+import { mundos } from '../data/categories';
 import SEOHead from '../components/shared/SEOHead';
+import '../styles/Global.css';
 import '../styles/BookingFlow.css';
 
+const specialists = [
+  { name: "Valeria", role: "Colorista & Alisados", color: "#3E4A3B", initial: "V" },
+  { name: "Vivy", role: "Facial & Bienestar", color: "#C17A5A", initial: "V" },
+  { name: "Gaby", role: "Nails & Cejas", color: "#B79A5B", initial: "G" },
+  { name: "Allison", role: "Make-up & Peinados", color: "#2A3228", initial: "A" },
+  { name: "Michelle", role: "Podología Clínica", color: "#4A5A60", initial: "M" }
+];
+
 const BookingFlow = () => {
-  const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    need: '',
-    specialist: '',
-    date: '',
-    notes: ''
-  });
+  const [activeStep, setActiveStep] = useState(1);
+  const [slideDirection, setSlideDirection] = useState('slide_in');
+  
+  const [selectedMundo, setSelectedMundo] = useState('capilar');
+  const [selectedService, setSelectedService] = useState(null);
+  const [selectedSpecialist, setSelectedSpecialist] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedTime, setSelectedTime] = useState('');
+  
   const [dateError, setDateError] = useState('');
 
-  // Helpers de fecha
+  const steps = ["Servicio", "Especialista", "Fecha", "Hora", "Confirmar"];
+
+  // Step 1 Filtering
+  const activeWorld = useMemo(() => {
+    return mundos.find(m => m.id === selectedMundo);
+  }, [selectedMundo]);
+
+  const filteredServices = useMemo(() => {
+    if (!activeWorld) return [];
+    return servicesData.filter(s => activeWorld.categories.includes(s.cat));
+  }, [activeWorld]);
+
+  // Step 2 Filtering
+  const availableSpecialists = useMemo(() => {
+    if (!selectedService) return [];
+    const workerField = selectedService.worker || "";
+    if (!workerField) return specialists;
+    const workers = workerField.split(',').map(w => w.trim().toLowerCase());
+    const filtered = specialists.filter(spec => workers.includes(spec.name.toLowerCase()));
+    return filtered.length > 0 ? filtered : specialists;
+  }, [selectedService]);
+
+  // Step 3 Date helpers
   const getTodayString = () => {
     const today = new Date();
     const year = today.getFullYear();
@@ -33,196 +68,305 @@ const BookingFlow = () => {
 
   const handleDateChange = (value) => {
     setDateError('');
-    const selected = new Date(value + 'T12:00:00');
-    if (selected.getDay() === 0) {
-      setDateError('El salón no abre los domingos. Elige otro día.');
-      setFormData({ ...formData, date: value });
+    if (!value) {
+      setSelectedDate('');
       return;
     }
-    setFormData({ ...formData, date: value });
+    const selected = new Date(value + 'T12:00:00');
+    if (selected.getDay() === 0) {
+      setDateError('El salón no abre los domingos. Por favor, selecciona otro día.');
+      setSelectedDate(value);
+      return;
+    }
+    setSelectedDate(value);
   };
 
-  const nextStep = () => setStep(step + 1);
-  const prevStep = () => setStep(step - 1);
+  // Step 4 Hours helper
+  const availableTimes = useMemo(() => {
+    if (!selectedDate) return [];
+    const dateObj = new Date(selectedDate + 'T12:00:00');
+    const day = dateObj.getDay();
+    if (day === 5) {
+      // Viernes: hasta 18:00
+      return ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"];
+    }
+    if (day === 6) {
+      // Sábado: hasta 16:00
+      return ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00"];
+    }
+    // Lunes a Jueves: Lun-Vie hasta 19:00
+    return ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
+  }, [selectedDate]);
 
-  const needs = [
-    { id: 'cambio', title: 'Necesito un cambio visible.', desc: 'Transformación y nueva estética.' },
-    { id: 'mantenimiento', title: 'Busco mantener mi estilo.', desc: 'Continuidad de estilo y pulcritud.' },
-    { id: 'descanso', title: 'Solo necesito silencio y descanso.', desc: 'Relajación y desconexión total.' }
-  ];
+  const handleNext = () => {
+    setSlideDirection('slide_left');
+    setTimeout(() => {
+      setActiveStep(prev => prev + 1);
+      setSlideDirection('slide_in');
+    }, 250);
+  };
 
-  const specialists = [
-    { id: 'allison', name: 'Allison', specialty: 'Make-up & Hair Styling' },
-    { id: 'valeria', name: 'Valeria', specialty: 'Master Alisados & Cutting' },
-    { id: 'gaby', name: 'Gaby', specialty: 'Dermo-Nails & Depilación' },
-    { id: 'vivy', name: 'Vivy', specialty: 'Faciales & Maderoterapia' },
-    { id: 'sin_preferencia', name: 'Sin preferencia', specialty: 'Cualquier especialista disponible' },
-  ];
+  const handleBack = () => {
+    setSlideDirection('slide_right');
+    setTimeout(() => {
+      setActiveStep(prev => prev - 1);
+      setSlideDirection('slide_in');
+    }, 250);
+  };
+
+  const canContinue = useMemo(() => {
+    if (activeStep === 1) return selectedService !== null;
+    if (activeStep === 2) return selectedSpecialist !== null;
+    if (activeStep === 3) return selectedDate !== '' && !dateError;
+    if (activeStep === 4) return selectedTime !== '';
+    return true;
+  }, [activeStep, selectedService, selectedSpecialist, selectedDate, selectedTime, dateError]);
 
   const sendWhatsApp = () => {
-    const needLabel = needs.find(n => n.id === formData.need)?.title || formData.need;
-    const specialistLabel = specialists.find(s => s.id === formData.specialist)?.name || formData.specialist;
-    const message = `*Nueva Consulta Digital - Naamá Studio*%0A%0A` +
-      `*Preferencia:* ${needLabel}%0A` +
-      `*Especialista:* ${specialistLabel}%0A` +
-      `*Fecha sugerida:* ${formData.date}%0A` +
-      `*Notas:* ${formData.notes || 'Sin notas'}%0A%0A` +
-      `_Enviado desde el sistema de reserva digital._`;
-    
-    window.open(`https://wa.me/56979520623?text=${message}`, '_blank');
+    const mensaje = `Hola Naamá Studio ■ Quiero reservar:
+■ Servicio: ${selectedService.name}
+■ Especialista: ${selectedSpecialist.name}
+■ Fecha: ${selectedDate}
+■ Hora: ${selectedTime}
+¡Muchas gracias!`;
+    window.open(`https://wa.me/56979520623?text=${encodeURIComponent(mensaje)}`, '_blank');
   };
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeStep]);
+
   return (
-    <div className="booking_flow_container">
-      <SEOHead title="Consulta Digital" description="Inicia tu proceso de restauración técnica en Naamá Studio." />
+    <div className="booking_page container">
+      <SEOHead title="Reserva tu Experiencia" description="Flujo de agendamiento premium Naamá Studio." />
       
-      <div className="booking_card">
-        <div className="step_indicator" style={{ width: `${(step / 5) * 100}%` }}></div>
+      {/* ── BARRA DE PROGRESO ── */}
+      <div className="progress_bar_container">
+        <div className="progress_line_bg" />
+        <div className="progress_line" style={{ width: `${(activeStep - 1) / 4 * 100}%` }} />
+        <div className="progress_nodes">
+          {steps.map((st, i) => {
+            const stepNum = i + 1;
+            let nodeClass = "future";
+            if (stepNum === activeStep) nodeClass = "active";
+            else if (stepNum < activeStep) nodeClass = "completed";
+            
+            return (
+              <div key={st} className={`progress_node ${nodeClass}`}>
+                <span className="node_circle">
+                  {nodeClass === "completed" ? <Check size={12} strokeWidth={3} /> : stepNum}
+                </span>
+                <span className="node_label">{st}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── CONTENIDO DEL FLUJO CON ANIMACIÓN ── */}
+      <div className={`booking_flow_card ${slideDirection}`}>
         
-        {/* Paso 1: Necesidad */}
-        {step === 1 && (
-          <div className="booking_step_content">
-            <span className="booking_label">Paso 01 · El Origen</span>
-            <h2 className="booking_question serif">"Cuéntanos cómo te sientes hoy para que podamos servirte mejor."</h2>
+        {/* PASO 1: SERVICIO */}
+        {activeStep === 1 && (
+          <div className="booking_step">
+            <h2 className="booking_step_title serif">¿Qué experiencia buscas hoy?</h2>
+            <p className="booking_step_sub">Puedes filtrar por categoría o buscar directamente.</p>
             
-            <div className="options_grid">
-              {needs.map(n => (
-                <button 
-                  key={n.id} 
-                  className={`option_btn ${formData.need === n.id ? 'selected' : ''}`}
-                  onClick={() => setFormData({ ...formData, need: n.id })}
-                  aria-pressed={formData.need === n.id}
+            {/* World Filters */}
+            <div className="world_filter_pills">
+              {mundos.map(m => (
+                <button
+                  key={m.id}
+                  className={`world_pill ${selectedMundo === m.id ? 'active' : ''}`}
+                  onClick={() => setSelectedMundo(m.id)}
                 >
-                  <span className="option_title">{n.title}</span>
-                  <span className="option_desc">{n.desc}</span>
-                </button>
-              ))}
-            </div>
-            
-            <div className="booking_actions" style={{ justifyContent: 'flex-end' }}>
-              <button className="next_btn" disabled={!formData.need} onClick={nextStep}>Siguiente</button>
-            </div>
-          </div>
-        )}
-
-        {/* Paso 2: Especialista */}
-        {step === 2 && (
-          <div className="booking_step_content">
-            <span className="booking_label">Paso 02 · Tu Especialista</span>
-            <h2 className="booking_question serif">¿Con quién te gustaría <span className="booking_highlight">atenderte</span>?</h2>
-            
-            <div className="options_grid">
-              {specialists.map(s => (
-                <button 
-                  key={s.id} 
-                  className={`option_btn ${formData.specialist === s.id ? 'selected' : ''}`}
-                  onClick={() => setFormData({ ...formData, specialist: s.id })}
-                  aria-pressed={formData.specialist === s.id}
-                >
-                  <span className="option_title">{s.name}</span>
-                  <span className="option_desc">{s.specialty}</span>
+                  {m.name}
                 </button>
               ))}
             </div>
 
-            <div className="booking_actions">
-              <button className="back_btn" onClick={prevStep}>Atrás</button>
-              <button className="next_btn" disabled={!formData.specialist} onClick={nextStep}>Siguiente</button>
+            {/* List of Services */}
+            <div className="booking_services_list">
+              {filteredServices.map((service, index) => {
+                const isSelected = selectedService?.name === service.name;
+                return (
+                  <div
+                    key={`${service.name}-${index}`}
+                    className={`booking_service_row ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setSelectedService(service)}
+                  >
+                    <span className="bs_index">{(index + 1).toString().padStart(2, '0')}</span>
+                    <div className="bs_name_group">
+                      <span className="bs_name">{service.name}</span>
+                      <span className="bs_category">{service.cat}</span>
+                    </div>
+                    <span className="bs_duration">{service.time}</span>
+                    <span className="bs_price">${service.price || 'Consultar'}</span>
+                    <div className="bs_select_indicator">
+                      {isSelected && <Check size={14} strokeWidth={3} />}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Paso 3: Fecha */}
-        {step === 3 && (
-          <div className="booking_step_content">
-            <span className="booking_label">Paso 03 · El Momento</span>
-            <h2 className="booking_question serif">¿Cuándo deseas tu <br /> <span className="booking_highlight">sesión</span>?</h2>
+        {/* PASO 2: ESPECIALISTA */}
+        {activeStep === 2 && (
+          <div className="booking_step">
+            <h2 className="booking_step_title serif">¿Con quién quieres tu experiencia?</h2>
+            <p className="booking_step_sub">Elige una de nuestras especialistas calificadas.</p>
             
-            <div className="booking_input_area">
+            <div className="booking_specialists_grid">
+              {/* Opción Sorpréndeme */}
+              <div 
+                className={`booking_spec_card auto_spec ${selectedSpecialist?.name === "Sin preferencia" ? 'selected' : ''}`}
+                onClick={() => setSelectedSpecialist({ name: "Sin preferencia", role: "Te asignaremos la especialista disponible", color: "var(--accent-walnut)" })}
+              >
+                <div className="spec_card_top" style={{ backgroundColor: '#1A1A1A' }}>
+                  <span className="spec_initial">?</span>
+                </div>
+                <div className="spec_card_bottom">
+                  <h4 className="spec_name serif">Sin preferencia</h4>
+                  <p className="spec_role">Sorpréndeme</p>
+                  <span className="spec_badge_available">Disponible</span>
+                </div>
+              </div>
+
+              {/* Especialistas Filtrados */}
+              {availableSpecialists.map(spec => {
+                const isSelected = selectedSpecialist?.name === spec.name;
+                return (
+                  <div 
+                    key={spec.name}
+                    className={`booking_spec_card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setSelectedSpecialist(spec)}
+                  >
+                    <div className="spec_card_top" style={{ backgroundColor: spec.color }}>
+                      <span className="spec_initial">{spec.initial}</span>
+                    </div>
+                    <div className="spec_card_bottom">
+                      <h4 className="spec_name serif">{spec.name}</h4>
+                      <p className="spec_role">{spec.role}</p>
+                      <span className="spec_badge_available">Disponible</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* PASO 3: FECHA */}
+        {activeStep === 3 && (
+          <div className="booking_step date_step_layout">
+            <h2 className="booking_step_title serif">¿Cuándo viene tu momento?</h2>
+            <p className="booking_step_sub">Selecciona un día en los próximos 3 meses.</p>
+            
+            <div className="date_input_wrapper">
               <input 
-                type="date" 
-                className={`booking_input${dateError ? ' booking_input_error' : ''}`}
-                value={formData.date}
+                type="date"
+                className={`premium_date_input ${dateError ? 'error' : ''}`}
                 min={getTodayString()}
                 max={getMaxDateString()}
+                value={selectedDate}
                 onChange={(e) => handleDateChange(e.target.value)}
-                aria-label="Fecha deseada para la sesión"
-                aria-describedby={dateError ? 'date_error_msg' : undefined}
               />
-              {dateError && (
-                <p id="date_error_msg" className="booking_date_error" role="alert">
-                  {dateError}
-                </p>
-              )}
-            </div>
-            
-            <div className="booking_actions">
-              <button className="back_btn" onClick={prevStep}>Atrás</button>
-              <button
-                className="next_btn"
-                disabled={!formData.date || !!dateError}
-                onClick={nextStep}
-              >
-                Siguiente
-              </button>
+              {dateError && <p className="premium_date_error">{dateError}</p>}
             </div>
           </div>
         )}
 
-        {/* Paso 4: Notas */}
-        {step === 4 && (
-          <div className="booking_step_content">
-            <span className="booking_label">Paso 04 · Nota Técnica</span>
-            <h2 className="booking_question serif">¿Alguna nota para <br /> tu <span className="booking_highlight">especialista</span>?</h2>
+        {/* PASO 4: HORA */}
+        {activeStep === 4 && (
+          <div className="booking_step">
+            <h2 className="booking_step_title serif">¿A qué hora te acomodamos?</h2>
+            <p className="booking_step_sub">Horarios disponibles para el día seleccionado.</p>
             
-            <div className="booking_input_area">
-              <textarea 
-                className="booking_input booking_textarea" 
-                placeholder="Ej: Tengo poco tiempo / Quiero silencio total / Alergias..."
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                aria-label="Notas adicionales para el especialista"
-              />
-            </div>
-            
-            <div className="booking_actions">
-              <button className="back_btn" onClick={prevStep}>Atrás</button>
-              <button className="next_btn" onClick={nextStep}>Finalizar Consulta</button>
+            <div className="time_pills_grid">
+              {availableTimes.map(time => {
+                const isSelected = selectedTime === time;
+                return (
+                  <button
+                    key={time}
+                    className={`time_pill ${isSelected ? 'selected' : ''}`}
+                    onClick={() => setSelectedTime(time)}
+                  >
+                    {time}
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* Paso 5: Confirmación */}
-        {step === 5 && (
-          <div className="booking_step_content booking_completion_wrapper">
-            <div className="booking_icon_box">
-              <Check size={40} strokeWidth={1} />
-            </div>
-            <h2 className="serif booking_completion_title">¡Todo <span className="booking_highlight">Listo</span>!</h2>
-            <p className="booking_completion_sub">
-              Tu espacio está siendo preparado. Envíanos tu consulta por WhatsApp y te confirmamos disponibilidad.
-            </p>
+        {/* PASO 5: CONFIRMACIÓN */}
+        {activeStep === 5 && (
+          <div className="booking_step confirmation_layout">
+            <h2 className="booking_step_title serif">Tu experiencia está lista.</h2>
+            <p className="booking_step_sub">Revisa los detalles antes de solicitar tu cita.</p>
             
-            <div className="booking_actions_vertical">
-               <button className="next_btn booking_whatsapp_btn" onClick={sendWhatsApp}>
-                 📲 Confirmar por WhatsApp
-               </button>
-               <a 
-                 href="https://www.instagram.com/naamastudio_/" 
-                 target="_blank" 
-                 rel="noopener noreferrer"
-                 className="booking_instagram_link"
-               >
-                 Ver trabajos en Instagram
-               </a>
+            <div className="booking_summary_card">
+              <div className="summary_row">
+                <span className="summary_label">Servicio</span>
+                <span className="summary_value serif">{selectedService?.name}</span>
+              </div>
+              <div className="summary_row">
+                <span className="summary_label">Especialista</span>
+                <span className="summary_value serif">{selectedSpecialist?.name}</span>
+              </div>
+              <div className="summary_row">
+                <span className="summary_label">Fecha</span>
+                <span className="summary_value serif">{selectedDate}</span>
+              </div>
+              <div className="summary_row">
+                <span className="summary_label">Hora</span>
+                <span className="summary_value serif">{selectedTime}</span>
+              </div>
+              <div className="summary_divider" />
+              <div className="summary_row total_row">
+                <span className="summary_label">Total Estimado</span>
+                <span className="summary_value total_price">${selectedService?.price || 'Consultar'}</span>
+              </div>
+              
+              <p className="summary_notice">
+                Tu reserva se confirma por WhatsApp en menos de 1 hora.
+              </p>
             </div>
-            
-            <p className="booking_completion_footer">
-               Gracias por confiar en nuestra ingeniería del cuidado. 🌸
-            </p>
+
+            <button 
+              className="btn_whatsapp_confirm"
+              onClick={sendWhatsApp}
+            >
+              Confirmar por WhatsApp
+            </button>
           </div>
+        )}
+
+      </div>
+
+      {/* ── BOTONES DE NAVEGACIÓN ── */}
+      <div className="booking_navigation">
+        {activeStep > 1 ? (
+          <button className="nav_btn_back" onClick={handleBack}>
+            <ArrowLeft size={16} /> Volver
+          </button>
+        ) : (
+          <div />
+        )}
+        
+        {activeStep < 5 && (
+          <button 
+            className="nav_btn_continue" 
+            onClick={handleNext}
+            disabled={!canContinue}
+          >
+            Continuar <ArrowRight size={16} />
+          </button>
         )}
       </div>
+
     </div>
   );
 };
