@@ -122,6 +122,7 @@ const PolaroidCard = ({ data, index, total, onRemove }) => {
                 src={data.src} 
                 alt="Recuerdo" 
                 className={`nh_polaroid_img ${data.isScreenshot ? 'contain' : ''}`} 
+                loading="lazy"
             />
         </div>
         
@@ -539,6 +540,7 @@ const NuestraHistoria = () => {
                          <img 
                             src={selectedImage.src} 
                             className="nh_lb_img"
+                            loading="lazy"
                         />
                         {selectedImage.text && (
                              <motion.div 

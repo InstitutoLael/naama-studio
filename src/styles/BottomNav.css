@@ -16,21 +16,21 @@
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 900;
+    z-index: 100;
 
-    background: var(--bg-primary);
+    background: rgba(246, 244, 240, 0.85);
     border-top: var(--border-fine);
     padding-bottom: var(--safe-bottom);
     padding-top: 8px;
     height: calc(64px + var(--safe-bottom));
 
     /* Glass effect */
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
   }
 
   [data-theme="dark"] .bottom_nav {
-    background: rgba(20, 18, 16, 0.92);
+    background: rgba(26, 30, 26, 0.85);
     border-top-color: rgba(240, 235, 224, 0.08);
   }
 

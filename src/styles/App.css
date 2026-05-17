@@ -373,14 +373,16 @@
 }
 
 /* En móvil, mover los botones flotantes un poco más arriba para no tapar el BottomNav */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .floating_buttons {
-    bottom: 90px;
+    bottom: 80px;
     right: 16px;
   }
 
   .float_btn {
     width: 46px;
     height: 46px;
+    min-width: 44px;
+    min-height: 44px;
   }
 }

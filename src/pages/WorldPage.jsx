@@ -144,7 +144,7 @@ const WorldPage = () => {
         <div className="related_grid">
           {relatedWorlds.map((rel, idx) => (
             <Link key={rel.id} to={`/mundo/${rel.id}`} className={`related_card delay-${(idx % 3) + 1}`}>
-              <img src={mundoImages[rel.id]} alt={rel.name} className="related_img" />
+              <img src={mundoImages[rel.id]} alt={rel.name} className="related_img" loading="lazy" />
               <div className="related_overlay" />
               <div className="related_content">
                 <span className="related_tag">ECOSISTEMA 0{mundos.findIndex(m => m.id === rel.id) + 1}</span>
