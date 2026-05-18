@@ -270,28 +270,8 @@ button {
 }
 
 /* ============================================================
-   ANIMACIONES — Blur-In Elevation
+   ANIMACIONES — Delays utilitarios
    ============================================================ */
-[class*="reveal"] {
-  opacity: 0;
-  filter: blur(8px);
-  transform: translateY(24px);
-  transition:
-    opacity 1.1s ease,
-    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1.1s ease;
-}
-
-.reveal-visible {
-  opacity: 1;
-  filter: blur(0);
-  transform: translateY(0);
-}
-
-.delay-1 { transition-delay: 0.1s; }
-.delay-2 { transition-delay: 0.25s; }
-.delay-3 { transition-delay: 0.45s; }
-.delay-4 { transition-delay: 0.65s; }
 
 /* ============================================================
    ACCESIBILIDAD — Focus States
