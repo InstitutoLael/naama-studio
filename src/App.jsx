@@ -70,8 +70,6 @@ const App = () => {
   return (
     <div className="naama_app">
       <ScrollToTop />
-      <ScrollProgress />
-      <CustomCursor />
 
       {/* Navegación Desktop / Mobile Header */}
       <nav className={`main_nav ${scrolled ? 'nav_scrolled' : ''} ${menuOpen ? 'nav_menu_active' : ''}`} aria-label="Navegación principal">

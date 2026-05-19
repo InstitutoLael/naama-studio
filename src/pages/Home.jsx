@@ -214,24 +214,34 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ── ESENCIA / MANIFIESTO ── */}
-      <section className="home_essence">
-        <div className="container essence_inner reveal">
-          <span className="essence_label">Nuestra Promesa</span>
-          <h2 className="serif essence_title">
-            La belleza es un acto<br />de servicio honesto.
+      {/* ── SECCIÓN EMOCIONAL: EL ELOGIO DE LA PAUSA ── */}
+      <section className="emotional_sanctuary reveal">
+        <div className="container sanctuary_inner">
+          <span className="sanctuary_eyebrow">EL ELOGIO DE LA PAUSA</span>
+          <h2 className="serif sanctuary_title">
+            En un mundo que no para,<br />
+            <em>elegir el silencio es un acto de rebeldía.</em>
           </h2>
-          <p className="essence_text serif">
-            "Creemos que el verdadero bienestar no necesita misticismo, necesita maestría.
-            En Naamá Studio honramos tu tiempo y tu confianza con higiene impecable,
-            productos honestos y manos que entienden la arquitectura de tu belleza."
-          </p>
-          <p className="essence_signature serif">
-            Que al salir, te sientas más tú misma que cuando entraste.
-            <br />
-            <em className="text_gold">Dulce. Placentera. Renovada.</em>
-          </p>
-          <div className="essence_divider" />
+          
+          <div className="sanctuary_grid">
+            <div className="sanctuary_column">
+              <p className="sanctuary_text serif">
+                No vienes a Naamá Studio solo a teñir tu cabello o esculpir tus uñas. Vienes a reclamar tu derecho al descanso. Vienes porque la prisa desdibuja la identidad, y el cuidado genuino es el único ritual capaz de devolverte a tu centro.
+              </p>
+            </div>
+            <div className="sanctuary_column">
+              <p className="sanctuary_text serif">
+                Aquí, el tiempo transcurre más despacio. Entre el murmullo de nuestra casa patrimonial y el aroma a aceites botánicos, diseñamos un espacio donde tu autoestima y tu descanso no son un lujo secundario, sino la prioridad absoluta.
+              </p>
+            </div>
+          </div>
+          
+          <div className="sanctuary_quote_block">
+            <p className="sanctuary_quote serif">
+              "No vendemos servicios. Custodiamos pausas."
+            </p>
+            <span className="sanctuary_author">— El Manifiesto de Naamá</span>
+          </div>
         </div>
       </section>
 

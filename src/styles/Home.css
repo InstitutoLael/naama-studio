@@ -540,64 +540,100 @@
 }
 
 /* ============================================================
-   ESENCIA / MANIFIESTO
+   SECCIÓN EMOCIONAL: EL ELOGIO DE LA PAUSA (Santuario)
    ============================================================ */
-.home_essence {
-  padding: 180px 0;
+.emotional_sanctuary {
+  padding: 160px 0;
   background: var(--surface-warm);
   border-top: var(--border-fine);
   border-bottom: var(--border-fine);
 }
 
-.essence_inner {
-  max-width: 860px;
-  text-align: center;
+.sanctuary_inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 40px;
 }
 
-.essence_label {
+.sanctuary_eyebrow {
   font-family: var(--font-sans);
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.45em;
+  letter-spacing: 0.4em;
   color: var(--accent-gold);
-  margin-bottom: 40px;
+  margin-bottom: 30px;
   display: block;
 }
 
-.essence_title {
-  font-size: clamp(2.2rem, 4vw, 3.5rem);
+.sanctuary_title {
+  font-size: clamp(2rem, 3.8vw, 3.2rem);
   font-weight: 300;
-  margin-bottom: 50px;
+  line-height: 1.25;
   color: var(--text-primary);
-  line-height: 1.15;
-}
-
-.essence_text {
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
-  line-height: 1.85;
-  color: var(--text-muted);
-  margin-bottom: 40px;
-  font-weight: 300;
-}
-
-.essence_signature {
-  font-size: 1.1rem;
-  color: var(--text-muted);
-  line-height: 1.9;
-  font-weight: 300;
   margin-bottom: 60px;
 }
 
-.text_gold   { color: var(--accent-gold); }
-.text_walnut { color: var(--accent-walnut); }
+.sanctuary_title em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--accent-gold);
+}
 
-.essence_divider {
-  width: 50px;
-  height: 1px;
-  background: var(--accent-gold);
+.sanctuary_grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px 80px;
+  margin-bottom: 70px;
+}
+
+.sanctuary_text {
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+  font-weight: 300;
+  margin: 0;
+}
+
+.sanctuary_quote_block {
+  text-align: center;
+  border-top: 1px solid rgba(183, 154, 91, 0.15);
+  padding-top: 60px;
+  max-width: 680px;
   margin: 0 auto;
-  opacity: 0.6;
+}
+
+.sanctuary_quote {
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  font-style: italic;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.sanctuary_author {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .emotional_sanctuary {
+    padding: 100px 0;
+  }
+  .sanctuary_grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .sanctuary_title {
+    margin-bottom: 40px;
+  }
+  .sanctuary_quote_block {
+    padding-top: 40px;
+  }
 }
 
 /* ============================================================
