@@ -1,5 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X } from 'lucide-react';
 import Home from './pages/Home';
 
 // Lazy-load páginas pesadas para mejorar performance en móvil
@@ -35,6 +37,7 @@ const ScrollToTop = () => {
 
 const App = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -42,6 +45,23 @@ const App = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Cerrar menú al cambiar de ruta
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  // Bloquear scroll cuando el menú está abierto
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [menuOpen]);
 
   // Hook global de animaciones premium para observar todos los .reveal en cambio de ruta
   useReveal(location.pathname);
@@ -53,8 +73,8 @@ const App = () => {
       <ScrollProgress />
       <CustomCursor />
 
-      {/* Navegación Desktop */}
-      <nav className={`main_nav ${scrolled ? 'nav_scrolled' : ''}`} aria-label="Navegación principal">
+      {/* Navegación Desktop / Mobile Header */}
+      <nav className={`main_nav ${scrolled ? 'nav_scrolled' : ''} ${menuOpen ? 'nav_menu_active' : ''}`} aria-label="Navegación principal">
         <div className="nav_container">
           <Link to="/" className="logo_link" aria-label="Ir al inicio de Naamá Studio">
             <img
@@ -67,17 +87,90 @@ const App = () => {
               height="45"
             />
           </Link>
-          <div className="nav_links">
+          
+          {/* Enlaces Desktop */}
+          <div className="nav_links desktop_only">
             <Link to="/" className={`nav_item ${location.pathname === '/' ? 'active' : ''}`}>Inicio</Link>
             <Link to="/staff" className={`nav_item ${location.pathname === '/staff' ? 'active' : ''}`}>Precios</Link>
-            {/* <Link to="/galeria" className={`nav_item ${location.pathname === '/galeria' ? 'active' : ''}`}>Galería</Link> */}
             <Link to="/empresas" className={`nav_item ${location.pathname === '/empresas' ? 'active' : ''}`}>Empresas</Link>
             <Link to="/contacto" className={`nav_item ${location.pathname === '/contacto' ? 'active' : ''}`}>Contacto</Link>
             <ThemeToggle />
             <Link to="/reservar" className="nav_cta_boutique" aria-label="Agendar una sesión">Agendar</Link>
           </div>
+
+          {/* Grupo de Control Mobile */}
+          <div className="mobile_nav_control mobile_only">
+            <ThemeToggle />
+            <button 
+              className={`hamburger_btn ${menuOpen ? 'active' : ''}`}
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? "Cerrar menú de navegación" : "Abrir menú de navegación"}
+              aria-expanded={menuOpen}
+            >
+              {menuOpen ? <X size={26} /> : <Menu size={26} />}
+            </button>
+          </div>
         </div>
       </nav>
+
+      {/* Menú Desplegable Responsivo overlay */}
+      <AnimatePresence>
+        {menuOpen && (
+          <motion.div 
+            className="mobile_menu_overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => setMenuOpen(false)}
+          >
+            <motion.div 
+              className="mobile_menu_panel"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mobile_menu_header">
+                <span className="mobile_menu_brand serif">Naamá Studio</span>
+                <button 
+                  className="mobile_menu_close" 
+                  onClick={() => setMenuOpen(false)}
+                  aria-label="Cerrar menú"
+                >
+                  <X size={28} />
+                </button>
+              </div>
+
+              <div className="mobile_menu_links">
+                <Link to="/" className={`mobile_menu_item ${location.pathname === '/' ? 'active' : ''}`}>
+                  Inicio
+                </Link>
+                <Link to="/staff" className={`mobile_menu_item ${location.pathname === '/staff' ? 'active' : ''}`}>
+                  Precios & Equipo
+                </Link>
+                <Link to="/empresas" className={`mobile_menu_item ${location.pathname === '/empresas' ? 'active' : ''}`}>
+                  Empresas
+                </Link>
+                <Link to="/contacto" className={`mobile_menu_item ${location.pathname === '/contacto' ? 'active' : ''}`}>
+                  Contacto
+                </Link>
+              </div>
+
+              <div className="mobile_menu_footer">
+                <Link to="/reservar" className="mobile_menu_cta btn_gold_solid" aria-label="Agendar experiencia">
+                  Agendar Experiencia
+                </Link>
+                <div className="mobile_menu_info">
+                  <p className="sch_text uppercase">Lunes a Sábado</p>
+                  <p className="arena_text_muted">Arcadia 1297, San Miguel</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <main className="main_content">
         <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--bg-linen)' }} />}>
