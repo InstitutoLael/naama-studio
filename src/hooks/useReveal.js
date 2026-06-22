@@ -2,34 +2,44 @@ import { useEffect } from 'react';
 
 export const useReveal = (dependency) => {
   useEffect(() => {
-    let observer = null;
-    
-    // Add small delay to ensure all DOM elements are fully rendered before observing
-    const timer = setTimeout(() => {
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-              observer.unobserve(entry.target);
-            }
-          });
-        },
-        {
-          threshold: 0.05,
-          rootMargin: '0px 0px -30px 0px',
-        }
-      );
+    // 1. Crear el IntersectionObserver para revelar elementos al hacer scroll
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.05,
+        rootMargin: '0px 0px -30px 0px',
+      }
+    );
 
-      const elements = document.querySelectorAll('.reveal');
-      elements.forEach((el) => observer.observe(el));
-    }, 100);
+    // Función para buscar y observar elementos .reveal que aún no sean visibles
+    const observeExisting = () => {
+      const elements = document.querySelectorAll('.reveal:not(.visible)');
+      elements.forEach((el) => io.observe(el));
+    };
+
+    // Observar de inmediato lo que esté en el DOM actual
+    observeExisting();
+
+    // 2. Usar MutationObserver para registrar elementos cargados de forma diferida (lazy/Suspense)
+    const mutationObserver = new MutationObserver(() => {
+      observeExisting();
+    });
+
+    mutationObserver.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
 
     return () => {
-      clearTimeout(timer);
-      if (observer) {
-        observer.disconnect();
-      }
+      io.disconnect();
+      mutationObserver.disconnect();
     };
   }, [dependency]);
 };
