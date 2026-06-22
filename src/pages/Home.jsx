@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { mundos } from '../data/categories';
 import SEOHead from '../components/shared/SEOHead';
 import TestimonialsSection from '../components/sections/TestimonialsSection';
@@ -27,10 +27,21 @@ const editorialMundos = [
 
 const Home = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+    if (location.hash === '#nosotros') {
+      const element = document.getElementById('nosotros');
+      if (element) {
+        const timer = setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [location]);
 
   return (
     <div className="home_page">
@@ -124,7 +135,7 @@ const Home = () => {
       </section>
 
       {/* ── NUESTRA ESENCIA ── */}
-      <section className="premium_essence">
+      <section className="premium_essence" id="nosotros">
         <div className="container premium_essence_layout">
           {/* Columna Izquierda: Elemento Visual */}
           <div className="premium_essence_visual reveal reveal-left">

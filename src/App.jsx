@@ -9,7 +9,7 @@ const WorldPage = lazy(() => import('./pages/WorldPage'));
 const StaffPage = lazy(() => import('./pages/StaffPage'));
 const EmpresasPage = lazy(() => import('./pages/EmpresasPage'));
 const BookingFlow = lazy(() => import('./pages/BookingFlow'));
-const NuestraHistoria = lazy(() => import('./pages/NuestraHistoria')); // Existe pero no se muestra
+const NuestraHistoria = lazy(() => import('./pages/NuestraHistoria'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const GalleryPage = lazy(() => import('./pages/GalleryPage'));
 const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
@@ -179,7 +179,6 @@ const App = () => {
               <Route path="/staff" element={<StaffPage />} />
               <Route path="/empresas" element={<EmpresasPage />} />
               <Route path="/reservar" element={<BookingFlow />} />
-              {/* NuestraHistoria: ruta activa pero sin acceso desde ningún menú */}
               <Route path="/nuestra-historia" element={<NuestraHistoria />} />
               <Route path="/contacto" element={<ContactPage />} />
               <Route path="/galeria" element={<GalleryPage />} />
@@ -264,7 +263,7 @@ const App = () => {
               <Link to="/" className="footer_nav_link">Inicio</Link>
               <Link to="/staff" className="footer_nav_link">Servicios</Link>
               <Link to="/galeria" className="footer_nav_link">Galería</Link>
-              <Link to="/nuestra-historia" className="footer_nav_link">Nosotros</Link>
+              <Link to="/#nosotros" className="footer_nav_link">Nosotros</Link>
               <Link to="/contacto" className="footer_nav_link">Contacto</Link>
               <Link to="/reservar" className="footer_nav_link">Reservar</Link>
             </div>
