@@ -4,6 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, PlusIcon } from './Icons';
 
 const hasValue = (v) => v && v.trim() !== '' && v !== '---';
+const toNumber = (v) => Number(String(v).replace(/\D/g, ''));
+// Solo se muestra el precio tachado cuando realmente es una rebaja (antes costaba más).
+const isDiscount = (s) => hasValue(s.old) && hasValue(s.price) && toNumber(s.old) > toNumber(s.price);
 
 /** Fila de servicio con precio; se expande para mostrar el detalle. */
 const ServiceRow = ({ service }) => {
@@ -26,7 +29,7 @@ const ServiceRow = ({ service }) => {
           {service.worker && <span>{service.worker}</span>}
         </span>
         <span className="srow__price">
-          {hasValue(service.old) && <s>${service.old}</s>}
+          {isDiscount(service) && <s>${service.old}</s>}
           {hasValue(service.price) ? `$${service.price}` : 'Consultar'}
         </span>
         {hasDetail && <PlusIcon className="srow__icon" />}
