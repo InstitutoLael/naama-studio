@@ -12,7 +12,7 @@
 .gc-stage { perspective: 1200px; }
 .gc {
   --fg: var(--paper);
-  --accent: var(--gold-300);
+  --accent: var(--caramel-300);
   position: relative;
   aspect-ratio: 1.6;
   display: grid;
@@ -22,10 +22,11 @@
   color: var(--fg);
   overflow: hidden;
   transform-style: preserve-3d;
-  box-shadow: 0 50px 90px -40px rgba(27, 33, 25, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 50px 90px -40px rgba(28, 18, 12, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
-.gc--bosque { background: radial-gradient(120% 140% at 0% 0%, #3a4636 0%, #2c3629 45%, #1b2119 100%); }
-.gc--marfil { --fg: var(--forest-900); --accent: var(--gold-600); background: radial-gradient(120% 140% at 0% 0%, #fffdf8 0%, #f4eee4 50%, #e8ddcc 100%); }
+.gc--cacao { background: radial-gradient(120% 140% at 0% 0%, #3e2a1e 0%, #2a1c14 45%, #1c120c 100%); }
+.gc--caramelo { --fg: #3a2414; --accent: #3a2414; background: radial-gradient(120% 140% at 0% 0%, #d69a55 0%, #c08040 50%, #9a6128 100%); }
+.gc--marfil { --fg: var(--cacao-900); --accent: var(--caramel-600); background: radial-gradient(120% 140% at 0% 0%, #fffdf8 0%, #f4eee4 50%, #e8ddcc 100%); }
 .gc--burdeo { background: radial-gradient(120% 140% at 0% 0%, #8a3447 0%, #6b2737 50%, #3f1520 100%); }
 .gc__shine {
   position: absolute;
@@ -35,8 +36,7 @@
   pointer-events: none;
 }
 .gc__top { display: flex; align-items: center; gap: 12px; }
-.gc__mark { width: 30px; height: 38px; color: var(--fg); }
-.gc__brand { font-family: var(--font-display); font-size: 1.15rem; }
+.gc__logo { width: clamp(110px, 14vw, 150px); color: var(--fg); }
 .gc__amount {
   align-self: center;
   font-family: var(--font-display);
@@ -58,7 +58,7 @@
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--gold-600);
+  color: var(--caramel-600);
 }
 .gc-swatches { display: flex; align-items: center; gap: 12px; }
 .gc-swatch {
@@ -69,7 +69,7 @@
   outline-offset: 4px;
   transition: outline-color 0.3s, transform 0.4s var(--ease-out);
 }
-.gc-swatch.is-active { outline: 2px solid var(--forest); transform: scale(1.06); }
+.gc-swatch.is-active { outline: 2px solid var(--cacao); transform: scale(1.06); }
 .gc-swatches__name { margin-left: 8px; font-family: var(--font-display); font-size: 1.2rem; }
 .gc-amounts { display: flex; flex-wrap: wrap; gap: 8px; }
 .gc-two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }

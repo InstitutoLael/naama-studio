@@ -1,46 +1,53 @@
 // Equipo de especialistas. `name` debe coincidir con el campo `worker` de servicesData.
+// `photo` es el nombre del retrato en src/data/photos.json (si no hay, se muestra la inicial).
 export const team = [
   {
     name: 'Valeria',
     role: 'Colorista & Alisados',
     specialties: ['Balayage', 'Babylights', 'Alisado Brasileño', 'Cortes'],
-    tone: '#2C3629',
+    tone: '#2a1c14',
+    photo: 'retrato-valeria',
   },
   {
-    name: 'Vivy',
-    role: 'Faciales & Bienestar',
-    specialties: ['Limpiezas Faciales', 'Masajes', 'Maderoterapia'],
-    tone: '#7A5A43',
+    name: 'Viviana',
+    role: 'Cabello, Faciales & Bienestar',
+    specialties: ['Cortes', 'Tratamientos Capilares', 'Limpiezas Faciales', 'Masajes'],
+    tone: '#7a5a43',
+    photo: 'retrato-viviana',
   },
   {
     name: 'Gaby',
     role: 'Uñas, Cejas & Pestañas',
     specialties: ['Manicure', 'Pedicure', 'Lifting', 'Depilación'],
-    tone: '#A67C52',
+    tone: '#8e5a2b',
+    photo: 'retrato-gaby',
   },
   {
     name: 'Leah',
-    role: 'Manicurista',
-    specialties: ['Esmaltado Permanente', 'Soft Gel', 'Nail Art'],
-    tone: '#6B2737',
+    role: 'Manicure, Pedicure & Cabello',
+    specialties: ['Esmaltado Permanente', 'Pedicure', 'Lavado & Brushing'],
+    tone: '#6b2737',
+    photo: 'retrato-leah',
   },
   {
     name: 'Catalina',
-    role: 'Manicurista',
-    specialties: ['Esmaltado Permanente', 'PolyGel', 'Diseño a Mano Alzada'],
-    tone: '#4E3B31',
+    role: 'Manicure, Pedicure & Cabello',
+    specialties: ['Esmaltado Permanente', 'Pedicure', 'Lavado & Brushing'],
+    tone: '#4e3b31',
+    photo: 'retrato-catalina',
   },
   {
     name: 'Allison',
     role: 'Make-up & Peinados',
     specialties: ['Maquillaje Social', 'Peinados para Eventos'],
-    tone: '#1F261C',
+    tone: '#1c120c',
+    photo: 'retrato-allison',
   },
   {
     name: 'Michelle',
     role: 'Podología Clínica',
     specialties: ['Podología Básica', 'Podología Avanzada'],
-    tone: '#3F4A45',
+    tone: '#3f4a45',
   },
 ];
 

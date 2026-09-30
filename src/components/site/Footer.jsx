@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { LogoMark } from '../common/Logo';
+import Logo from '../common/Logo';
 import { ArrowRight, ArrowUpRight, InstagramIcon, WhatsAppIcon } from '../common/Icons';
 import { HOURS, SITE, whatsappUrl } from '../../data/site';
 import { mundos } from '../../data/categories';
@@ -16,7 +16,7 @@ const Footer = () => (
           Reserva un momento <em>solo para ti.</em>
         </h2>
         <div className="footer__cta-actions">
-          <Link to="/reservar" className="btn btn--gold">
+          <Link to="/reservar" className="btn btn--caramel">
             Reservar mi hora <ArrowRight />
           </Link>
           <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer" className="btn btn--ghost-light">
@@ -81,10 +81,7 @@ const Footer = () => (
         </div>
       </div>
 
-      <div className="footer__wordmark" aria-hidden="true">
-        <LogoMark className="footer__mark" />
-        <span>Naamá</span>
-      </div>
+      <Logo className="footer__wordmark" />
 
       <div className="footer__bottom">
         <span>© {new Date().getFullYear()} Naamá Studio SpA</span>

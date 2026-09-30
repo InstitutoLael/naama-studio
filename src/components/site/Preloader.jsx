@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { LogoMark } from '../common/Logo';
+import Logo from '../common/Logo';
 
 const KEY = 'naama-intro-seen';
 const EASE = [0.16, 1, 0.3, 1];
@@ -44,13 +44,8 @@ const Preloader = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: EASE }}
           >
-            <LogoMark className="preloader__mark" />
+            <Logo className="preloader__logo" />
           </motion.div>
-          <span className="split-line preloader__word">
-            <motion.span initial={{ y: '110%' }} animate={{ y: 0 }} transition={{ duration: 1, ease: EASE, delay: 0.3 }}>
-              Naamá Studio
-            </motion.span>
-          </span>
         </motion.div>
       )}
     </AnimatePresence>

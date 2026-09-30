@@ -1,16 +1,16 @@
 /* ─────────────────────────────────────────────────────────────
    Naamá Studio — Design tokens & base
-   Paleta tomada del logo: verde bosque, dorado champán y marfil.
+   Paleta del logo y de la casa: cacao, caramelo y marfil.
    ───────────────────────────────────────────────────────────── */
 
 :root {
   /* Marca */
-  --forest: #2c3629;
-  --forest-900: #1b2119;
-  --forest-700: #3a4636;
-  --gold: #c6a177;
-  --gold-300: #e3cba9;
-  --gold-600: #9c7550;
+  --cacao: #2a1c14;
+  --cacao-900: #1c120c;
+  --cacao-700: #3e2a1e;
+  --caramel: #c08040;
+  --caramel-300: #e6c49a;
+  --caramel-600: #8e5a2b;
   --wine: #6b2737;
 
   /* Neutros */
@@ -62,10 +62,6 @@ html {
   scroll-padding-top: var(--nav-h);
 }
 
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-.lenis.lenis-stopped { overflow: hidden; }
-
 body {
   background: var(--paper);
   color: var(--ink);
@@ -77,17 +73,6 @@ body {
   overflow-x: clip;
 }
 
-/* Grano sutil de papel sobre todo el sitio */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 9000;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
 img, picture, video, svg { display: block; max-width: 100%; }
 img { height: auto; }
 a { color: inherit; text-decoration: none; }
@@ -95,10 +80,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 input, textarea, select { font: inherit; color: inherit; }
 ul, ol { list-style: none; }
 
-::selection { background: var(--gold-300); color: var(--forest-900); }
+::selection { background: var(--caramel-300); color: var(--cacao-900); }
 
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--caramel);
   outline-offset: 3px;
   border-radius: 2px;
 }
@@ -109,7 +94,7 @@ ul, ol { list-style: none; }
   left: 12px;
   z-index: 10000;
   padding: 12px 18px;
-  background: var(--forest);
+  background: var(--cacao);
   color: var(--paper);
   transform: translateY(-160%);
   transition: transform 0.3s var(--ease-out);
@@ -127,9 +112,9 @@ h1, h2, h3, h4 {
 h1 em, h2 em, h3 em, .display em {
   font-style: italic;
   font-weight: 400;
-  color: var(--gold-600);
+  color: var(--caramel-600);
 }
-.on-dark h1 em, .on-dark h2 em, .on-dark h3 em, .on-dark .display em { color: var(--gold-300); }
+.on-dark h1 em, .on-dark h2 em, .on-dark h3 em, .on-dark .display em { color: var(--caramel-300); }
 
 p { text-wrap: pretty; }
 
@@ -142,7 +127,7 @@ p { text-wrap: pretty; }
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--gold-600);
+  color: var(--caramel-600);
 }
 .eyebrow::before {
   content: '';
@@ -150,7 +135,7 @@ p { text-wrap: pretty; }
   height: 1px;
   background: currentColor;
 }
-.on-dark .eyebrow { color: var(--gold-300); }
+.on-dark .eyebrow { color: var(--caramel-300); }
 
 .lead {
   font-size: var(--fs-lead);
@@ -172,7 +157,7 @@ p { text-wrap: pretty; }
   padding-inline: var(--gutter);
 }
 .section { padding-block: var(--section); }
-.on-dark { background: var(--forest); color: var(--paper); }
+.on-dark { background: var(--cacao); color: var(--paper); }
 .on-ivory { background: var(--ivory); }
 
 .section-head {
@@ -193,10 +178,10 @@ p { text-wrap: pretty; }
 
 /* ── Botones ── */
 .btn {
-  --btn-bg: var(--forest);
+  --btn-bg: var(--cacao);
   --btn-fg: var(--paper);
-  --btn-fill: var(--gold);
-  --btn-fill-fg: var(--forest-900);
+  --btn-fill: var(--caramel);
+  --btn-fill-fg: var(--cacao-900);
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -232,12 +217,12 @@ p { text-wrap: pretty; }
 .btn:hover svg { transform: translateX(4px); }
 .btn:disabled { opacity: 0.4; pointer-events: none; }
 
-.btn--gold { --btn-bg: var(--gold); --btn-fg: var(--forest-900); --btn-fill: var(--paper); --btn-fill-fg: var(--forest-900); }
-.btn--light { --btn-bg: var(--paper); --btn-fg: var(--forest-900); --btn-fill: var(--gold); }
+.btn--caramel { --btn-bg: var(--caramel); --btn-fg: var(--cacao-900); --btn-fill: var(--paper); --btn-fill-fg: var(--cacao-900); }
+.btn--light { --btn-bg: var(--paper); --btn-fg: var(--cacao-900); --btn-fill: var(--caramel); }
 .btn--ghost {
   --btn-bg: transparent;
   --btn-fg: var(--ink);
-  --btn-fill: var(--forest);
+  --btn-fill: var(--cacao);
   --btn-fill-fg: var(--paper);
   border: 1px solid var(--line);
 }
@@ -245,7 +230,7 @@ p { text-wrap: pretty; }
   --btn-bg: transparent;
   --btn-fg: var(--paper);
   --btn-fill: var(--paper);
-  --btn-fill-fg: var(--forest-900);
+  --btn-fill-fg: var(--cacao-900);
   border: 1px solid rgba(251, 248, 243, 0.35);
 }
 .btn--sm { min-height: 44px; padding: 0 22px; font-size: 0.72rem; }
@@ -300,8 +285,8 @@ p { text-wrap: pretty; }
 }
 .chip:hover { border-color: var(--ink); color: var(--ink); }
 .chip[aria-pressed='true'], .chip.is-active {
-  background: var(--forest);
-  border-color: var(--forest);
+  background: var(--cacao);
+  border-color: var(--cacao);
   color: var(--paper);
 }
 
@@ -324,7 +309,7 @@ p { text-wrap: pretty; }
   font-size: 1.1rem;
   transition: border-color 0.3s;
 }
-.input:focus { outline: none; border-color: var(--gold-600); }
+.input:focus { outline: none; border-color: var(--caramel-600); }
 textarea.input { min-height: 120px; resize: vertical; }
 
 .visually-hidden {

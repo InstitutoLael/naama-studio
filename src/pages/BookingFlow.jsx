@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
+import Photo from '../components/common/Photo';
 import { ArrowRight, CheckIcon, SearchIcon, WhatsAppIcon } from '../components/common/Icons';
 import { mundos, servicesForMundo } from '../data/categories';
 import { servicesData } from '../data/servicesData';
@@ -145,7 +146,7 @@ const BookingFlow = () => {
                       ))}
                     </div>
                   )}
-                  <ul className="options" data-lenis-prevent>
+                  <ul className="options">
                     {list.map((s, i) => {
                       const selected = service?.name === s.name;
                       return (
@@ -186,8 +187,8 @@ const BookingFlow = () => {
                           aria-pressed={selected}
                           onClick={() => setPerson(p)}
                         >
-                          <span className="person__mono" style={{ '--tone': p.tone ?? '#1b2119' }}>
-                            {p === ANY ? '✦' : p.name[0]}
+                          <span className="person__mono" style={{ '--tone': p.tone ?? '#1c120c' }}>
+                            {p.photo ? <Photo name={p.photo} alt="" sizes="52px" position="50% 20%" /> : p === ANY ? '✦' : p.name[0]}
                           </span>
                           <span className="person__name">{p.name}</span>
                           <span className="person__role">{p.role}</span>
@@ -250,7 +251,7 @@ const BookingFlow = () => {
                     <label htmlFor="nombre">Tu nombre (opcional)</label>
                     <input id="nombre" className="input" value={name} onChange={(e) => setName(e.target.value)} autoComplete="given-name" />
                   </div>
-                  <a href={whatsappUrl(message())} target="_blank" rel="noopener noreferrer" className="btn btn--gold booking__confirm">
+                  <a href={whatsappUrl(message())} target="_blank" rel="noopener noreferrer" className="btn btn--caramel booking__confirm">
                     <WhatsAppIcon /> Confirmar por WhatsApp
                   </a>
                 </>

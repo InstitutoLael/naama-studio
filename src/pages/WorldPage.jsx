@@ -53,7 +53,7 @@ const WorldPage = () => {
             {mundo.description}
           </Reveal>
           <Reveal className="world-hero__actions" delay={0.6}>
-            <Link to={`/reservar?mundo=${mundo.id}`} className="btn btn--gold">
+            <Link to={`/reservar?mundo=${mundo.id}`} className="btn btn--caramel">
               Reservar <ArrowRight />
             </Link>
           </Reveal>

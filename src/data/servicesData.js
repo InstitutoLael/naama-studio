@@ -13,7 +13,7 @@ export const servicesData = [
     },
     {
       name: "Adicional Brushing Corto",
-      worker: "Valeria",
+      worker: "Valeria, Viviana, Leah, Catalina",
       cat: "Peluquería",
       old: "5.990",
       price: "7.000",
@@ -23,7 +23,7 @@ export const servicesData = [
     },
     {
       name: "Adicional Brushing Medio",
-      worker: "Valeria",
+      worker: "Valeria, Viviana, Leah, Catalina",
       cat: "Peluquería",
       old: "7.990",
       price: "10.000",
@@ -33,7 +33,7 @@ export const servicesData = [
     },
     {
       name: "Adicional Brushing Largo",
-      worker: "Valeria",
+      worker: "Valeria, Viviana, Leah, Catalina",
       cat: "Peluquería",
       old: "8.990",
       price: "13.000",
@@ -347,7 +347,7 @@ export const servicesData = [
     // ESTÉTICA (VIVY)
     {
       name: "BB Glow",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "35.990",
       price: "39.000",
@@ -357,7 +357,7 @@ export const servicesData = [
     },
     {
       name: "BB Lips",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "19.990",
       price: "28.000",
@@ -367,7 +367,7 @@ export const servicesData = [
     },
     {
       name: "Fibroblast",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "25.990",
       price: "28.000",
@@ -377,7 +377,7 @@ export const servicesData = [
     },
     {
       name: "Hilos Colágenos",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "9.990",
       price: "10.000",
@@ -387,7 +387,7 @@ export const servicesData = [
     },
     {
       name: "Limpieza Facial Básica",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "19.990",
       price: "20.000",
@@ -397,7 +397,7 @@ export const servicesData = [
     },
     {
       name: "Limpieza Facial Media",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "29.990",
       price: "30.000",
@@ -407,7 +407,7 @@ export const servicesData = [
     },
     {
       name: "Limpieza Facial Profunda",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "35.990",
       price: "36.000",
@@ -447,7 +447,7 @@ export const servicesData = [
     },
     {
       name: "Maderoterapia Facial (Mini)",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "---",
       price: "10.000",
@@ -457,7 +457,7 @@ export const servicesData = [
     },
     {
       name: "Masaje Descontracturante de Mandíbula",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "---",
       price: "12.000",
@@ -467,7 +467,7 @@ export const servicesData = [
     },
     {
       name: "Limpieza de Espalda (Back Facial)",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "---",
       price: "25.990",
@@ -477,7 +477,7 @@ export const servicesData = [
     },
     {
       name: "Tratamiento Reafirmante Cuello y Escote",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "---",
       price: "18.000",
@@ -487,7 +487,7 @@ export const servicesData = [
     },
     {
       name: "Masaje de Craneal y Cuello",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Estetica",
       old: "---",
       price: "10.000",
@@ -1051,7 +1051,7 @@ export const servicesData = [
     // --- SERVICIOS INDIVIDUALES Y OTROS ---
     {
       name: "Brushing Solo",
-      worker: "Valeria",
+      worker: "Valeria, Viviana, Leah, Catalina",
       cat: "Peluquería",
       old: "15.990",
       price: "15.000",
@@ -1071,7 +1071,7 @@ export const servicesData = [
     },
     {
       name: "Corte de Dama",
-      worker: "Valeria, Vivy",
+      worker: "Valeria, Viviana",
       cat: "Peluquería",
       old: "15.990",
       price: "16.000",
@@ -1081,7 +1081,7 @@ export const servicesData = [
     },
     {
       name: "Corte de Varón",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Peluquería",
       old: "12.990",
       price: "13.000",
@@ -1111,7 +1111,7 @@ export const servicesData = [
     },
     {
       name: "Camuflaje de Canas (Varón)",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Peluquería",
       old: "---",
       price: "18.000",
@@ -1121,7 +1121,7 @@ export const servicesData = [
     },
     {
       name: "Omniplex (Aditivo Protector)",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Peluquería",
       old: "---",
       price: "10.000",
@@ -1153,7 +1153,7 @@ export const servicesData = [
     // MASAJES & BIENESTAR (VIVY)
     {
       name: "Auriculoterapia",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "10.990",
       price: "15.000",
@@ -1163,7 +1163,7 @@ export const servicesData = [
     },
     {
       name: "Drenaje Linfático",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "25.990",
       price: "27.000",
@@ -1173,7 +1173,7 @@ export const servicesData = [
     },
     {
       name: "Inyecciones Lipolíticas (Sesión)",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "70.000",
       price: "80.000",
@@ -1183,7 +1183,7 @@ export const servicesData = [
     },
     {
       name: "Masaje de Relajación",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "25.990",
       price: "26.000",
@@ -1193,7 +1193,7 @@ export const servicesData = [
     },
     {
       name: "Masaje Descontracturante",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "25.990",
       price: "26.000",
@@ -1203,7 +1203,7 @@ export const servicesData = [
     },
     {
       name: "Masaje Reductivo",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "39.990",
       price: "45.000",
@@ -1213,7 +1213,7 @@ export const servicesData = [
     },
     {
       name: "Pack 6 sesiones Masajes Reductivos",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "189.990",
       price: "195.000",
@@ -1223,7 +1223,7 @@ export const servicesData = [
     },
     {
       name: "Reflexología",
-      worker: "Vivy",
+      worker: "Viviana",
       cat: "Masaje",
       old: "25.990",
       price: "30.000",
@@ -1235,7 +1235,7 @@ export const servicesData = [
     // PEDICURE (GABY)
     {
       name: "Pedicure Permanente",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Pedicure",
       old: "24.990",
       price: "25.000",
@@ -1245,7 +1245,7 @@ export const servicesData = [
     },
     {
       name: "Pedicure Spa",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Pedicure",
       old: "25.990",
       price: "28.000",
@@ -1255,7 +1255,7 @@ export const servicesData = [
     },
     {
       name: "Pedicure Tradicional",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Pedicure",
       old: "14.990",
       price: "18.000",
@@ -1265,7 +1265,7 @@ export const servicesData = [
     },
     {
       name: "Corte de uñas hombres",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Pedicure",
       old: "---",
       price: "10.000",
@@ -1275,7 +1275,7 @@ export const servicesData = [
     },
     {
       name: "Corte de uñas mujeres",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Pedicure",
       old: "---",
       price: "12.000",
@@ -1309,7 +1309,7 @@ export const servicesData = [
     // TRATAMIENTOS CAPILARES (VIVY, VALERIA)
     {
       name: "Detox de Cuero Cabelludo",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "---",
       price: "15.000",
@@ -1319,7 +1319,7 @@ export const servicesData = [
     },
     {
       name: "Detox de Cuero Cabelludo + Alta Frecuencia",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "---",
       price: "22.000",
@@ -1329,7 +1329,7 @@ export const servicesData = [
     },
     {
       name: "Tratamiento Nutritivo",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "8.990",
       price: "10.000",
@@ -1339,7 +1339,7 @@ export const servicesData = [
     },
     {
       name: "Lavado + Secado",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria, Leah, Catalina",
       cat: "Tratamiento Capilar",
       old: "13.990",
       price: "14.000",
@@ -1349,7 +1349,7 @@ export const servicesData = [
     },
     {
       name: "Tratamiento TIGI (Bed Head)",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "---",
       price: "22.990",
@@ -1359,7 +1359,7 @@ export const servicesData = [
     },
     {
       name: "Tratamiento Sebastian Professional",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "---",
       price: "27.990",
@@ -1369,7 +1369,7 @@ export const servicesData = [
     },
     {
       name: "Tratamiento Green Soho",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "---",
       price: "27.990",
@@ -1379,7 +1379,7 @@ export const servicesData = [
     },
     {
       name: "Tratamiento SOW (Premium)",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "35.990",
       price: "36.000",
@@ -1389,7 +1389,7 @@ export const servicesData = [
     },
     {
       name: "Tratamiento Wella",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "25.990",
       price: "28.000",
@@ -1399,7 +1399,7 @@ export const servicesData = [
     },
     {
       name: "Ampolla de Rescate Inmediato",
-      worker: "Vivy, Valeria",
+      worker: "Viviana, Valeria",
       cat: "Tratamiento Capilar",
       old: "---",
       price: "12.000",

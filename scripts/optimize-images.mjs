@@ -6,7 +6,7 @@
  *      y ejecuta `npm run images`.
  */
 import sharp from 'sharp';
-import { readdir, mkdir, writeFile } from 'node:fs/promises';
+import { readdir, mkdir, writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const SRC = 'photos-src';
@@ -15,10 +15,13 @@ const WIDTHS = [480, 960, 1600, 2400];
 
 await mkdir(OUT, { recursive: true });
 const files = (await readdir(SRC)).filter((f) => /\.(jpe?g|png|webp|heic)$/i.test(f));
-const manifest = {};
+// Conserva lo ya generado: solo se procesan fotos nuevas (usa --all para regenerar todo).
+const all = process.argv.includes('--all');
+const manifest = all ? {} : JSON.parse(await readFile('src/data/photos.json', 'utf8').catch(() => '{}'));
 
 for (const file of files) {
   const name = path.parse(file).name;
+  if (manifest[name] && !all) continue;
   const input = sharp(path.join(SRC, file)).rotate();
   const { width, height } = await input.metadata();
   const widths = WIDTHS.filter((w) => w < width).concat(width > 2400 ? [] : [width]);

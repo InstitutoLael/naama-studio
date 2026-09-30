@@ -16,12 +16,15 @@
 }
 .member__monogram {
   position: relative;
-  aspect-ratio: 5 / 3;
+  aspect-ratio: 4 / 5;
   display: grid;
   place-items: center;
   background: var(--tone);
   overflow: hidden;
 }
+.member__photo { aspect-ratio: 4 / 5; }
+.member__photo img { transition: transform 1.2s var(--ease-out); }
+.member:hover .member__photo img { transform: scale(1.04); }
 .member__monogram::before {
   content: '';
   position: absolute;
@@ -36,7 +39,7 @@
   font-size: clamp(4.5rem, 8vw, 6.5rem);
   font-style: italic;
   line-height: 1;
-  color: var(--gold-300);
+  color: var(--caramel-300);
   transition: transform 1s var(--ease-out);
 }
 .member:hover .member__monogram span { transform: translateY(-6px) scale(1.06); }
@@ -51,8 +54,8 @@
   text-transform: uppercase;
   padding: 5px 10px;
   border-radius: 999px;
-  background: var(--forest);
-  color: var(--gold-300);
+  background: var(--cacao);
+  color: var(--caramel-300);
 }
 .member__role { color: var(--ink-2); }
 .member__tags { display: flex; flex-wrap: wrap; gap: 6px; }

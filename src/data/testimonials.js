@@ -1,4 +1,4 @@
-// Comentarios de clientas. Reemplázalos o amplíalos con reseñas reales cuando quieras.
+// Mensajes reales que nos enviaron clientas por WhatsApp.
 export const testimonials = [
   {
     quote: 'Desde que descubrí Naamá no vuelvo a otro lado. El ambiente de paz y la técnica de las chicas es otro nivel.',

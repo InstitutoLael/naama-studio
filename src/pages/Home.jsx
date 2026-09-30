@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   AnimatePresence,
@@ -13,7 +13,6 @@ import SEOHead from '../components/shared/SEOHead';
 import Photo from '../components/common/Photo';
 import { Parallax, Reveal, ScrollWords, SplitText } from '../components/common/Motion';
 import { ArrowRight } from '../components/common/Icons';
-import { LogoMark } from '../components/common/Logo';
 import { introDelay } from '../components/site/Preloader';
 import { mundos, servicesForMundo } from '../data/categories';
 import { servicesData } from '../data/servicesData';
@@ -80,7 +79,7 @@ const Hero = () => {
             Belleza y bienestar en una casa patrimonial, hechos con calma, técnica y cariño.
           </Reveal>
           <Reveal className="hero__actions" delay={delay + 0.65} y={20}>
-            <Link to="/reservar" className="btn btn--gold">
+            <Link to="/reservar" className="btn btn--caramel">
               Reservar mi hora <ArrowRight />
             </Link>
             <Link to="/servicios" className="btn btn--ghost-light">
@@ -250,7 +249,7 @@ const Marquee = () => {
       {words.map((w) => (
         <React.Fragment key={w}>
           <span>{w}</span>
-          <LogoMark className="marquee__mark" />
+          <span className="marquee__mark">✦</span>
         </React.Fragment>
       ))}
     </span>
@@ -265,66 +264,48 @@ const Marquee = () => {
   );
 };
 
-/* ── 06. Trabajos: scroll horizontal fijado ── */
+/* ── 06. Trabajos: carrusel horizontal nativo ── */
 const Work = () => {
-  const section = useRef(null);
   const track = useRef(null);
-  const reduce = useReducedMotion();
-  const [distance, setDistance] = useState(0);
-  const [pinned, setPinned] = useState(false);
+  const [edge, setEdge] = useState({ start: true, end: false });
 
-  useLayoutEffect(() => {
-    const measure = () => {
-      const enabled = window.innerWidth >= 900 && !reduce;
-      setPinned(enabled);
-      setDistance(enabled && track.current ? track.current.scrollWidth - window.innerWidth : 0);
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (track.current) ro.observe(track.current);
-    window.addEventListener('resize', measure);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', measure);
-    };
-  }, [reduce]);
-
-  const { scrollYProgress } = useScroll({ target: section, offset: ['start start', 'end end'] });
-  const x = useTransform(scrollYProgress, [0, 1], [0, -distance]);
+  const update = () => {
+    const el = track.current;
+    if (!el) return;
+    setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth > el.scrollWidth - 8 });
+  };
+  const move = (dir) => track.current?.scrollBy({ left: dir * track.current.clientWidth * 0.7, behavior: 'smooth' });
 
   return (
-    <section
-      ref={section}
-      className={`work ${pinned ? 'work--pinned' : ''}`}
-      style={pinned ? { height: `calc(100vh + ${distance}px)` } : undefined}
-      aria-labelledby="trabajo-title"
-    >
-      <div className="work__sticky">
-        <motion.div ref={track} className="work__track" style={pinned ? { x } : undefined}>
-          <div className="work__intro">
-            <p className="eyebrow">Nuestro trabajo</p>
-            <h2 className="h2" id="trabajo-title">
-              Hecho a mano, <em>detalle a detalle.</em>
-            </h2>
-            <p className="lead">Algunos resultados recientes de nuestras especialistas.</p>
-            <Link to="/galeria" className="link-arrow">
-              Ver galería <ArrowRight />
-            </Link>
-          </div>
-          {WORK.map((w, i) => (
-            <figure className={`work__item work__item--${i % 3}`} key={w.photo}>
-              <Photo name={w.photo} alt={`${w.title} — trabajo de Naamá Studio`} sizes="(min-width: 900px) 30vw, 75vw" />
-              <figcaption>
-                <span>{w.label}</span>
-                {w.title}
-              </figcaption>
-            </figure>
-          ))}
-          <Link to="/galeria" className="work__more">
-            <span>Ver toda la galería</span>
+    <section className="work section" aria-labelledby="trabajo-title">
+      <div className="container work__head">
+        <div>
+          <p className="eyebrow">Nuestro trabajo</p>
+          <SplitText as="h2" id="trabajo-title" className="h2" lines={['Hecho a mano,', <em key="w">detalle a detalle.</em>]} />
+        </div>
+        <div className="work__controls">
+          <button className="work__arrow work__arrow--prev" onClick={() => move(-1)} disabled={edge.start} aria-label="Anteriores">
             <ArrowRight />
-          </Link>
-        </motion.div>
+          </button>
+          <button className="work__arrow" onClick={() => move(1)} disabled={edge.end} aria-label="Siguientes">
+            <ArrowRight />
+          </button>
+        </div>
+      </div>
+      <div ref={track} className="work__track" onScroll={update}>
+        {WORK.map((w, i) => (
+          <Reveal as="figure" className="work__item" key={w.photo} delay={Math.min(i, 4) * 0.08} y={50}>
+            <Photo name={w.photo} alt={`${w.title} — trabajo de Naamá Studio`} sizes="(min-width: 900px) 28vw, 72vw" />
+            <figcaption>
+              <span>{w.label}</span>
+              {w.title}
+            </figcaption>
+          </Reveal>
+        ))}
+        <Link to="/galeria" className="work__more">
+          <span>Ver toda la galería</span>
+          <ArrowRight />
+        </Link>
       </div>
     </section>
   );
@@ -352,7 +333,7 @@ const Team = () => (
 
       <Reveal y={80}>
         <Parallax className="team-home__photo parallax" amount={8}>
-          <Photo name="equipo" alt="El equipo de Naamá Studio en el patio de la casa" sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
+          <Photo name="equipo" alt="De izquierda a derecha: Gaby, Viviana, Leah, Catalina y Valeria, en el patio de la casa" sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
         </Parallax>
       </Reveal>
 
@@ -389,7 +370,7 @@ const Testimonials = () => {
   return (
     <section className="quotes section" aria-labelledby="quotes-title">
       <div className="container quotes__inner">
-        <p className="eyebrow" id="quotes-title">Lo que dicen de nosotras</p>
+        <p className="eyebrow" id="quotes-title">Mensajes de nuestras clientas</p>
         <div className="quotes__stage" aria-live="polite">
           <AnimatePresence mode="wait">
             <motion.figure

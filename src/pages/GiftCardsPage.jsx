@@ -2,13 +2,14 @@ import React, { useRef, useState } from 'react';
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
 import { Reveal, SplitText } from '../components/common/Motion';
-import { LogoMark } from '../components/common/Logo';
+import Logo from '../components/common/Logo';
 import { WhatsAppIcon } from '../components/common/Icons';
 import { whatsappUrl } from '../data/site';
 import '../theme/giftcards.css';
 
 const DESIGNS = [
-  { id: 'bosque', name: 'Bosque', className: 'gc--bosque' },
+  { id: 'cacao', name: 'Cacao', className: 'gc--cacao' },
+  { id: 'caramelo', name: 'Caramelo', className: 'gc--caramelo' },
   { id: 'marfil', name: 'Marfil', className: 'gc--marfil' },
   { id: 'burdeo', name: 'Burdeo', className: 'gc--burdeo' },
 ];
@@ -40,8 +41,7 @@ const Card = ({ design, amount, to, from, message }) => {
       <motion.div ref={ref} className={`gc ${design.className}`} style={{ rotateX: rx, rotateY: ry }}>
         <motion.span className="gc__shine" style={{ '--x': shine }} aria-hidden="true" />
         <div className="gc__top">
-          <LogoMark className="gc__mark" />
-          <span className="gc__brand">Naamá Studio</span>
+          <Logo className="gc__logo" />
         </div>
         <div className="gc__amount">{clp(amount)}</div>
         <p className="gc__msg">{message || 'Un momento para ti.'}</p>
@@ -158,7 +158,7 @@ const GiftCardsPage = () => {
             href={ready ? whatsappUrl(text) : undefined}
             target="_blank"
             rel="noopener noreferrer"
-            className={`btn btn--gold gc-form__send ${ready ? '' : 'is-disabled'}`}
+            className={`btn btn--caramel gc-form__send ${ready ? '' : 'is-disabled'}`}
             aria-disabled={!ready}
           >
             <WhatsAppIcon /> Solicitar por WhatsApp

@@ -38,7 +38,7 @@ const TeamPage = () => (
     <div className="container">
       <Reveal y={80}>
         <Parallax className="team-page__photo parallax" amount={8}>
-          <Photo name="equipo" alt="El equipo de Naamá Studio frente al muro de ladrillo del patio" priority sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
+          <Photo name="equipo" alt="De izquierda a derecha: Gaby, Viviana, Leah, Catalina y Valeria, en el patio de la casa" priority sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
         </Parallax>
       </Reveal>
     </div>
@@ -47,9 +47,13 @@ const TeamPage = () => (
       {team.map((p, i) => (
         <Reveal key={p.name} delay={(i % 3) * 0.08} y={50}>
           <article className="member">
-            <div className="member__monogram" style={{ '--tone': p.tone }} aria-hidden="true">
-              <span>{p.name[0]}</span>
-            </div>
+            {p.photo ? (
+              <Photo name={p.photo} alt={`${p.name}, ${p.role}`} className="member__photo" sizes="(min-width: 1100px) 30vw, (min-width: 700px) 45vw, 92vw" position="50% 20%" />
+            ) : (
+              <div className="member__monogram" style={{ '--tone': p.tone }} aria-hidden="true">
+                <span>{p.name[0]}</span>
+              </div>
+            )}
             <div className="member__body">
               <div className="member__top">
                 <h2 className="member__name">{p.name}</h2>

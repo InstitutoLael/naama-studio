@@ -100,7 +100,6 @@ const Navbar = () => {
           <motion.div
             id="menu"
             className="menu on-dark"
-            data-lenis-prevent
             role="dialog"
             aria-modal="true"
             aria-label="Menú"
@@ -133,7 +132,7 @@ const Navbar = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7, duration: 0.6 }}
               >
-                <Link to="/reservar" className="btn btn--gold">
+                <Link to="/reservar" className="btn btn--caramel">
                   Reservar mi hora <ArrowRight />
                 </Link>
                 <div className="menu__info">

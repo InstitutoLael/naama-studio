@@ -21,7 +21,7 @@ class ErrorBoundary extends React.Component {
         <p className="eyebrow">Algo salió mal</p>
         <h1 className="h2">Necesitamos <em>un respiro.</em></h1>
         <p className="lead">Recarga la página para volver a intentarlo.</p>
-        <button className="btn btn--gold" onClick={() => window.location.reload()}>
+        <button className="btn btn--caramel" onClick={() => window.location.reload()}>
           Recargar
         </button>
       </div>

@@ -2,36 +2,16 @@
    Layout global: navbar, menú, footer, intro, WhatsApp flotante
    ───────────────────────────────────────────────────────────── */
 
-/* ── Logo ── */
+/* ── Logo (vector con máscara: toma el color del texto) ── */
 .logo {
-  display: inline-flex;
-  align-items: center;
-  gap: 14px;
-  color: var(--forest);
-  transition: color 0.4s;
+  display: block;
+  aspect-ratio: 3644 / 1140;
+  background: currentColor;
+  -webkit-mask: url('/brand/naama-logo.svg') center / contain no-repeat;
+  mask: url('/brand/naama-logo.svg') center / contain no-repeat;
 }
-.logo__mark { width: 40px; height: 50px; flex: none; }
-.logo__text { display: grid; line-height: 1; }
-.logo__name {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-.logo__sub {
-  margin-top: 7px;
-  font-size: 0.56rem;
-  font-weight: 600;
-  letter-spacing: 0.34em;
-  text-transform: uppercase;
-  opacity: 0.7;
-  white-space: nowrap;
-}
-@media (max-width: 420px) {
-  .logo__mark { width: 34px; height: 42px; }
-  .logo__name { font-size: 1.35rem; }
-  .logo__sub { font-size: 0.5rem; letter-spacing: 0.26em; }
-}
+.nav__logo .logo { width: clamp(150px, 15vw, 216px); color: var(--cacao-900); transition: color 0.4s; }
+.nav--light .nav__logo .logo, .nav--open .nav__logo .logo { color: var(--paper); }
 
 /* ── Navbar ── */
 .nav {
@@ -67,7 +47,6 @@
 .nav--hidden { transform: translateY(-100%); }
 
 .nav--light, .nav--open { color: var(--paper); }
-.nav--light .logo, .nav--open .logo { color: var(--paper); }
 .nav--open { background: transparent; border-color: transparent; }
 
 .nav__links {
@@ -98,12 +77,12 @@
   transform: scaleX(1);
   transform-origin: left;
 }
-.nav__link.active { color: var(--gold-600); }
-.nav--light .nav__link.active { color: var(--gold-300); }
+.nav__link.active { color: var(--caramel-600); }
+.nav--light .nav__link.active { color: var(--caramel-300); }
 
 .nav__actions { display: flex; align-items: center; gap: 12px; }
 .nav__cta { display: none; }
-.nav--light .nav__cta { --btn-bg: var(--paper); --btn-fg: var(--forest-900); }
+.nav--light .nav__cta { --btn-bg: var(--paper); --btn-fg: var(--cacao-900); }
 .nav--open .nav__cta { opacity: 0; pointer-events: none; }
 
 .nav__burger {
@@ -141,7 +120,7 @@
   position: fixed;
   inset: 0;
   z-index: 150;
-  background: var(--forest-900);
+  background: var(--cacao-900);
   overflow-y: auto;
 }
 .menu__inner {
@@ -165,13 +144,13 @@
   color: var(--paper);
   transition: color 0.3s, padding 0.5s var(--ease-out);
 }
-.menu__link:hover { padding-left: 12px; color: var(--gold-300); }
-.menu__link.active { color: var(--gold-300); }
+.menu__link:hover { padding-left: 12px; color: var(--caramel-300); }
+.menu__link.active { color: var(--caramel-300); }
 .menu__num {
   font-family: var(--font-sans);
   font-size: 0.72rem;
   letter-spacing: 0.2em;
-  color: var(--gold);
+  color: var(--caramel);
 }
 .menu__foot { display: grid; gap: 32px; }
 .menu__foot .btn { justify-self: start; }
@@ -226,10 +205,10 @@
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: var(--gold-300);
+  color: var(--caramel-300);
 }
 .footer__link { width: fit-content; transition: color 0.3s; }
-.footer__link:hover { color: var(--gold-300); }
+.footer__link:hover { color: var(--caramel-300); }
 .footer__link--arrow { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; }
 .footer__link--arrow svg { width: 14px; height: 14px; }
 .footer__hours { display: flex; justify-content: space-between; gap: 16px; max-width: 280px; }
@@ -244,25 +223,15 @@
   place-items: center;
   transition: background 0.3s, color 0.3s;
 }
-.footer__social a:hover { background: var(--gold); color: var(--forest-900); border-color: var(--gold); }
+.footer__social a:hover { background: var(--caramel); color: var(--cacao-900); border-color: var(--caramel); }
 .footer__social svg { width: 18px; height: 18px; }
 
 .footer__wordmark {
-  display: flex;
-  align-items: flex-end;
-  gap: clamp(12px, 2vw, 32px);
-  font-family: var(--font-display);
-  font-size: clamp(5rem, 24vw, 22rem);
-  line-height: 0.8;
-  letter-spacing: -0.04em;
-  background: linear-gradient(120deg, #ecd3b0 0%, #c6a177 45%, #9c7550 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  padding-bottom: 0.06em;
-  user-select: none;
+  width: 100%;
+  margin-top: 8px;
+  color: var(--caramel);
+  opacity: 0.9;
 }
-.footer__mark { width: 0.36em; height: 0.45em; flex: none; color: var(--paper); margin-bottom: 0.06em; }
 
 .footer__bottom {
   display: flex;
@@ -276,7 +245,7 @@
   color: rgba(251, 248, 243, 0.55);
 }
 .footer__top { color: var(--paper); font-size: 0.8rem; }
-.footer__top:hover { color: var(--gold-300); }
+.footer__top:hover { color: var(--caramel-300); }
 
 /* ── Intro ── */
 .preloader {
@@ -287,15 +256,10 @@
   place-content: center;
   justify-items: center;
   gap: 24px;
-  background: var(--forest-900);
+  background: var(--cacao-900);
   color: var(--paper);
 }
-.preloader__mark { width: 72px; height: 90px; }
-.preloader__word {
-  font-family: var(--font-display);
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  letter-spacing: 0.01em;
-}
+.preloader__logo { width: min(64vw, 380px); color: var(--caramel-300); }
 
 /* ── WhatsApp flotante ── */
 .wa-float {
@@ -309,16 +273,16 @@
   height: 56px;
   padding: 0 18px;
   border-radius: 999px;
-  background: var(--gold);
-  color: var(--forest-900);
-  box-shadow: 0 12px 40px -12px rgba(27, 33, 25, 0.5);
+  background: var(--caramel);
+  color: var(--cacao-900);
+  box-shadow: 0 12px 40px -12px rgba(28, 18, 12, 0.5);
   opacity: 0;
   transform: translateY(20px) scale(0.9);
   pointer-events: none;
   transition: opacity 0.5s, transform 0.6s var(--ease-out), background 0.3s;
 }
 .wa-float.is-visible { opacity: 1; transform: none; pointer-events: auto; }
-.wa-float:hover { background: var(--gold-300); }
+.wa-float:hover { background: var(--caramel-300); }
 .wa-float svg { width: 22px; height: 22px; }
 .wa-float__label { font-size: 0.82rem; font-weight: 600; }
 @media (max-width: 600px) {

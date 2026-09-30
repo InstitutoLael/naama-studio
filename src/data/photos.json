@@ -182,5 +182,65 @@
       1536
     ],
     "lqip": "data:image/webp;base64,UklGRqYAAABXRUJQVlA4IJoAAACwBQCdASoYACAAPu1ep06ppKMiMBgMATAdiWYAnTLfAVswmrAnHEfoJ1iYLf2RsdKzXc86O/gA/s3+PenY5/uM0rr2e8JNZ5Yv+3BbGl7Yktozn9GrYB+Rz1QcZicDPEnwszvZzuTY3GhGoRhScmwkwbhh0rTE8GjDL7FTV8BGm910XvmQ44wtEkLDUYfHZLEX+UUFiLUPwAAA"
+  },
+  "retrato-allison": {
+    "w": 1448,
+    "h": 1932,
+    "widths": [
+      480,
+      960,
+      1448
+    ],
+    "lqip": "data:image/webp;base64,UklGRooAAABXRUJQVlA4IH4AAACwBQCdASoYACAAPu1qrFEppaQiqAqpMB2JQBYj4wA1Jkvjm1eDKXl0Fj4YTVXc2U5uwlSLymgA/Q7QgHZNiwVkQXunAArg2w/rIP5QFIg7yBqTw+exTpKRpGfNflLDEgx/osymYOOXLfCmNGNApJAfqM14OBWZ3O/DzxAAAAA="
+  },
+  "retrato-catalina": {
+    "w": 1086,
+    "h": 1448,
+    "widths": [
+      480,
+      960,
+      1086
+    ],
+    "lqip": "data:image/webp;base64,UklGRqwAAABXRUJQVlA4IKAAAADQBQCdASoYACAAPu1mrE8ppaQiKA1RMB2JagCdOUFSHgaAU4XWFJPYTkZqzUmAu0O8sQfocSgAAMxuQBfugd4jdltQGJhyxukIryQOglgQP/UbglUK4l+fNM9dUMUoHateYWSkJZsJ/OT9fyNTKN/6VzAsxFF3nvv2mglpqH+GQqcT6dpGYNRpzZCmCgTXppHFMK171A0yaavvvTpNYAAA"
+  },
+  "retrato-gaby": {
+    "w": 1086,
+    "h": 1448,
+    "widths": [
+      480,
+      960,
+      1086
+    ],
+    "lqip": "data:image/webp;base64,UklGRpYAAABXRUJQVlA4IIoAAABQBQCdASoYACAAPu1mqk6ppaOiKA1RMB2JZACdAAvXkT6FdXbaeIV2s5PezyWK4r2Pa7AA/d5DlfhnFuEg5gaYFvaMJpJ0astPyTXLvoFZrBA+9+GzI2AL5L1/Pb7pSCbn0ikSpDB+yamM0hFBpYtJgNjsWPJ7jT68P5iz4LORhqCC05NWEdisgAA="
+  },
+  "retrato-leah": {
+    "w": 1086,
+    "h": 1448,
+    "widths": [
+      480,
+      960,
+      1086
+    ],
+    "lqip": "data:image/webp;base64,UklGRrIAAABXRUJQVlA4IKYAAACwBQCdASoYACAAPu1srlIppaQiqAgBMB2JYgCdMt1yTBhEssYT2+XYLuRN/zm7MfA8WrlL54AA/dlEt50zT2Jgb5pegYkjfv5wRxJv6Q1Bj//87EDFXar4FtqcL3xyZBGdHrwN1gF8rGjNqFMI+APpzvbLsUcCJPAaJYPtW5VxhRNJO/Dk5HxWxY88Bny1AyTmcrDfZhWTEhEGWCARLTteA/QhwAAA"
+  },
+  "retrato-valeria": {
+    "w": 1086,
+    "h": 1448,
+    "widths": [
+      480,
+      960,
+      1086
+    ],
+    "lqip": "data:image/webp;base64,UklGRqwAAABXRUJQVlA4IKAAAADQBQCdASoYACAAPu1mq08ppaOiKA1RMB2JZgCdMoR5jzKB3U/ieehM9Inv+g7csj/ylggzBgcAAP3Y9MOXl0s/9iAp6CDKE0h7hdJ4BZ6bNNQQDx9TRvsKN6piEKrzxKeHDgiVIMfF8q/B2lWBG4kuQAn6+HNgB37XHzr9wq6q9kZIcSxMLwHkw2KpHk8sPM9bPLBEY71lCodK3d8kAlYA"
+  },
+  "retrato-viviana": {
+    "w": 1086,
+    "h": 1448,
+    "widths": [
+      480,
+      960,
+      1086
+    ],
+    "lqip": "data:image/webp;base64,UklGRqoAAABXRUJQVlA4IJ4AAACQBQCdASoYACAAPu1krE+ppSQiMBgIATAdiWQAnS+vAOT3oRxH9zUq6dRBDJ21uBytvdosAAD5KjI5ycQo42uO0YeMVkGbaHeaHJ6lVh0EESDrXI3tSoLZksjVVqXlO3v5Hd1Izl7IjtgUEsN3ZsKY7pSZuwHJakAdDLHuoZPMvqa5g1Za+ydo4EKrtDIV0Y+UZ44wcJLTHAj+ChAAAA=="
   }
 }

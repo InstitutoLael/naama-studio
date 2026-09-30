@@ -29,7 +29,7 @@ html[data-nav="hidden"] .catalog-bar { top: 0; }
   background: var(--paper);
   transition: border-color 0.3s;
 }
-.catalog-search:focus-within { border-color: var(--gold-600); }
+.catalog-search:focus-within { border-color: var(--caramel-600); }
 .catalog-search > svg { width: 18px; height: 18px; color: var(--ink-3); flex: none; }
 .catalog-search input { flex: 1; min-width: 0; border: 0; background: none; outline: none; font-size: 1rem; }
 .catalog-search button { width: 32px; height: 32px; display: grid; place-items: center; color: var(--ink-2); }

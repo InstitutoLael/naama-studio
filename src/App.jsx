@@ -7,7 +7,7 @@ import Preloader from './components/site/Preloader';
 import FloatingWhatsApp from './components/site/FloatingWhatsApp';
 import Home from './pages/Home';
 import { legacyMundoIds } from './data/categories';
-import { initSmoothScroll, scrollToElement, scrollToTop } from './lib/smoothScroll';
+import { scrollToElement, scrollToTop } from './lib/smoothScroll';
 
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const WorldPage = lazy(() => import('./pages/WorldPage'));
@@ -28,10 +28,6 @@ const EASE = [0.16, 1, 0.3, 1];
 
 const App = () => {
   const location = useLocation();
-
-  useEffect(() => {
-    initSmoothScroll();
-  }, []);
 
   // Si la URL trae un ancla (#seccion), bajar hasta ella cuando la página ya está montada.
   useEffect(() => {
