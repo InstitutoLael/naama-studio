@@ -1,157 +1,99 @@
-import React, { useMemo, useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { servicesData } from '../data/servicesData';
-import { mundos } from '../data/categories';
+import React, { useMemo } from 'react';
+import { Link, Navigate, useParams } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
-import { ArrowLeft, ChevronDown } from 'lucide-react';
-
-import HeroBg from '../assets/hero-bg.png';
-import MiradaBg from '../assets/mirada-bg.png';
-import NailsBg from '../assets/nails-bg.png';
-import WellnessBg from '../assets/wellness-bg.png';
-import SalonArch from '../assets/salon-arch.png';
-import LaborHands from '../assets/labor-hands.png';
-
-import '../styles/Global.css';
-import '../styles/WorldPage.css';
-
-const mundoImages = {
-  'capilar': SalonArch,
-  'color': LaborHands,
-  'tratamientos': MiradaBg,
-  'bienestar': WellnessBg,
-  'manos-pies': NailsBg,
-  'clinico': HeroBg
-};
-
-const colorMap = {
-  "Valeria": "#3E4A3B",
-  "Vivy": "#C17A5A",
-  "Gaby": "#B79A5B",
-  "Allison": "#2A3228",
-  "Michelle": "#4A5A60"
-};
-
-const ServiceRow = ({ service, index }) => {
-  const [expanded, setExpanded] = useState(false);
-  const badgeColor = colorMap[service.worker] || "var(--accent-walnut)";
-
-  return (
-    <div className={`service_row_wrap reveal delay-${(index % 4) + 1} ${expanded ? 'expanded' : ''}`}>
-      <div className="service_row" onClick={() => setExpanded(!expanded)}>
-        <span className="sr_index">{(index + 1).toString().padStart(2, '0')}</span>
-        <div className="sr_name_group">
-          <span className="sr_name">{service.name}</span>
-          {service.worker && (
-            <span className="sr_badge" style={{ backgroundColor: badgeColor }}>
-              {service.worker}
-            </span>
-          )}
-        </div>
-        <span className="sr_duration">{service.time}</span>
-        <span className="sr_price">${service.price || 'Consultar'}</span>
-        <button className={`sr_expand_btn ${expanded ? 'rotated' : ''}`} aria-hidden="true">
-          <ChevronDown size={16} strokeWidth={1.5} />
-        </button>
-      </div>
-      
-      <div className={`sr_detail ${expanded ? 'open' : ''}`}>
-        <div className="sr_detail_inner">
-          <p className="sr_desc">{service.desc}</p>
-          {service.why && <p className="sr_why">{service.why}</p>}
-          <a 
-            href={`https://wa.me/56979520623?text=Hola! Me interesa agendar el servicio: ${service.name}`} 
-            target="_blank" rel="noopener noreferrer" 
-            className="sr_cta_btn"
-          >
-            Agendar este servicio → WhatsApp
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-};
+import Photo from '../components/common/Photo';
+import ServiceRow from '../components/common/ServiceRow';
+import { Reveal, SplitText } from '../components/common/Motion';
+import { ArrowRight } from '../components/common/Icons';
+import { legacyMundoIds, mundos, servicesForMundo } from '../data/categories';
+import { servicesData } from '../data/servicesData';
+import '../theme/services.css';
+import '../theme/world.css';
 
 const WorldPage = () => {
   const { mundoId } = useParams();
-  
-  const mundo = useMemo(() => mundos.find(m => m.id === mundoId), [mundoId]);
-  
-  const filteredServices = useMemo(() => {
-    if (!mundo) return [];
-    return servicesData.filter(service => mundo.categories.includes(service.cat));
-  }, [mundo]);
+  const reduce = useReducedMotion();
+  const index = mundos.findIndex((m) => m.id === mundoId);
+  const mundo = mundos[index];
 
-  const relatedWorlds = useMemo(() => {
-    return mundos.filter(m => m.id !== mundoId).slice(0, 3);
-  }, [mundoId]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [mundoId]);
+  const services = useMemo(() => (mundo ? servicesForMundo(servicesData, mundo) : []), [mundo]);
+  const specialists = useMemo(
+    () => [...new Set(services.flatMap((s) => (s.worker ?? '').split(',').map((w) => w.trim())).filter(Boolean))],
+    [services],
+  );
 
   if (!mundo) {
-    return (
-      <div className="world_page container world_not_found_container">
-        <SEOHead title="Error 404" description="Mundo no encontrado." />
-        <Link to="/" className="world_back_link" aria-label="Volver al inicio">
-          <ArrowLeft size={16} /> Volver al Inicio
-        </Link>
-        <h2 className="serif world_not_found_title">Mundo no encontrado</h2>
-      </div>
-    );
+    if (legacyMundoIds[mundoId]) return <Navigate to={`/servicios/${legacyMundoIds[mundoId]}`} replace />;
+    return <Navigate to="/servicios" replace />;
   }
 
-  const bgImage = mundoImages[mundo.id];
-  const worldIndex = mundos.findIndex(m => m.id === mundo.id) + 1;
+  const others = mundos.filter((m) => m.id !== mundo.id);
 
   return (
-    <div className="world_page">
-      <SEOHead title={mundo.name} description={mundo.description} />
-      
-      <header className="world_hero" style={{ backgroundImage: `url(${bgImage})` }}>
-        <div className="world_hero_overlay" />
-        <div className="world_hero_content reveal">
-          <span className="world_eyebrow">ECOSISTEMA 0{worldIndex}</span>
-          <h1 className="world_hero_title serif">{mundo.name}</h1>
-          <p className="world_hero_desc">{mundo.description}</p>
-          <a 
-            href="https://wa.me/56979520623?text=Hola! Quiero agendar una sesión en Naamá Studio." 
-            target="_blank" rel="noopener noreferrer" 
-            className="btn_world_hero"
-          >
-            Reservar este servicio
-          </a>
+    <div className="world">
+      <SEOHead title={mundo.name} description={`${mundo.description} Precios y reservas en Naamá Studio, San Miguel.`} image={`/img/${mundo.photo}-960.webp`} />
+
+      <header className="world-hero on-dark">
+        <motion.div
+          className="world-hero__media"
+          initial={reduce ? false : { scale: 1.15 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 2, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <Photo name={mundo.photo} alt="" priority sizes="100vw" />
+        </motion.div>
+        <div className="world-hero__shade" />
+        <div className="container world-hero__content">
+          <Reveal as="p" className="eyebrow" delay={0.1} y={12}>
+            Mundo 0{index + 1} · {services.length} servicios
+          </Reveal>
+          <SplitText as="h1" className="world-hero__title" onMount delay={0.2} lines={[mundo.name]} />
+          <Reveal as="p" className="lead world-hero__lead" delay={0.45}>
+            {mundo.description}
+          </Reveal>
+          <Reveal className="world-hero__actions" delay={0.6}>
+            <Link to={`/reservar?mundo=${mundo.id}`} className="btn btn--gold">
+              Reservar <ArrowRight />
+            </Link>
+          </Reveal>
         </div>
       </header>
 
-      <main className="world_main container">
-        <div className="services_list">
-          {filteredServices.length > 0 ? (
-            filteredServices.map((service, index) => (
-              <ServiceRow key={`${service.name}-${index}`} service={service} index={index} />
-            ))
-          ) : (
-            <div className="empty_selection">
-              <p className="serif">No se encontraron servicios bajo esta selección.</p>
-            </div>
-          )}
-        </div>
-      </main>
-
-      <section className="related_worlds_section container reveal">
-        <h3 className="related_title serif">También en Naamá Studio</h3>
-        <div className="related_grid">
-          {relatedWorlds.map((rel, idx) => (
-            <Link key={rel.id} to={`/mundo/${rel.id}`} className={`related_card delay-${(idx % 3) + 1}`}>
-              <img src={mundoImages[rel.id]} alt={rel.name} className="related_img" loading="lazy" />
-              <div className="related_overlay" />
-              <div className="related_content">
-                <span className="related_tag">ECOSISTEMA 0{mundos.findIndex(m => m.id === rel.id) + 1}</span>
-                <h4 className="related_name serif">{rel.name}</h4>
-              </div>
-            </Link>
+      <section className="container world__body">
+        <aside className="world__aside">
+          <p className="eyebrow">Especialistas</p>
+          <ul>
+            {specialists.map((name) => (
+              <li key={name}>
+                <Link to={`/servicios?especialista=${encodeURIComponent(name)}`}>{name}</Link>
+              </li>
+            ))}
+          </ul>
+          <Link to="/servicios" className="link-arrow">
+            Todos los servicios <ArrowRight />
+          </Link>
+        </aside>
+        <ul className="srows">
+          {services.map((s, i) => (
+            <ServiceRow key={`${s.name}-${i}`} service={s} />
           ))}
+        </ul>
+      </section>
+
+      <section className="world__others on-ivory section" aria-labelledby="otros">
+        <div className="container">
+          <p className="eyebrow" id="otros">Otros mundos</p>
+          <div className="world__others-grid">
+            {others.map((m, i) => (
+              <Reveal key={m.id} delay={i * 0.06} y={40}>
+                <Link to={`/servicios/${m.id}`} className="world-card">
+                  <Photo name={m.photo} alt="" sizes="(min-width: 900px) 19vw, 45vw" />
+                  <span className="world-card__name">{m.name}</span>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
     </div>

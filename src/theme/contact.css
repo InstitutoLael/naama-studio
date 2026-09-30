@@ -1,0 +1,56 @@
+.contact__grid { display: grid; gap: 56px; align-items: start; }
+@media (min-width: 1000px) { .contact__grid { grid-template-columns: 1fr 1fr; gap: 96px; } }
+.contact__photo .photo { aspect-ratio: 4 / 5; border-radius: var(--radius-lg); }
+.contact__info { display: grid; }
+.contact__block { display: grid; gap: 12px; justify-items: start; padding-block: 36px; border-bottom: 1px solid var(--line); }
+.contact__block:first-child { padding-top: 0; }
+.contact__label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-eyebrow);
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold-600);
+}
+.contact__big { font-family: var(--font-display); font-size: clamp(1.8rem, 3vw, 2.6rem); line-height: 1.1; }
+.contact__block .link-arrow { margin-top: 8px; }
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: none;
+  color: var(--ink-3);
+}
+.status::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #b44; }
+.status.is-open { color: #2f7a47; }
+.status.is-open::before { background: #2f9a55; box-shadow: 0 0 0 4px rgba(47, 154, 85, 0.18); }
+.contact__hours { display: grid; gap: 8px; width: 100%; max-width: 420px; }
+.contact__hours div { display: flex; justify-content: space-between; gap: 24px; font-size: 1.05rem; }
+.contact__hours dd { font-family: var(--font-display); font-size: 1.2rem; }
+.contact__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.contact__actions .btn { text-transform: none; letter-spacing: 0.02em; font-size: 0.95rem; }
+.contact__mail { margin-top: 8px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 4px; }
+
+.contact__map-wrap { padding-block: var(--section); }
+.contact__map {
+  display: block;
+  width: 100%;
+  height: clamp(360px, 50vw, 560px);
+  border: 0;
+  border-radius: var(--radius-lg);
+  filter: grayscale(0.6) sepia(0.15);
+}
+.contact__map--placeholder {
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  background: var(--ivory);
+  filter: none;
+  transition: background 0.4s;
+}
+.contact__map--placeholder:hover { background: var(--sand); }

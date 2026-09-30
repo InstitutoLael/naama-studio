@@ -1,5 +1,17 @@
 /*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Frame-Options: SAMEORIGIN
+
+# Archivos con hash en el nombre (JS/CSS/fuentes de Vite): se pueden cachear para siempre.
+/assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-/index.html
-  Cache-Control: no-cache, no-store, must-revalidate
+# Fotos optimizadas: 30 días.
+/img/*
+  Cache-Control: public, max-age=2592000
+
+# El service worker nunca debe quedar en caché.
+/sw.js
+  Cache-Control: no-cache

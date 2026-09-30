@@ -531,7 +531,7 @@ export const servicesData = [
     // MANICURE (GABY)
     {
       name: "Baño de PolyGel",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "31.990",
       price: "31.000",
@@ -541,7 +541,7 @@ export const servicesData = [
     },
     {
       name: "Capping de Rubber",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "25.990",
       price: "26.000",
@@ -551,7 +551,7 @@ export const servicesData = [
     },
     {
       name: "Decoraciones Uñas",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "990",
       price: "1.000",
@@ -561,7 +561,7 @@ export const servicesData = [
     },
     {
       name: "Diseño de Mano Alzada",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "1.490",
       price: "3.000",
@@ -571,7 +571,7 @@ export const servicesData = [
     },
     {
       name: "Esculpidas con Polygel Extension (Desde)",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "36.990",
       price: "39.990",
@@ -581,7 +581,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado Permanente",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "20.990",
       price: "21.000",
@@ -591,7 +591,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado Permanente (Degradado o Francesa)",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "21.990",
       price: "23.000",
@@ -601,7 +601,7 @@ export const servicesData = [
     },
     {
       name: "Exfoliación de Manos",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "3.990",
       price: "4.000",
@@ -611,7 +611,7 @@ export const servicesData = [
     },
     {
       name: "Extensión de Uña / Soft Gel (Desde)",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "35.990",
       price: "42.990",
@@ -621,7 +621,7 @@ export const servicesData = [
     },
     {
       name: "Parche de Uñas",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "2.990",
       price: "3.500",
@@ -631,7 +631,7 @@ export const servicesData = [
     },
     {
       name: "Retiro de Acrílico / PolyGel / SoftGel",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "12.990",
       price: "15.990",
@@ -641,7 +641,7 @@ export const servicesData = [
     },
     {
       name: "Retiro Esmalte Permanente",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "3.990",
       price: "4.990",
@@ -651,7 +651,7 @@ export const servicesData = [
     },
     {
       name: "Manicura Express Varón (Limpieza)",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "---",
       price: "12.000",
@@ -661,7 +661,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado de Niñas (Mini-Manicure)",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "---",
       price: "10.000",
@@ -671,7 +671,7 @@ export const servicesData = [
     },
     {
       name: "Exfoliación + Masaje de Manos",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "---",
       price: "7.000",
@@ -681,7 +681,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado al Aire Tradicional",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure",
       old: "---",
       price: "15.000",
@@ -691,7 +691,7 @@ export const servicesData = [
     },
     {
       name: "Baño de Parafina Caliente",
-      worker: "Gaby",
+      worker: "Gaby, Leah, Catalina",
       cat: "Manicure, Pedicure",
       old: "---",
       price: "16.000",

@@ -1,115 +1,112 @@
 import React from 'react';
-import { MessageCircle, Mail, MapPin } from 'lucide-react';
 import SEOHead from '../components/shared/SEOHead';
+import Photo from '../components/common/Photo';
+import { Parallax, Reveal, SplitText } from '../components/common/Motion';
+import { ArrowRight, WhatsAppIcon } from '../components/common/Icons';
 import { b2bPacks } from '../data/b2bPacks';
-import '../styles/Global.css';
-import '../styles/EmpresasPage.css';
+import { SITE, whatsappUrl } from '../data/site';
+import '../theme/empresas.css';
 
-const EmpresasPage = () => {
-  return (
-    <div className="empresas_page">
-      <SEOHead 
-        title="B2B & Bienestar Corporativo" 
-        description="Servicios de restauración y cuidado técnico para equipos corporativos de alto rendimiento." 
-      />
+const MODES = [
+  {
+    title: 'En el salón',
+    text: 'Reservamos la casa para tu equipo: una jornada de cuidado capilar, uñas y bienestar lejos de la oficina.',
+  },
+  {
+    title: 'En tu oficina',
+    text: 'Llevamos estaciones de masaje, diseño de cejas y manicure express a tus dependencias.',
+  },
+  {
+    title: 'Gift cards corporativas',
+    text: 'Un reconocimiento que cada persona canjea por el servicio que prefiera, cuando quiera.',
+  },
+];
 
-      <header className="empresas_hero reveal">
-        <span className="empresas_label">Atención Corporativa</span>
-        <h1 className="empresas_title serif">Ingeniería del Cuidado para su <span className="b2b_accent_text">Equipo</span></h1>
-        <p className="world_description">
-          Llevamos la excelencia de Naamá Studio al entorno profesional, diseñando jornadas de restauración técnica y descanso hospitalario a medida de su corporación.
-        </p>
-      </header>
+const EmpresasPage = () => (
+  <div className="empresas">
+    <SEOHead title="Empresas" description="Bienestar corporativo con Naamá Studio: jornadas en el salón o en tu oficina, packs y gift cards corporativas." />
 
-      <main className="empresas_benefits container reveal delay-1">
-        <div className="benefit_item">
-          <span className="detail_label">Modalidad 01</span>
-          <h3 className="benefit_title serif">Naamá en Salón</h3>
-          <p className="benefit_desc">Reserva íntegra de nuestras instalaciones para jornadas de bienestar exclusivo. Packs de restauración técnica que incluyen cuidado capilar, podología y descanso visual en un entorno de pulcritud absoluta.</p>
-        </div>
-        
-        <div className="benefit_item">
-          <span className="detail_label">Modalidad 02</span>
-          <h3 className="benefit_title serif">Naamá en Oficina</h3>
-          <p className="benefit_desc">Desplazamos nuestra ingeniería del cuidado a sus dependencias. Montaje de estaciones técnicas de masaje clínico, diseño de mirada y tratamientos express para equipos de alta exigencia sin salir de su entorno seguro.</p>
-        </div>
+    <header className="page-hero container empresas__hero">
+      <div>
+        <p className="eyebrow">Empresas</p>
+        <SplitText as="h1" className="page-hero__title" onMount delay={0.15} lines={['Bienestar para', <em key="e">tu equipo.</em>]} />
+        <Reveal as="p" className="lead page-hero__lead" delay={0.4}>
+          Diseñamos jornadas de cuidado a la medida de tu empresa, para celebrar, reconocer o
+          simplemente darle a tu equipo un respiro.
+        </Reveal>
+        <Reveal className="empresas__actions" delay={0.55}>
+          <a
+            href={whatsappUrl('Hola! Escribo de una empresa y me gustaría recibir la propuesta corporativa de Naamá Studio.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn"
+          >
+            <WhatsAppIcon /> Pedir propuesta
+          </a>
+          <a href={`mailto:${SITE.email}?subject=Propuesta%20corporativa%20Naam%C3%A1%20Studio`} className="btn btn--ghost">
+            Escribir un correo
+          </a>
+        </Reveal>
+      </div>
+      <Reveal className="empresas__photo" y={60} delay={0.2}>
+        <Parallax className="parallax empresas__parallax" amount={8}>
+          <Photo name="salon-estaciones" alt="Estaciones de trabajo de Naamá Studio" priority sizes="(min-width: 1000px) 40vw, 92vw" />
+        </Parallax>
+      </Reveal>
+    </header>
 
-        <div className="benefit_item">
-          <span className="detail_label">Modalidad 03</span>
-          <h3 className="benefit_title serif">Packs de Honor</h3>
-          <p className="benefit_desc">Gift cards corporativas físicas en acabado lino crudo. Un gesto de reconocimiento técnico que permite al colaborador elegir su propio protocolo de restauración en nuestro salón.</p>
-        </div>
-      </main>
-
-      <section className="container section-padding reveal b2b_section_header">
-        <span className="essence_label">Combinaciones de Valor</span>
-        <h2 className="serif b2b_heading_large">Packs de Ingeniería <span className="b2b_accent_text">B2B</span></h2>
-        
-        <div className="b2b_packs_grid">
-          {b2bPacks.map((pack) => (
-            <div key={pack.id} className="b2b_pack_card">
-              <div className="pack_status_badge">{pack.modality}</div>
-              <h3 className="serif pack_name">{pack.name}</h3>
-              <p className="pack_desc">{pack.description}</p>
-              <div className="pack_services_list">
-                 {pack.services.map(s => <span key={s} className="pack_service_tag">{s}</span>)}
-              </div>
-              <div className="pack_footer">
-                 <div className="pack_price_box">
-                    <span className="pack_label_tag">Inversión desde</span>
-                    <span className="pack_price serif">${pack.price} <small className="pack_savings">(-{pack.savings})</small></span>
-                 </div>
-                 <button 
-                  id={`btn_pack_${pack.id}`}
-                  className="nav_cta_boutique b2b_pack_btn"
-                  onClick={() => window.open(`https://wa.me/56979520623?text=Hola! Me interesa el Pack B2B: ${pack.name}. ¿Podrían darme más información?`, '_blank')}
-                  aria-label={`Solicitar información sobre el Pack ${pack.name}`}
-                 >
-                   Solicitar Pack
-                 </button>
-              </div>
-            </div>
+    <section className="section on-ivory">
+      <div className="container">
+        <div className="modes">
+          {MODES.map((m, i) => (
+            <Reveal key={m.title} className="mode" delay={i * 0.08}>
+              <span className="mode__num">0{i + 1}</span>
+              <h2 className="h3">{m.title}</h2>
+              <p className="muted">{m.text}</p>
+            </Reveal>
           ))}
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section className="container reveal b2b_cta_container">
-        <div className="b2b_cta_section">
-          <h2 className="cta_heading serif">Consulte nuestra propuesta B2B</h2>
-          <p className="cta_sub">Diseñamos sesiones personalizadas según los objetivos de bienestar de su empresa.</p>
-          
-          <div className="b2b_contact_info">
-            <div className="b2b_contact_row">
-              <MapPin size={14} /> <span>San Miguel, Santiago</span>
-            </div>
-            <div className="b2b_contact_row">
-              <Mail size={14} /> 
-              <a href="mailto:naamastudiospa@gmail.com" style={{ color: 'inherit' }}>naamastudiospa@gmail.com</a>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '1.5rem' }}>
-            <button 
-              className="nav_cta_boutique b2b_cta_main"
-              onClick={() => window.open('https://wa.me/56979520623?text=Hola! Soy de una empresa y me gustaría solicitar información sobre sus servicios B2B. ¿Podrían contactarme?', '_blank')}
-              aria-label="Solicitar información para empresas por WhatsApp"
-            >
-              <MessageCircle size={16} style={{ marginRight: '8px' }} />
-              Escribir por WhatsApp
-            </button>
-            <button 
-              className="back_btn"
-              onClick={() => window.location.href = 'mailto:naamastudiospa@gmail.com?subject=Consulta B2B Naamá Studio'}
-              aria-label="Solicitar información para empresas por email"
-              style={{ padding: '0.9rem 2rem' }}
-            >
-              Enviar un Email
-            </button>
-          </div>
+    <section className="section container" aria-labelledby="packs-title">
+      <div className="section-head section-head--split">
+        <div>
+          <p className="eyebrow">Packs</p>
+          <SplitText as="h2" id="packs-title" className="h2" lines={['Combinaciones', <em key="p">pensadas para equipos.</em>]} />
         </div>
-      </section>
-    </div>
-  );
-};
+        <Reveal as="p" className="lead">Valores referenciales. Armamos la propuesta según el tamaño de tu equipo.</Reveal>
+      </div>
+      <div className="packs">
+        {b2bPacks.map((p, i) => (
+          <Reveal key={p.id} className="pack" delay={i * 0.08} y={50}>
+            <span className="pack__mode">{p.modality}</span>
+            <h3 className="pack__name">{p.name.replace('Pack ', '')}</h3>
+            <p className="muted">{p.description}</p>
+            <ul className="pack__list">
+              {p.services.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ul>
+            <div className="pack__foot">
+              <div>
+                <small>Desde</small>
+                <strong>${p.price}</strong>
+              </div>
+              <a
+                href={whatsappUrl(`Hola! Me interesa el ${p.name} para mi empresa. ¿Me pueden enviar más información?`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-arrow"
+              >
+                Consultar <ArrowRight />
+              </a>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
+  </div>
+);
 
 export default EmpresasPage;

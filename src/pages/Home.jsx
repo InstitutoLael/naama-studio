@@ -1,338 +1,483 @@
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { mundos } from '../data/categories';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
-import TestimonialsSection from '../components/sections/TestimonialsSection';
-import InstagramFeed from '../components/sections/InstagramFeed';
-import { Gift, ArrowRight, Scissors, Palette, Sparkles, Heart, Hand, ShieldCheck } from 'lucide-react';
-import SalonArch from '../assets/salon-arch.png';
-import LaborHands from '../assets/labor-hands.png';
-import HeroBg from '../assets/hero-bg.png';
-import MiradaBg from '../assets/mirada-bg.png';
-import NailsBg from '../assets/nails-bg.png';
-import WellnessBg from '../assets/wellness-bg.png';
-import EsenciaLogo from '../assets/esencia-logo.png';
-import '../styles/Global.css';
-import '../styles/Home.css';
+import Photo from '../components/common/Photo';
+import { Parallax, Reveal, ScrollWords, SplitText } from '../components/common/Motion';
+import { ArrowRight } from '../components/common/Icons';
+import { LogoMark } from '../components/common/Logo';
+import { introDelay } from '../components/site/Preloader';
+import { mundos, servicesForMundo } from '../data/categories';
+import { servicesData } from '../data/servicesData';
+import { team } from '../data/team';
+import { testimonials } from '../data/testimonials';
+import { SITE } from '../data/site';
+import '../theme/home.css';
 
-const editorialMundos = [
-  { id: 'capilar', name: 'Corte & Estilo', icon: Scissors, img: HeroBg },
-  { id: 'color', name: 'Colorimetría', icon: Palette, img: MiradaBg },
-  { id: 'tratamientos', name: 'Restauración', icon: Sparkles, img: SalonArch },
-  { id: 'bienestar', name: 'Bienestar', icon: Heart, img: WellnessBg },
-  { id: 'manos-pies', name: 'Uñas & Manos', icon: Hand, img: NailsBg },
-  { id: 'clinico', name: 'Podología', icon: ShieldCheck, img: LaborHands }
+const EASE = [0.16, 1, 0.3, 1];
+const NEW_MEMBERS = ['Leah', 'Catalina'];
+
+const WORK = [
+  { photo: 'unas-burdeo-oro', label: 'Uñas', title: 'Burdeo & pan de oro' },
+  { photo: 'cabello-balayage', label: 'Color', title: 'Balayage miel' },
+  { photo: 'unas-chocolate', label: 'Uñas', title: 'Chocolate & flores doradas' },
+  { photo: 'cabello-castano', label: 'Cabello', title: 'Castaño espejo' },
+  { photo: 'unas-cat-eye', label: 'Uñas', title: 'Cat eye rosa' },
+  { photo: 'cabello-ondas', label: 'Color', title: 'Iluminación con ondas' },
+  { photo: 'unas-glitter', label: 'Uñas', title: 'Nude glitter' },
 ];
 
-const Home = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    if (location.hash === '#nosotros') {
-      const element = document.getElementById('nosotros');
-      if (element) {
-        const timer = setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-        return () => clearTimeout(timer);
-      }
-    } else {
-      window.scrollTo(0, 0);
-    }
-  }, [location]);
+/* ── 01. Portada ── */
+const Hero = () => {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const [delay] = useState(introDelay);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] });
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '22%']);
+  const fade = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   return (
-    <div className="home_page">
-      <SEOHead
-        title="Naamá Studio · Belleza Honesta, Descanso Real"
-        description="Un refugio de paz donde la tradición de una casa patrimonial se encuentra con la alta tecnología del bienestar. San Miguel, Santiago."
-      />
+    <section ref={ref} className="hero on-dark" aria-label="Portada">
+      <motion.div className="hero__media" style={{ y: reduce ? 0 : y }}>
+        <motion.div
+          className="hero__zoom"
+          initial={reduce ? false : { scale: 1.18 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 2.4, ease: EASE, delay: delay - 0.2 }}
+        >
+          <Photo
+            name="salon-recepcion"
+            alt="Recepción de Naamá Studio con el logo iluminado"
+            priority
+            sizes="100vw"
+            position="50% 60%"
+          />
+        </motion.div>
+      </motion.div>
+      <div className="hero__shade" />
 
-      {/* ── HERO ── */}
-      <section className="hero_section">
-        <img
-          src={SalonArch}
-          alt="Interior de Naamá Studio"
-          className="hero_bg_img"
-          fetchpriority="high"
-          width="1920"
-          height="1080"
+      <motion.div className="hero__content container" style={{ opacity: reduce ? 1 : fade }}>
+        <Reveal as="p" className="eyebrow" delay={delay} y={16}>
+          Beauty & Wellness House · San Miguel
+        </Reveal>
+        <SplitText
+          as="h1"
+          className="hero__title"
+          onMount
+          delay={delay + 0.1}
+          lines={['Tu momento', 'de volver', <em key="a">a ti.</em>]}
         />
-        <div className="hero_overlay" />
-        
-        <div className="hero_content">
-          <motion.span 
-            className="hero_eyebrow"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-          >
-            Beauty & Wellness House · San Miguel, Santiago
-          </motion.span>
-          
-          <h1 className="hero_statement">
-            <motion.div
-              className="line_1"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-            >
-              Tu momento
-            </motion.div>
-            <motion.div
-              className="line_2"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.55, duration: 0.8, ease: "easeOut" }}
-            >
-              de volver
-            </motion.div>
-            <motion.div
-              className="line_3"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
-            >
-              a ti.
-            </motion.div>
-          </h1>
-          
-          <motion.p 
-            className="hero_subtitle"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
-          >
-            Servicios de belleza y bienestar en un espacio pensado
-            para que te reconectes contigo misma.
-          </motion.p>
-          
-          <motion.div 
-            className="hero_actions"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.1, duration: 0.8 }}
-          >
-            <Link to="/reservar" className="btn_hero_primary">
-              Reservar mi experiencia
+        <div className="hero__foot">
+          <Reveal as="p" className="lead hero__lead" delay={delay + 0.5} y={20}>
+            Belleza y bienestar en una casa patrimonial, hechos con calma, técnica y cariño.
+          </Reveal>
+          <Reveal className="hero__actions" delay={delay + 0.65} y={20}>
+            <Link to="/reservar" className="btn btn--gold">
+              Reservar mi hora <ArrowRight />
             </Link>
-            <Link to="/staff" className="btn_hero_secondary">
-              Ver servicios →
+            <Link to="/servicios" className="btn btn--ghost-light">
+              Ver servicios
             </Link>
-          </motion.div>
+          </Reveal>
         </div>
+      </motion.div>
 
-        <div className="hero_scroll_hint" aria-hidden="true">
-          <span className="scroll_label">Descubre</span>
-          <span className="scroll_line" />
-        </div>
+      <div className="hero__scroll" aria-hidden="true">
+        <span>Scroll</span>
+        <i />
+      </div>
+    </section>
+  );
+};
 
-        <div className="hero_stats">
-          180+ Clientas · 5 Especialistas · 4.9★ Google
-        </div>
-      </section>
+/* ── 02. Esencia ── */
+const Essence = () => (
+  <section className="essence section" aria-labelledby="esencia-title">
+    <div className="container essence__grid">
+      <div className="essence__text">
+        <p className="eyebrow" id="esencia-title">Nuestra esencia</p>
+        <ScrollWords
+          className="essence__statement"
+          text="Somos una casa antigua de San Miguel convertida en refugio. Aquí la belleza se hace sin apuro: con técnica, silencio y un equipo que te recibe por tu nombre."
+        />
+        <Reveal className="essence__stats">
+          <div>
+            <strong>{team.length}</strong>
+            <span>Especialistas</span>
+          </div>
+          <div>
+            <strong>{servicesData.length}</strong>
+            <span>Servicios</span>
+          </div>
+          <div>
+            <strong>6</strong>
+            <span>Mundos de cuidado</span>
+          </div>
+        </Reveal>
+      </div>
+      <Reveal className="essence__media" y={60}>
+        <Parallax className="essence__photo parallax" amount={10}>
+          <Photo name="salon-rincon" alt="Rincón de espera con el letrero de Naamá Studio" sizes="(min-width: 900px) 40vw, 90vw" />
+        </Parallax>
+        <p className="essence__caption">La sala de espera, con luz de tarde.</p>
+      </Reveal>
+    </div>
+  </section>
+);
 
-      {/* ── NUESTRA ESENCIA ── */}
-      <section className="premium_essence" id="nosotros">
-        <div className="container premium_essence_layout">
-          {/* Columna Izquierda: Elemento Visual */}
-          <div className="premium_essence_visual reveal reveal-left">
-            <img 
-              src={EsenciaLogo} 
-              alt="Naamá Studio Beauty & Wellness House" 
-              className="essence_logo_img" 
-              loading="lazy" 
+/* ── 03. Índice de servicios con imagen que sigue al cursor ── */
+const ServicesIndex = () => {
+  const [active, setActive] = useState(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 160, damping: 22, mass: 0.6 });
+  const sy = useSpring(y, { stiffness: 160, damping: 22, mass: 0.6 });
+
+  const onMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set(e.clientX - rect.left);
+    y.set(e.clientY - rect.top);
+  };
+
+  return (
+    <section className="sindex section on-ivory" aria-labelledby="servicios-title">
+      <div className="container">
+        <div className="section-head section-head--split">
+          <div>
+            <p className="eyebrow">Servicios</p>
+            <SplitText
+              as="h2"
+              className="h2"
+              lines={['Seis formas', <em key="c">de cuidarte.</em>]}
             />
           </div>
-
-          {/* Columna Derecha: Contenido */}
-          <div className="premium_essence_content reveal reveal-right">
-            <span className="premium_essence_eyebrow">NUESTRA ESENCIA</span>
-            <h2 className="premium_essence_heading">
-              Más que estética,<br />
-              <em>una experiencia de cuidado genuino.</em>
-            </h2>
-            <p className="premium_essence_main_text">
-              En Naamá Studio creemos que el cuidado personal es también
-              una forma de bienestar. Creamos un espacio cálido, elegante
-              y cercano donde cada detalle está pensado para que puedas
-              desconectarte, renovarte y volver a ti misma.
+          <Reveal>
+            <p className="lead">
+              Del color a la podología clínica: todo lo que necesitas en un solo lugar, con precios
+              transparentes.
             </p>
-            <p className="premium_essence_sub_text">
-              Porque mereces un momento que sea completamente tuyo.
-            </p>
-            
-            <div className="premium_essence_values">
-              <div className="premium_value_item reveal delay-1">
-                <span className="value_star">✦</span> Calidez genuina
-              </div>
-              <div className="premium_value_item reveal delay-2">
-                <span className="value_star">✦</span> Técnica de excelencia
-              </div>
-              <div className="premium_value_item reveal delay-3">
-                <span className="value_star">✦</span> Experiencia que perdura
-              </div>
-            </div>
-            
-            <Link to="/staff" className="premium_essence_cta">
-              Conoce nuestro equipo →
+            <Link to="/servicios" className="link-arrow sindex__all">
+              Ver todos los precios <ArrowRight />
             </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ── ECOSISTEMAS / MUNDOS EDITORIAL ── */}
-      <section className="editorial_worlds_section">
-        <div className="editorial_header reveal">
-          <span className="editorial_eyebrow">NUESTROS SERVICIOS</span>
-          <h2 className="editorial_heading">
-            Seis formas de <br />
-            <em>cuidarte.</em>
-          </h2>
-          <p className="editorial_subtext">
-            Cada mundo es una experiencia completa diseñada para ti.
-          </p>
+          </Reveal>
         </div>
 
-        <div className="editorial_grid container">
-          {editorialMundos.map((mundo, index) => (
-            <div
-              key={mundo.id}
-              className={`mundo_card reveal delay-${(index % 3) + 1}`}
-              onClick={() => navigate(`/mundo/${mundo.id}`)}
-              role="button"
-              tabIndex={0}
-              aria-label={`Explorar ${mundo.name}`}
-              onKeyDown={(e) => e.key === 'Enter' && navigate(`/mundo/${mundo.id}`)}
-            >
-              <img src={mundo.img} alt={mundo.name} className="mundo_bg" loading="lazy" />
-              <div className="mundo_overlay" />
-              
-              <span className="mundo_large_num">0{index + 1}</span>
-              
-              <div className="mundo_content">
-                <mundo.icon className="mundo_icon" />
-                <h3 className="mundo_name">{mundo.name}</h3>
-                <p className="mundo_desc">
-                  Descubre los protocolos y rituales especializados de esta área.
-                </p>
-                <span className="mundo_cta">Ver experiencia →</span>
-              </div>
-            </div>
+        <div className="sindex__wrap" onMouseMove={onMove} onMouseLeave={() => setActive(null)}>
+        <ul className="sindex__list">
+          {mundos.map((m, i) => (
+            <Reveal as="li" key={m.id} delay={i * 0.05} y={24}>
+              <Link
+                to={`/servicios/${m.id}`}
+                className="sindex__row"
+                onMouseEnter={() => setActive(m.id)}
+                onFocus={() => setActive(m.id)}
+              >
+                <span className="sindex__num">0{i + 1}</span>
+                <Photo name={m.photo} alt="" className="sindex__thumb" sizes="96px" />
+                <span className="sindex__name">{m.name}</span>
+                <span className="sindex__desc">{m.description}</span>
+                <span className="sindex__count">{servicesForMundo(servicesData, m).length} servicios</span>
+                <ArrowRight className="sindex__arrow" />
+              </Link>
+            </Reveal>
           ))}
+        </ul>
+
+          <motion.div className="sindex__preview" style={{ x: sx, y: sy }} aria-hidden="true">
+            <AnimatePresence>
+              {active && (
+                <motion.div
+                  key={active}
+                  className="sindex__preview-inner"
+                  initial={{ opacity: 0, scale: 0.85, rotate: -4 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ duration: 0.45, ease: EASE }}
+                >
+                  <Photo name={mundos.find((m) => m.id === active).photo} alt="" sizes="320px" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
-      </section>
+      </div>
+    </section>
+  );
+};
 
-      {/* ── SECCIÓN EMOCIONAL: EL ELOGIO DE LA PAUSA ── */}
-      <section className="emotional_sanctuary reveal">
-        <div className="container sanctuary_inner">
-          <span className="sanctuary_eyebrow">EL ELOGIO DE LA PAUSA</span>
-          <h2 className="serif sanctuary_title">
-            En un mundo que no para,<br />
-            <em>elegir el silencio es un acto de rebeldía.</em>
-          </h2>
-          
-          <div className="sanctuary_grid">
-            <div className="sanctuary_column">
-              <p className="sanctuary_text serif">
-                No vienes a Naamá Studio solo a teñir tu cabello o esculpir tus uñas. Vienes a reclamar tu derecho al descanso. Vienes porque la prisa desdibuja la identidad, y el cuidado genuino es el único ritual capaz de devolverte a tu centro.
-              </p>
-            </div>
-            <div className="sanctuary_column">
-              <p className="sanctuary_text serif">
-                Aquí, el tiempo transcurre más despacio. Entre el murmullo de nuestra casa patrimonial y el aroma a aceites botánicos, diseñamos un espacio donde tu autoestima y tu descanso no son un lujo secundario, sino la prioridad absoluta.
-              </p>
-            </div>
-          </div>
-          
-          <div className="sanctuary_quote_block">
-            <p className="sanctuary_quote serif">
-              "No vendemos servicios. Custodiamos pausas."
-            </p>
-            <span className="sanctuary_author">— El Manifiesto de Naamá</span>
-          </div>
-        </div>
-      </section>
+/* ── 04. La casa ── */
+const House = () => (
+  <section className="house section" aria-labelledby="casa-title">
+    <div className="container house__grid">
+      <Reveal className="house__main" y={60}>
+        <Parallax className="house__photo parallax" amount={8}>
+          <Photo name="salon-estaciones" alt="Estaciones de peluquería con techo de madera" sizes="(min-width: 900px) 55vw, 100vw" />
+        </Parallax>
+      </Reveal>
+      <div className="house__text">
+        <p className="eyebrow">La casa</p>
+        <SplitText
+          as="h2"
+          id="casa-title"
+          className="h2"
+          lines={['Techos de madera,', 'puertas antiguas', <em key="l">y luz natural.</em>]}
+        />
+        <Reveal as="p" className="lead">
+          Cada rincón de Naamá está pensado para bajar el ritmo: estaciones amplias, un patio con
+          plantas y una recepción que te espera con aroma y buena música.
+        </Reveal>
+        <Reveal className="house__small" y={60}>
+          <Photo name="salon-tocador" alt="Tocador de maquillaje junto a la puerta patrimonial" sizes="(min-width: 900px) 22vw, 60vw" />
+        </Reveal>
+      </div>
+    </div>
+  </section>
+);
 
-      {/* ── TESTIMONIOS ── */}
-      <TestimonialsSection />
-
-      {/* ── AGENTE IA / WHATSAPP ── */}
-      <section className="booking_teaser reveal">
-        <div className="container teaser_inner">
-          <div className="teaser_text_side">
-            <span className="world_item_tag teaser_eyebrow">Hospitalidad 24/7</span>
-            <h2 className="serif teaser_heading">
-              ¿No sabes qué<br />necesitas hoy?
-            </h2>
-            <p className="teaser_body">
-              Nuestra asistente técnica te guía por WhatsApp para diseñar
-              tu sesión ideal. Sin compromiso, sin confusión.
-            </p>
-            <a
-              href="https://wa.me/56979520623?text=Hola! Necesito asesoría para mi próxima sesión en Naamá Studio."
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Consultar por WhatsApp"
-              className="btn_light"
-            >
-              Consultar ahora
-              <ArrowRight size={14} strokeWidth={1.5} />
-            </a>
-          </div>
-          <div className="teaser_deco" aria-hidden="true">
-            <span className="deco_num serif">N.</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ── GIFT CARDS ── */}
-      <section className="home_giftcard reveal">
-        <div className="container giftcard_inner">
-          <span className="world_item_tag">Experiencias que se Regalan</span>
-          <h2 className="serif giftcard_heading">
-            Gift Cards <span className="text_gold">Digitales</span>
-          </h2>
-          <p className="giftcard_desc">
-            Regala una sesión de restauración a alguien especial.
-            Personaliza el monto, el mensaje y el diseño de tu tarjeta al instante.
-          </p>
-          <Link to="/gift-cards" className="btn_primary" aria-label="Crear una Gift Card digital">
-            <Gift size={15} strokeWidth={1.5} />
-            Crear Gift Card
-          </Link>
-        </div>
-      </section>
-
-      {/* ── INSTAGRAM FEED ── */}
-      <InstagramFeed />
-
-      {/* ── B2B ── */}
-      <section className="home_b2b reveal">
-        <div className="container b2b_inner">
-          <span className="world_item_tag">Hospitalidad Corporativa</span>
-          <h2 className="serif b2b_heading">
-            Bienestar para su <span className="text_walnut">Empresa</span>
-          </h2>
-          <p className="b2b_desc">
-            Llevamos nuestra cultura de la pulcritud y el servicio de alto nivel
-            al entorno corporativo. Jornadas de restauración para equipos
-            que exigen excelencia.
-          </p>
-          <button
-            className="btn_primary"
-            onClick={() => navigate('/empresas')}
-            aria-label="Solicitar información B2B"
-          >
-            Solicitar Dossier B2B
-            <ArrowRight size={15} strokeWidth={1.5} />
-          </button>
-        </div>
-      </section>
+/* ── 05. Cinta de palabras ── */
+const Marquee = () => {
+  const words = ['Cabello', 'Color', 'Uñas', 'Cejas', 'Pestañas', 'Faciales', 'Masajes', 'Podología'];
+  const row = (
+    <span className="marquee__row">
+      {words.map((w) => (
+        <React.Fragment key={w}>
+          <span>{w}</span>
+          <LogoMark className="marquee__mark" />
+        </React.Fragment>
+      ))}
+    </span>
+  );
+  return (
+    <div className="marquee on-dark" aria-hidden="true">
+      <div className="marquee__track">
+        {row}
+        {row}
+      </div>
     </div>
   );
 };
+
+/* ── 06. Trabajos: scroll horizontal fijado ── */
+const Work = () => {
+  const section = useRef(null);
+  const track = useRef(null);
+  const reduce = useReducedMotion();
+  const [distance, setDistance] = useState(0);
+  const [pinned, setPinned] = useState(false);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const enabled = window.innerWidth >= 900 && !reduce;
+      setPinned(enabled);
+      setDistance(enabled && track.current ? track.current.scrollWidth - window.innerWidth : 0);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (track.current) ro.observe(track.current);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, [reduce]);
+
+  const { scrollYProgress } = useScroll({ target: section, offset: ['start start', 'end end'] });
+  const x = useTransform(scrollYProgress, [0, 1], [0, -distance]);
+
+  return (
+    <section
+      ref={section}
+      className={`work ${pinned ? 'work--pinned' : ''}`}
+      style={pinned ? { height: `calc(100vh + ${distance}px)` } : undefined}
+      aria-labelledby="trabajo-title"
+    >
+      <div className="work__sticky">
+        <motion.div ref={track} className="work__track" style={pinned ? { x } : undefined}>
+          <div className="work__intro">
+            <p className="eyebrow">Nuestro trabajo</p>
+            <h2 className="h2" id="trabajo-title">
+              Hecho a mano, <em>detalle a detalle.</em>
+            </h2>
+            <p className="lead">Algunos resultados recientes de nuestras especialistas.</p>
+            <Link to="/galeria" className="link-arrow">
+              Ver galería <ArrowRight />
+            </Link>
+          </div>
+          {WORK.map((w, i) => (
+            <figure className={`work__item work__item--${i % 3}`} key={w.photo}>
+              <Photo name={w.photo} alt={`${w.title} — trabajo de Naamá Studio`} sizes="(min-width: 900px) 30vw, 75vw" />
+              <figcaption>
+                <span>{w.label}</span>
+                {w.title}
+              </figcaption>
+            </figure>
+          ))}
+          <Link to="/galeria" className="work__more">
+            <span>Ver toda la galería</span>
+            <ArrowRight />
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+/* ── 07. Equipo ── */
+const Team = () => (
+  <section className="team-home section on-dark" aria-labelledby="equipo-title">
+    <div className="container">
+      <div className="section-head section-head--split">
+        <div>
+          <p className="eyebrow">El equipo</p>
+          <SplitText
+            as="h2"
+            id="equipo-title"
+            className="h2"
+            lines={[`${team.length} especialistas,`, <em key="t">una misma forma de cuidar.</em>]}
+          />
+        </div>
+        <Reveal as="p" className="lead">
+          Colorimetría, uñas, faciales, maquillaje y podología clínica. Cada una experta en lo suyo,
+          todas con la misma obsesión por el detalle.
+        </Reveal>
+      </div>
+
+      <Reveal y={80}>
+        <Parallax className="team-home__photo parallax" amount={8}>
+          <Photo name="equipo" alt="El equipo de Naamá Studio en el patio de la casa" sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
+        </Parallax>
+      </Reveal>
+
+      <ul className="team-home__list">
+        {team.map((p, i) => (
+          <Reveal as="li" key={p.name} delay={i * 0.05} y={20}>
+            <span className="team-home__name">
+              {p.name}
+              {NEW_MEMBERS.includes(p.name) && <small>Nueva</small>}
+            </span>
+            <span className="team-home__role">{p.role}</span>
+          </Reveal>
+        ))}
+      </ul>
+
+      <Reveal className="team-home__cta">
+        <Link to="/equipo" className="btn btn--ghost">
+          Conoce al equipo <ArrowRight />
+        </Link>
+      </Reveal>
+    </div>
+  </section>
+);
+
+/* ── 08. Testimonios ── */
+const Testimonials = () => {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI((n) => (n + 1) % testimonials.length), 7000);
+    return () => clearInterval(t);
+  }, [i]);
+  const t = testimonials[i];
+
+  return (
+    <section className="quotes section" aria-labelledby="quotes-title">
+      <div className="container quotes__inner">
+        <p className="eyebrow" id="quotes-title">Lo que dicen de nosotras</p>
+        <div className="quotes__stage" aria-live="polite">
+          <AnimatePresence mode="wait">
+            <motion.figure
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.8, ease: EASE }}
+            >
+              <blockquote className="quotes__text">“{t.quote}”</blockquote>
+              <figcaption className="quotes__who">
+                <strong>{t.name}</strong> · {t.service}
+              </figcaption>
+            </motion.figure>
+          </AnimatePresence>
+        </div>
+        <div className="quotes__controls">
+          {testimonials.map((q, n) => (
+            <button
+              key={q.name}
+              className={`quotes__dot ${n === i ? 'is-active' : ''}`}
+              onClick={() => setI(n)}
+              aria-label={`Ver comentario de ${q.name}`}
+              aria-current={n === i}
+            />
+          ))}
+        </div>
+        <a href={SITE.reviewsUrl} target="_blank" rel="noopener noreferrer" className="link-arrow">
+          Ver reseñas en Google <ArrowRight />
+        </a>
+      </div>
+    </section>
+  );
+};
+
+/* ── 09. Regalos y empresas ── */
+const Extras = () => (
+  <section className="extras section on-ivory" aria-label="Gift cards y empresas">
+    <div className="container extras__grid">
+      {[
+        {
+          to: '/gift-cards',
+          photo: 'unas-glitter',
+          eyebrow: 'Gift Cards',
+          title: <>Regala una <em>pausa.</em></>,
+          text: 'Diseña una gift card digital con el monto y mensaje que quieras.',
+          cta: 'Crear gift card',
+        },
+        {
+          to: '/empresas',
+          photo: 'equipo-celebracion',
+          eyebrow: 'Empresas',
+          title: <>Bienestar para <em>tu equipo.</em></>,
+          text: 'Jornadas de cuidado en el salón o en tu oficina, y gift cards corporativas.',
+          cta: 'Ver propuesta',
+        },
+      ].map((c, i) => (
+        <Reveal key={c.to} delay={i * 0.1} y={60}>
+          <Link to={c.to} className="extra-card">
+            <Photo name={c.photo} alt="" className="extra-card__photo" sizes="(min-width: 900px) 45vw, 92vw" />
+            <div className="extra-card__body">
+              <p className="eyebrow">{c.eyebrow}</p>
+              <h3 className="h3">{c.title}</h3>
+              <p className="muted">{c.text}</p>
+              <span className="link-arrow">
+                {c.cta} <ArrowRight />
+              </span>
+            </div>
+          </Link>
+        </Reveal>
+      ))}
+    </div>
+  </section>
+);
+
+const Home = () => (
+  <div className="home">
+    <SEOHead />
+    <Hero />
+    <Essence />
+    <ServicesIndex />
+    <House />
+    <Marquee />
+    <Work />
+    <Team />
+    <Testimonials />
+    <Extras />
+  </div>
+);
 
 export default Home;

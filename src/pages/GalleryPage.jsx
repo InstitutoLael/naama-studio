@@ -1,203 +1,140 @@
-import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
-import InstagramReels from '../components/sections/InstagramReels';
-import '../styles/Global.css';
-import '../styles/GalleryPage.css';
+import Photo from '../components/common/Photo';
+import { Reveal, SplitText } from '../components/common/Motion';
+import { ArrowRight, CloseIcon, InstagramIcon } from '../components/common/Icons';
+import { galleryCategories, galleryItems } from '../data/gallery';
+import { SITE } from '../data/site';
+import { lockScroll } from '../lib/smoothScroll';
+import '../theme/gallery.css';
 
-const galleryCategories = ['Todos', 'Corte & Estilo', 'Colorimetría', 'Manicure', 'Pedicure', 'Maquillaje', 'Tratamientos'];
-
-// Placeholder gallery using existing assets + trend descriptions
-export const galleryItems = [
-  // Agregar items así cuando tengas fotos:
-  // { 
-  //   id: 1, 
-  //   src: '/galeria/balayage-valeria-01.jpg', 
-  //   cat: 'Colorimetría', 
-  //   title: 'Balayage Caramelo', 
-  //   specialist: 'Valeria', 
-  //   desc: 'Técnica de mano alzada para un rubio natural y luminoso.' 
-  // },
-];
+const EASE = [0.16, 1, 0.3, 1];
 
 const GalleryPage = () => {
-  const [activeFilter, setActiveFilter] = useState('Todos');
-  const [lightbox, setLightbox] = useState(null);
+  const [filter, setFilter] = useState('Todo');
+  const [current, setCurrent] = useState(null);
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  const items = useMemo(
+    () => (filter === 'Todo' ? galleryItems : galleryItems.filter((g) => g.cat === filter)),
+    [filter],
+  );
 
-  const filtered = activeFilter === 'Todos' 
-    ? galleryItems 
-    : galleryItems.filter(item => item.cat === activeFilter);
+  const step = useCallback(
+    (dir) => setCurrent((c) => (c === null ? c : (c + dir + items.length) % items.length)),
+    [items.length],
+  );
 
-  const openLightbox = (item) => setLightbox(item);
-  const closeLightbox = () => setLightbox(null);
-
-  const navigateLightbox = (dir) => {
-    const currentIdx = filtered.findIndex(i => i.id === lightbox.id);
-    const nextIdx = (currentIdx + dir + filtered.length) % filtered.length;
-    setLightbox(filtered[nextIdx]);
-  };
-
-  // Close lightbox on Escape
   useEffect(() => {
-    const handleKey = (e) => {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowRight') lightbox && navigateLightbox(1);
-      if (e.key === 'ArrowLeft') lightbox && navigateLightbox(-1);
+    if (current === null) return undefined;
+    lockScroll(true);
+    const onKey = (e) => {
+      if (e.key === 'Escape') setCurrent(null);
+      if (e.key === 'ArrowRight') step(1);
+      if (e.key === 'ArrowLeft') step(-1);
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [lightbox, filtered]);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      lockScroll(false);
+    };
+  }, [current, step]);
+
+  const active = current !== null ? items[current] : null;
 
   return (
-    <div className="gallery_page">
-      <SEOHead 
-        title="Galería de Trabajos" 
-        description="Explora nuestro portfolio de trabajos: cortes, colorimetría, manicure, maquillaje y más." 
+    <div className="gallery-page">
+      <SEOHead
+        title="Galería"
+        description="Trabajos reales de Naamá Studio: uñas, balayage, color y cortes, y rincones de nuestra casa en San Miguel."
+        image="/img/unas-burdeo-oro-960.webp"
       />
 
-      <header className="gallery_header reveal">
-        <span className="world_category_label">Portfolio</span>
-        <h1 className="gallery_title serif">Nuestra <span className="text_clay">Obra</span></h1>
-        <p className="world_description">
-          Cada servicio es una pieza de ingeniería del cuidado. Aquí mostramos las tendencias y técnicas que definen nuestro trabajo.
-        </p>
+      <header className="page-hero container">
+        <p className="eyebrow">Galería</p>
+        <SplitText as="h1" className="page-hero__title" onMount delay={0.15} lines={['Nuestro trabajo,', <em key="g">sin filtros.</em>]} />
+        <Reveal as="p" className="lead page-hero__lead" delay={0.4}>
+          Resultados reales de nuestras especialistas y rincones de la casa. Para ver lo más reciente,
+          síguenos en Instagram.
+        </Reveal>
       </header>
 
-      {/* Filter Tabs */}
-      <div className="gallery_filters container reveal delay-1">
-        {galleryCategories.map(cat => (
-          <button
-            key={cat}
-            className={`filter_btn ${activeFilter === cat ? 'active' : ''}`}
-            onClick={() => setActiveFilter(cat)}
-            aria-label={`Filtrar por ${cat}`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Masonry Grid o Estado Vacío */}
-      {galleryItems.length === 0 ? (
-        <div className="gallery_empty container reveal delay-2">
-          <p className="empty_title serif">Próximamente — Nuestros trabajos</p>
-          <p className="empty_text">
-            Sigue nuestra cuenta <a href="https://www.instagram.com/naamastudio_" target="_blank" rel="noopener noreferrer">@naamastudio_</a> en Instagram para ver los trabajos más recientes.
-          </p>
-        </div>
-      ) : (
-        <div className="gallery_masonry container reveal delay-2">
-          {filtered.map((item, idx) => (
-            <div 
-              key={item.id} 
-              className={`gallery_item ${idx % 5 === 0 ? 'tall' : ''}`}
-              onClick={() => openLightbox(item)}
-              role="button"
-              tabIndex={0}
-              aria-label={`Ver ${item.title}`}
-              onKeyDown={(e) => e.key === 'Enter' && openLightbox(item)}
-            >
-              <img 
-                src={item.src} 
-                alt={item.title} 
-                loading="lazy"
-                width="400"
-                height="500"
-              />
-              <div className="gallery_item_overlay">
-                <span className="gallery_item_cat">{item.cat}</span>
-                <h3 className="gallery_item_title serif">{item.title}</h3>
-                <span className="gallery_item_specialist">por {item.specialist}</span>
-              </div>
-            </div>
+      <div className="container">
+        <div className="gallery-filters" role="group" aria-label="Filtrar galería">
+          {galleryCategories.map((c) => (
+            <button key={c} className="chip" aria-pressed={filter === c} onClick={() => setFilter(c)}>
+              {c}
+            </button>
           ))}
         </div>
-      )}
 
-      {/* Lightbox Modal */}
-      {lightbox && (
-        <div className="lightbox_overlay" onClick={closeLightbox} role="dialog" aria-modal="true" aria-label="Vista ampliada">
-          <div className="lightbox_content" onClick={(e) => e.stopPropagation()}>
-            <button className="lightbox_close" onClick={closeLightbox} aria-label="Cerrar">
-              <X size={24} strokeWidth={1} />
-            </button>
-            <button className="lightbox_nav lightbox_prev" onClick={() => navigateLightbox(-1)} aria-label="Imagen anterior">
-              <ChevronLeft size={30} strokeWidth={1} />
-            </button>
-            <div className="lightbox_image_box">
-              <img src={lightbox.src} alt={lightbox.title} />
-            </div>
-            <button className="lightbox_nav lightbox_next" onClick={() => navigateLightbox(1)} aria-label="Imagen siguiente">
-              <ChevronRight size={30} strokeWidth={1} />
-            </button>
-            <div className="lightbox_info">
-              <span className="gallery_item_cat">{lightbox.cat}</span>
-              <h3 className="serif" style={{ fontSize: '1.8rem', margin: '10px 0' }}>{lightbox.title}</h3>
-              <p className="lightbox_desc">{lightbox.desc}</p>
-              <span className="gallery_item_specialist">Realiza: {lightbox.specialist}</span>
-              <a
-                href={`https://wa.me/56979520623?text=Hola! Vi el trabajo "${lightbox.title}" en la galería de Naamá Studio y me gustaría agendar algo similar. ¿Tienen disponibilidad?`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-block',
-                  marginTop: '20px',
-                  background: '#25D366',
-                  color: '#fff',
-                  padding: '12px 24px',
-                  borderRadius: '2px',
-                  fontSize: '0.7rem',
-                  fontWeight: '800',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.15em',
-                  textDecoration: 'none'
-                }}
-                aria-label="Agendar este servicio por WhatsApp"
+        <ul className="masonry" key={filter}>
+            {items.map((item, i) => (
+              <motion.li
+                key={item.photo}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: EASE, delay: Math.min(i, 8) * 0.04 }}
               >
-                📲 Quiero algo así — Agendar por WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
+                <button className="masonry__item" onClick={() => setCurrent(i)} aria-label={`Ampliar: ${item.title}`}>
+                  <Photo name={item.photo} alt={item.title} sizes="(min-width: 1100px) 30vw, (min-width: 600px) 45vw, 92vw" />
+                  <span className="masonry__caption">
+                    <small>{item.cat}</small>
+                    {item.title}
+                  </span>
+                </button>
+              </motion.li>
+            ))}
+        </ul>
 
-      <section className="container section-padding text-center reveal">
-        <p className="world_item_tag" style={{ marginBottom: '20px' }}>Próximo Paso</p>
-        <h2 className="serif" style={{ fontSize: '2rem', marginBottom: '20px' }}>¿Te gustaría reservar?</h2>
-        <a href="/reservar" className="notfound_btn" aria-label="Reservar sesión">Agendar Sesión</a>
-      </section>
-      {/* Real Instagram Reels */}
-      <InstagramReels 
-        reels={[
-          {
-            url: "https://www.instagram.com/reel/DU67OwaDr2-/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-            title: "Resultados increíbles con técnica Balayage 🤎",
-            category: "Colorimetría"
-          },
-          {
-            url: "https://www.instagram.com/reel/DTvTUX5jnvw/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-            title: "Proceso de iluminación y matiz",
-            category: "Corte & Estilo"
-          },
-          {
-            url: "https://www.instagram.com/reel/DRhY5Z9jtAg/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-            title: "Transformación radical y saludable ✨",
-            category: "Tratamientos"
-          },
-          {
-            url: "https://www.instagram.com/reel/DR4nT54jlQ-/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-            title: "Rubio perfecto sin dañar la fibra capilar",
-            category: "Colorimetría"
-          },
-          {
-            url: "https://www.instagram.com/reel/DPO7EA0Dphm/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-            title: "Expectativa vs Realidad 😂 (Humor Salón)",
-            category: "Naamá Vibe"
-          }
-        ]}
-      />
+        <Reveal className="gallery-ig">
+          <InstagramIcon className="gallery-ig__icon" />
+          <p className="h3">Lo más nuevo está en <em>{SITE.instagramHandle}</em></p>
+          <a href={SITE.instagram} target="_blank" rel="noopener noreferrer" className="btn">
+            Seguir en Instagram <ArrowRight />
+          </a>
+        </Reveal>
+      </div>
+
+      <AnimatePresence>
+        {active && (
+          <motion.div
+            className="lightbox"
+            role="dialog"
+            aria-modal="true"
+            aria-label={active.title}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            onClick={() => setCurrent(null)}
+          >
+            <motion.figure
+              key={active.photo}
+              className="lightbox__figure"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: EASE }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Photo name={active.photo} alt={active.title} sizes="90vw" priority />
+              <figcaption>
+                <span>{active.cat}</span> {active.title}
+                <em>{current + 1} / {items.length}</em>
+              </figcaption>
+            </motion.figure>
+            <button className="lightbox__btn lightbox__prev" onClick={(e) => { e.stopPropagation(); step(-1); }} aria-label="Anterior">
+              <ArrowRight />
+            </button>
+            <button className="lightbox__btn lightbox__next" onClick={(e) => { e.stopPropagation(); step(1); }} aria-label="Siguiente">
+              <ArrowRight />
+            </button>
+            <button className="lightbox__btn lightbox__close" onClick={() => setCurrent(null)} aria-label="Cerrar" autoFocus>
+              <CloseIcon />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -1,27 +1,27 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
-import ThemeProvider from './context/ThemeProvider'
-import ErrorBoundary from './components/shared/ErrorBoundary'
-import App from './App.jsx'
-import './index.css'
-import './styles/Global.css'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import '@fontsource-variable/playfair-display/wght.css';
+import '@fontsource-variable/playfair-display/wght-italic.css';
+import '@fontsource-variable/manrope/wght.css';
+import './theme/base.css';
+import './theme/layout.css';
+import ErrorBoundary from './components/shared/ErrorBoundary';
+import App from './App.jsx';
 
-// Register Service Worker
+// La versión anterior registraba un service worker que podía servir contenido viejo.
+// Lo desregistramos y limpiamos sus cachés para que todas las visitas vean la versión actual.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+  navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()));
+  if (window.caches) caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <ErrorBoundary>
-        <ThemeProvider>
-          <App />
-        </ThemeProvider>
+        <App />
       </ErrorBoundary>
     </BrowserRouter>
   </React.StrictMode>,
-)
+);

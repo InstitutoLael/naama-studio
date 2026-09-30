@@ -1,45 +1,44 @@
 <!doctype html>
-<html lang="es">
+<html lang="es-CL">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/naama-studio.png" />
-    <link rel="apple-touch-icon" href="/naama-studio.png" />
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#B08D79" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Naamá Studio" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Naamá Studio | Belleza, Bienestar & Armonía</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Naamá Studio · Beauty & Wellness House en San Miguel</title>
+    <meta name="description" content="Naamá Studio — Beauty & Wellness House en una casa patrimonial de San Miguel, Santiago. Cabello, color, uñas, cejas, faciales, masajes y podología." />
+    <link rel="canonical" href="https://naamastudio.cl/" />
 
-    <!-- Open Graph / WhatsApp / Instagram -->
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#1b2119" />
+
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Naamá Studio | Belleza, Bienestar & Armonía" />
-    <meta property="og:description" content="Naamá Studio — Belleza experta en San Miguel, Santiago. Servicios de hair, make-up, uñas, faciales y más. Agenda por WhatsApp." />
-    <!-- Cuando compartan el link, se verá esta imagen en WhatsApp -->
-    <meta property="og:image" content="https://naamastudio.cl/assets/salon-arch.png" />
+    <meta property="og:site_name" content="Naamá Studio" />
+    <meta property="og:locale" content="es_CL" />
+    <meta property="og:title" content="Naamá Studio · Beauty & Wellness House en San Miguel" />
+    <meta property="og:description" content="Belleza y bienestar en una casa patrimonial de San Miguel. Reserva por WhatsApp." />
+    <meta property="og:url" content="https://naamastudio.cl/" />
+    <meta property="og:image" content="https://naamastudio.cl/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:url" content="https://naamastudio.cl/" />
-    <meta property="og:locale" content="es_CL" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="https://naamastudio.cl/assets/salon-arch.png" />
+    <meta name="twitter:image" content="https://naamastudio.cl/og-image.jpg" />
 
-    <!-- Preload crítico: logo navbar — /public/ garantiza nombre estable entre builds -->
-    <link
-      rel="preload"
-      href="/naama-studio.png"
-      as="image"
-      fetchpriority="high"
-    />
+    <!-- Imagen de portada: se precarga para que aparezca lo antes posible -->
+    <link rel="preload" as="image" type="image/avif" fetchpriority="high"
+      imagesrcset="/img/salon-recepcion-480.avif 480w, /img/salon-recepcion-960.avif 960w, /img/salon-recepcion-1536.avif 1536w"
+      imagesizes="100vw" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Color de fondo antes de que cargue el CSS, para evitar el destello blanco */
+      html { background: #fbf8f3; }
+    </style>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./src/main.jsx"></script>
+    <noscript>
+      <p style="padding:24px;font-family:sans-serif">Naamá Studio · Arcadia 1297, San Miguel · WhatsApp +56 9 7952 0623</p>
+    </noscript>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

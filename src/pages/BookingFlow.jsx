@@ -1,372 +1,299 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Check, ArrowLeft, ArrowRight } from 'lucide-react';
-import { servicesData } from '../data/servicesData';
-import { mundos } from '../data/categories';
+import React, { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
-import '../styles/Global.css';
-import '../styles/BookingFlow.css';
+import { ArrowRight, CheckIcon, SearchIcon, WhatsAppIcon } from '../components/common/Icons';
+import { mundos, servicesForMundo } from '../data/categories';
+import { servicesData } from '../data/servicesData';
+import { team } from '../data/team';
+import { whatsappUrl } from '../data/site';
+import { scrollToTop } from '../lib/smoothScroll';
+import '../theme/booking.css';
 
-const specialists = [
-  { name: "Valeria", role: "Colorista & Alisados", color: "#3E4A3B", initial: "V" },
-  { name: "Vivy", role: "Facial & Bienestar", color: "#C17A5A", initial: "V" },
-  { name: "Gaby", role: "Nails & Cejas", color: "#B79A5B", initial: "G" },
-  { name: "Allison", role: "Make-up & Peinados", color: "#2A3228", initial: "A" },
-  { name: "Michelle", role: "Podología Clínica", color: "#4A5A60", initial: "M" }
-];
+const STEPS = ['Servicio', 'Especialista', 'Día', 'Hora', 'Confirmar'];
+const ANY = { name: 'Sin preferencia', role: 'Te asignamos a quien esté disponible' };
+const EASE = [0.16, 1, 0.3, 1];
+
+const normalize = (s = '') => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const pad = (n) => String(n).padStart(2, '0');
+const toKey = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+// Próximos días hábiles (lunes a sábado).
+const upcomingDays = () => {
+  const days = [];
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  for (let i = 0; days.length < 38 && i < 60; i++) {
+    const day = new Date(d);
+    day.setDate(d.getDate() + i);
+    if (day.getDay() !== 0) days.push(day);
+  }
+  return days;
+};
+
+// Horarios de inicio por día (se omite la hora de almuerzo).
+const timesFor = (date) => {
+  if (!date) return [];
+  const day = date.getDay();
+  if (day === 6) return ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00'];
+  if (day === 5) return ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
+  return ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+};
+
+const fmtLong = (d) =>
+  d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 
 const BookingFlow = () => {
-  const [activeStep, setActiveStep] = useState(1);
-  const [slideDirection, setSlideDirection] = useState('slide_in');
-  
-  const [selectedMundo, setSelectedMundo] = useState('capilar');
-  const [selectedService, setSelectedService] = useState(null);
-  const [selectedSpecialist, setSelectedSpecialist] = useState(null);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedTime, setSelectedTime] = useState('');
-  
-  const [dateError, setDateError] = useState('');
+  const [params] = useSearchParams();
+  const preService = servicesData.find((s) => s.name === params.get('servicio')) ?? null;
+  const preMundo =
+    params.get('mundo') ??
+    (preService ? mundos.find((m) => servicesForMundo([preService], m).length)?.id : mundos[0].id);
 
-  const steps = ["Servicio", "Especialista", "Fecha", "Hora", "Confirmar"];
+  const [step, setStep] = useState(preService ? 2 : 1);
+  const [mundoId, setMundoId] = useState(preMundo);
+  const [query, setQuery] = useState('');
+  const [service, setService] = useState(preService);
+  const [person, setPerson] = useState(null);
+  const [date, setDate] = useState(null);
+  const [time, setTime] = useState('');
+  const [name, setName] = useState('');
 
-  // Step 1 Filtering
-  const activeWorld = useMemo(() => {
-    return mundos.find(m => m.id === selectedMundo);
-  }, [selectedMundo]);
+  const days = useMemo(upcomingDays, []);
+  const mundo = mundos.find((m) => m.id === mundoId) ?? mundos[0];
 
-  const filteredServices = useMemo(() => {
-    if (!activeWorld) return [];
-    return servicesData.filter(s => activeWorld.categories.includes(s.cat));
-  }, [activeWorld]);
+  const list = useMemo(() => {
+    const q = normalize(query.trim());
+    const pool = q ? servicesData : servicesForMundo(servicesData, mundo);
+    return q ? pool.filter((s) => normalize(`${s.name} ${s.cat}`).includes(q)) : pool;
+  }, [mundo, query]);
 
-  // Step 2 Filtering
-  const availableSpecialists = useMemo(() => {
-    if (!selectedService) return [];
-    const workerField = selectedService.worker || "";
-    if (!workerField) return specialists;
-    const workers = workerField.split(',').map(w => w.trim().toLowerCase());
-    const filtered = specialists.filter(spec => workers.includes(spec.name.toLowerCase()));
-    return filtered.length > 0 ? filtered : specialists;
-  }, [selectedService]);
+  const people = useMemo(() => {
+    if (!service?.worker) return team;
+    const names = service.worker.split(',').map((w) => w.trim());
+    const found = team.filter((t) => names.includes(t.name));
+    return found.length ? found : team;
+  }, [service]);
 
-  // Step 3 Date helpers
-  const getTodayString = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  const canNext = [!!service, !!person, !!date, !!time, true][step - 1];
+
+  const go = (n) => {
+    setStep(n);
+    scrollToTop(false);
   };
 
-  const getMaxDateString = () => {
-    const max = new Date();
-    max.setMonth(max.getMonth() + 3);
-    const year = max.getFullYear();
-    const month = String(max.getMonth() + 1).padStart(2, '0');
-    const day = String(max.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+  const message = () =>
+    [
+      'Hola Naamá Studio! Quiero reservar:',
+      `• Servicio: ${service?.name}`,
+      `• Especialista: ${person?.name}`,
+      `• Día: ${date ? fmtLong(date) : ''}`,
+      `• Hora: ${time}`,
+      name && `• Nombre: ${name}`,
+      '¡Muchas gracias!',
+    ]
+      .filter(Boolean)
+      .join('\n');
 
-  const handleDateChange = (value) => {
-    setDateError('');
-    if (!value) {
-      setSelectedDate('');
-      return;
-    }
-    const selected = new Date(value + 'T12:00:00');
-    if (selected.getDay() === 0) {
-      setDateError('El salón no abre los domingos. Por favor, selecciona otro día.');
-      setSelectedDate(value);
-      return;
-    }
-    setSelectedDate(value);
-  };
-
-  // Step 4 Hours helper
-  const availableTimes = useMemo(() => {
-    if (!selectedDate) return [];
-    const dateObj = new Date(selectedDate + 'T12:00:00');
-    const day = dateObj.getDay();
-    if (day === 5) {
-      // Viernes: hasta 18:00
-      return ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"];
-    }
-    if (day === 6) {
-      // Sábado: hasta 16:00
-      return ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00"];
-    }
-    // Lunes a Jueves: Lun-Vie hasta 19:00
-    return ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
-  }, [selectedDate]);
-
-  const handleNext = () => {
-    setSlideDirection('slide_left');
-    setTimeout(() => {
-      setActiveStep(prev => prev + 1);
-      setSlideDirection('slide_in');
-    }, 250);
-  };
-
-  const handleBack = () => {
-    setSlideDirection('slide_right');
-    setTimeout(() => {
-      setActiveStep(prev => prev - 1);
-      setSlideDirection('slide_in');
-    }, 250);
-  };
-
-  const canContinue = useMemo(() => {
-    if (activeStep === 1) return selectedService !== null;
-    if (activeStep === 2) return selectedSpecialist !== null;
-    if (activeStep === 3) return selectedDate !== '' && !dateError;
-    if (activeStep === 4) return selectedTime !== '';
-    return true;
-  }, [activeStep, selectedService, selectedSpecialist, selectedDate, selectedTime, dateError]);
-
-  const sendWhatsApp = () => {
-    const mensaje = `Hola Naamá Studio ■ Quiero reservar:
-■ Servicio: ${selectedService.name}
-■ Especialista: ${selectedSpecialist.name}
-■ Fecha: ${selectedDate}
-■ Hora: ${selectedTime}
-¡Muchas gracias!`;
-    window.open(`https://wa.me/56979520623?text=${encodeURIComponent(mensaje)}`, '_blank');
-  };
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [activeStep]);
+  const summary = [
+    { label: 'Servicio', value: service?.name, step: 1 },
+    { label: 'Especialista', value: person?.name, step: 2 },
+    { label: 'Día', value: date && fmtLong(date), step: 3 },
+    { label: 'Hora', value: time, step: 4 },
+  ];
 
   return (
-    <div className="booking_page container">
-      <SEOHead title="Reserva tu Experiencia" description="Flujo de agendamiento premium Naamá Studio." />
-      
-      {/* ── BARRA DE PROGRESO ── */}
-      <div className="progress_bar_container">
-        <div className="progress_line_bg" />
-        <div className="progress_line" style={{ width: `${(activeStep - 1) / 4 * 100}%` }} />
-        <div className="progress_nodes">
-          {steps.map((st, i) => {
-            const stepNum = i + 1;
-            let nodeClass = "future";
-            if (stepNum === activeStep) nodeClass = "active";
-            else if (stepNum < activeStep) nodeClass = "completed";
-            
-            return (
-              <div key={st} className={`progress_node ${nodeClass}`}>
-                <span className="node_circle">
-                  {nodeClass === "completed" ? <Check size={12} strokeWidth={3} /> : stepNum}
-                </span>
-                <span className="node_label">{st}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+    <div className="booking">
+      <SEOHead title="Reservar" description="Elige tu servicio, especialista, día y hora, y confirma tu reserva por WhatsApp con Naamá Studio." />
 
-      {/* ── CONTENIDO DEL FLUJO CON ANIMACIÓN ── */}
-      <div className={`booking_flow_card ${slideDirection}`}>
-        
-        {/* PASO 1: SERVICIO */}
-        {activeStep === 1 && (
-          <div className="booking_step">
-            <h2 className="booking_step_title serif">¿Qué experiencia buscas hoy?</h2>
-            <p className="booking_step_sub">Puedes filtrar por categoría o buscar directamente.</p>
-            
-            {/* World Filters */}
-            <div className="world_filter_pills">
-              {mundos.map(m => (
-                <button
-                  key={m.id}
-                  className={`world_pill ${selectedMundo === m.id ? 'active' : ''}`}
-                  onClick={() => setSelectedMundo(m.id)}
-                >
-                  {m.name}
-                </button>
-              ))}
-            </div>
+      <div className="container booking__layout">
+        <div className="booking__main">
+          <p className="eyebrow">Reserva en 5 pasos</p>
 
-            {/* List of Services */}
-            <div className="booking_services_list">
-              {filteredServices.map((service, index) => {
-                const isSelected = selectedService?.name === service.name;
-                return (
-                  <div
-                    key={`${service.name}-${index}`}
-                    className={`booking_service_row ${isSelected ? 'selected' : ''}`}
-                    onClick={() => setSelectedService(service)}
-                  >
-                    <span className="bs_index">{(index + 1).toString().padStart(2, '0')}</span>
-                    <div className="bs_name_group">
-                      <span className="bs_name">{service.name}</span>
-                      <span className="bs_category">{service.cat}</span>
-                    </div>
-                    <span className="bs_duration">{service.time}</span>
-                    <span className="bs_price">${service.price || 'Consultar'}</span>
-                    <div className="bs_select_indicator">
-                      {isSelected && <Check size={14} strokeWidth={3} />}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+          <ol className="steps" aria-label="Progreso">
+            {STEPS.map((s, i) => (
+              <li key={s} className={`steps__item ${i + 1 === step ? 'is-current' : ''} ${i + 1 < step ? 'is-done' : ''}`}>
+                <span className="steps__dot">{i + 1 < step ? <CheckIcon /> : i + 1}</span>
+                <span className="steps__label">{s}</span>
+              </li>
+            ))}
+          </ol>
 
-        {/* PASO 2: ESPECIALISTA */}
-        {activeStep === 2 && (
-          <div className="booking_step">
-            <h2 className="booking_step_title serif">¿Con quién quieres tu experiencia?</h2>
-            <p className="booking_step_sub">Elige una de nuestras especialistas calificadas.</p>
-            
-            <div className="booking_specialists_grid">
-              {/* Opción Sorpréndeme */}
-              <div 
-                className={`booking_spec_card auto_spec ${selectedSpecialist?.name === "Sin preferencia" ? 'selected' : ''}`}
-                onClick={() => setSelectedSpecialist({ name: "Sin preferencia", role: "Te asignaremos la especialista disponible", color: "var(--accent-walnut)" })}
-              >
-                <div className="spec_card_top" style={{ backgroundColor: '#1A1A1A' }}>
-                  <span className="spec_initial">?</span>
-                </div>
-                <div className="spec_card_bottom">
-                  <h4 className="spec_name serif">Sin preferencia</h4>
-                  <p className="spec_role">Sorpréndeme</p>
-                  <span className="spec_badge_available">Disponible</span>
-                </div>
-              </div>
-
-              {/* Especialistas Filtrados */}
-              {availableSpecialists.map(spec => {
-                const isSelected = selectedSpecialist?.name === spec.name;
-                return (
-                  <div 
-                    key={spec.name}
-                    className={`booking_spec_card ${isSelected ? 'selected' : ''}`}
-                    onClick={() => setSelectedSpecialist(spec)}
-                  >
-                    <div className="spec_card_top" style={{ backgroundColor: spec.color }}>
-                      <span className="spec_initial">{spec.initial}</span>
-                    </div>
-                    <div className="spec_card_bottom">
-                      <h4 className="spec_name serif">{spec.name}</h4>
-                      <p className="spec_role">{spec.role}</p>
-                      <span className="spec_badge_available">Disponible</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* PASO 3: FECHA */}
-        {activeStep === 3 && (
-          <div className="booking_step date_step_layout">
-            <h2 className="booking_step_title serif">¿Cuándo viene tu momento?</h2>
-            <p className="booking_step_sub">Selecciona un día en los próximos 3 meses.</p>
-            
-            <div className="date_input_wrapper">
-              <input 
-                type="date"
-                className={`premium_date_input ${dateError ? 'error' : ''}`}
-                min={getTodayString()}
-                max={getMaxDateString()}
-                value={selectedDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-              />
-              {dateError && <p className="premium_date_error">{dateError}</p>}
-            </div>
-          </div>
-        )}
-
-        {/* PASO 4: HORA */}
-        {activeStep === 4 && (
-          <div className="booking_step">
-            <h2 className="booking_step_title serif">¿A qué hora te acomodamos?</h2>
-            <p className="booking_step_sub">Horarios disponibles para el día seleccionado.</p>
-            
-            <div className="time_pills_grid">
-              {availableTimes.map(time => {
-                const isSelected = selectedTime === time;
-                return (
-                  <button
-                    key={time}
-                    className={`time_pill ${isSelected ? 'selected' : ''}`}
-                    onClick={() => setSelectedTime(time)}
-                  >
-                    {time}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* PASO 5: CONFIRMACIÓN */}
-        {activeStep === 5 && (
-          <div className="booking_step confirmation_layout">
-            <h2 className="booking_step_title serif">Tu experiencia está lista.</h2>
-            <p className="booking_step_sub">Revisa los detalles antes de solicitar tu cita.</p>
-            
-            <div className="booking_summary_card">
-              <div className="summary_row">
-                <span className="summary_label">Servicio</span>
-                <span className="summary_value serif">{selectedService?.name}</span>
-              </div>
-              <div className="summary_row">
-                <span className="summary_label">Especialista</span>
-                <span className="summary_value serif">{selectedSpecialist?.name}</span>
-              </div>
-              <div className="summary_row">
-                <span className="summary_label">Fecha</span>
-                <span className="summary_value serif">{selectedDate}</span>
-              </div>
-              <div className="summary_row">
-                <span className="summary_label">Hora</span>
-                <span className="summary_value serif">{selectedTime}</span>
-              </div>
-              <div className="summary_divider" />
-              <div className="summary_row total_row">
-                <span className="summary_label">Total Estimado</span>
-                <span className="summary_value total_price">${selectedService?.price || 'Consultar'}</span>
-              </div>
-              
-              <p className="summary_notice">
-                Tu reserva se confirma por WhatsApp en menos de 1 hora.
-              </p>
-            </div>
-
-            <button 
-              className="btn_whatsapp_confirm"
-              onClick={sendWhatsApp}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -24 }}
+              transition={{ duration: 0.45, ease: EASE }}
+              className="step"
             >
-              Confirmar por WhatsApp
-            </button>
+              {step === 1 && (
+                <>
+                  <h1 className="step__title">¿Qué te <em>hacemos hoy?</em></h1>
+                  <label className="catalog-search booking__search">
+                    <SearchIcon />
+                    <span className="visually-hidden">Buscar servicio</span>
+                    <input type="search" placeholder="Buscar servicio…" value={query} onChange={(e) => setQuery(e.target.value)} />
+                  </label>
+                  {!query && (
+                    <div className="booking__tabs" role="group" aria-label="Categorías">
+                      {mundos.map((m) => (
+                        <button key={m.id} className="chip" aria-pressed={m.id === mundoId} onClick={() => setMundoId(m.id)}>
+                          {m.short}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <ul className="options" data-lenis-prevent>
+                    {list.map((s, i) => {
+                      const selected = service?.name === s.name;
+                      return (
+                        <li key={`${s.name}-${i}`}>
+                          <button
+                            className={`option ${selected ? 'is-selected' : ''}`}
+                            aria-pressed={selected}
+                            onClick={() => {
+                              setService(s);
+                              setPerson(null);
+                            }}
+                          >
+                            <span className="option__main">
+                              <span className="option__name">{s.name}</span>
+                              <span className="option__meta">{s.time}</span>
+                            </span>
+                            <span className="option__price">{s.price ? `$${s.price}` : 'Consultar'}</span>
+                            <span className="option__check"><CheckIcon /></span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                    {list.length === 0 && <li className="muted">Sin resultados para “{query}”.</li>}
+                  </ul>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
+                  <h1 className="step__title">¿Con <em>quién?</em></h1>
+                  <div className="people">
+                    {[ANY, ...people].map((p) => {
+                      const selected = person?.name === p.name;
+                      return (
+                        <button
+                          key={p.name}
+                          className={`person ${selected ? 'is-selected' : ''}`}
+                          aria-pressed={selected}
+                          onClick={() => setPerson(p)}
+                        >
+                          <span className="person__mono" style={{ '--tone': p.tone ?? '#1b2119' }}>
+                            {p === ANY ? '✦' : p.name[0]}
+                          </span>
+                          <span className="person__name">{p.name}</span>
+                          <span className="person__role">{p.role}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {step === 3 && (
+                <>
+                  <h1 className="step__title">¿Qué <em>día?</em></h1>
+                  <p className="muted step__hint">Abrimos de lunes a sábado.</p>
+                  <div className="days">
+                    {days.map((d) => {
+                      const selected = date && toKey(d) === toKey(date);
+                      return (
+                        <button
+                          key={toKey(d)}
+                          className={`day ${selected ? 'is-selected' : ''}`}
+                          aria-pressed={selected}
+                          aria-label={fmtLong(d)}
+                          onClick={() => {
+                            setDate(d);
+                            setTime('');
+                          }}
+                        >
+                          <span className="day__wd">{d.toLocaleDateString('es-CL', { weekday: 'short' }).replace('.', '')}</span>
+                          <span className="day__n">{d.getDate()}</span>
+                          <span className="day__m">{d.toLocaleDateString('es-CL', { month: 'short' }).replace('.', '')}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {step === 4 && (
+                <>
+                  <h1 className="step__title">¿A qué <em>hora?</em></h1>
+                  <p className="muted step__hint">{date && fmtLong(date)}. Te confirmamos la disponibilidad por WhatsApp.</p>
+                  <div className="times">
+                    {timesFor(date).map((t) => (
+                      <button key={t} className={`time ${time === t ? 'is-selected' : ''}`} aria-pressed={time === t} onClick={() => setTime(t)}>
+                        {t}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {step === 5 && (
+                <>
+                  <h1 className="step__title">Todo <em>listo.</em></h1>
+                  <p className="muted step__hint">
+                    Al confirmar se abrirá WhatsApp con tu solicitud. Te respondemos para confirmar la hora.
+                  </p>
+                  <div className="field booking__name">
+                    <label htmlFor="nombre">Tu nombre (opcional)</label>
+                    <input id="nombre" className="input" value={name} onChange={(e) => setName(e.target.value)} autoComplete="given-name" />
+                  </div>
+                  <a href={whatsappUrl(message())} target="_blank" rel="noopener noreferrer" className="btn btn--gold booking__confirm">
+                    <WhatsAppIcon /> Confirmar por WhatsApp
+                  </a>
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          <div className="booking__nav">
+            {step > 1 ? (
+              <button className="btn btn--ghost" onClick={() => go(step - 1)}>
+                Volver
+              </button>
+            ) : <span />}
+            {step < 5 && (
+              <button className="btn" disabled={!canNext} onClick={() => go(step + 1)}>
+                Continuar <ArrowRight />
+              </button>
+            )}
           </div>
-        )}
+        </div>
 
+        <aside className="booking__summary on-dark" aria-label="Resumen de tu reserva">
+          <p className="eyebrow">Tu reserva</p>
+          <dl>
+            {summary.map((row) => (
+              <div key={row.label} className="summary__row">
+                <dt>{row.label}</dt>
+                <dd>
+                  {row.value ? (
+                    <button onClick={() => go(row.step)} className="summary__value">{row.value}</button>
+                  ) : (
+                    <span className="summary__empty">—</span>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          <div className="summary__total">
+            <span>Valor referencial</span>
+            <strong>{service?.price ? `$${service.price}` : '—'}</strong>
+          </div>
+        </aside>
       </div>
-
-      {/* ── BOTONES DE NAVEGACIÓN ── */}
-      <div className="booking_navigation">
-        {activeStep > 1 ? (
-          <button className="nav_btn_back" onClick={handleBack}>
-            <ArrowLeft size={16} /> Volver
-          </button>
-        ) : (
-          <div />
-        )}
-        
-        {activeStep < 5 && (
-          <button 
-            className="nav_btn_continue" 
-            onClick={handleNext}
-            disabled={!canContinue}
-          >
-            Continuar <ArrowRight size={16} />
-          </button>
-        )}
-      </div>
-
     </div>
   );
 };

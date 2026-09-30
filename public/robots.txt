@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /nuestra-historia
 
 Sitemap: https://naamastudio.cl/sitemap.xml

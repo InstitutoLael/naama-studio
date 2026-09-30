@@ -1,300 +1,171 @@
-import React, { useState } from 'react';
-import { Gift, Heart, Sparkles, Star, ArrowRight, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useRef, useState } from 'react';
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
-import '../styles/Global.css';
-import '../styles/GiftCardsPage.css';
+import { Reveal, SplitText } from '../components/common/Motion';
+import { LogoMark } from '../components/common/Logo';
+import { WhatsAppIcon } from '../components/common/Icons';
+import { whatsappUrl } from '../data/site';
+import '../theme/giftcards.css';
 
-const templates = [
-  { 
-    id: 'elegant', 
-    name: 'Elegance', 
-    icon: Sparkles,
-    gradient: 'linear-gradient(135deg, #2B2B2B 0%, #4A4A4A 100%)',
-    textColor: '#F4F1EA',
-    accentColor: '#E5D3B3'
-  },
-  { 
-    id: 'romance', 
-    name: 'Romance', 
-    icon: Heart,
-    gradient: 'linear-gradient(135deg, #B08D79 0%, #D4A98A 50%, #E5D3B3 100%)',
-    textColor: '#2B2B2B',
-    accentColor: '#fff'
-  },
-  { 
-    id: 'celebration', 
-    name: 'Celebración', 
-    icon: Star,
-    gradient: 'linear-gradient(135deg, #F4F1EA 0%, #E5D3B3 100%)',
-    textColor: '#2B2B2B',
-    accentColor: '#B08D79'
-  }
+const DESIGNS = [
+  { id: 'bosque', name: 'Bosque', className: 'gc--bosque' },
+  { id: 'marfil', name: 'Marfil', className: 'gc--marfil' },
+  { id: 'burdeo', name: 'Burdeo', className: 'gc--burdeo' },
 ];
+const AMOUNTS = [25000, 40000, 60000, 85000];
+const clp = (n) => `$${Number(n || 0).toLocaleString('es-CL')}`;
 
-const amounts = [25000, 40000, 60000, 85000];
+/** Tarjeta con leve inclinación 3D al mover el cursor. */
+const Card = ({ design, amount, to, from, message }) => {
+  const ref = useRef(null);
+  const reduce = useReducedMotion();
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const rx = useSpring(useTransform(my, [0, 1], [8, -8]), { stiffness: 150, damping: 18 });
+  const ry = useSpring(useTransform(mx, [0, 1], [-10, 10]), { stiffness: 150, damping: 18 });
+  const shine = useTransform(mx, [0, 1], ['0%', '100%']);
 
-const GiftCardsPage = () => {
-  const [step, setStep] = useState(1);
-  const [card, setCard] = useState({
-    template: templates[0],
-    amount: 40000,
-    customAmount: '',
-    to: '',
-    from: '',
-    message: '',
-  });
-  const [showUnbox, setShowUnbox] = useState(false);
-
-  const selectedAmount = card.customAmount ? parseInt(card.customAmount) : card.amount;
-
-  const sendWhatsApp = () => {
-    const msg = `*Solicitud de Gift Card - Naamá Studio*%0A%0A` +
-      `*Diseño:* ${card.template.name}%0A` +
-      `*Monto:* $${selectedAmount.toLocaleString('es-CL')}%0A` +
-      `*Para:* ${card.to}%0A` +
-      `*De:* ${card.from}%0A` +
-      `*Mensaje:* ${card.message || 'Sin mensaje'}%0A%0A` +
-      `_Solicitud enviada desde la Gift Card digital._`;
-    window.open(`https://wa.me/56979520623?text=${msg}`, '_blank');
+  const onMove = (e) => {
+    const r = ref.current.getBoundingClientRect();
+    mx.set((e.clientX - r.left) / r.width);
+    my.set((e.clientY - r.top) / r.height);
+  };
+  const reset = () => {
+    mx.set(0.5);
+    my.set(0.5);
   };
 
   return (
-    <div className="giftcards_page">
-      <SEOHead 
-        title="Gift Cards Digitales" 
-        description="Regala una experiencia de restauración en Naamá Studio con nuestras Gift Cards personalizables." 
-      />
+    <div className="gc-stage" onMouseMove={reduce ? undefined : onMove} onMouseLeave={reset}>
+      <motion.div ref={ref} className={`gc ${design.className}`} style={{ rotateX: rx, rotateY: ry }}>
+        <motion.span className="gc__shine" style={{ '--x': shine }} aria-hidden="true" />
+        <div className="gc__top">
+          <LogoMark className="gc__mark" />
+          <span className="gc__brand">Naamá Studio</span>
+        </div>
+        <div className="gc__amount">{clp(amount)}</div>
+        <p className="gc__msg">{message || 'Un momento para ti.'}</p>
+        <div className="gc__bottom">
+          <span><small>Para</small>{to || '—'}</span>
+          <span><small>De</small>{from || '—'}</span>
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
-      <header className="gc_header reveal">
-        <span className="world_category_label">Regalos</span>
-        <h1 className="gc_title serif">Gift Cards <span className="text_clay">Digitales</span></h1>
-        <p className="world_description">
-          Regala el descanso. Crea una gift card personalizada para alguien que merece una pausa.
-        </p>
+const GiftCardsPage = () => {
+  const [design, setDesign] = useState(DESIGNS[0]);
+  const [amount, setAmount] = useState(40000);
+  const [custom, setCustom] = useState('');
+  const [to, setTo] = useState('');
+  const [from, setFrom] = useState('');
+  const [message, setMessage] = useState('');
+
+  const value = custom ? parseInt(custom, 10) || 0 : amount;
+  const ready = to.trim() && from.trim() && value >= 10000;
+
+  const text = [
+    'Hola Naamá Studio! Quiero una Gift Card:',
+    `• Diseño: ${design.name}`,
+    `• Monto: ${clp(value)}`,
+    `• Para: ${to}`,
+    `• De: ${from}`,
+    message && `• Mensaje: ${message}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  return (
+    <div className="giftcards">
+      <SEOHead title="Gift Cards" description="Regala una experiencia de belleza y bienestar en Naamá Studio con una gift card personalizada." />
+
+      <header className="page-hero container">
+        <p className="eyebrow">Gift Cards</p>
+        <SplitText as="h1" className="page-hero__title" onMount delay={0.15} lines={['Regala una', <em key="g">pausa.</em>]} />
+        <Reveal as="p" className="lead page-hero__lead" delay={0.4}>
+          Diseña tu tarjeta, elige el monto y escribe tu mensaje. Te la enviamos lista para regalar.
+        </Reveal>
       </header>
 
-      <div className="gc_builder container">
-        {/* Step 1: Template */}
-        {step === 1 && (
-          <div className="gc_step reveal">
-            <span className="gc_step_label">Paso 01 · Diseño</span>
-            <h2 className="serif gc_step_title">Elige el diseño de tu tarjeta</h2>
-            
-            <div className="gc_templates_grid">
-              {templates.map(t => (
+      <section className="container gc-builder">
+        <div className="gc-builder__preview">
+          <Card design={design} amount={value} to={to} from={from} message={message} />
+        </div>
+
+        <form className="gc-form" onSubmit={(e) => e.preventDefault()}>
+          <fieldset>
+            <legend>01 · Diseño</legend>
+            <div className="gc-swatches">
+              {DESIGNS.map((d) => (
                 <button
-                  key={t.id}
-                  className={`gc_template_option ${card.template.id === t.id ? 'selected' : ''}`}
-                  onClick={() => setCard({...card, template: t})}
-                  aria-label={`Diseño ${t.name}`}
+                  type="button"
+                  key={d.id}
+                  className={`gc-swatch ${d.className} ${d.id === design.id ? 'is-active' : ''}`}
+                  onClick={() => setDesign(d)}
+                  aria-pressed={d.id === design.id}
                 >
-                  <div className="gc_template_preview" style={{ background: t.gradient }}>
-                    <t.icon size={24} color={t.accentColor} strokeWidth={1} />
-                    <span style={{ color: t.textColor, fontFamily: 'var(--font-serif)', fontSize: '1.2rem' }}>Naamá Studio</span>
-                  </div>
-                  <span className="gc_template_name">{t.name}</span>
+                  <span className="visually-hidden">{d.name}</span>
+                </button>
+              ))}
+              <span className="gc-swatches__name">{design.name}</span>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>02 · Monto</legend>
+            <div className="gc-amounts">
+              {AMOUNTS.map((a) => (
+                <button
+                  type="button"
+                  key={a}
+                  className="chip"
+                  aria-pressed={!custom && amount === a}
+                  onClick={() => {
+                    setAmount(a);
+                    setCustom('');
+                  }}
+                >
+                  {clp(a)}
                 </button>
               ))}
             </div>
-
-            <div className="gc_actions">
-              <button className="next_btn" onClick={() => setStep(2)}>
-                Siguiente <ArrowRight size={14} />
-              </button>
+            <div className="field">
+              <label htmlFor="gc-custom">Otro monto (mínimo $10.000)</label>
+              <input id="gc-custom" className="input" inputMode="numeric" placeholder="Ej: 50000" value={custom} onChange={(e) => setCustom(e.target.value.replace(/\D/g, ''))} />
             </div>
-          </div>
-        )}
+          </fieldset>
 
-        {/* Step 2: Amount */}
-        {step === 2 && (
-          <div className="gc_step reveal">
-            <span className="gc_step_label">Paso 02 · Monto</span>
-            <h2 className="serif gc_step_title">¿Cuánto deseas regalar?</h2>
-            
-            <div className="gc_amounts_grid">
-              {amounts.map(amt => (
-                <button
-                  key={amt}
-                  className={`gc_amount_btn ${card.amount === amt && !card.customAmount ? 'selected' : ''}`}
-                  onClick={() => setCard({...card, amount: amt, customAmount: ''})}
-                  aria-label={`${amt.toLocaleString('es-CL')} pesos`}
-                >
-                  <span className="serif">${amt.toLocaleString('es-CL')}</span>
-                </button>
-              ))}
-            </div>
-
-            <div className="gc_custom_amount">
-              <label htmlFor="customAmount" className="form_label">o ingresa un monto personalizado</label>
-              <input
-                id="customAmount"
-                type="number"
-                className="form_input"
-                placeholder="Ej: 50000"
-                value={card.customAmount}
-                onChange={(e) => setCard({...card, customAmount: e.target.value})}
-                min="10000"
-              />
-            </div>
-
-            <div className="gc_actions gc_actions_between">
-              <button className="back_btn" onClick={() => setStep(1)}>Atrás</button>
-              <button className="next_btn" onClick={() => setStep(3)}>
-                Siguiente <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Personalization */}
-        {step === 3 && (
-          <div className="gc_step reveal">
-            <span className="gc_step_label">Paso 03 · Personalización</span>
-            <h2 className="serif gc_step_title">Hazla especial</h2>
-            
-            <div className="gc_form_fields">
-              <div className="form_group">
-                <label htmlFor="gc_to" className="form_label">Para</label>
-                <input
-                  id="gc_to"
-                  type="text"
-                  className="form_input"
-                  placeholder="Nombre de quien la recibe"
-                  value={card.to}
-                  onChange={(e) => setCard({...card, to: e.target.value})}
-                  required
-                />
+          <fieldset>
+            <legend>03 · Dedicatoria</legend>
+            <div className="gc-two">
+              <div className="field">
+                <label htmlFor="gc-to">Para</label>
+                <input id="gc-to" className="input" value={to} onChange={(e) => setTo(e.target.value)} maxLength={40} />
               </div>
-              <div className="form_group">
-                <label htmlFor="gc_from" className="form_label">De</label>
-                <input
-                  id="gc_from"
-                  type="text"
-                  className="form_input"
-                  placeholder="Tu nombre"
-                  value={card.from}
-                  onChange={(e) => setCard({...card, from: e.target.value})}
-                  required
-                />
-              </div>
-              <div className="form_group">
-                <label htmlFor="gc_message" className="form_label">Mensaje (opcional)</label>
-                <textarea
-                  id="gc_message"
-                  className="form_input gc_textarea"
-                  placeholder="Escribe un mensaje especial..."
-                  value={card.message}
-                  onChange={(e) => setCard({...card, message: e.target.value})}
-                />
+              <div className="field">
+                <label htmlFor="gc-from">De</label>
+                <input id="gc-from" className="input" value={from} onChange={(e) => setFrom(e.target.value)} maxLength={40} />
               </div>
             </div>
-
-            <div className="gc_actions gc_actions_between">
-              <button className="back_btn" onClick={() => setStep(2)}>Atrás</button>
-              <button className="next_btn" onClick={() => { setStep(4); setShowUnbox(true); }} disabled={!card.to || !card.from}>
-                Ver Preview <ArrowRight size={14} />
-              </button>
+            <div className="field">
+              <label htmlFor="gc-msg">Mensaje (opcional)</label>
+              <textarea id="gc-msg" className="input" value={message} onChange={(e) => setMessage(e.target.value)} maxLength={140} />
             </div>
-          </div>
-        )}
+          </fieldset>
 
-        {/* Step 4: Preview & Send */}
-        {step === 4 && (
-          <div className="gc_step gc_preview_step reveal">
-            <span className="gc_step_label">Paso 04 · Tu Gift Card</span>
-
-            {/* Unboxing Animation */}
-            <AnimatePresence>
-              {showUnbox && (
-                <motion.div 
-                  className="gc_unbox_overlay"
-                  initial={{ opacity: 1 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <motion.div
-                    className="gc_unbox_envelope"
-                    initial={{ scale: 0.8, y: 50, rotateX: 0 }}
-                    animate={{ scale: 1, y: 0, rotateX: 0 }}
-                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <Gift size={60} strokeWidth={0.5} color="var(--accent-clay)" />
-                    <motion.p 
-                      className="serif" 
-                      style={{ fontSize: '1.3rem', marginTop: '20px', color: 'var(--text-slate)' }}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.5 }}
-                    >
-                      Tu regalo está listo
-                    </motion.p>
-                    <motion.button 
-                      className="gc_reveal_btn"
-                      onClick={() => setShowUnbox(false)}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 1 }}
-                    >
-                      Revelar Gift Card
-                    </motion.button>
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Card Preview */}
-            {!showUnbox && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                className="gc_card_preview"
-              >
-                <div className="gc_card_face" style={{ background: card.template.gradient }}>
-                  <div className="gc_card_header">
-                    <card.template.icon size={20} color={card.template.accentColor} strokeWidth={1} />
-                    <span style={{ color: card.template.textColor, fontFamily: 'var(--font-serif)', fontSize: '0.9rem' }}>Naamá Studio</span>
-                  </div>
-                  <div className="gc_card_body">
-                    <span className="gc_card_amount serif" style={{ color: card.template.accentColor }}>
-                      ${selectedAmount.toLocaleString('es-CL')}
-                    </span>
-                    <p style={{ fontSize: '0.8rem', color: card.template.textColor, opacity: 0.7 }}>Gift Card Digital</p>
-                  </div>
-                  <div className="gc_card_footer">
-                    <div>
-                      <span style={{ fontSize: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: card.template.textColor, opacity: 0.5 }}>Para</span>
-                      <p style={{ color: card.template.textColor, fontSize: '0.85rem' }}>{card.to}</p>
-                    </div>
-                    <div>
-                      <span style={{ fontSize: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: card.template.textColor, opacity: 0.5 }}>De</span>
-                      <p style={{ color: card.template.textColor, fontSize: '0.85rem' }}>{card.from}</p>
-                    </div>
-                  </div>
-                  {card.message && (
-                    <p style={{ marginTop: '20px', fontSize: '0.8rem', fontStyle: 'italic', color: card.template.textColor, opacity: 0.6 }}>
-                      "{card.message}"
-                    </p>
-                  )}
-                </div>
-
-                <div className="gc_preview_actions">
-                  <button className="next_btn gc_send_btn" onClick={sendWhatsApp}>
-                    <Check size={16} />
-                    Solicitar por WhatsApp
-                  </button>
-                  <button className="back_btn" onClick={() => setStep(3)}>Editar</button>
-                </div>
-                <p className="gc_note">
-                  Al solicitar, nuestro equipo te confirmará disponibilidad y forma de pago.
-                </p>
-              </motion.div>
-            )}
-          </div>
-        )}
-      </div>
+          <a
+            href={ready ? whatsappUrl(text) : undefined}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`btn btn--gold gc-form__send ${ready ? '' : 'is-disabled'}`}
+            aria-disabled={!ready}
+          >
+            <WhatsAppIcon /> Solicitar por WhatsApp
+          </a>
+          <p className="gc-form__note">Te confirmamos el pago y te enviamos la tarjeta lista para regalar.</p>
+        </form>
+      </section>
     </div>
   );
 };

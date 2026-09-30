@@ -1,137 +1,84 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { SITE } from '../../data/site';
 
-const SEOHead = ({ title, description, image }) => {
-  const location = useLocation();
-  const baseUrl = 'https://naamastudio.cl';
-  const fullUrl = `${baseUrl}${location.pathname}`;
-  const fullTitle = `${title} | Naamá Studio`;
-  const fullDescription = description || 'Naamá Studio - Belleza, Bienestar & Armonía en San Miguel, Santiago.';
-  const ogImage = image || `${baseUrl}/assets/naama-studio.png`;
+const DEFAULT_DESCRIPTION =
+  'Naamá Studio — Beauty & Wellness House en una casa patrimonial de San Miguel, Santiago. Cabello, color, uñas, cejas, faciales, masajes y podología.';
 
-  React.useEffect(() => {
-    // Title
+const upsert = (selector, create, attrs) => {
+  let el = document.head.querySelector(selector);
+  if (!el) {
+    el = create();
+    document.head.appendChild(el);
+  }
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+};
+
+const meta = (key, content, attr = 'name') =>
+  upsert(`meta[${attr}="${key}"]`, () => {
+    const m = document.createElement('meta');
+    m.setAttribute(attr, key);
+    return m;
+  }, { content });
+
+const SCHEMA = {
+  '@context': 'https://schema.org',
+  '@type': 'BeautySalon',
+  name: SITE.name,
+  description: DEFAULT_DESCRIPTION,
+  url: SITE.url,
+  logo: `${SITE.url}/icon-512.png`,
+  image: `${SITE.url}/og-image.jpg`,
+  telephone: `+${SITE.phone}`,
+  email: SITE.email,
+  priceRange: '$$',
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: 'Arcadia 1297',
+    addressLocality: 'San Miguel',
+    addressRegion: 'Región Metropolitana',
+    addressCountry: 'CL',
+  },
+  geo: { '@type': 'GeoCoordinates', latitude: -33.4969, longitude: -70.6483 },
+  openingHoursSpecification: [
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '09:00', closes: '19:00' },
+    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '09:00', closes: '17:00' },
+  ],
+  sameAs: [SITE.instagram],
+};
+
+const SEOHead = ({ title, description = DEFAULT_DESCRIPTION, image = '/og-image.jpg' }) => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    const fullTitle = title ? `${title} · Naamá Studio` : 'Naamá Studio · Beauty & Wellness House en San Miguel';
+    const url = `${SITE.url}${pathname === '/' ? '/' : pathname}`;
+    const img = image.startsWith('http') ? image : `${SITE.url}${image}`;
+
     document.title = fullTitle;
+    meta('description', description);
+    upsert('link[rel="canonical"]', () => {
+      const l = document.createElement('link');
+      l.rel = 'canonical';
+      return l;
+    }, { href: url });
 
-    // Meta description
-    setMeta('description', fullDescription);
+    meta('og:title', fullTitle, 'property');
+    meta('og:description', description, 'property');
+    meta('og:url', url, 'property');
+    meta('og:image', img, 'property');
+    meta('twitter:title', fullTitle);
+    meta('twitter:description', description);
+    meta('twitter:image', img);
 
-    // Canonical
-    setLink('canonical', fullUrl);
-
-    // Open Graph
-    setMetaProperty('og:title', fullTitle);
-    setMetaProperty('og:description', fullDescription);
-    setMetaProperty('og:url', fullUrl);
-    setMetaProperty('og:image', ogImage);
-    setMetaProperty('og:type', 'website');
-    setMetaProperty('og:site_name', 'Naamá Studio');
-    setMetaProperty('og:locale', 'es_CL');
-
-    // Twitter Cards
-    setMetaName('twitter:card', 'summary_large_image');
-    setMetaName('twitter:title', fullTitle);
-    setMetaName('twitter:description', fullDescription);
-    setMetaName('twitter:image', ogImage);
-
-    // Schema.org JSON-LD
-    updateJsonLd();
-  }, [title, description, location.pathname]);
-
-  const setMeta = (name, content) => {
-    let el = document.querySelector(`meta[name="${name}"]`);
-    if (!el) {
-      el = document.createElement('meta');
-      el.name = name;
-      document.head.appendChild(el);
-    }
-    el.setAttribute('content', content);
-  };
-
-  const setMetaName = (name, content) => {
-    let el = document.querySelector(`meta[name="${name}"]`);
-    if (!el) {
-      el = document.createElement('meta');
-      el.setAttribute('name', name);
-      document.head.appendChild(el);
-    }
-    el.setAttribute('content', content);
-  };
-
-  const setMetaProperty = (property, content) => {
-    let el = document.querySelector(`meta[property="${property}"]`);
-    if (!el) {
-      el = document.createElement('meta');
-      el.setAttribute('property', property);
-      document.head.appendChild(el);
-    }
-    el.setAttribute('content', content);
-  };
-
-  const setLink = (rel, href) => {
-    let el = document.querySelector(`link[rel="${rel}"]`);
-    if (!el) {
-      el = document.createElement('link');
-      el.rel = rel;
-      document.head.appendChild(el);
-    }
-    el.href = href;
-  };
-
-  const updateJsonLd = () => {
-    const id = 'naama-schema';
-    let script = document.getElementById(id);
-    if (!script) {
-      script = document.createElement('script');
-      script.id = id;
-      script.type = 'application/ld+json';
-      document.head.appendChild(script);
-    }
-    
-    const schema = {
-      "@context": "https://schema.org",
-      "@type": ["LocalBusiness", "BeautySalon"],
-      "name": "Naamá Studio",
-      "description": "Gracia, Pulcritud y Descanso. La cuna de la ingeniería estética y hospitalaria en Santiago.",
-      "url": baseUrl,
-      "logo": `${baseUrl}/assets/naama-studio.png`,
-      "image": ogImage,
-      "telephone": "+56979520623",
-      "email": "naamastudiospa@gmail.com",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Arcadia 1297",
-        "addressLocality": "San Miguel",
-        "addressRegion": "Santiago",
-        "addressCountry": "CL"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": -33.4969,
-        "longitude": -70.6483
-      },
-      "openingHoursSpecification": [
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-          "opens": "09:00",
-          "closes": "19:00"
-        },
-        {
-          "@type": "OpeningHoursSpecification",
-          "dayOfWeek": "Saturday",
-          "opens": "09:00",
-          "closes": "17:00"
-        }
-      ],
-      "priceRange": "$$",
-      "sameAs": [
-        "https://www.instagram.com/naamastudio_/"
-      ]
-    };
-
-    script.textContent = JSON.stringify(schema);
-  };
+    upsert('script#naama-schema', () => {
+      const s = document.createElement('script');
+      s.id = 'naama-schema';
+      s.type = 'application/ld+json';
+      return s;
+    }, {});
+    document.getElementById('naama-schema').textContent = JSON.stringify(SCHEMA);
+  }, [title, description, image, pathname]);
 
   return null;
 };

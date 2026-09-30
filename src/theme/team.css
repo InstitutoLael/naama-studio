@@ -1,0 +1,79 @@
+.team-page__photo { aspect-ratio: 16 / 9; border-radius: var(--radius-lg); }
+@media (max-width: 700px) { .team-page__photo { aspect-ratio: 4 / 3; } }
+
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: clamp(20px, 2.5vw, 32px);
+}
+.member {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  background: var(--ivory);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.member__monogram {
+  position: relative;
+  aspect-ratio: 5 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--tone);
+  overflow: hidden;
+}
+.member__monogram::before {
+  content: '';
+  position: absolute;
+  inset: 18% 30% -10%;
+  border: 1px solid rgba(227, 203, 169, 0.5);
+  border-radius: 999px 999px 0 0;
+  transition: transform 1s var(--ease-out);
+}
+.member__monogram span {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: clamp(4.5rem, 8vw, 6.5rem);
+  font-style: italic;
+  line-height: 1;
+  color: var(--gold-300);
+  transition: transform 1s var(--ease-out);
+}
+.member:hover .member__monogram span { transform: translateY(-6px) scale(1.06); }
+.member:hover .member__monogram::before { transform: scale(1.05); }
+.member__body { display: grid; gap: 14px; align-content: start; padding: 28px clamp(24px, 2.6vw, 36px) 36px; }
+.member__top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.member__name { font-size: 2rem; }
+.member__badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--forest);
+  color: var(--gold-300);
+}
+.member__role { color: var(--ink-2); }
+.member__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.member__tags li {
+  font-size: 0.76rem;
+  padding: 5px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink-2);
+}
+.member__body .link-arrow { justify-self: start; margin-top: 8px; }
+
+.team-life__grid { display: grid; gap: 40px; align-items: center; }
+.team-life__text { display: grid; gap: 28px; justify-items: start; }
+.team-life__a .photo { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); }
+.team-life__b .photo { aspect-ratio: 3 / 4; border-radius: 999px 999px var(--radius-lg) var(--radius-lg); }
+@media (min-width: 900px) {
+  .team-life__grid { grid-template-columns: 1.1fr 0.8fr 0.7fr; gap: 40px; }
+  .team-life__b { margin-top: 20vh; }
+}
+@media (max-width: 899px) {
+  .team-life__a { width: 80%; }
+  .team-life__b { width: 62%; justify-self: end; margin-top: -20%; }
+}

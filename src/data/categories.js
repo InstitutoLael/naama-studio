@@ -1,50 +1,70 @@
+// "Mundos" de servicios. `categories` corresponde al campo `cat` de servicesData.
+// Todas las categorías de servicesData deben estar cubiertas por algún mundo.
 export const mundos = [
   {
-    id: 'capilar',
-    name: 'Corte y Estilo',
-    categories: ["Peluquería", "Adicional"],
-    description: "Arquitectura para tu cabello. Diseñamos formas que respetan tu textura natural.",
-    icon: "Scissors",
-    image: "/assets/salon-arch.png"
+    id: 'cabello',
+    name: 'Cabello & Color',
+    short: 'Cabello',
+    categories: ['Peluquería', 'Adicional'],
+    description: 'Cortes, balayage, babylights, alisados y peinados. Color que se ve nacido, no puesto.',
+    photo: 'cabello-balayage',
   },
   {
-    id: "color",
-    name: "Colorimetría",
-    description: "Luz y profundidad. Técnicas avanzadas para un color que se ve nacido, no puesto.",
-    icon: "Palette",
-    categories: ["Peluquería"],
-    image: "/assets/labor-hands.png"
+    id: 'tratamientos',
+    name: 'Tratamientos Capilares',
+    short: 'Tratamientos',
+    categories: ['Tratamiento Capilar'],
+    description: 'Botox, hidratación y reconstrucción para devolverle fuerza y brillo a tu fibra capilar.',
+    photo: 'cabello-brillo',
   },
   {
-    id: "tratamientos",
-    name: "Restauración",
-    categories: ["Tratamiento Capilar"],
-    description: "Ciencia dedicada a recuperar la fuerza y el brillo de tu fibra capilar.",
-    icon: "Zap",
-    image: '/assets/mirada-bg.png'
+    id: 'unas',
+    name: 'Manicure & Pedicure',
+    short: 'Uñas',
+    categories: ['Manicure', 'Pedicure'],
+    description: 'Esmaltado permanente, soft gel, polygel y nail art hecho a mano, con pulcritud absoluta.',
+    photo: 'unas-burdeo-oro',
+  },
+  {
+    id: 'mirada',
+    name: 'Cejas, Pestañas & Depilación',
+    short: 'Mirada',
+    categories: ['Pestañas y Cejas', 'Depilación'],
+    description: 'Diseño de cejas, lifting de pestañas y depilación con cera, con técnica delicada.',
+    photo: 'salon-tocador',
   },
   {
     id: 'bienestar',
-    name: 'Terapias de Descanso',
-    categories: ['Masaje', 'Estetica'],
-    description: 'Sesiones de descompresión muscular y recuperación física profunda.',
-    icon: 'Info',
-    image: '/assets/wellness-bg.png'
+    name: 'Faciales & Masajes',
+    short: 'Bienestar',
+    categories: ['Estetica', 'Masaje'],
+    description: 'Limpiezas faciales, maderoterapia y masajes para descomprimir cuerpo y mente.',
+    photo: 'salon-rincon',
   },
   {
-    id: 'manos-pies',
-    name: 'Manicure & Pedicure',
-    categories: ['Manicure', 'Pedicure'],
-    description: 'Cuidado técnico de extremidades y estética de uñas con pulcritud.',
-    icon: 'Sparkles',
-    image: '/assets/nails-bg.png'
-  },
-  {
-    id: 'clinico',
-    name: 'Atención Clínica',
+    id: 'podologia',
+    name: 'Podología Clínica',
+    short: 'Podología',
     categories: ['Podología'],
-    description: 'Salud podal y podología clínica especializada para el bienestar diario.',
-    icon: 'User',
-    image: '/assets/hero-bg.png'
-  }
+    description: 'Atención clínica especializada para la salud y el cuidado de tus pies.',
+    photo: 'salon-estaciones',
+  },
 ];
+
+// IDs antiguos → nuevos (para no romper enlaces ya compartidos)
+export const legacyMundoIds = {
+  capilar: 'cabello',
+  color: 'cabello',
+  'manos-pies': 'unas',
+  clinico: 'podologia',
+};
+
+const splitCats = (cat = '') => cat.split(',').map((c) => c.trim());
+
+// Los adicionales van al final de cada lista.
+const isExtra = (s) => s.name.startsWith('Adicional');
+
+export const servicesForMundo = (services, mundo) =>
+  services
+    .filter((s) => splitCats(s.cat).some((c) => mundo.categories.includes(c)))
+    .sort((a, b) => isExtra(a) - isExtra(b));

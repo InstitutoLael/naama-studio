@@ -1,0 +1,52 @@
+.world-hero {
+  position: relative;
+  min-height: 88svh;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  background: var(--forest-900);
+}
+.world-hero__media { position: absolute; inset: 0; }
+.world-hero__media .photo { width: 100%; height: 100%; }
+.world-hero__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(20, 24, 18, 0.92) 0%, rgba(20, 24, 18, 0.35) 60%, rgba(20, 24, 18, 0.45) 100%);
+}
+.world-hero__content {
+  position: relative;
+  padding-top: calc(var(--nav-h) + 48px);
+  padding-bottom: clamp(48px, 7vw, 96px);
+}
+.world-hero__title { margin-top: 24px; font-size: var(--fs-display); max-width: 14ch; }
+.world-hero__lead { margin-top: 24px; max-width: 44ch; }
+.world-hero__actions { margin-top: 36px; }
+
+.world__body {
+  display: grid;
+  gap: 48px;
+  padding-block: clamp(64px, 9vw, 140px);
+}
+@media (min-width: 1000px) {
+  .world__body { grid-template-columns: 240px 1fr; gap: 80px; align-items: start; }
+  .world__aside { position: sticky; top: calc(var(--nav-h) + 24px); }
+}
+.world__aside { display: grid; gap: 20px; align-content: start; }
+.world__aside ul { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+@media (min-width: 1000px) { .world__aside ul { display: grid; gap: 8px; } }
+.world__aside li a { font-family: var(--font-display); font-size: 1.35rem; transition: color 0.3s; }
+.world__aside li a:hover { color: var(--gold-600); }
+.world__aside .link-arrow { justify-self: start; margin-top: 12px; }
+
+.world__others-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 40px;
+}
+@media (min-width: 900px) { .world__others-grid { grid-template-columns: repeat(5, 1fr); } }
+.world-card { display: grid; gap: 14px; }
+.world-card .photo { aspect-ratio: 3 / 4; border-radius: var(--radius-lg); }
+.world-card .photo img { transition: transform 1.2s var(--ease-out); }
+.world-card:hover .photo img { transform: scale(1.06); }
+.world-card__name { font-family: var(--font-display); font-size: 1.2rem; line-height: 1.2; }
