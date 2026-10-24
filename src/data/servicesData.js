@@ -13,7 +13,7 @@ export const servicesData = [
     },
     {
       name: "Adicional Brushing Corto",
-      worker: "Valeria, Viviana, Leah, Catalina",
+      worker: "Valeria, Viviana, Katalina",
       cat: "Peluquería",
       old: "5.990",
       price: "7.000",
@@ -23,7 +23,7 @@ export const servicesData = [
     },
     {
       name: "Adicional Brushing Medio",
-      worker: "Valeria, Viviana, Leah, Catalina",
+      worker: "Valeria, Viviana, Katalina",
       cat: "Peluquería",
       old: "7.990",
       price: "10.000",
@@ -33,7 +33,7 @@ export const servicesData = [
     },
     {
       name: "Adicional Brushing Largo",
-      worker: "Valeria, Viviana, Leah, Catalina",
+      worker: "Valeria, Viviana, Katalina",
       cat: "Peluquería",
       old: "8.990",
       price: "13.000",
@@ -531,7 +531,7 @@ export const servicesData = [
     // MANICURE (GABY)
     {
       name: "Baño de PolyGel",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "31.990",
       price: "31.000",
@@ -541,7 +541,7 @@ export const servicesData = [
     },
     {
       name: "Capping de Rubber",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "25.990",
       price: "26.000",
@@ -551,7 +551,7 @@ export const servicesData = [
     },
     {
       name: "Decoraciones Uñas",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "990",
       price: "1.000",
@@ -561,7 +561,7 @@ export const servicesData = [
     },
     {
       name: "Diseño de Mano Alzada",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "1.490",
       price: "3.000",
@@ -571,7 +571,7 @@ export const servicesData = [
     },
     {
       name: "Esculpidas con Polygel Extension (Desde)",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "36.990",
       price: "39.990",
@@ -581,7 +581,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado Permanente",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "20.990",
       price: "21.000",
@@ -591,7 +591,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado Permanente (Degradado o Francesa)",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "21.990",
       price: "23.000",
@@ -601,7 +601,7 @@ export const servicesData = [
     },
     {
       name: "Exfoliación de Manos",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "3.990",
       price: "4.000",
@@ -611,7 +611,7 @@ export const servicesData = [
     },
     {
       name: "Extensión de Uña / Soft Gel (Desde)",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "35.990",
       price: "42.990",
@@ -621,7 +621,7 @@ export const servicesData = [
     },
     {
       name: "Parche de Uñas",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "2.990",
       price: "3.500",
@@ -631,7 +631,7 @@ export const servicesData = [
     },
     {
       name: "Retiro de Acrílico / PolyGel / SoftGel",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "12.990",
       price: "15.990",
@@ -641,7 +641,7 @@ export const servicesData = [
     },
     {
       name: "Retiro Esmalte Permanente",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "3.990",
       price: "4.990",
@@ -651,7 +651,7 @@ export const servicesData = [
     },
     {
       name: "Manicura Express Varón (Limpieza)",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "---",
       price: "12.000",
@@ -661,7 +661,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado de Niñas (Mini-Manicure)",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "---",
       price: "10.000",
@@ -671,7 +671,7 @@ export const servicesData = [
     },
     {
       name: "Exfoliación + Masaje de Manos",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "---",
       price: "7.000",
@@ -681,7 +681,7 @@ export const servicesData = [
     },
     {
       name: "Esmaltado al Aire Tradicional",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure",
       old: "---",
       price: "15.000",
@@ -691,7 +691,7 @@ export const servicesData = [
     },
     {
       name: "Baño de Parafina Caliente",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Manicure, Pedicure",
       old: "---",
       price: "16.000",
@@ -1051,7 +1051,7 @@ export const servicesData = [
     // --- SERVICIOS INDIVIDUALES Y OTROS ---
     {
       name: "Brushing Solo",
-      worker: "Valeria, Viviana, Leah, Catalina",
+      worker: "Valeria, Viviana, Katalina",
       cat: "Peluquería",
       old: "15.990",
       price: "15.000",
@@ -1235,7 +1235,7 @@ export const servicesData = [
     // PEDICURE (GABY)
     {
       name: "Pedicure Permanente",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Pedicure",
       old: "24.990",
       price: "25.000",
@@ -1245,7 +1245,7 @@ export const servicesData = [
     },
     {
       name: "Pedicure Spa",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Pedicure",
       old: "25.990",
       price: "28.000",
@@ -1255,7 +1255,7 @@ export const servicesData = [
     },
     {
       name: "Pedicure Tradicional",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Pedicure",
       old: "14.990",
       price: "18.000",
@@ -1265,7 +1265,7 @@ export const servicesData = [
     },
     {
       name: "Corte de uñas hombres",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Pedicure",
       old: "---",
       price: "10.000",
@@ -1275,7 +1275,7 @@ export const servicesData = [
     },
     {
       name: "Corte de uñas mujeres",
-      worker: "Gaby, Leah, Catalina",
+      worker: "Gaby, Katalina",
       cat: "Pedicure",
       old: "---",
       price: "12.000",
@@ -1287,7 +1287,7 @@ export const servicesData = [
     // PODOLOGÍA CLÍNICA (MICHELLE)
     {
       name: "Podología Clínica Básica",
-      worker: "Michelle",
+      worker: "Podóloga",
       cat: "Podología",
       old: "19.990",
       price: "20.000",
@@ -1297,7 +1297,7 @@ export const servicesData = [
     },
     {
       name: "Podología Clínica Avanzada",
-      worker: "Michelle",
+      worker: "Podóloga",
       cat: "Podología",
       old: "25.990",
       price: "25.000",
@@ -1339,7 +1339,7 @@ export const servicesData = [
     },
     {
       name: "Lavado + Secado",
-      worker: "Viviana, Valeria, Leah, Catalina",
+      worker: "Viviana, Valeria, Katalina",
       cat: "Tratamiento Capilar",
       old: "13.990",
       price: "14.000",

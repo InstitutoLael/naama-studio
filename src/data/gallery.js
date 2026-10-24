@@ -1,7 +1,16 @@
 // Fotos reales del salón. `photo` es el nombre en src/data/photos.json (ver scripts/optimize-images.mjs).
-export const galleryCategories = ['Todo', 'Uñas', 'Cabello', 'La Casa', 'Equipo'];
+export const galleryCategories = ['Todo', 'Uñas', 'Cabello', 'Eventos', 'La Casa', 'Equipo'];
 
 export const galleryItems = [
+  { photo: 'unas-violeta', cat: 'Uñas', title: 'Violeta galaxia & cristal rojo' },
+  { photo: 'evento-familia', cat: 'Eventos', title: 'Toda la familia lista para el matrimonio' },
+  { photo: 'casa-fachada', cat: 'La Casa', title: 'Nuestra fachada en Arcadia 1297' },
+  { photo: 'unas-serpiente', cat: 'Uñas', title: 'Rosa holográfico & serpiente de cristal' },
+  { photo: 'evento-ondas', cat: 'Eventos', title: 'Ondas para el gran día' },
+  { photo: 'casa-sala', cat: 'La Casa', title: 'La sala de espera' },
+  { photo: 'evento-jardin', cat: 'Eventos', title: 'Peinado y maquillaje de invitada' },
+  { photo: 'unas-violeta-corazon', cat: 'Uñas', title: 'Violeta con detalles en relieve' },
+  { photo: 'evento-maquillaje', cat: 'Eventos', title: 'Maquillaje luminoso' },
   { photo: 'unas-burdeo-oro', cat: 'Uñas', title: 'Burdeo & pan de oro' },
   { photo: 'cabello-balayage', cat: 'Cabello', title: 'Balayage miel' },
   { photo: 'salon-recepcion', cat: 'La Casa', title: 'La recepción' },

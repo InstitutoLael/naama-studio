@@ -1,31 +1,38 @@
 /* ─────────────────────────────────────────────────────────────
    Naamá Studio — Design tokens & base
-   Paleta del logo y de la casa: cacao, caramelo y marfil.
+   Línea gráfica "Pausa Cálida": espresso, crema, arcilla y dorado.
+   (Los nombres antiguos --cacao/--caramel se mantienen como alias.)
    ───────────────────────────────────────────────────────────── */
 
 :root {
-  /* Marca */
-  --cacao: #2a1c14;
-  --cacao-900: #1c120c;
-  --cacao-700: #3e2a1e;
-  --caramel: #c08040;
-  --caramel-300: #e6c49a;
-  --caramel-600: #8e5a2b;
-  --wine: #6b2737;
+  /* Pausa Cálida */
+  --espresso: #211a17;
+  --crema: #f3eae0;
+  --arcilla: #a65d45;
+  --dorado: #c5a675;
+
+  /* Marca (alias usados en todo el sitio) */
+  --cacao: var(--espresso);
+  --cacao-900: #17110e;
+  --cacao-700: #33271f;
+  --caramel: var(--dorado);          /* botones y acentos sobre oscuro */
+  --caramel-300: var(--dorado);      /* itálicas sobre oscuro */
+  --caramel-600: #8c4a36;            /* itálicas y acentos sobre claro (arcilla profunda) */
+  --wine: var(--arcilla);
 
   /* Neutros */
-  --paper: #fbf8f3;
-  --ivory: #f4eee4;
-  --sand: #e8ddcc;
-  --ink: #1d1b18;
-  --ink-2: #57504a;
-  --ink-3: #8a8178;
-  --line: rgba(29, 27, 24, 0.12);
-  --line-light: rgba(251, 248, 243, 0.16);
+  --paper: #f8f3ed;
+  --ivory: var(--crema);
+  --sand: #e6d9c8;
+  --ink: #211a17;
+  --ink-2: #4f443d;
+  --ink-3: #6e6158;
+  --line: rgba(33, 26, 23, 0.12);
+  --line-light: rgba(243, 234, 224, 0.16);
 
   /* Tipografía */
   --font-display: 'Playfair Display Variable', 'Playfair Display', Georgia, serif;
-  --font-sans: 'Manrope Variable', 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Montserrat Variable', 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   --fs-hero: clamp(3.4rem, 10.5vw, 10.5rem);
   --fs-display: clamp(2.7rem, 7vw, 7rem);
@@ -143,7 +150,7 @@ p { text-wrap: pretty; }
   color: var(--ink-2);
   font-weight: 400;
 }
-.on-dark .lead { color: rgba(251, 248, 243, 0.78); }
+.on-dark .lead { color: rgba(243, 234, 224, 0.78); }
 
 .h2 { font-size: var(--fs-h2); }
 .h3 { font-size: var(--fs-h3); line-height: 1.12; }
@@ -231,7 +238,7 @@ p { text-wrap: pretty; }
   --btn-fg: var(--paper);
   --btn-fill: var(--paper);
   --btn-fill-fg: var(--cacao-900);
-  border: 1px solid rgba(251, 248, 243, 0.35);
+  border: 1px solid rgba(243, 234, 224, 0.35);
 }
 .btn--sm { min-height: 44px; padding: 0 22px; font-size: 0.72rem; }
 

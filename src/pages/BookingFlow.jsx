@@ -36,10 +36,12 @@ const upcomingDays = () => {
 const timesFor = (date) => {
   if (!date) return [];
   const day = date.getDay();
-  if (day === 6) return ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00'];
-  if (day === 5) return ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00'];
-  return ['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00', '17:00', '18:00'];
+  if (day === 0) return [];
+  return ['10:30', '11:30', '12:30', '14:30', '15:30', '16:30', '17:30', '18:30'];
 };
+
+// Opción para quien no tiene preferencia (o servicios sin especialista fija, como podología).
+const ANY_PERSON = { name: 'Sin preferencia', role: 'Te asignamos especialista según disponibilidad' };
 
 const fmtLong = (d) =>
   d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -70,10 +72,10 @@ const BookingFlow = () => {
   }, [mundo, query]);
 
   const people = useMemo(() => {
-    if (!service?.worker) return team;
+    if (!service?.worker) return [...team, ANY_PERSON];
     const names = service.worker.split(',').map((w) => w.trim());
     const found = team.filter((t) => names.includes(t.name));
-    return found.length ? found : team;
+    return found.length ? [...found, ANY_PERSON] : [ANY_PERSON];
   }, [service]);
 
   const canNext = [!!service, !!person, !!date, !!time, true][step - 1];

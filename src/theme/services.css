@@ -4,7 +4,7 @@
   top: calc(var(--nav-h) - 12px);
   z-index: 50;
   transition: top 0.6s var(--ease-out);
-  background: rgba(251, 248, 243, 0.9);
+  background: rgba(243, 234, 224, 0.9);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
   border-block: 1px solid var(--line);

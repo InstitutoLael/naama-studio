@@ -21,7 +21,7 @@ const ContactPage = () => {
 
       <section className="container contact__grid">
         <Reveal className="contact__photo" y={60}>
-          <Photo name="salon-recepcion" alt="Recepción de Naamá Studio" priority sizes="(min-width: 1000px) 45vw, 92vw" />
+          <Photo name="casa-puerta" alt="Puerta de Naamá Studio en Arcadia 1297, San Miguel" priority sizes="(min-width: 1000px) 45vw, 92vw" />
         </Reveal>
 
         <div className="contact__info">

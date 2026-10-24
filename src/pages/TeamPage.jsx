@@ -8,7 +8,7 @@ import { team } from '../data/team';
 import { servicesData } from '../data/servicesData';
 import '../theme/team.css';
 
-const NEW_MEMBERS = ['Leah', 'Catalina'];
+const NEW_MEMBERS = [];
 
 const countFor = (name) => servicesData.filter((s) => (s.worker ?? '').includes(name)).length;
 
@@ -16,7 +16,7 @@ const TeamPage = () => (
   <div className="team-page">
     <SEOHead
       title="Nuestro Equipo"
-      description={`Conoce a las ${team.length} especialistas de Naamá Studio: colorimetría, uñas, faciales, maquillaje y podología clínica en San Miguel.`}
+      description="Conoce a las especialistas de Naamá Studio: colorimetría, cabello, uñas, faciales y maquillaje en San Miguel."
       image="/img/equipo-1600.webp"
     />
 
@@ -30,7 +30,7 @@ const TeamPage = () => (
         lines={['Las manos detrás', <em key="t">de tu cambio.</em>]}
       />
       <Reveal as="p" className="lead page-hero__lead" delay={0.4}>
-        {team.length} especialistas, cada una experta en lo suyo. Elige con quién quieres atenderte o
+        Cada una experta en lo suyo. Elige con quién quieres atenderte o
         déjate recomendar.
       </Reveal>
     </header>
@@ -38,7 +38,7 @@ const TeamPage = () => (
     <div className="container">
       <Reveal y={80}>
         <Parallax className="team-page__photo parallax" amount={8}>
-          <Photo name="equipo" alt="De izquierda a derecha: Gaby, Viviana, Leah, Catalina y Valeria, en el patio de la casa" priority sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
+          <Photo name="equipo" alt="El equipo de Naamá Studio en la recepción de la casa" priority sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
         </Parallax>
       </Reveal>
     </div>

@@ -16,22 +16,22 @@ import { ArrowRight } from '../components/common/Icons';
 import { introDelay } from '../components/site/Preloader';
 import { mundos, servicesForMundo } from '../data/categories';
 import { servicesData } from '../data/servicesData';
-import { team } from '../data/team';
+import { FAQ } from '../data/faq';
 import { testimonials } from '../data/testimonials';
-import { SITE } from '../data/site';
+import { HOURS, SITE, whatsappUrl } from '../data/site';
 import '../theme/home.css';
 
 const EASE = [0.16, 1, 0.3, 1];
-const NEW_MEMBERS = ['Leah', 'Catalina'];
 
 const WORK = [
-  { photo: 'unas-burdeo-oro', label: 'Uñas', title: 'Burdeo & pan de oro' },
+  { photo: 'unas-violeta', label: 'Uñas', title: 'Violeta galaxia & cristal rojo' },
+  { photo: 'unas-violeta-corazon', label: 'Uñas', title: 'Violeta con relieve' },
+  { photo: 'unas-serpiente', label: 'Uñas', title: 'Rosa holográfico & serpiente' },
   { photo: 'cabello-balayage', label: 'Color', title: 'Balayage miel' },
-  { photo: 'unas-chocolate', label: 'Uñas', title: 'Chocolate & flores doradas' },
+  { photo: 'unas-burdeo-oro', label: 'Uñas', title: 'Burdeo & pan de oro' },
   { photo: 'cabello-castano', label: 'Cabello', title: 'Castaño espejo' },
-  { photo: 'unas-cat-eye', label: 'Uñas', title: 'Cat eye rosa' },
+  { photo: 'unas-chocolate', label: 'Uñas', title: 'Chocolate & flores doradas' },
   { photo: 'cabello-ondas', label: 'Color', title: 'Iluminación con ondas' },
-  { photo: 'unas-glitter', label: 'Uñas', title: 'Nude glitter' },
 ];
 
 /* ── 01. Portada ── */
@@ -65,18 +65,18 @@ const Hero = () => {
 
       <motion.div className="hero__content container" style={{ opacity: reduce ? 1 : fade }}>
         <Reveal as="p" className="eyebrow" delay={delay} y={16}>
-          Beauty & Wellness House · San Miguel
+          Salón de belleza y bienestar · San Miguel
         </Reveal>
         <SplitText
           as="h1"
           className="hero__title"
           onMount
           delay={delay + 0.1}
-          lines={['Tu momento', 'de volver', <em key="a">a ti.</em>]}
+          lines={['Tu pausa', <em key="a">te espera.</em>]}
         />
         <div className="hero__foot">
           <Reveal as="p" className="lead hero__lead" delay={delay + 0.5} y={20}>
-            Belleza y bienestar en una casa patrimonial, hechos con calma, técnica y cariño.
+            Un salón de belleza y bienestar en una casa patrimonial de San Miguel. Cabello, color, uñas, rostro y masajes, hechos con calma y detalle.
           </Reveal>
           <Reveal className="hero__actions" delay={delay + 0.65} y={20}>
             <Link to="/reservar" className="btn btn--caramel">
@@ -105,12 +105,12 @@ const Essence = () => (
         <p className="eyebrow" id="esencia-title">Nuestra esencia</p>
         <ScrollWords
           className="essence__statement"
-          text="Somos una casa antigua de San Miguel convertida en refugio. Aquí la belleza se hace sin apuro: con técnica, silencio y un equipo que te recibe por tu nombre."
+          text="No vendemos servicios, custodiamos pausas. En una casa patrimonial de San Miguel, la belleza se hace sin apuro: con técnica, calma y un trato que te recibe por tu nombre."
         />
         <Reveal className="essence__stats">
           <div>
-            <strong>{team.length}</strong>
-            <span>Especialistas</span>
+            <strong>1</strong>
+            <span>Casa patrimonial</span>
           </div>
           <div>
             <strong>{servicesData.length}</strong>
@@ -124,7 +124,7 @@ const Essence = () => (
       </div>
       <Reveal className="essence__media" y={60}>
         <Parallax className="essence__photo parallax" amount={10}>
-          <Photo name="salon-rincon" alt="Rincón de espera con el letrero de Naamá Studio" sizes="(min-width: 900px) 40vw, 90vw" />
+          <Photo name="casa-sala" alt="Sala de espera de Naamá Studio con piso de madera y puertas antiguas" sizes="(min-width: 900px) 40vw, 90vw" />
         </Parallax>
         <p className="essence__caption">La sala de espera, con luz de tarde.</p>
       </Reveal>
@@ -311,54 +311,79 @@ const Work = () => {
   );
 };
 
-/* ── 07. Equipo ── */
-const Team = () => (
-  <section className="team-home section on-dark" aria-labelledby="equipo-title">
-    <div className="container">
-      <div className="section-head section-head--split">
-        <div>
-          <p className="eyebrow">El equipo</p>
-          <SplitText
-            as="h2"
-            id="equipo-title"
-            className="h2"
-            lines={[`${team.length} especialistas,`, <em key="t">una misma forma de cuidar.</em>]}
-          />
-        </div>
+/* ── 07. Eventos a domicilio ── */
+const Events = () => (
+  <section className="events section on-dark" aria-labelledby="eventos-title">
+    <div className="container events__grid">
+      <div className="events__text">
+        <p className="eyebrow">Matrimonios & eventos</p>
+        <SplitText as="h2" id="eventos-title" className="h2" lines={['Vamos', <em key="e">a donde estés.</em>]} />
         <Reveal as="p" className="lead">
-          Colorimetría, uñas, faciales, maquillaje y podología clínica. Cada una experta en lo suyo,
-          todas con la misma obsesión por el detalle.
+          Peinado y maquillaje para novias, madrinas y toda la familia, en tu casa o en el lugar del
+          evento. Con la misma calma y detalle que en Naamá.
+        </Reveal>
+        <Reveal className="events__actions">
+          <a
+            href={whatsappUrl('Hola Naamá! Quiero cotizar peinado y maquillaje para un evento.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn--caramel"
+          >
+            Cotizar mi evento <ArrowRight />
+          </a>
         </Reveal>
       </div>
+      <div className="events__photos">
+        <Reveal className="events__main" y={60}>
+          <Parallax className="events__photo parallax" amount={8}>
+            <Photo name="evento-ondas" alt="Peinado en ondas hecho por Naamá Studio para un matrimonio" sizes="(min-width: 900px) 34vw, 70vw" position="50% 30%" />
+          </Parallax>
+        </Reveal>
+        <Reveal className="events__second" y={90}>
+          <Photo name="evento-familia" alt="Familia preparada por Naamá Studio para un matrimonio" sizes="(min-width: 900px) 22vw, 46vw" position="50% 55%" />
+        </Reveal>
+      </div>
+    </div>
+  </section>
+);
 
-      <Reveal y={80}>
-        <Parallax className="team-home__photo parallax" amount={8}>
-          <Photo name="equipo" alt="De izquierda a derecha: Gaby, Viviana, Leah, Catalina y Valeria, en el patio de la casa" sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
-        </Parallax>
+/* ── 08. Visítanos ── */
+const Visit = () => (
+  <section className="visit" aria-labelledby="visita-title">
+    <div className="visit__media">
+      <Photo name="casa-fachada" alt="Fachada terracota de Naamá Studio en Arcadia 1297, San Miguel" sizes="100vw" position="62% 55%" />
+    </div>
+    <div className="visit__shade" />
+    <div className="container visit__content on-dark">
+      <p className="eyebrow">Visítanos</p>
+      <SplitText as="h2" id="visita-title" className="h2" lines={['La casa', <em key="v">de la fachada terracota.</em>]} />
+      <Reveal className="visit__info">
+        <div>
+          <span className="visit__label">Dirección</span>
+          <a href={SITE.mapsUrl} target="_blank" rel="noopener noreferrer">{SITE.address}, Santiago</a>
+        </div>
+        <div>
+          <span className="visit__label">Horario</span>
+          {HOURS.map((h) => (
+            <span key={h.label}>{h.label}: {h.value}</span>
+          ))}
+        </div>
+        <div>
+          <span className="visit__label">Agenda</span>
+          <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer">WhatsApp {SITE.phoneDisplay}</a>
+        </div>
       </Reveal>
-
-      <ul className="team-home__list">
-        {team.map((p, i) => (
-          <Reveal as="li" key={p.name} delay={i * 0.05} y={20}>
-            <span className="team-home__name">
-              {p.name}
-              {NEW_MEMBERS.includes(p.name) && <small>Nueva</small>}
-            </span>
-            <span className="team-home__role">{p.role}</span>
-          </Reveal>
-        ))}
-      </ul>
-
-      <Reveal className="team-home__cta">
-        <Link to="/equipo" className="btn btn--ghost">
-          Conoce al equipo <ArrowRight />
-        </Link>
+      <Reveal className="visit__actions">
+        <a href={SITE.mapsUrl} target="_blank" rel="noopener noreferrer" className="btn btn--caramel">
+          Cómo llegar <ArrowRight />
+        </a>
+        <Link to="/equipo" className="btn btn--ghost-light">Conoce al equipo</Link>
       </Reveal>
     </div>
   </section>
 );
 
-/* ── 08. Testimonios ── */
+/* ── 09. Testimonios ── */
 const Testimonials = () => {
   const [i, setI] = useState(0);
   useEffect(() => {
@@ -406,7 +431,27 @@ const Testimonials = () => {
   );
 };
 
-/* ── 09. Regalos y empresas ── */
+/* ── 10. Preguntas frecuentes ── */
+const Faq = () => (
+  <section className="faq section on-ivory" aria-labelledby="faq-title">
+    <div className="container faq__grid">
+      <div>
+        <p className="eyebrow">Preguntas frecuentes</p>
+        <SplitText as="h2" id="faq-title" className="h2" lines={['Antes de', <em key="f">tu visita.</em>]} />
+      </div>
+      <div className="faq__list">
+        {FAQ.map((f) => (
+          <details key={f.q} className="faq__item">
+            <summary>{f.q}</summary>
+            <p>{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+/* ── 11. Regalos y empresas ── */
 const Extras = () => (
   <section className="extras section on-ivory" aria-label="Gift cards y empresas">
     <div className="container extras__grid">
@@ -448,15 +493,17 @@ const Extras = () => (
 
 const Home = () => (
   <div className="home">
-    <SEOHead />
+    <SEOHead faq={FAQ} />
     <Hero />
     <Essence />
     <ServicesIndex />
     <House />
     <Marquee />
     <Work />
-    <Team />
+    <Events />
+    <Visit />
     <Testimonials />
+    <Faq />
     <Extras />
   </div>
 );

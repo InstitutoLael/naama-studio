@@ -16,8 +16,7 @@ export const SITE = {
 
 // day: 0 = domingo … 6 = sábado. open/close en minutos desde medianoche.
 export const HOURS = [
-  { label: 'Lunes a Viernes', value: '09:00 — 19:00', days: [1, 2, 3, 4, 5], open: 540, close: 1140 },
-  { label: 'Sábado', value: '09:00 — 17:00', days: [6], open: 540, close: 1020 },
+  { label: 'Lunes a Sábado', value: '10:30 — 19:30', days: [1, 2, 3, 4, 5, 6], open: 630, close: 1170 },
   { label: 'Domingo', value: 'Cerrado', days: [0] },
 ];
 

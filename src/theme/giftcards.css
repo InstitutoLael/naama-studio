@@ -22,7 +22,7 @@
   color: var(--fg);
   overflow: hidden;
   transform-style: preserve-3d;
-  box-shadow: 0 50px 90px -40px rgba(28, 18, 12, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 50px 90px -40px rgba(33, 26, 23, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 .gc--cacao { background: radial-gradient(120% 140% at 0% 0%, #3e2a1e 0%, #2a1c14 45%, #1c120c 100%); }
 .gc--caramelo { --fg: #3a2414; --accent: #3a2414; background: radial-gradient(120% 140% at 0% 0%, #d69a55 0%, #c08040 50%, #9a6128 100%); }

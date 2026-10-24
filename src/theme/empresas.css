@@ -21,7 +21,7 @@
   transition: background 0.5s, color 0.5s, border-color 0.5s;
 }
 .pack:hover { background: var(--cacao); color: var(--paper); border-color: var(--cacao); }
-.pack:hover .muted { color: rgba(251, 248, 243, 0.7); }
+.pack:hover .muted { color: rgba(243, 234, 224, 0.7); }
 .pack__mode {
   justify-self: start;
   font-size: 0.66rem;

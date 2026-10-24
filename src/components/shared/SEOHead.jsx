@@ -1,9 +1,7 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { SITE } from '../../data/site';
-
-const DEFAULT_DESCRIPTION =
-  'Naamá Studio — Beauty & Wellness House en una casa patrimonial de San Miguel, Santiago. Cabello, color, uñas, cejas, faciales, masajes y podología.';
+import { BUSINESS_SCHEMA, DEFAULT_DESCRIPTION, DEFAULT_TITLE, faqSchema } from '../../data/schema';
 
 const upsert = (selector, create, attrs) => {
   let el = document.head.querySelector(selector);
@@ -21,37 +19,11 @@ const meta = (key, content, attr = 'name') =>
     return m;
   }, { content });
 
-const SCHEMA = {
-  '@context': 'https://schema.org',
-  '@type': 'BeautySalon',
-  name: SITE.name,
-  description: DEFAULT_DESCRIPTION,
-  url: SITE.url,
-  logo: `${SITE.url}/icon-512.png`,
-  image: `${SITE.url}/og-image.jpg`,
-  telephone: `+${SITE.phone}`,
-  email: SITE.email,
-  priceRange: '$$',
-  address: {
-    '@type': 'PostalAddress',
-    streetAddress: 'Arcadia 1297',
-    addressLocality: 'San Miguel',
-    addressRegion: 'Región Metropolitana',
-    addressCountry: 'CL',
-  },
-  geo: { '@type': 'GeoCoordinates', latitude: -33.4969, longitude: -70.6483 },
-  openingHoursSpecification: [
-    { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '09:00', closes: '19:00' },
-    { '@type': 'OpeningHoursSpecification', dayOfWeek: 'Saturday', opens: '09:00', closes: '17:00' },
-  ],
-  sameAs: [SITE.instagram],
-};
-
-const SEOHead = ({ title, description = DEFAULT_DESCRIPTION, image = '/og-image.jpg' }) => {
+const SEOHead = ({ title, description = DEFAULT_DESCRIPTION, image = '/og-image.jpg', faq }) => {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const fullTitle = title ? `${title} · Naamá Studio` : 'Naamá Studio · Beauty & Wellness House en San Miguel';
+    const fullTitle = title ? `${title} · Naamá Studio` : DEFAULT_TITLE;
     const url = `${SITE.url}${pathname === '/' ? '/' : pathname}`;
     const img = image.startsWith('http') ? image : `${SITE.url}${image}`;
 
@@ -77,8 +49,19 @@ const SEOHead = ({ title, description = DEFAULT_DESCRIPTION, image = '/og-image.
       s.type = 'application/ld+json';
       return s;
     }, {});
-    document.getElementById('naama-schema').textContent = JSON.stringify(SCHEMA);
-  }, [title, description, image, pathname]);
+    document.getElementById('naama-schema').textContent = JSON.stringify(BUSINESS_SCHEMA);
+
+    // Preguntas frecuentes (solo en las páginas que las muestran)
+    const old = document.getElementById('naama-faq');
+    if (old) old.remove();
+    if (faq?.length) {
+      const f = document.createElement('script');
+      f.id = 'naama-faq';
+      f.type = 'application/ld+json';
+      f.textContent = JSON.stringify(faqSchema(faq));
+      document.head.appendChild(f);
+    }
+  }, [title, description, image, pathname, faq]);
 
   return null;
 };

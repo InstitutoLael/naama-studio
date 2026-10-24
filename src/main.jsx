@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import '@fontsource-variable/playfair-display/wght.css';
 import '@fontsource-variable/playfair-display/wght-italic.css';
-import '@fontsource-variable/manrope/wght.css';
+import '@fontsource-variable/montserrat/wght.css';
 import './theme/base.css';
 import './theme/layout.css';
 import ErrorBoundary from './components/shared/ErrorBoundary';
