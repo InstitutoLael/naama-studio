@@ -846,3 +846,32 @@ test('calendario: link .ics privado por persona, solo con sus horas', async () =
   await kata.post('calendario/nuevo', {});
   assert.equal((await manejar(new Request(k.propio), env)).status, 404);
 });
+
+test('avisos programados: el de mañana y el resumen del lunes salen una sola vez y a su hora', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '18.1.1.2');
+  const ids = Object.fromEntries((await admin.pedir('cuentas')).data.cuentas.map((x) => [x.nombre, x.id]));
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date());
+  const manana = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(Date.now() + 86400000));
+  await admin.post('agenda', { fecha: manana, hora: '11:00', cuentaId: ids.Kata, clienta: 'Rosita', servicio: 'Manos' });
+  // Antes de las 18:00 no hace nada.
+  env.RELOJ = `${hoy}T12:00:00-03:00`;
+  let r = await admin.post('cron', {});
+  assert.deepEqual(r.data.hecho, {});
+  // A las 19:00 avisa una vez.
+  env.RELOJ = `${hoy}T19:00:00-03:00`;
+  r = await admin.post('cron', {});
+  assert.equal(r.data.hecho.manana.citas, 1);
+  assert.equal(r.data.hecho.manana.sinConfirmar, 1);
+  r = await kata.pedir('agenda/nuevas'); // el respaldo no lo repite
+  assert.equal(r.status, 200);
+  r = await admin.post('cron', {});
+  assert.equal(r.data.hecho.manana, undefined);
+  // Resumen del lunes a las 10:00.
+  env.RELOJ = '2026-11-16T10:00:00-03:00';
+  r = await admin.post('cron', {});
+  assert.ok(r.data.hecho.semana.lineas.length >= 2);
+  r = await admin.post('cron', {});
+  assert.equal(r.data.hecho.semana, undefined);
+  delete env.RELOJ;
+});

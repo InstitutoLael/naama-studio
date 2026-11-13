@@ -2120,6 +2120,99 @@ async function avisarCita(db, env, citaId, quienAnota) {
 
 
 
+
+/* ── Avisos programados: recordatorio de mañana y resumen del lunes ───── */
+
+const reloj = (env) => (env?.RELOJ ? new Date(env.RELOJ) : new Date());
+const enChile = (d, op) => new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', ...op }).format(d);
+
+/** Marca una tarea como hecha para `valor` (día o semana). Devuelve false si ya estaba hecha. */
+async function reclamar(db, clave, valor) {
+  const r = await db
+    .prepare('INSERT INTO meta (clave, valor) VALUES (?, ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor WHERE meta.valor != excluded.valor')
+    .bind(clave, valor)
+    .run();
+  return (r.meta?.changes ?? 0) > 0;
+}
+
+const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
+const pesosCL = (n) => `$${Math.round(n).toLocaleString('es-CL')}`;
+
+async function avisoDeManana(db, env, hoy) {
+  const manana = new Date(Date.parse(`${hoy}T12:00:00Z`) + 86400000).toISOString().slice(0, 10);
+  const { results } = await db
+    .prepare(
+      `SELECT ci.*, cu.nombre AS quien, cl.telefono AS tel_clienta FROM citas ci JOIN cuentas cu ON cu.id = ci.cuenta_id
+       LEFT JOIN clientas cl ON cl.id = ci.clienta_id
+       WHERE ci.fecha = ? AND ci.estado NOT IN ('cancelada', 'no-vino') ORDER BY ci.hora`,
+    )
+    .bind(manana)
+    .all();
+  if (!results.length) return { manana, citas: 0 };
+  const url = `/portal/agenda?fecha=${manana}`;
+  // A cada profesional: sus clientas de mañana.
+  const porPersona = new Map();
+  for (const c of results) porPersona.set(c.cuenta_id, [...(porPersona.get(c.cuenta_id) ?? []), c]);
+  for (const [id, citas] of porPersona) {
+    await avisar(db, env, [id], {
+      titulo: `Mañana tienes ${plural(citas.length, 'clienta', 'clientas')} ✨`,
+      cuerpo: citas.map((c) => `${c.hora} ${c.clienta}${c.servicio ? ` · ${c.servicio}` : ''}`).join('\n'),
+      url,
+      tag: `manana-${manana}`,
+    }).catch(() => 0);
+  }
+  // A quienes confirman: cuántas faltan por confirmar.
+  const sinConfirmar = results.filter((c) => c.estado === 'agendada');
+  const conNumero = sinConfirmar.filter((c) => c.telefono || c.tel_clienta).length;
+  if (sinConfirmar.length) {
+    const destino = await conPermiso(db, 'clientas');
+    await avisar(db, env, destino, {
+      titulo: `Mañana: ${plural(results.length, 'hora', 'horas')} · ${sinConfirmar.length} sin confirmar`,
+      cuerpo: conNumero
+        ? `Toca para mandarles el recordatorio por WhatsApp (${plural(conNumero, 'tiene', 'tienen')} número).`
+        : 'Toca para revisarlas y confirmarlas.',
+      url,
+      tag: `confirmar-${manana}`,
+    }).catch(() => 0);
+  }
+  return { manana, citas: results.length, sinConfirmar: sinConfirmar.length };
+}
+
+async function resumenSemanal(db, env, hoy) {
+  const fin = new Date(Date.parse(`${hoy}T12:00:00Z`) - 86400000).toISOString().slice(0, 10); // domingo
+  const ini = new Date(Date.parse(`${hoy}T12:00:00Z`) - 7 * 86400000).toISOString().slice(0, 10); // lunes pasado
+  const [citas, faltas, serv, top, compras] = await Promise.all([
+    db.prepare(`SELECT COUNT(*) AS n FROM citas WHERE fecha BETWEEN ? AND ? AND estado NOT IN ('cancelada', 'no-vino')`).bind(ini, fin).first(),
+    db.prepare(`SELECT COUNT(*) AS n FROM citas WHERE fecha BETWEEN ? AND ? AND estado = 'no-vino'`).bind(ini, fin).first(),
+    db.prepare(`SELECT COUNT(*) AS n, COALESCE(SUM(monto), 0) AS total FROM servicios WHERE fecha BETWEEN ? AND ?`).bind(ini, fin).first(),
+    db.prepare(`SELECT servicio, COUNT(*) AS n FROM servicios WHERE fecha BETWEEN ? AND ? GROUP BY lower(servicio) ORDER BY n DESC LIMIT 1`).bind(ini, fin).first(),
+    db.prepare(`SELECT COUNT(*) AS n, COALESCE(SUM(urgente), 0) AS urgentes FROM pedidos WHERE estado = 'pedido'`).first(),
+  ]);
+  const lineas = [
+    serv.n ? `${plural(serv.n, 'servicio anotado', 'servicios anotados')} · ${pesosCL(serv.total)}` : 'Sin servicios anotados en el portal',
+    `${plural(citas.n, 'hora en la agenda', 'horas en la agenda')}${faltas.n ? ` · ${plural(faltas.n, 'no vino', 'no vinieron')}` : ''}`,
+    top?.servicio ? `Lo que más se hizo: ${top.servicio} (${top.n})` : null,
+    compras.n ? `Por comprar: ${compras.n}${compras.urgentes ? ` (${compras.urgentes} urgente${compras.urgentes > 1 ? 's' : ''})` : ''}` : 'Nada pendiente por comprar',
+  ].filter(Boolean);
+  const destino = await conPermiso(db, 'finanzas');
+  await avisar(db, env, destino, { titulo: 'Así fue la semana en Naamá 📊', cuerpo: lineas.join('\n'), url: '/portal', tag: `semana-${hoy}` }).catch(() => 0);
+  return { desde: ini, hasta: fin, lineas };
+}
+
+/** Se llama desde un cron externo y, por si acaso, cuando alguien abre el portal. Cada aviso sale una sola vez. */
+async function tareasProgramadas(db, env) {
+  const d = reloj(env);
+  const hoy = fechaChile(d);
+  const hora = Number(enChile(d, { hour: 'numeric', hourCycle: 'h23' }));
+  const dia = enChile(d, { weekday: 'short' });
+  const hecho = {};
+  if (hora >= 18 && hora < 23 && (await reclamar(db, 'cron_manana', hoy))) hecho.manana = await avisoDeManana(db, env, hoy);
+  if (dia === 'Mon' && hora >= 9 && (await reclamar(db, 'cron_semana', hoy))) hecho.semana = await resumenSemanal(db, env, hoy);
+  return hecho;
+}
+
+ruta('POST', /^cron$/, {}, async ({ db, env }) => json({ ok: true, hecho: await tareasProgramadas(db, env) }));
+
 /* ── Calendario del celu (.ics) ─────────────────────────── */
 
 const tokenNuevo = () => [...crypto.getRandomValues(new Uint8Array(24))].map((b) => b.toString(16).padStart(2, '0')).join('');
@@ -2343,7 +2436,9 @@ ruta('GET', /^agenda$/, { sesion: true }, async ({ db, cuenta, request }) => {
   });
 });
 
-ruta('GET', /^agenda\/nuevas$/, { sesion: true }, async ({ db, cuenta }) => {
+ruta('GET', /^agenda\/nuevas$/, { sesion: true }, async ({ db, env, cuenta }) => {
+  // Respaldo del cron: si nadie lo llamó, los avisos programados salen cuando alguien abre el Inicio.
+  await tareasProgramadas(db, env).catch((e) => console.error('cron', e));
   const { results } = await db
     .prepare(`${CITAS_SQL} WHERE ci.cuenta_id = ? AND ci.visto = 0 AND ci.estado != 'cancelada' AND ci.fecha >= ? ORDER BY ci.fecha, ci.hora`)
     .bind(cuenta.id, fechaChile())

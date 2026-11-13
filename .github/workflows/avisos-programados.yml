@@ -1,0 +1,18 @@
+# Dispara los avisos programados del portal (recordatorio de mañana a las 18:00 y resumen del lunes a las 9:00, hora de Chile).
+# El endpoint es idempotente: cada aviso sale una sola vez aunque se llame varias veces.
+name: Avisos programados del portal
+
+on:
+  schedule:
+    - cron: '7 21,22,23 * * *'   # 18:00–20:00 Chile (verano e invierno)
+    - cron: '7 12,13 * * 1'      # lunes 9:00 Chile (verano e invierno)
+  workflow_dispatch:
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar al portal
+        run: |
+          curl -fsS -X POST https://naamastudio.cl/api/portal/cron \
+            -H 'x-naama: 1' -H 'Content-Type: application/json' -d '{}'
