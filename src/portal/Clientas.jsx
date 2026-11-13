@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { CheckIcon, PlusIcon, SearchIcon, WhatsAppIcon } from '../components/common/Icons';
 import { api, post } from './api';
 import Hoja from './Hoja';
+import FichaClienta from './FichaClienta';
 import { leerCsv, leerVcf, limpiarNombre, mostrarTelefono, prepararContactos } from './contactos';
 
 const FILTROS = [
@@ -301,7 +302,7 @@ const Importar = ({ onListo, onCerrar }) => {
 
 /* ── Ficha de una clienta ─────────────────────────────── */
 
-const Ficha = ({ clienta, verNumeros, onCambio, onCerrar }) => {
+const Ficha = ({ clienta, verNumeros, yo, onCambio, onCerrar }) => {
   const [visitas, setVisitas] = useState(null);
   const [error, setError] = useState('');
   const [editando, setEditando] = useState(false);
@@ -329,6 +330,8 @@ const Ficha = ({ clienta, verNumeros, onCambio, onCerrar }) => {
           </a>
         </div>
       )}
+
+      <FichaClienta clienta={clienta} yo={yo} />
 
       <form
         className="ficha__otra"
@@ -427,7 +430,7 @@ const Ficha = ({ clienta, verNumeros, onCambio, onCerrar }) => {
 
 /* ── Página ───────────────────────────────────────────── */
 
-const Clientas = () => {
+const Clientas = ({ cuenta }) => {
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
   const [aviso, setAviso] = useState('');
@@ -627,6 +630,7 @@ const Clientas = () => {
       {hoja?.tipo === 'importar' && <Importar onListo={alSubir} onCerrar={() => setHoja(null)} />}
       {hoja?.tipo === 'ficha' && (
         <Ficha
+          yo={cuenta}
           clienta={todas.find((c) => c.id === hoja.id) ?? { id: hoja.id, nombre: '' }}
           verNumeros={datos?.verNumeros}
           onCambio={(c) => {

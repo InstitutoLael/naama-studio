@@ -160,6 +160,40 @@ const MiMes = ({ cuenta }) => {
             )}
           </section>
 
+          {(esYo || d.meta) && (
+            <section className="meta">
+              <div className="meta__cabeza">
+                <strong>{esYo ? 'Mi meta del mes' : 'Su meta del mes'}</strong>
+                {esYo && (
+                  <button
+                    type="button"
+                    className="portal__link"
+                    onClick={async () => {
+                      const v = window.prompt('¿Cuánto te gustaría hacer este mes? (en pesos)', d.meta ?? '');
+                      if (v === null) return;
+                      await post('mi-mes/meta', { mes, monto: v });
+                      cargar(mes, quien);
+                    }}
+                  >
+                    {d.meta ? 'Cambiar' : 'Ponerme una meta'}
+                  </button>
+                )}
+              </div>
+              {d.meta ? (
+                <>
+                  <div className="meta__barra" role="progressbar" aria-valuemin={0} aria-valuemax={d.meta} aria-valuenow={d.total}>
+                    <span style={{ width: `${Math.min(100, (d.total / d.meta) * 100)}%` }} />
+                  </div>
+                  <small className="muted">
+                    {pesos(d.total)} de {pesos(d.meta)} · {d.total >= d.meta ? '¡Meta cumplida! 🎉' : `faltan ${pesos(d.meta - d.total)}`}
+                  </small>
+                </>
+              ) : (
+                <small className="muted">Ponte una meta y aquí vas viendo cuánto te falta.</small>
+              )}
+            </section>
+          )}
+
           {esYo && !d.revisa && (
             <p className="muted">
               Esto es tu propio registro: no cambia la planilla. Administración lo revisa antes de pagar para que no se pierda ningún servicio.

@@ -84,3 +84,15 @@ Cuando se crea la hoja del mes nuevo (copiando la anterior), los servicios caen 
 - **Disponibilidad** (todas): cada una marca los próximos 14 días (sin domingos); todas ven la tabla del equipo.
 - **Mi mes** (todas): cada trabajadora anota lo que hizo. **No va a la planilla.** Administración y Vivy lo cruzan con lo anotado
   antes de pagar (mismo día; mismo monto o mismo servicio).
+
+## Experiencia de la clienta y del equipo (nov 2026)
+
+- **Permisos:** `servicios` (anotar/borrar) es solo de Administración. Vivy tiene `verServicios`: ve lo anotado sin editar. Las trabajadoras solo ven su propio «Mi mes».
+- **Cierre de caja:** quien cierra suma por separado tarjeta (cierre de la Point), transferencias y efectivo; se compara con Mercado Pago y con lo anotado.
+- **Ficha de clienta** (todas): alergias o cuidados (aviso destacado), cumpleaños, gustos, notas y fórmulas de color con fecha y quién la anotó.
+- **Te toca** (permiso `clientas`): clientas a las que les toca volver según el último servicio (uñas 21 días, depilación 28, facial 30, color 42, corte 45, corporal 14; si no, 35) y dormidas (+60). WhatsApp con mensaje listo; al escribir sale de la lista hasta su próxima visita. Cumpleaños de la semana.
+- **Aseo y tareas:** Administración crea tareas por persona y días; cada una marca las suyas. El inicio muestra lo que toca hoy.
+- **Mi QR de reseñas:** QR a la reseña de Google de Naamá Studio (Arcadia 1297). Enlace configurable con `POST /api/portal/resenas`.
+- **Metas:** cada una se pone su meta del mes en «Mi mes» y ve su avance.
+- **Gift cards** (`servicios` o `finanzas`): 4 diseños Pausa Cálida, código NAAMA-XXXX-XXXX, PNG para compartir, canje una sola vez.
+- **Margen por servicio** (`finanzas`): precio − IVA − comisión MP − % profesional − insumos (pesa), últimos 90 días.

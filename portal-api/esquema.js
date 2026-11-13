@@ -196,10 +196,75 @@ const TABLAS = [
     nota TEXT,
     creado TEXT NOT NULL
   )`,
+  // Ficha de cada clienta: lo que el equipo debe saber antes de atenderla.
+  `CREATE TABLE IF NOT EXISTS fichas (
+    clienta_id INTEGER PRIMARY KEY,
+    cumple TEXT,
+    alergias TEXT,
+    preferencias TEXT,
+    notas TEXT,
+    actualizado TEXT,
+    por TEXT
+  )`,
+  `CREATE TABLE IF NOT EXISTS formulas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    clienta_id INTEGER NOT NULL,
+    fecha TEXT NOT NULL,
+    texto TEXT NOT NULL,
+    cuenta_id INTEGER,
+    por TEXT,
+    ts TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS avisos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    clienta_id INTEGER NOT NULL,
+    tipo TEXT NOT NULL,
+    fecha TEXT NOT NULL,
+    por TEXT
+  )`,
+  `CREATE TABLE IF NOT EXISTS metas (
+    cuenta_id INTEGER NOT NULL,
+    mes TEXT NOT NULL,
+    monto INTEGER NOT NULL,
+    PRIMARY KEY (cuenta_id, mes)
+  )`,
+  `CREATE TABLE IF NOT EXISTS tareas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    texto TEXT NOT NULL,
+    cuenta_id INTEGER,
+    dias TEXT NOT NULL,
+    activa INTEGER NOT NULL DEFAULT 1,
+    creado TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS tareas_hechas (
+    tarea_id INTEGER NOT NULL,
+    fecha TEXT NOT NULL,
+    cuenta_id INTEGER,
+    por TEXT,
+    ts TEXT NOT NULL,
+    PRIMARY KEY (tarea_id, fecha)
+  )`,
+  `CREATE TABLE IF NOT EXISTS giftcards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    codigo TEXT NOT NULL UNIQUE,
+    para TEXT NOT NULL,
+    de TEXT,
+    monto INTEGER,
+    servicio TEXT,
+    mensaje TEXT,
+    diseno TEXT NOT NULL,
+    vence TEXT NOT NULL,
+    estado TEXT NOT NULL DEFAULT 'activa',
+    medio TEXT,
+    por TEXT,
+    creado TEXT NOT NULL,
+    canjeada TEXT,
+    canjeada_por TEXT
+  )`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v6';
+export const HUELLA = 'v7';
 
 let listo = false;
 

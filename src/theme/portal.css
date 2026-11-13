@@ -796,3 +796,34 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .dispo-celda--manana, .dispo-celda--tarde { background: rgba(197, 166, 117, 0.3); color: #6b4b1a; }
 .dispo-celda--no { background: rgba(166, 93, 69, 0.16); color: var(--caramel-600); }
 .pedido__texto small.alerta { padding: 0; background: none; border-radius: 0; font-size: inherit; }
+
+/* ── Ficha, te toca, aseo, reseñas, metas, gift cards, márgenes ── */
+.ficha-cli { display: grid; gap: 14px; }
+.ficha-cli__alergia { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: var(--r-sm); background: rgba(166, 93, 69, 0.14); color: var(--caramel-600); font-size: 0.92rem; }
+.ficha-cli__alergia svg { flex: none; margin-top: 2px; }
+.ficha-cli__datos { display: grid; gap: 6px; font-size: 0.92rem; color: var(--ink-2); }
+.ficha-cli__datos p { margin: 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.avisos-hoy { display: grid; gap: 10px; }
+.aviso-hoy { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); color: inherit; text-decoration: none; }
+.aviso-hoy > svg:first-child { flex: none; width: 22px; height: 22px; color: var(--caramel-600); }
+.aviso-hoy > span { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.aviso-hoy small { color: var(--ink-3); }
+.resenas { justify-items: center; text-align: center; }
+.resenas__tarjeta { display: grid; gap: 16px; justify-items: center; padding: 24px; border-radius: 28px; background: var(--card); box-shadow: var(--sombra-alta); max-width: 420px; width: 100%; }
+.resenas__tarjeta img { width: 100%; max-width: 340px; aspect-ratio: 1; border-radius: 12px; }
+.resenas__tarjeta p { margin: 0; font-size: 1rem; line-height: 1.5; }
+.meta { display: grid; gap: 8px; padding: 16px; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); }
+.meta__cabeza { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.meta__barra { height: 12px; border-radius: 999px; background: var(--card-2); overflow: hidden; }
+.meta__barra span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--caramel-300, #c5a675), var(--caramel-600, #a65d45)); transition: width 0.4s; }
+.gift { display: grid; gap: 12px; }
+.gift__canvas { width: 100%; height: auto; border-radius: 18px; box-shadow: var(--sombra-alta); }
+.gift__muestra { display: inline-block; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid; vertical-align: middle; }
+.caja-total { font-size: 1rem; }
+.tabla-margen { overflow-x: auto; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); padding: 6px 0; }
+.tabla-margen__fila { display: grid; grid-template-columns: minmax(130px, 1.6fr) repeat(5, minmax(78px, 1fr)); gap: 8px; align-items: center; padding: 10px 14px; min-width: 620px; font-size: 0.85rem; }
+.tabla-margen__fila + .tabla-margen__fila { border-top: 1px solid rgba(33, 26, 23, 0.07); }
+.tabla-margen__cabeza span { font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+.tabla-margen small { color: var(--ink-3); }
+.ok-texto { color: #2f6b3a; font-weight: 600; }
+.alerta-texto { color: var(--caramel-600); font-weight: 600; }

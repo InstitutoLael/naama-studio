@@ -288,7 +288,7 @@ const Servicios = ({ cuenta }) => {
   return (
     <div className="panel">
       <header className="panel__cabeza">
-        <span className="eyebrow">Solo Administración</span>
+        <span className="eyebrow">{datos && !datos.puedeEditar ? 'Solo para ver' : 'Solo Administración'}</span>
         <h1 className="panel__titulo">
           Anotar <em>servicios</em>
         </h1>
@@ -299,7 +299,7 @@ const Servicios = ({ cuenta }) => {
 
       {datos && (
         <>
-          {!datos.planillaConectada && (
+          {datos.puedeEditar && !datos.planillaConectada && (
             <div className="aviso-fijo">
               <p>
                 <strong>La planilla todavía no está conectada.</strong> Lo que anotes queda guardado aquí y se manda solo cuando la conectemos.
@@ -311,7 +311,7 @@ const Servicios = ({ cuenta }) => {
               )}
             </div>
           )}
-          {datos.planillaConectada && datos.pendientes > 0 && (
+          {datos.puedeEditar && datos.planillaConectada && datos.pendientes > 0 && (
             <div className="aviso-fijo">
               <p>
                 <strong>{datos.pendientes} sin llegar a la planilla.</strong>
@@ -349,9 +349,11 @@ const Servicios = ({ cuenta }) => {
                 <span>cobrado</span>
               </div>
             </div>
-            <button type="button" className="hoy__boton" onClick={() => setHoja({ tipo: 'anotar' })}>
-              <Plus size={18} /> Anotar servicio
-            </button>
+            {datos.puedeEditar && (
+              <button type="button" className="hoy__boton" onClick={() => setHoja({ tipo: 'anotar' })}>
+                <Plus size={18} /> Anotar servicio
+              </button>
+            )}
           </section>
 
           <section>
@@ -381,6 +383,7 @@ const Servicios = ({ cuenta }) => {
                         {x.estado === 'en_planilla' ? `✓ En la planilla (fila ${x.fila})` : `⚠ ${x.error ?? 'Falta mandarlo a la planilla'}`}
                       </small>
                     </span>
+                    {datos.puedeEditar && (
                     <span className="pedido__acciones">
                       {x.estado !== 'en_planilla' && datos.planillaConectada && (
                         <button
@@ -408,6 +411,7 @@ const Servicios = ({ cuenta }) => {
                         <Trash2 size={16} />
                       </button>
                     </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -416,7 +420,7 @@ const Servicios = ({ cuenta }) => {
         </>
       )}
 
-      {datos && (
+      {datos?.puedeEditar && (
         <button type="button" className="fab" onClick={() => setHoja({ tipo: 'anotar' })} aria-label="Anotar servicio">
           <Plus />
         </button>

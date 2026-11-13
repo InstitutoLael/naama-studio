@@ -1,6 +1,10 @@
 // Íconos del portal (lucide-react, ya incluido en la web).
 import {
+  BellRing,
   CalendarDays,
+  Gift,
+  ListChecks,
+  QrCode,
   ClipboardList,
   KeyRound,
   Package,
@@ -14,6 +18,10 @@ import {
 
 export const ICONO_MODULO = {
   disponibilidad: CalendarDays,
+  'te-toca': BellRing,
+  aseo: ListChecks,
+  resenas: QrCode,
+  giftcards: Gift,
   clientas: UsersRound,
   insumos: Package,
   compras: ShoppingBag,

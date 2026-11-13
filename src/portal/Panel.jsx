@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Plus } from 'lucide-react';
+import { Cake, ChevronRight, ListChecks, Plus } from 'lucide-react';
 import { api } from './api';
-import { MODULOS, ROLES, puede } from './permisos';
+import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
 import { ICONO_MODULO } from './iconos';
 
 const saludo = () => {
@@ -18,6 +18,17 @@ const hoyLargo = () =>
 /** Inicio del portal: saludo, resumen del día y accesos. Lo que no le corresponde a la persona, no aparece. */
 const Panel = ({ cuenta }) => {
   const [resumen, setResumen] = useState(null);
+  const [cumples, setCumples] = useState([]);
+  const [tareas, setTareas] = useState(null);
+
+  useEffect(() => {
+    api('cumpleanos')
+      .then((r) => setCumples(r.cumples))
+      .catch(() => {});
+    api('tareas')
+      .then((r) => setTareas(r.mias))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     api('clientas')
@@ -32,7 +43,7 @@ const Panel = ({ cuenta }) => {
       .catch(() => setResumen(null));
   }, []);
 
-  const visibles = MODULOS.filter((m) => !m.permiso || puede(cuenta, m.permiso));
+  const visibles = MODULOS.filter((m) => puedeModulo(cuenta, m));
   const listos = visibles.filter((m) => m.listo);
   const pronto = visibles.filter((m) => !m.listo);
 
@@ -71,6 +82,36 @@ const Panel = ({ cuenta }) => {
           </Link>
         )}
       </section>
+
+      {(cumples.length > 0 || tareas?.length > 0) && (
+        <section className="avisos-hoy">
+          {tareas?.length > 0 && (
+            <Link to="/portal/aseo" className="aviso-hoy">
+              <ListChecks strokeWidth={1.6} />
+              <span>
+                <strong>
+                  Te toca hoy: {tareas.filter((t) => !t.hecha).length ? `${tareas.filter((t) => !t.hecha).length} tareas` : '¡todo listo!'}
+                </strong>
+                <small>{tareas.filter((t) => !t.hecha).map((t) => t.texto).slice(0, 2).join(' · ')}</small>
+              </span>
+              <ChevronRight strokeWidth={1.6} />
+            </Link>
+          )}
+          {cumples.length > 0 && (
+            <div className="aviso-hoy">
+              <Cake strokeWidth={1.6} />
+              <span>
+                <strong>Cumpleaños esta semana</strong>
+                <small>
+                  {cumples
+                    .map((c) => `${c.nombre.split(' ')[0]} (${c.dias === 0 ? 'hoy' : c.dias === 1 ? 'mañana' : `en ${c.dias} días`})`)
+                    .join(' · ')}
+                </small>
+              </span>
+            </div>
+          )}
+        </section>
+      )}
 
       <section>
         <h2 className="seccion__titulo">Accesos</h2>
