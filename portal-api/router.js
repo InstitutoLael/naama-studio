@@ -1518,16 +1518,34 @@ const normTexto = (t) =>
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
 
-/** Cruza lo que anotó ella con lo que anotó Administración (mismo día; mismo monto o mismo servicio). */
+/** Cruza lo que anotó ella con lo que anotó Administración (mismo día). Primero los que calzan en monto y servicio,
+ * después solo monto, después solo servicio, y al final el nombre completo de la clienta. */
 function cruzar(suyos, nuestros) {
   const libres = new Set(nuestros.map((x) => x.id));
+  const pares = new Map();
+  const mismaClienta = (a, b) => {
+    const x = normTexto(a);
+    const y = normTexto(b);
+    return x && y && (x === y || x.startsWith(`${y} `) || y.startsWith(`${x} `));
+  };
+  const pasadas = [
+    (m, x) => m.monto && x.monto === m.monto && normTexto(x.servicio) === normTexto(m.servicio),
+    (m, x) => m.monto && x.monto === m.monto,
+    (m, x) => normTexto(x.servicio) === normTexto(m.servicio),
+    (m, x) => mismaClienta(x.clienta, m.clienta) && (!m.monto || Math.abs(x.monto - m.monto) <= m.monto * 0.2),
+  ];
+  for (const regla of pasadas) {
+    for (const m of suyos) {
+      if (pares.has(m.id)) continue;
+      const par = nuestros.find((x) => libres.has(x.id) && x.fecha === m.fecha && regla(m, x));
+      if (par) {
+        libres.delete(par.id);
+        pares.set(m.id, par);
+      }
+    }
+  }
   const filas = suyos.map((m) => {
-    const candidatos = nuestros.filter((x) => libres.has(x.id) && x.fecha === m.fecha);
-    const par =
-      candidatos.find((x) => m.monto && x.monto === m.monto) ??
-      candidatos.find((x) => normTexto(x.servicio) === normTexto(m.servicio)) ??
-      candidatos.find((x) => m.clienta && normTexto(x.clienta).split(' ')[0] === normTexto(m.clienta).split(' ')[0]);
-    if (par) libres.delete(par.id);
+    const par = pares.get(m.id);
     return { ...m, coincide: par ? { id: par.id, servicio: par.servicio, monto: par.monto, clienta: par.clienta } : null };
   });
   return { filas, soloNuestros: nuestros.filter((x) => libres.has(x.id)).map((x) => ({ id: x.id, fecha: x.fecha, clienta: x.clienta, servicio: x.servicio, monto: x.monto })) };
