@@ -44,3 +44,21 @@ npm run portal:local   # probar en http://localhost:8788/portal (clave de config
 - Máximo 5 intentos fallidos por correo y 20 por IP cada 15 minutos.
 - Secretos solo en las variables de Cloudflare, nunca en el código.
 - No se guardan datos de salud ni datos bancarios de clientas.
+
+## Módulos publicados
+
+| Módulo | Quién | Qué hace |
+| --- | --- | --- |
+| Clientas | Todas (números solo Administración y Vivy) | Subir contactos, «Vino hoy», hace cuánto no viene. |
+| Insumos | Todas (costos solo Administración y Vivy) | Productos con foto, «Anotar lo que usé» con la pesa, tonos, ventas y datos por servicio. |
+| Compras | Todas (montos solo Administración y Vivy) | Lista de compras; lo bajo el mínimo se sugiere solo. |
+| La plata | Administración y Vivy | Disponible para gastar, gastos fijos y pagos de Mercado Pago. |
+
+## Secretos en Cloudflare (Producción)
+
+- `SETUP_SECRET`: solo para crear la primera cuenta.
+- `MP_ACCESS_TOKEN`: llave de producción de la aplicación «Portal Naama» en Mercado Pago (cuenta Naamá). Solo se usa para leer pagos. Si se cambia en Mercado Pago, hay que actualizarla aquí y volver a publicar.
+
+## SII
+
+Desde el 1 de diciembre de 2026 el modelo de emisión es «Siempre emito Boleta… aun cuando reciba un pago electrónico» (las boletas las emite el plan de Mercado Pago). Así el F29 ya no duplica boletas y comprobantes.
