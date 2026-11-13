@@ -723,3 +723,12 @@ test('aseo por turnos: se reparte entre las que marcaron que vienen', async () =
   assert.equal(g.data.mias.length, 1, 'una para cada una');
   assert.match(g.data.mias[0].quien, /Gaby \(turno\)/);
 });
+
+test('se puede cambiar el correo de una cuenta (sin repetir)', async () => {
+  const admin = await configurar();
+  const r = await admin.post('cuentas', { nombre: 'Gaby', email: 'gaby@pendiente.naamastudio.cl', rol: 'socia', extras: [] });
+  await admin.post('cuentas', { nombre: 'Kata', email: 'kata@pendiente.naamastudio.cl', rol: 'equipo', extras: [] });
+  assert.equal((await admin.post(`cuentas/${r.data.cuenta.id}`, { email: 'kata@pendiente.naamastudio.cl' })).status, 409);
+  const ok = await admin.post(`cuentas/${r.data.cuenta.id}`, { email: 'Gaby@Gmail.com' });
+  assert.equal(ok.data.cuenta.email, 'gaby@gmail.com');
+});
