@@ -1010,6 +1010,8 @@ ruta('POST', /^plata\/compromisos$/, { permiso: 'finanzas' }, async ({ db, body 
   const monto = numero(String(body.monto ?? '').replace(/\./g, ''), { min: 1, max: 1e9 });
   const dia = body.dia ? numero(body.dia, { min: 1, max: 31 }) : null;
   if (!nombre || !monto) return error(400, 'Escribe el nombre y el monto.');
+  const repetido = await db.prepare('SELECT id FROM compromisos WHERE activo = 1 AND lower(nombre) = lower(?)').bind(nombre).first();
+  if (repetido) return error(409, `Ya tienes «${nombre}» en los gastos fijos.`);
   await db.prepare('INSERT INTO compromisos (nombre, monto, dia, creado) VALUES (?, ?, ?, ?)').bind(nombre, Math.round(monto), dia, ahora()).run();
   return json({ ok: true }, 201);
 });

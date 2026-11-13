@@ -36,6 +36,7 @@ const Cifra = ({ titulo, datos }) => (
 const Plata = () => {
   const [d, setD] = useState(null);
   const [error, setError] = useState('');
+  const [cargandoFijos, setCargandoFijos] = useState(false);
   const [hoja, setHoja] = useState(null);
   const [aviso, setAviso] = useState('');
   const avisoT = useRef();
@@ -159,13 +160,17 @@ const Plata = () => {
                 <button
                   type="button"
                   className="btn btn--sm"
+                  disabled={cargandoFijos}
                   onClick={async () => {
-                    for (const f of FIJOS_SUGERIDOS) await post('plata/compromisos', f);
+                    if (cargandoFijos) return;
+                    setCargandoFijos(true);
+                    for (const f of FIJOS_SUGERIDOS) await post('plata/compromisos', f).catch(() => {});
+                    setCargandoFijos(false);
                     mostrar('Cargué los gastos fijos de tu planilla. Ajusta los montos si cambiaron.');
                     cargar();
                   }}
                 >
-                  Cargar los de mi planilla
+                  {cargandoFijos ? 'Cargando…' : 'Cargar los de mi planilla'}
                 </button>
               </div>
             ) : (
