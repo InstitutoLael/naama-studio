@@ -2150,7 +2150,8 @@ ruta('GET', /^agenda$/, { sesion: true }, async ({ db, cuenta, request }) => {
     ok: true,
     hoy,
     fecha,
-    puedeAgendarATodas: tiene(cuenta, 'clientas'),
+    puedeAgendarATodas: true,
+    verNumeros: tiene(cuenta, 'clientas'),
     personas: personas.map((p) => ({ id: p.id, nombre: p.nombre, dispo: dispo.find((d) => d.cuenta_id === p.id)?.estado ?? null })),
     citas: results.map((c) => citaPublica(c, verTel)),
   });
@@ -2178,7 +2179,6 @@ ruta('POST', /^agenda$/, { sesion: true }, async ({ db, env, cuenta, body }) => 
   const minutos = numero(body.minutos, { min: 15, max: 480 }) ?? minutosDe(servicio);
   if (!fecha || !hora || !clienta) return error(400, 'Falta el día, la hora o la clienta.');
   if (fecha < fechaChile()) return error(400, 'Ese día ya pasó.');
-  if (cuentaId !== cuenta.id && !tiene(cuenta, 'clientas')) return error(403, 'Solo puedes agendar en tu propia agenda.');
   const quien = await db.prepare('SELECT id, nombre FROM cuentas WHERE id = ? AND activa = 1').bind(cuentaId).first();
   if (!quien) return error(400, 'Esa persona no existe.');
   const c = await choque(db, { fecha, hora, minutos, cuentaId });
@@ -2220,7 +2220,6 @@ ruta('POST', /^agenda\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, par
   const hora = HORA.test(body.hora ?? '') ? body.hora : c.hora;
   const minutos = numero(body.minutos, { min: 15, max: 480 }) ?? c.minutos;
   const cuentaId = body.cuentaId ? Number(body.cuentaId) : c.cuenta_id;
-  if (cuentaId !== cuenta.id && cuentaId !== c.cuenta_id && !tiene(cuenta, 'clientas')) return error(403, 'Solo puedes agendar en tu propia agenda.');
   const x = await choque(db, { fecha, hora, minutos, cuentaId, sinId: c.id });
   if (x) return error(409, `Choca con ${x.clienta} a las ${x.hora}.`);
   await db
