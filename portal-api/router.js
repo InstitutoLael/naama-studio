@@ -259,6 +259,11 @@ ruta('POST', /^cuentas\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, cuenta, bo
   const extras = body.extras ?? JSON.parse(actual.extras);
   const nombre = body.nombre !== undefined ? limpiarNombre(body.nombre) : actual.nombre;
   const activa = body.activa !== undefined ? (body.activa ? 1 : 0) : actual.activa;
+  const email = body.email !== undefined ? limpiarEmail(body.email) : actual.email;
+  if (!emailValido(email)) return error(400, 'Revisa el correo.');
+  if (email !== actual.email && (await db.prepare('SELECT id FROM cuentas WHERE email = ? AND id != ?').bind(email, id).first())) {
+    return error(409, 'Ya hay una cuenta con ese correo.');
+  }
   const malo = validarRolExtras(rol, extras);
   if (malo) return error(400, malo);
   if (!nombre) return error(400, 'El nombre no puede quedar vacío.');
@@ -267,8 +272,8 @@ ruta('POST', /^cuentas\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, cuenta, bo
     return error(400, 'No puedes quitarte tu propio acceso. Pídeselo a otra persona de Administración.');
   }
   await db
-    .prepare('UPDATE cuentas SET nombre = ?, rol = ?, extras = ?, activa = ? WHERE id = ?')
-    .bind(nombre, rol, JSON.stringify([...new Set(extras)]), activa, id)
+    .prepare('UPDATE cuentas SET nombre = ?, email = ?, rol = ?, extras = ?, activa = ? WHERE id = ?')
+    .bind(nombre, email, rol, JSON.stringify([...new Set(extras)]), activa, id)
     .run();
   if (!activa) await db.prepare('DELETE FROM sesiones WHERE cuenta_id = ?').bind(id).run();
   await registrar(db, cuenta.id, 'editar_cuenta', { id, rol, activa });

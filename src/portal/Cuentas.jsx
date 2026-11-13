@@ -127,6 +127,7 @@ const NuevaCuenta = ({ onCreada, onCerrar }) => {
 const EditarCuenta = ({ cuenta, esYo, onGuardada, onClave, onCerrar }) => {
   const [rol, setRol] = useState(cuenta.rol);
   const [extras, setExtras] = useState(cuenta.extras);
+  const [email, setEmail] = useState(cuenta.email);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const guardar = async (cambios) => {
@@ -142,11 +143,15 @@ const EditarCuenta = ({ cuenta, esYo, onGuardada, onClave, onCerrar }) => {
   };
   return (
     <Hoja titulo={cuenta.nombre} onCerrar={onCerrar}>
-      <p className="muted">{cuenta.email}</p>
+      <div className="field">
+        <label htmlFor="ec-email">Correo</label>
+        <input id="ec-email" type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
+        {cuenta.email.endsWith('@pendiente.naamastudio.cl') && <small className="muted">Correo provisorio: pon el suyo y después «Restablecer clave» para mandarle su acceso.</small>}
+      </div>
       <RolYPermisos rol={rol} extras={extras} onRol={setRol} onExtras={setExtras} />
       {error && <p className="portal-error" role="alert">{error}</p>}
       <div className="hoja__acciones">
-        <button type="button" className="btn" disabled={enviando} onClick={() => guardar({ rol, extras })}>
+        <button type="button" className="btn" disabled={enviando} onClick={() => guardar({ rol, extras, email })}>
           Guardar cambios
         </button>
         <button
