@@ -208,7 +208,7 @@ const Plata = () => {
                       <strong>{pesos(p.bruto)}</strong>
                       <small>
                         {hora(p.fecha)} · {MEDIOS[p.medio] ?? p.medio ?? '—'}
-                        {p.estado !== 'approved' ? ` · ${p.estado === 'rejected' ? 'rechazado' : p.estado}` : ''}
+                        {p.estado !== 'approved' ? ` · ${p.estadoTexto ?? p.estado}` : ''}
                       </small>
                     </span>
                     {p.estado === 'approved' && (

@@ -358,6 +358,7 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
   env.MP_ACCESS_TOKEN = 'TEST-llave';
   env.MP_FETCH = async (url, opciones) => {
     assert.equal(opciones.headers.Authorization, 'Bearer TEST-llave');
+    if (url.endsWith('/users/me')) return new Response(JSON.stringify({ id: 99 }));
     assert.match(url, /payments\/search/);
     return new Response(
       JSON.stringify({
@@ -365,6 +366,8 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
           { id: 1, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 30000, fee_details: [{ amount: 1050 }], transaction_details: { net_received_amount: 28950 }, money_release_status: 'pending', money_release_date: ahora, payment_type_id: 'credit_card' },
           { id: 2, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 10000, fee_details: [{ amount: 350 }], transaction_details: { net_received_amount: 9650 }, money_release_status: 'released', payment_type_id: 'debit_card' },
           { id: 3, status: 'rejected', date_created: ahora, transaction_amount: 5000, fee_details: [] },
+          { id: 4, status: 'approved', collector_id: 555, date_created: ahora, date_approved: ahora, transaction_amount: 14990, fee_details: [], payment_type_id: 'account_money' },
+          { id: 5, status: 'authorized', collector_id: 99, date_created: ahora, transaction_amount: 5500, fee_details: [], payment_type_id: 'account_money' },
         ],
       }),
     );
@@ -378,6 +381,8 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
   assert.equal(r.data.hoyMP.neto, 38600);
   assert.equal(r.data.porLiberar.total, 28950);
   assert.equal(r.data.disponible, 600000);
+  assert.equal(r.data.porDia.length, 14);
+  assert.deepEqual(r.data.ultimos.map((p) => p.id).sort(), [1, 2]);
   const arriendo = r.data.compromisos[0];
   await admin.post(`plata/compromisos/${arriendo.id}`, { pagado: true });
   assert.equal((await admin.pedir('plata')).data.disponible, 1500000);
