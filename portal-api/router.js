@@ -866,6 +866,17 @@ export const desfaseChile = (d = new Date()) => {
 
 const mesChile = () => fechaChile().slice(0, 7);
 
+/** Id de la cuenta de Mercado Pago dueña de la llave (para quedarnos solo con lo que le pagan a Naamá). */
+async function cuentaMP(env) {
+  try {
+    const r = await (env.MP_FETCH ?? fetch)(`${MP}/users/me`, { headers: { Authorization: `Bearer ${env.MP_ACCESS_TOKEN}` } });
+    if (!r.ok) return null;
+    return (await r.json()).id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function pagosMP(env, desde) {
   const llamar = env.MP_FETCH ?? fetch;
   const pagos = [];
@@ -906,8 +917,15 @@ const resumirPago = (p) => {
     libera: p.money_release_date,
     liberado: p.money_release_status === 'released',
     detalle: p.description ?? null,
+    cobrador: p.collector_id ?? p.collector?.id ?? null,
+    operacion: p.operation_type ?? null,
   };
 };
+
+/** Movimientos que no son ventas: pagos que hace Naamá, recargas, inversiones, etc. */
+const NO_VENTA = new Set(['account_fund', 'investment', 'cellphone_recharge', 'money_exchange', 'recurring_payment', 'payment_addition']);
+
+const PALABRAS_ESTADO = { approved: 'aprobado', refunded: 'devuelto', charged_back: 'contracargo', cancelled: 'anulado', in_mediation: 'en reclamo' };
 
 const sumar = (lista) => ({
   cantidad: lista.length,
@@ -938,10 +956,14 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
   const desde = haceDias(45) < `${mes}-01` ? haceDias(45) : `${mes}-01`;
   let pagos;
   try {
-    pagos = (await pagosMP(env, desde)).map(resumirPago);
+    const [crudos, yo] = await Promise.all([pagosMP(env, desde), cuentaMP(env)]);
+    pagos = crudos
+      .map(resumirPago)
+      .filter((p) => (yo == null || p.cobrador == null || String(p.cobrador) === String(yo)) && !NO_VENTA.has(p.operacion));
   } catch (e) {
     return json({ ...base, conectado: true, errorMP: e.message });
   }
+  pagos.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
   const aprobados = pagos.filter((p) => p.estado === 'approved');
   const semana = haceDias(6);
   const porLiberar = aprobados.filter((p) => !p.liberado && p.libera);
@@ -951,7 +973,8 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
     calendario.set(d, (calendario.get(d) ?? 0) + p.neto);
   }
   const porDia = new Map();
-  for (const p of aprobados.filter((x) => x.dia >= haceDias(13))) porDia.set(p.dia, (porDia.get(p.dia) ?? 0) + p.bruto);
+  for (let i = 13; i >= 0; i--) porDia.set(haceDias(i), 0);
+  for (const p of aprobados.filter((x) => porDia.has(x.dia))) porDia.set(p.dia, porDia.get(p.dia) + p.bruto);
   return json({
     ...base,
     conectado: true,
@@ -964,7 +987,10 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
     },
     devueltos: pagos.filter((p) => ['refunded', 'charged_back', 'cancelled'].includes(p.estado) && p.dia.startsWith(mes)).length,
     porDia: [...porDia.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([dia, bruto]) => ({ dia, bruto: Math.round(bruto) })),
-    ultimos: pagos.slice(0, 25),
+    ultimos: pagos
+      .filter((p) => PALABRAS_ESTADO[p.estado])
+      .slice(0, 25)
+      .map(({ cobrador, operacion, ...p }) => ({ ...p, estadoTexto: PALABRAS_ESTADO[p.estado] })),
   });
 });
 
