@@ -54,7 +54,7 @@ export const MODULOS = [
   { id: 'mi-mes', nombre: 'Mi mes', bajada: 'Tus servicios y tu honorario', permiso: null },
   { id: 'servicios', nombre: 'Registrar servicios', bajada: 'Directo a la planilla', permiso: 'servicios' },
   { id: 'caja', nombre: 'Cierre de caja', bajada: 'Efectivo, MP y transferencias', permiso: 'caja' },
-  { id: 'finanzas', nombre: 'Finanzas', bajada: 'Ingresos, gastos y saldos', permiso: 'finanzas' },
+  { id: 'plata', nombre: 'La plata', bajada: 'Mercado Pago, disponible y gastos fijos', permiso: 'finanzas', listo: true },
   { id: 'legal', nombre: 'Legal y pagos', bajada: 'Impuestos, honorarios, documentos', permiso: 'legal' },
   { id: 'cuentas', nombre: 'Cuentas', bajada: 'Quién entra y qué ve', permiso: 'cuentas', listo: true },
 ];

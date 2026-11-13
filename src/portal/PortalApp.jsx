@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Ellipsis, House, KeyRound, LogOut, Package, ShoppingBag, Smartphone, UsersRound } from 'lucide-react';
+import { Ellipsis, House, KeyRound, LogOut, Package, ShoppingBag, Smartphone, UsersRound, Wallet } from 'lucide-react';
 import Logo from '../components/common/Logo';
 import { api, post } from './api';
 import { Configurar, CrearClave, Entrar } from './Acceso';
@@ -9,6 +9,7 @@ import Cuentas from './Cuentas';
 import Clientas from './Clientas';
 import Insumos from './Insumos';
 import Compras from './Compras';
+import Plata from './Plata';
 import Instalar, { esApp, registrarAppPortal } from './Instalar';
 import Hoja from './Hoja';
 import { MODULOS, ROLES, puede } from './permisos';
@@ -41,7 +42,8 @@ const pestanas = (cuenta) => [
   { to: '/portal/clientas', label: 'Clientas', Icono: UsersRound },
   { to: '/portal/insumos', label: 'Insumos', Icono: Package },
   { to: '/portal/compras', label: 'Compras', Icono: ShoppingBag },
-  // Equipo va en la barra lateral del computador; en el celular está en «Más».
+  // Plata y Equipo van en la barra lateral del computador; en el celular están en «Más» y en Inicio.
+  ...(puede(cuenta, 'finanzas') ? [{ to: '/portal/plata', label: 'Plata', Icono: Wallet, soloCompu: true }] : []),
   ...(puede(cuenta, 'cuentas') ? [{ to: '/portal/cuentas', label: 'Equipo', Icono: KeyRound, soloCompu: true }] : []),
 ];
 
@@ -84,6 +86,13 @@ const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
         </span>
       </div>
       <ul className="grupo-lista">
+        {puede(cuenta, 'finanzas') && (
+          <li>
+            <Link to="/portal/plata" className="fila-lista" onClick={onCerrar}>
+              <Wallet strokeWidth={1.6} /> La plata
+            </Link>
+          </li>
+        )}
         {puede(cuenta, 'cuentas') && (
           <li>
             <Link to="/portal/cuentas" className="fila-lista" onClick={onCerrar}>
@@ -230,6 +239,7 @@ const PortalApp = () => {
             <Route path="clientas" element={<Clientas />} />
             <Route path="insumos" element={<Insumos cuenta={cuenta} />} />
             <Route path="compras" element={<Compras />} />
+            <Route path="plata" element={puede(cuenta, 'finanzas') ? <Plata /> : <Navigate to="/portal" replace />} />
             <Route path="cuentas" element={puede(cuenta, 'cuentas') ? <Cuentas yo={cuenta} /> : <Navigate to="/portal" replace />} />
             <Route path="*" element={<Navigate to="/portal" replace />} />
           </Routes>
