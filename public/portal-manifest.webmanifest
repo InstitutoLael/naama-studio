@@ -7,24 +7,24 @@
   "scope": "/portal",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#ecd6cc",
+  "background_color": "#b9674b",
   "theme_color": "#f8f3ed",
   "lang": "es-CL",
   "icons": [
     {
-      "src": "/portal-icono-192.png",
+      "src": "/app-naama-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/portal-icono-512.png",
+      "src": "/app-naama-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/portal-icono-maskable-512.png",
+      "src": "/app-naama-maskable.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

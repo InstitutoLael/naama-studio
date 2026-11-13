@@ -36,7 +36,7 @@ const usePortalHead = () => {
     link?.setAttribute('href', '/portal-manifest.webmanifest');
     const apple = document.querySelector('link[rel="apple-touch-icon"]');
     const appleAntes = apple?.getAttribute('href');
-    apple?.setAttribute('href', '/portal-apple-touch.png');
+    apple?.setAttribute('href', '/app-naama-apple.png');
     document.documentElement.classList.add('en-portal');
     registrarAppPortal();
     return () => {

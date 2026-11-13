@@ -152,7 +152,7 @@ const render = (r) => {
     html = html
       .replace('<link rel="manifest" href="/manifest.json" />', '<link rel="manifest" href="/portal-manifest.webmanifest" />')
       .replace('<meta name="theme-color" content="#17110e" />', '<meta name="theme-color" content="#f8f3ed" />')
-      .replace('<link rel="apple-touch-icon" href="/apple-touch-icon.png" />', '<link rel="apple-touch-icon" href="/portal-apple-touch.png" />')
+      .replace('<link rel="apple-touch-icon" href="/apple-touch-icon.png" />', '<link rel="apple-touch-icon" href="/app-naama-apple.png" />')
       .replace(
         '</head>',
         [
