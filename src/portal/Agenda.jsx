@@ -6,7 +6,7 @@ import Hoja from './Hoja';
 import { CATALOGO, minutosDe } from './servicios';
 
 const ABRE = 10 * 60; // 10:00
-const CIERRA = 20 * 60; // 20:00
+const CIERRA = 21 * 60; // 21:00 (los procesos largos de color terminan tarde)
 const PX = 1.4; // píxeles por minuto
 const ESTADOS = [
   ['agendada', 'Agendada'],
@@ -24,7 +24,7 @@ const moverDia = (f, n) => {
   return d.toISOString().slice(0, 10);
 };
 const primer = (n) => n.split(' ')[0];
-const DURACIONES = [30, 45, 60, 90, 120, 150, 180];
+const DURACIONES = [30, 45, 60, 90, 120, 150, 180, 210, 240, 300, 360, 420, 480];
 
 /** Mensaje bonito para recordarle la hora a la clienta (va por WhatsApp). */
 export const mensajeRecordatorio = (c) => {
