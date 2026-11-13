@@ -33,7 +33,7 @@ const capitalizar = (p) =>
 /** Devuelve { nombre, nota } a partir de cómo está guardado el contacto. */
 export function limpiarNombre(original = '') {
   const texto = String(original)
-    .replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|[\u{1F3FB}-\u{1F3FF}\u20E3]|️|‍|�/gu, ' ')
+    .replace(/\p{Extended_Pictographic}|\p{Emoji_Modifier}|\u20E3|\uFE0F|\u200D|\uFFFD/gu, ' ')
     .replace(/[()[\]{}|/\\_*.,;:!?¡¿"“”'«»#@+=~^<>]/g, ' ')
     .replace(/\d+\s*(ro|ero|do|to|vo|no|mo|°|º)?(?=\s|$)/gi, ' ')
     .replace(/\d+/g, ' ');
