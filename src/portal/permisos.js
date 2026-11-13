@@ -53,6 +53,7 @@ export const puedeModulo = (cuenta, m) => !m.permiso || [].concat(m.permiso).som
 export const MODULOS = [
   { id: 'agenda', nombre: 'Agenda', bajada: 'Las horas de cada una', permiso: null, listo: true },
   { id: 'disponibilidad', nombre: 'Mi disponibilidad', corto: 'Disponibilidad', bajada: 'Cuándo vienes y quién está', permiso: null, listo: true },
+  { id: 'precios', nombre: 'Precios', bajada: 'Cuánto sale cada servicio', permiso: null, listo: true },
   { id: 'clientas', nombre: 'Clientas', bajada: 'Sube contactos y anota quién vino', permiso: null, listo: true },
   { id: 'insumos', nombre: 'Insumos', bajada: 'Anota lo que usaste y mira lo que queda', permiso: null, listo: true },
   { id: 'compras', nombre: 'Lista de compras', bajada: 'Pide lo que falta', permiso: null, listo: true },

@@ -11,6 +11,7 @@ import {
   Package,
   Receipt,
   Scale,
+  Tags,
   ShoppingBag,
   UserRound,
   UsersRound,
@@ -19,6 +20,7 @@ import {
 
 export const ICONO_MODULO = {
   agenda: CalendarClock,
+  precios: Tags,
   disponibilidad: CalendarDays,
   'te-toca': BellRing,
   aseo: ListChecks,
