@@ -925,6 +925,14 @@ const resumirPago = (p) => {
 /** Movimientos que no son ventas: pagos que hace Naamá, recargas, inversiones, etc. */
 const NO_VENTA = new Set(['investment', 'cellphone_recharge', 'money_exchange', 'recurring_payment', 'payment_addition']);
 
+const sinTildes = (t) => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const GENERICAS = new Set(['plan', 'pago', 'cuenta', 'servicio', 'mensual']);
+/** Palabras del nombre del gasto fijo que sirven para reconocerlo en el detalle del pago («Luz (Enel)» → enel). */
+const clavesGasto = (nombre) =>
+  sinTildes(nombre)
+    .split(/[^a-z0-9]+/)
+    .filter((w) => w.length >= 4 && !GENERICAS.has(w));
+
 const PALABRAS_ESTADO = { approved: 'aprobado', refunded: 'devuelto', charged_back: 'contracargo', cancelled: 'anulado', in_mediation: 'en reclamo' };
 
 const sumar = (lista) => ({
@@ -976,13 +984,19 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
   const usadas = new Set();
   let marcados = 0;
   for (const c of base.compromisos.filter((x) => !x.pagado)) {
-    const s = salidas.find((x) => !usadas.has(x.id) && !yaUsadas.has(x.id) && Math.abs(x.bruto - c.monto) <= 1);
+    const claves = clavesGasto(c.nombre);
+    const libre = (x) => !usadas.has(x.id) && !yaUsadas.has(x.id);
+    const s =
+      salidas.find((x) => libre(x) && Math.abs(x.bruto - c.monto) <= 1) ??
+      salidas.find((x) => libre(x) && claves.some((k) => sinTildes(x.detalle ?? '').includes(k)));
     if (!s) continue;
     usadas.add(s.id);
     yaUsadas.add(s.id);
     await db.prepare('UPDATE compromisos SET pagado_mes = ? WHERE id = ?').bind(mes, c.id).run();
     c.pagado = true;
     c.pagadoMP = s.dia;
+    c.pagadoMonto = s.bruto;
+    c.pagadoDetalle = s.detalle;
     marcados += c.monto;
   }
   if (usadas.size) {
