@@ -146,10 +146,60 @@ const TABLAS = [
     por TEXT,
     creado TEXT NOT NULL
   )`,
+  // Servicios que anota Administración; cada uno se manda a la planilla del mes.
+  `CREATE TABLE IF NOT EXISTS servicios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL,
+    clienta TEXT NOT NULL,
+    clienta_id INTEGER,
+    profesional TEXT NOT NULL,
+    servicio TEXT NOT NULL,
+    categoria TEXT,
+    medio TEXT NOT NULL,
+    monto INTEGER NOT NULL,
+    propina INTEGER NOT NULL DEFAULT 0,
+    comision REAL NOT NULL,
+    turno TEXT,
+    token TEXT NOT NULL UNIQUE,
+    estado TEXT NOT NULL DEFAULT 'pendiente',
+    hoja TEXT,
+    fila INTEGER,
+    error TEXT,
+    por TEXT,
+    creado TEXT NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS servicios_fecha ON servicios (fecha)`,
+  `CREATE TABLE IF NOT EXISTS cierres (
+    fecha TEXT PRIMARY KEY,
+    datos TEXT NOT NULL,
+    efectivo INTEGER,
+    nota TEXT,
+    por TEXT,
+    ts TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS disponibilidad (
+    cuenta_id INTEGER NOT NULL,
+    fecha TEXT NOT NULL,
+    estado TEXT NOT NULL,
+    nota TEXT,
+    ts TEXT NOT NULL,
+    PRIMARY KEY (cuenta_id, fecha)
+  )`,
+  // «Mi mes»: lo que anota cada trabajadora. No va a la planilla; sirve para revisar antes de pagar.
+  `CREATE TABLE IF NOT EXISTS mis_servicios (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cuenta_id INTEGER NOT NULL,
+    fecha TEXT NOT NULL,
+    clienta TEXT,
+    servicio TEXT NOT NULL,
+    monto INTEGER,
+    nota TEXT,
+    creado TEXT NOT NULL
+  )`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v5';
+export const HUELLA = 'v6';
 
 let listo = false;
 

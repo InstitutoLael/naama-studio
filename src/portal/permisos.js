@@ -47,14 +47,14 @@ export const puede = (cuenta, permiso) => Boolean(cuenta?.permisos?.includes(per
 
 // Módulos del panel. `permiso: null` = lo tienen todas las cuentas.
 export const MODULOS = [
-  { id: 'disponibilidad', nombre: 'Mi disponibilidad', bajada: 'Tus días y horas libres', permiso: null },
+  { id: 'disponibilidad', nombre: 'Mi disponibilidad', corto: 'Disponibilidad', bajada: 'Cuándo vienes y quién está', permiso: null, listo: true },
   { id: 'clientas', nombre: 'Clientas', bajada: 'Sube contactos y anota quién vino', permiso: null, listo: true },
   { id: 'insumos', nombre: 'Insumos', bajada: 'Anota lo que usaste y mira lo que queda', permiso: null, listo: true },
   { id: 'compras', nombre: 'Lista de compras', bajada: 'Pide lo que falta', permiso: null, listo: true },
-  { id: 'mi-mes', nombre: 'Mi mes', bajada: 'Tus servicios y tu honorario', permiso: null },
-  { id: 'servicios', nombre: 'Registrar servicios', bajada: 'Directo a la planilla', permiso: 'servicios' },
-  { id: 'caja', nombre: 'Cierre de caja', bajada: 'Efectivo, MP y transferencias', permiso: 'caja' },
-  { id: 'plata', nombre: 'La plata', bajada: 'Mercado Pago, disponible y gastos fijos', permiso: 'finanzas', listo: true },
+  { id: 'mi-mes', nombre: 'Mi mes', bajada: 'Anota lo que hiciste este mes', permiso: null, listo: true },
+  { id: 'servicios', nombre: 'Anotar servicios', corto: 'Servicios', bajada: 'Directo a la planilla', permiso: 'servicios', listo: true },
+  { id: 'caja', nombre: 'Cierre de caja', corto: 'Caja', bajada: 'Efectivo, máquina y transferencias', permiso: 'caja', listo: true },
+  { id: 'plata', nombre: 'La plata', corto: 'Plata', bajada: 'Mercado Pago, disponible y gastos fijos', permiso: 'finanzas', listo: true },
   { id: 'legal', nombre: 'Legal y pagos', bajada: 'Impuestos, honorarios, documentos', permiso: 'legal' },
-  { id: 'cuentas', nombre: 'Cuentas', bajada: 'Quién entra y qué ve', permiso: 'cuentas', listo: true },
+  { id: 'cuentas', nombre: 'Cuentas', corto: 'Equipo', bajada: 'Quién entra y qué ve', permiso: 'cuentas', listo: true },
 ];
