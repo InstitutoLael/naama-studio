@@ -923,7 +923,7 @@ const resumirPago = (p) => {
 };
 
 /** Movimientos que no son ventas: pagos que hace Naamá, recargas, inversiones, etc. */
-const NO_VENTA = new Set(['account_fund', 'investment', 'cellphone_recharge', 'money_exchange', 'recurring_payment', 'payment_addition']);
+const NO_VENTA = new Set(['investment', 'cellphone_recharge', 'money_exchange', 'recurring_payment', 'payment_addition']);
 
 const PALABRAS_ESTADO = { approved: 'aprobado', refunded: 'devuelto', charged_back: 'contracargo', cancelled: 'anulado', in_mediation: 'en reclamo' };
 
@@ -955,15 +955,46 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
 
   const desde = haceDias(45) < `${mes}-01` ? haceDias(45) : `${mes}-01`;
   let pagos;
+  let salidas = [];
   try {
     const [crudos, yo] = await Promise.all([pagosMP(env, desde), cuentaMP(env)]);
-    pagos = crudos
-      .map(resumirPago)
-      .filter((p) => (yo == null || p.cobrador == null || String(p.cobrador) === String(yo)) && !NO_VENTA.has(p.operacion));
+    const todos = crudos.map(resumirPago);
+    const esMio = (p) => yo == null || p.cobrador == null || String(p.cobrador) === String(yo);
+    pagos = todos.filter((p) => esMio(p) && !NO_VENTA.has(p.operacion));
+    salidas = todos
+      .filter((p) => !esMio(p) && p.estado === 'approved' && p.dia.startsWith(mes))
+      .sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
   } catch (e) {
     return json({ ...base, conectado: true, errorMP: e.message });
   }
   pagos.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
+
+  // Si Naamá pagó por Mercado Pago este mes el monto exacto de un gasto fijo, se marca solo como pagado.
+  // Cada pago se usa una sola vez: si alguien desmarca el gasto, no se vuelve a marcar solo.
+  const filaAuto = await db.prepare(`SELECT valor FROM meta WHERE clave = 'mp_auto'`).first();
+  const yaUsadas = new Set(filaAuto ? JSON.parse(filaAuto.valor) : []);
+  const usadas = new Set();
+  let marcados = 0;
+  for (const c of base.compromisos.filter((x) => !x.pagado)) {
+    const s = salidas.find((x) => !usadas.has(x.id) && !yaUsadas.has(x.id) && Math.abs(x.bruto - c.monto) <= 1);
+    if (!s) continue;
+    usadas.add(s.id);
+    yaUsadas.add(s.id);
+    await db.prepare('UPDATE compromisos SET pagado_mes = ? WHERE id = ?').bind(mes, c.id).run();
+    c.pagado = true;
+    c.pagadoMP = s.dia;
+    marcados += c.monto;
+  }
+  if (usadas.size) {
+    await db
+      .prepare(`INSERT INTO meta (clave, valor) VALUES ('mp_auto', ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor`)
+      .bind(JSON.stringify([...yaUsadas].slice(-300)))
+      .run();
+  }
+  if (marcados) {
+    base.porPagar -= marcados;
+    base.disponible = saldo ? saldo.monto - base.porPagar : null;
+  }
   const aprobados = pagos.filter((p) => p.estado === 'approved');
   const semana = haceDias(6);
   const porLiberar = aprobados.filter((p) => !p.liberado && p.libera);
@@ -987,6 +1018,8 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
     },
     devueltos: pagos.filter((p) => ['refunded', 'charged_back', 'cancelled'].includes(p.estado) && p.dia.startsWith(mes)).length,
     porDia: [...porDia.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([dia, bruto]) => ({ dia, bruto: Math.round(bruto) })),
+    salidas: salidas.slice(0, 40).map((p) => ({ id: p.id, dia: p.dia, fecha: p.fecha, monto: p.bruto, detalle: p.detalle, medio: p.medio, gastoFijo: usadas.has(p.id) })),
+    totalSalidas: Math.round(salidas.reduce((a, p) => a + p.bruto, 0)),
     ultimos: pagos
       .filter((p) => PALABRAS_ESTADO[p.estado])
       .slice(0, 25)

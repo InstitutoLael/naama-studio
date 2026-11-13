@@ -188,7 +188,7 @@ const Plata = () => {
                     </button>
                     <span className="compromiso__texto">
                       <strong>{c.nombre}</strong>
-                      <small>{c.dia ? `vence el ${c.dia}` : 'sin fecha'}</small>
+                      <small>{c.pagadoMP ? `pagado por Mercado Pago el ${diaCorto(c.pagadoMP)}` : c.dia ? `vence el ${c.dia}` : 'sin fecha'}</small>
                     </span>
                     <strong className="compromiso__monto">{pesos(c.monto)}</strong>
                     <button type="button" className="icono-boton" aria-label={`Editar ${c.nombre}`} onClick={() => setHoja({ tipo: 'compromiso', c })}>
@@ -202,6 +202,25 @@ const Plata = () => {
               + Agregar gasto fijo
             </button>
           </section>
+
+          {d.conectado && d.salidas?.length > 0 && (
+            <section>
+              <h2 className="seccion__titulo">Lo que pagó Naamá por Mercado Pago este mes · {pesos(d.totalSalidas)}</h2>
+              <ul className="cuentas">
+                {d.salidas.map((p) => (
+                  <li key={p.id} className="pago">
+                    <span className="pago__texto">
+                      <strong>{pesos(p.monto)}</strong>
+                      <small>
+                        {hora(p.fecha)} · {p.detalle || MEDIOS[p.medio] || 'Pago'}
+                        {p.gastoFijo ? ' · gasto fijo ✓' : ''}
+                      </small>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {d.conectado && d.ultimos?.length > 0 && (
             <section>
