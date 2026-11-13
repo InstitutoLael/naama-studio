@@ -2112,6 +2112,7 @@ const citaPublica = (c, verTel) => ({
   recordada: c.recordada,
   alergias: c.alergias ?? null,
   faltas: c.faltas ?? 0,
+  sobrecupo: Boolean(c.sobrecupo),
   ...(verTel ? { telefono: c.telefono ?? c.tel_clienta ?? null } : {}),
 });
 
@@ -2132,6 +2133,7 @@ async function choque(db, { fecha, hora, minutos, cuentaId, sinId = 0 }) {
 }
 
 const CITAS_SQL = `SELECT ci.*, cu.nombre AS quien, cl.telefono AS tel_clienta, fi.alergias AS alergias,
+  (SELECT 1 FROM citas_sobrecupo so WHERE so.cita_id = ci.id) AS sobrecupo,
   (SELECT COUNT(*) FROM citas x WHERE lower(x.clienta) = lower(ci.clienta) AND x.estado = 'no-vino') AS faltas
   FROM citas ci JOIN cuentas cu ON cu.id = ci.cuenta_id LEFT JOIN clientas cl ON cl.id = ci.clienta_id
   LEFT JOIN fichas fi ON fi.clienta_id = ci.clienta_id`;
@@ -2181,8 +2183,9 @@ ruta('POST', /^agenda$/, { sesion: true }, async ({ db, env, cuenta, body }) => 
   if (fecha < fechaChile()) return error(400, 'Ese día ya pasó.');
   const quien = await db.prepare('SELECT id, nombre FROM cuentas WHERE id = ? AND activa = 1').bind(cuentaId).first();
   if (!quien) return error(400, 'Esa persona no existe.');
-  const c = await choque(db, { fecha, hora, minutos, cuentaId });
-  if (c) return error(409, `${quien.nombre} ya tiene a ${c.clienta} a las ${c.hora} (${c.minutos} min).`);
+  const sobrecupo = Boolean(body.sobrecupo);
+  const c = sobrecupo ? null : await choque(db, { fecha, hora, minutos, cuentaId });
+  if (c) return json({ ok: false, choque: true, error: `${quien.nombre} ya tiene a ${c.clienta} a las ${c.hora} (${c.minutos} min).` }, 409);
   const tel = tiene(cuenta, 'clientas') && body.telefono ? normalizarTelefono(body.telefono) : null;
   const ligada = body.clientaId
     ? Number(body.clientaId)
@@ -2194,6 +2197,7 @@ ruta('POST', /^agenda$/, { sesion: true }, async ({ db, env, cuenta, body }) => 
     )
     .bind(fecha, hora, Math.round(minutos), cuentaId, clienta, ligada, tel, servicio, texto(body.nota, 160) || null, cuenta.id, cuenta.nombre, ahora(), cuentaId === cuenta.id ? 1 : 0)
     .run();
+  if (sobrecupo) await db.prepare('INSERT OR IGNORE INTO citas_sobrecupo (cita_id) VALUES (?)').bind(r.meta.last_row_id).run();
   const avisadas = await avisarCita(db, env, r.meta.last_row_id, cuenta.id).catch(() => 0);
   return json({ ok: true, id: r.meta.last_row_id, avisadas }, 201);
 });
@@ -2205,6 +2209,7 @@ ruta('POST', /^agenda\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, par
   if (!puede) return error(403, 'Esa cita es de otra persona.');
   if (body.borrar) {
     await db.prepare('DELETE FROM citas WHERE id = ?').bind(c.id).run();
+    await db.prepare('DELETE FROM citas_sobrecupo WHERE cita_id = ?').bind(c.id).run();
     return json({ ok: true });
   }
   if (body.recordada) {
@@ -2220,8 +2225,14 @@ ruta('POST', /^agenda\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, par
   const hora = HORA.test(body.hora ?? '') ? body.hora : c.hora;
   const minutos = numero(body.minutos, { min: 15, max: 480 }) ?? c.minutos;
   const cuentaId = body.cuentaId ? Number(body.cuentaId) : c.cuenta_id;
-  const x = await choque(db, { fecha, hora, minutos, cuentaId, sinId: c.id });
-  if (x) return error(409, `Choca con ${x.clienta} a las ${x.hora}.`);
+  const yaSobrecupo = Boolean(await db.prepare('SELECT 1 AS s FROM citas_sobrecupo WHERE cita_id = ?').bind(c.id).first());
+  const sobrecupo = body.sobrecupo === undefined ? yaSobrecupo : Boolean(body.sobrecupo);
+  const x = sobrecupo ? null : await choque(db, { fecha, hora, minutos, cuentaId, sinId: c.id });
+  if (x) return json({ ok: false, choque: true, error: `Choca con ${x.clienta} a las ${x.hora}.` }, 409);
+  await db
+    .prepare(sobrecupo ? 'INSERT OR IGNORE INTO citas_sobrecupo (cita_id) VALUES (?)' : 'DELETE FROM citas_sobrecupo WHERE cita_id = ?')
+    .bind(c.id)
+    .run();
   await db
     .prepare('UPDATE citas SET fecha = ?, hora = ?, minutos = ?, cuenta_id = ?, clienta = ?, servicio = ?, nota = ?, visto = ? WHERE id = ?')
     .bind(fecha, hora, Math.round(minutos), cuentaId, texto(body.clienta, 60) || c.clienta, texto(body.servicio, 60) || c.servicio, texto(body.nota, 160) || null, cuentaId === cuenta.id ? 1 : 0, c.id)

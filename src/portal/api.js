@@ -26,6 +26,7 @@ export async function api(camino, { metodo = 'GET', body } = {}) {
   if (!res.ok || !data?.ok) {
     const err = new Error(data?.error ?? 'Algo falló. Inténtalo de nuevo.');
     err.status = res.status;
+    err.choque = Boolean(data?.choque);
     throw err;
   }
   return data;
