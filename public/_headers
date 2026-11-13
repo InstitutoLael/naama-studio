@@ -15,3 +15,8 @@
 # El service worker nunca debe quedar en caché.
 /sw.js
   Cache-Control: no-cache
+
+# Service worker del portal: nunca en caché y puede controlar /portal.
+/portal-sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /portal

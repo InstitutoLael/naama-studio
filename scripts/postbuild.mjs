@@ -148,7 +148,21 @@ const render = (r) => {
   html = html.replace('</head>', `    ${ld.join('\n    ')}\n  </head>`);
   if (r.privada) {
     // Zona privada: que Google no la indexe y sin texto de la web adentro.
-    html = html.replace('</head>', '    <meta name="robots" content="noindex, nofollow" />\n  </head>');
+    // App instalable del portal: su propio manifest e íconos para iPhone y Android.
+    html = html
+      .replace('<link rel="manifest" href="/manifest.json" />', '<link rel="manifest" href="/portal-manifest.webmanifest" />')
+      .replace('<meta name="theme-color" content="#17110e" />', '<meta name="theme-color" content="#f8f3ed" />')
+      .replace(
+        '</head>',
+        [
+          '    <meta name="robots" content="noindex, nofollow" />',
+          '    <meta name="apple-mobile-web-app-capable" content="yes" />',
+          '    <meta name="mobile-web-app-capable" content="yes" />',
+          '    <meta name="apple-mobile-web-app-title" content="Naamá Equipo" />',
+          '    <meta name="apple-mobile-web-app-status-bar-style" content="default" />',
+          '  </head>',
+        ].join('\n'),
+      );
     return html;
   }
   html = html.replace('<div id="root"></div>', `<div id="root">${staticBody(r)}</div>`);

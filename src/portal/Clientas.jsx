@@ -513,7 +513,7 @@ const Clientas = () => {
           </h1>
         </div>
         <div className="panel__botones">
-          <button type="button" className="btn btn--sm" onClick={() => setHoja({ tipo: 'subir' })}>
+          <button type="button" className="btn btn--sm solo-compu" onClick={() => setHoja({ tipo: 'subir' })}>
             <PlusIcon /> Subir clienta
           </button>
           {datos?.verNumeros && (
@@ -610,6 +610,10 @@ const Clientas = () => {
         {lista.length > 300 && <li className="muted">Mostrando 300 de {lista.length}. Usa el buscador para encontrar al resto.</li>}
         {datos && todas.length > 0 && lista.length === 0 && <li className="muted">Ninguna clienta con ese filtro.</li>}
       </ul>
+
+      <button type="button" className="fab" onClick={() => setHoja({ tipo: 'subir' })} aria-label="Subir clienta">
+        <PlusIcon />
+      </button>
 
       {aviso && (
         <p className="aviso" role="status">

@@ -18,7 +18,7 @@ const cuando = (iso) => {
 };
 
 const mensajeClave = (c, clave) =>
-  `Hola ${c.nombre}! Tu cuenta del portal de Naamá está lista.\n\nEntra en: ${window.location.origin}/portal\nCorreo: ${c.email}\nClave temporal: ${clave}\n\nAl entrar te va a pedir crear tu propia clave.`;
+  `Hola ${c.nombre}! Tu cuenta del portal de Naamá está lista.\n\nInstala la app aquí: ${window.location.origin}/portal/app\nCorreo: ${c.email}\nClave temporal: ${clave}\n\nAl entrar te va a pedir crear tu propia clave.`;
 
 /** Selector de rol + permisos extra (reutilizado al crear y al editar). */
 const RolYPermisos = ({ rol, extras, onRol, onExtras }) => {
@@ -238,9 +238,9 @@ const Cuentas = ({ yo }) => {
       <header className="panel__cabeza panel__cabeza--fila">
         <div>
           <span className="eyebrow">Dirección</span>
-          <h1 className="panel__titulo">Cuentas</h1>
+          <h1 className="panel__titulo">Equipo</h1>
         </div>
-        <button type="button" className="btn btn--sm" onClick={() => setHoja({ tipo: 'nueva' })}>
+        <button type="button" className="btn btn--sm solo-compu" onClick={() => setHoja({ tipo: 'nueva' })}>
           <PlusIcon /> Nueva cuenta
         </button>
       </header>
@@ -316,6 +316,10 @@ const Cuentas = ({ yo }) => {
         ))}
         {cuentas && lista.length === 0 && <li className="muted">No hay cuentas con ese filtro.</li>}
       </ul>
+
+      <button type="button" className="fab" onClick={() => setHoja({ tipo: 'nueva' })} aria-label="Nueva cuenta">
+        <PlusIcon />
+      </button>
 
       {hoja?.tipo === 'nueva' && (
         <NuevaCuenta

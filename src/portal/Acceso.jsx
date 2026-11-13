@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Smartphone } from 'lucide-react';
 import { ArrowRight } from '../components/common/Icons';
+import Logo from '../components/common/Logo';
 import { post } from './api';
 
 /* Pantallas sin sesión: entrar, configurar la primera cuenta y crear la clave personal. */
@@ -13,8 +16,14 @@ const Campo = ({ id, label, ...props }) => (
 
 const Aviso = ({ texto }) => (texto ? <p className="portal-error" role="alert">{texto}</p> : null);
 
-const Marco = ({ eyebrow, titulo, bajada, children }) => (
-  <section className="acceso">
+const Marco = ({ eyebrow, titulo, bajada, children, interno = false }) => (
+  <section className={`acceso ${interno ? 'acceso--interno' : ''}`}>
+    {!interno && (
+      <div className="acceso__marca">
+        <Logo />
+        <span>Portal del equipo</span>
+      </div>
+    )}
     <div className="acceso__caja">
       <span className="eyebrow">{eyebrow}</span>
       <h1 className="acceso__titulo">{titulo}</h1>
@@ -68,6 +77,9 @@ export const Entrar = ({ onListo }) => {
             creas la tuya.
           </p>
         )}
+        <Link to="/portal/app" className="acceso__instalar">
+          <Smartphone strokeWidth={1.6} /> Instalar la app en tu celular
+        </Link>
       </form>
     </Marco>
   );
@@ -112,6 +124,7 @@ export const CrearClave = ({ cuenta, onListo, onSalir, obligatoria = true }) => 
   const { enviando, error, enviar } = useEnvio();
   return (
     <Marco
+      interno={!obligatoria}
       eyebrow={obligatoria ? 'Primer ingreso' : 'Tu cuenta'}
       titulo={obligatoria ? <>Hola {cuenta.nombre}, crea <em>tu clave.</em></> : <>Cambia <em>tu clave.</em></>}
       bajada={obligatoria ? 'La clave que te mandaron es temporal. Crea una que solo tú sepas.' : null}

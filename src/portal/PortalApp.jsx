@@ -1,19 +1,129 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link, Navigate, Route, Routes } from 'react-router-dom';
+import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { Ellipsis, House, KeyRound, LogOut, Smartphone, UsersRound } from 'lucide-react';
 import Logo from '../components/common/Logo';
 import { api, post } from './api';
 import { Configurar, CrearClave, Entrar } from './Acceso';
 import Panel from './Panel';
 import Cuentas from './Cuentas';
 import Clientas from './Clientas';
-import { puede } from './permisos';
+import Instalar, { esApp, registrarAppPortal } from './Instalar';
+import Hoja from './Hoja';
+import { MODULOS, ROLES, puede } from './permisos';
+import { ICONO_MODULO } from './iconos';
 import '../theme/booking.css';
 import '../theme/portal.css';
 
-/** Zona privada del equipo: /portal. Tiene su propia cabecera; no usa el menú de la web. */
+const usePortalHead = () => {
+  useEffect(() => {
+    const link = document.querySelector('link[rel="manifest"]');
+    const previo = { titulo: document.title, manifest: link?.getAttribute('href') };
+    document.title = 'Naamá · Portal del equipo';
+    const robots = Object.assign(document.createElement('meta'), { name: 'robots', content: 'noindex, nofollow' });
+    document.head.appendChild(robots);
+    link?.setAttribute('href', '/portal-manifest.webmanifest');
+    document.documentElement.classList.add('en-portal');
+    registrarAppPortal();
+    return () => {
+      robots.remove();
+      document.title = previo.titulo;
+      if (previo.manifest) link?.setAttribute('href', previo.manifest);
+      document.documentElement.classList.remove('en-portal');
+    };
+  }, []);
+};
+
+/** Pestañas del menú: hasta 3 accesos + «Más». */
+const pestanas = (cuenta) => [
+  { to: '/portal', label: 'Inicio', Icono: House, end: true },
+  { to: '/portal/clientas', label: 'Clientas', Icono: UsersRound },
+  ...(puede(cuenta, 'cuentas') ? [{ to: '/portal/cuentas', label: 'Equipo', Icono: KeyRound }] : []),
+];
+
+const Menu = ({ cuenta, onMas }) => (
+  <nav className="tabbar" aria-label="Menú del portal">
+    <Link to="/portal" className="tabbar__logo" aria-label="Inicio">
+      <Logo />
+    </Link>
+    {pestanas(cuenta).map(({ to, label, Icono, end }) => (
+      <NavLink key={to} to={to} end={end} className="tabbar__item">
+        <Icono strokeWidth={1.6} />
+        <span>{label}</span>
+      </NavLink>
+    ))}
+    <button type="button" className="tabbar__item" onClick={onMas}>
+      <Ellipsis strokeWidth={1.6} />
+      <span>Más</span>
+    </button>
+    <div className="tabbar__yo">
+      <span className="avatar avatar--sm">{cuenta.nombre.charAt(0)}</span>
+      <span>
+        <strong>{cuenta.nombre}</strong>
+        <small>{ROLES[cuenta.rol]?.nombre}</small>
+      </span>
+    </div>
+  </nav>
+);
+
+const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
+  const pronto = MODULOS.filter((m) => !m.listo && (!m.permiso || puede(cuenta, m.permiso)));
+  return (
+    <Hoja titulo="Más" onCerrar={onCerrar}>
+      <div className="mas__yo">
+        <span className="avatar">{cuenta.nombre.charAt(0)}</span>
+        <span>
+          <strong>{cuenta.nombre}</strong>
+          <small>
+            {ROLES[cuenta.rol]?.nombre} · {cuenta.email}
+          </small>
+        </span>
+      </div>
+      <ul className="grupo-lista">
+        {!esApp() && (
+          <li>
+            <Link to="/portal/app" className="fila-lista" onClick={onCerrar}>
+              <Smartphone strokeWidth={1.6} /> Instalar la app en el celular
+            </Link>
+          </li>
+        )}
+        <li>
+          <button type="button" className="fila-lista" onClick={onClave}>
+            <KeyRound strokeWidth={1.6} /> Cambiar mi clave
+          </button>
+        </li>
+        <li>
+          <button type="button" className="fila-lista fila-lista--peligro" onClick={onSalir}>
+            <LogOut strokeWidth={1.6} /> Cerrar sesión
+          </button>
+        </li>
+      </ul>
+      {pronto.length > 0 && (
+        <>
+          <p className="grupo__titulo">Muy pronto</p>
+          <ul className="pronto">
+            {pronto.map((m) => {
+              const Icono = ICONO_MODULO[m.id];
+              return (
+                <li key={m.id}>
+                  {Icono && <Icono strokeWidth={1.6} />} {m.nombre}
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
+    </Hoja>
+  );
+};
+
+/** Zona privada del equipo: /portal. Diseño de app propio; no usa el menú de la web. */
 const PortalApp = () => {
+  usePortalHead();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [estado, setEstado] = useState({ cargando: true });
   const [cambiandoClave, setCambiandoClave] = useState(false);
+  const [mas, setMas] = useState(false);
 
   const cargar = useCallback(async () => {
     try {
@@ -26,88 +136,102 @@ const PortalApp = () => {
 
   useEffect(() => {
     cargar();
-    const robots = document.createElement('meta');
-    robots.name = 'robots';
-    robots.content = 'noindex, nofollow';
-    document.head.appendChild(robots);
-    const tituloPrevio = document.title;
-    document.title = 'Portal del equipo · Naamá Studio';
-    return () => {
-      robots.remove();
-      document.title = tituloPrevio;
-    };
   }, [cargar]);
+
+  useEffect(() => {
+    setCambiandoClave(false);
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   const salir = async () => {
     if (!window.confirm('¿Cerrar sesión?')) return;
+    setMas(false);
     try {
       await post('salir');
     } catch {
       // aunque falle, mostramos la pantalla de entrada
     }
     setEstado((e) => ({ ...e, cuenta: null }));
+    navigate('/portal', { replace: true });
   };
+
+  // La página para instalar la app se ve con o sin sesión.
+  if (location.pathname.replace(/\/$/, '') === '/portal/app') {
+    return (
+      <div className="portal portal--acceso">
+        <Instalar />
+      </div>
+    );
+  }
 
   const { cuenta } = estado;
 
-  let contenido;
-  if (estado.cargando) contenido = <p className="portal-cargando muted">Cargando…</p>;
-  else if (estado.error)
-    contenido = (
-      <section className="acceso">
-        <div className="acceso__caja">
-          <p className="portal-error" role="alert">{estado.error}</p>
-          <button type="button" className="btn" onClick={cargar}>
-            Reintentar
-          </button>
+  if (estado.cargando) {
+    return (
+      <div className="portal portal--acceso">
+        <div className="splash">
+          <Logo />
         </div>
-      </section>
+      </div>
     );
-  else if (!estado.configurado) contenido = <Configurar onListo={(c) => setEstado({ configurado: true, cuenta: c })} />;
-  else if (!cuenta) contenido = <Entrar onListo={(c) => setEstado({ configurado: true, cuenta: c })} />;
-  else if (cuenta.debeCambiar || cambiandoClave)
-    contenido = (
-      <CrearClave
-        cuenta={cuenta}
-        obligatoria={cuenta.debeCambiar}
-        onListo={() => {
-          setCambiandoClave(false);
-          setEstado((e) => ({ ...e, cuenta: { ...e.cuenta, debeCambiar: false } }));
-        }}
-        onSalir={cuenta.debeCambiar ? salir : () => setCambiandoClave(false)}
-      />
-    );
-  else
-    contenido = (
-      <Routes>
-        <Route index element={<Panel cuenta={cuenta} />} />
-        <Route path="clientas" element={<Clientas />} />
-        <Route path="cuentas" element={puede(cuenta, 'cuentas') ? <Cuentas yo={cuenta} /> : <Navigate to="/portal" replace />} />
-        <Route path="*" element={<Navigate to="/portal" replace />} />
-      </Routes>
-    );
+  }
+
+  if (estado.error || !estado.configurado || !cuenta || cuenta.debeCambiar) {
+    let pantalla;
+    if (estado.error)
+      pantalla = (
+        <section className="acceso">
+          <div className="acceso__marca">
+            <Logo />
+          </div>
+          <div className="acceso__caja">
+            <p className="portal-error" role="alert">{estado.error}</p>
+            <button type="button" className="btn" onClick={cargar}>
+              Reintentar
+            </button>
+          </div>
+        </section>
+      );
+    else if (!estado.configurado) pantalla = <Configurar onListo={(c) => setEstado({ configurado: true, cuenta: c })} />;
+    else if (!cuenta) pantalla = <Entrar onListo={(c) => setEstado({ configurado: true, cuenta: c })} />;
+    else
+      pantalla = (
+        <CrearClave
+          cuenta={cuenta}
+          obligatoria
+          onListo={() => setEstado((e) => ({ ...e, cuenta: { ...e.cuenta, debeCambiar: false } }))}
+          onSalir={salir}
+        />
+      );
+    return <div className="portal portal--acceso">{pantalla}</div>;
+  }
 
   return (
-    <div className="portal">
-      <header className="portal__barra">
-        <Link to="/portal" className="portal__logo" aria-label="Portal Naamá, inicio">
-          <Logo />
-          <span>Portal</span>
-        </Link>
-        {cuenta && !cuenta.debeCambiar && (
-          <nav className="portal__acciones" aria-label="Tu cuenta">
-            <button type="button" className="portal__link" onClick={() => setCambiandoClave(true)}>
-              Mi clave
-            </button>
-            <button type="button" className="portal__link" onClick={salir}>
-              Cerrar sesión
-            </button>
-          </nav>
-        )}
-      </header>
+    <div className="portal portal--app">
+      <Menu cuenta={cuenta} onMas={() => setMas(true)} />
       <main id="contenido" className="portal__cuerpo">
-        {contenido}
+        {cambiandoClave ? (
+          <CrearClave cuenta={cuenta} obligatoria={false} onListo={() => setCambiandoClave(false)} onSalir={() => setCambiandoClave(false)} />
+        ) : (
+          <Routes>
+            <Route index element={<Panel cuenta={cuenta} />} />
+            <Route path="clientas" element={<Clientas />} />
+            <Route path="cuentas" element={puede(cuenta, 'cuentas') ? <Cuentas yo={cuenta} /> : <Navigate to="/portal" replace />} />
+            <Route path="*" element={<Navigate to="/portal" replace />} />
+          </Routes>
+        )}
       </main>
+      {mas && (
+        <HojaMas
+          cuenta={cuenta}
+          onCerrar={() => setMas(false)}
+          onClave={() => {
+            setMas(false);
+            setCambiandoClave(true);
+          }}
+          onSalir={salir}
+        />
+      )}
     </div>
   );
 };

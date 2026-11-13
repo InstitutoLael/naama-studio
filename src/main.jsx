@@ -11,9 +11,11 @@ import App from './App.jsx';
 
 // La versión anterior registraba un service worker que podía servir contenido viejo.
 // Lo desregistramos y limpiamos sus cachés para que todas las visitas vean la versión actual.
+// El portal del equipo (/portal) tiene su propio service worker: ese se respeta.
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister()));
-  if (window.caches) caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
+  const esPortal = (scope) => new URL(scope).pathname.startsWith('/portal');
+  navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => !esPortal(r.scope) && r.unregister()));
+  if (window.caches) caches.keys().then((keys) => keys.forEach((k) => !k.startsWith('portal-') && caches.delete(k)));
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
