@@ -827,3 +827,5 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .tabla-margen small { color: var(--ink-3); }
 .ok-texto { color: #2f6b3a; font-weight: 600; }
 .alerta-texto { color: var(--caramel-600); font-weight: 600; }
+.ficha-cli__datos .portal__link { display: inline-flex; align-items: center; gap: 6px; justify-self: start; }
+.portal .hoja__form label.field > span { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
