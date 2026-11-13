@@ -2119,6 +2119,115 @@ async function avisarCita(db, env, citaId, quienAnota) {
 
 
 
+
+/* ── Calendario del celu (.ics) ─────────────────────────── */
+
+const tokenNuevo = () => [...crypto.getRandomValues(new Uint8Array(24))].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+async function linkCalendario(db, cuenta, todas, nuevo = false) {
+  let fila = await db.prepare('SELECT token FROM calendarios WHERE cuenta_id = ? AND todas = ?').bind(cuenta.id, todas ? 1 : 0).first();
+  if (fila && nuevo) {
+    await db.prepare('DELETE FROM calendarios WHERE token = ?').bind(fila.token).run();
+    fila = null;
+  }
+  if (!fila) {
+    fila = { token: tokenNuevo() };
+    await db.prepare('INSERT INTO calendarios (token, cuenta_id, todas, creado) VALUES (?, ?, ?, ?)').bind(fila.token, cuenta.id, todas ? 1 : 0, ahora()).run();
+  }
+  return fila.token;
+}
+
+ruta('GET', /^calendario$/, { sesion: true }, async ({ db, cuenta, request }) => {
+  const origen = new URL(request.url).origin;
+  const propio = await linkCalendario(db, cuenta, false);
+  const todas = tiene(cuenta, 'clientas') ? await linkCalendario(db, cuenta, true) : null;
+  const url = (t) => `${origen}/api/portal/calendario/${t}.ics`;
+  return json({ ok: true, propio: url(propio), todas: todas ? url(todas) : null });
+});
+
+ruta('POST', /^calendario\/nuevo$/, { sesion: true }, async ({ db, cuenta }) => {
+  await linkCalendario(db, cuenta, false, true);
+  if (tiene(cuenta, 'clientas')) await linkCalendario(db, cuenta, true, true);
+  return json({ ok: true });
+});
+
+const icsTexto = (t = '') => String(t).replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/([,;])/g, '\\$1');
+/** Corta líneas a 75 octetos como pide el formato iCalendar. */
+const icsLinea = (l) => {
+  const partes = [];
+  let resto = l;
+  while (new TextEncoder().encode(resto).length > 74) {
+    let n = 74;
+    while (new TextEncoder().encode(resto.slice(0, n)).length > 74) n--;
+    partes.push(resto.slice(0, n));
+    resto = ` ${resto.slice(n)}`;
+  }
+  partes.push(resto);
+  return partes.join('\r\n');
+};
+const icsHora = (fecha, min) => {
+  const d = new Date(Date.parse(`${fecha}T00:00:00Z`) + min * 60000);
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}${p(d.getUTCMonth() + 1)}${p(d.getUTCDate())}T${p(d.getUTCHours())}${p(d.getUTCMinutes())}00`;
+};
+
+ruta('GET', /^calendario\/([0-9a-f]{48})\.ics$/, {}, async ({ db, params }) => {
+  const cal = await db.prepare('SELECT * FROM calendarios WHERE token = ?').bind(params[0]).first();
+  const cuenta = cal && (await db.prepare('SELECT * FROM cuentas WHERE id = ? AND activa = 1').bind(cal.cuenta_id).first());
+  if (!cuenta) return new Response('No encontrado', { status: 404 });
+  const todas = cal.todas && tiene(cuenta, 'clientas');
+  const desde = new Date(Date.now() - 14 * 86400000).toISOString().slice(0, 10);
+  const { results } = await db
+    .prepare(
+      `SELECT ci.*, cu.nombre AS quien FROM citas ci JOIN cuentas cu ON cu.id = ci.cuenta_id
+       WHERE ci.fecha >= ? AND ci.estado NOT IN ('cancelada', 'no-vino') ${todas ? '' : 'AND ci.cuenta_id = ?'} ORDER BY ci.fecha, ci.hora LIMIT 1500`,
+    )
+    .bind(...(todas ? [desde] : [desde, cuenta.id]))
+    .all();
+  const sello = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+  const nombre = todas ? 'Naamá · Agenda del salón' : `Naamá · ${cuenta.nombre.split(' ')[0]}`;
+  const lineas = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Naama Studio//Portal//ES',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    `X-WR-CALNAME:${icsTexto(nombre)}`,
+    'X-WR-TIMEZONE:America/Santiago',
+    'REFRESH-INTERVAL;VALUE=DURATION:PT30M',
+    'X-PUBLISHED-TTL:PT30M',
+  ];
+  for (const c of results) {
+    const ini = aMin(c.hora);
+    const titulo = `${todas ? `${c.quien.split(' ')[0]} · ` : ''}${c.clienta}${c.servicio ? ` · ${c.servicio}` : ''}`;
+    const notas = [c.nota, c.estado === 'confirmada' ? 'Confirmada' : null, `Agendó: ${c.por ?? ''}`].filter(Boolean).join('\n');
+    lineas.push(
+      'BEGIN:VEVENT',
+      `UID:cita-${c.id}@naamastudio.cl`,
+      `DTSTAMP:${sello}`,
+      `DTSTART;TZID=America/Santiago:${icsHora(c.fecha, ini)}`,
+      `DTEND;TZID=America/Santiago:${icsHora(c.fecha, ini + c.minutos)}`,
+      `SUMMARY:${icsTexto(titulo)}`,
+      `DESCRIPTION:${icsTexto(notas)}`,
+      'LOCATION:Naamá Studio\\, Arcadia 1297\\, San Miguel',
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      `DESCRIPTION:${icsTexto(titulo)}`,
+      'TRIGGER:-PT30M',
+      'END:VALARM',
+      'END:VEVENT',
+    );
+  }
+  lineas.push('END:VCALENDAR');
+  return new Response(lineas.map(icsLinea).join('\r\n') + '\r\n', {
+    headers: {
+      'Content-Type': 'text/calendar; charset=utf-8',
+      'Content-Disposition': 'inline; filename="naama.ics"',
+      'Cache-Control': 'no-store',
+    },
+  });
+});
+
 /* ── Avisos de compras: cuando algo se acaba ─────────────── */
 
 /** Cuentas activas que tienen un permiso (para avisarles). */

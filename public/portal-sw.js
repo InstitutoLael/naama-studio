@@ -1,6 +1,6 @@
 // Service worker del portal (solo /portal). Guarda la app para que abra rápido
 // y muestra una página amable si no hay internet. Nunca guarda datos de la API.
-const VERSION = 'portal-v5';
+const VERSION = 'portal-v6';
 const OFFLINE = '/portal-sin-internet.html';
 
 self.addEventListener('install', (event) => {

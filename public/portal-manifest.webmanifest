@@ -29,5 +29,55 @@
       "type": "image/png",
       "purpose": "maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "Agendar una hora",
+      "short_name": "Agendar",
+      "url": "/portal/agenda?nueva=1",
+      "icons": [
+        {
+          "src": "/app-naama-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Agenda de hoy",
+      "short_name": "Hoy",
+      "url": "/portal/agenda",
+      "icons": [
+        {
+          "src": "/app-naama-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Precios",
+      "short_name": "Precios",
+      "url": "/portal/precios",
+      "icons": [
+        {
+          "src": "/app-naama-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Se acabó algo",
+      "short_name": "Compras",
+      "url": "/portal/compras",
+      "icons": [
+        {
+          "src": "/app-naama-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
   ]
 }

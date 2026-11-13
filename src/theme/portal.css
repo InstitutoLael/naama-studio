@@ -904,3 +904,17 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .precio__agendar { justify-self: start; display: inline-flex; align-items: center; gap: 8px; }
 .precios__nada { padding: 24px 4px; }
 .precios__nota { font-size: .78rem; padding: 4px 4px 24px; }
+
+/* Calendario del celu */
+.cal-celu { margin-top: 18px; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); overflow: hidden; }
+.cal-celu__cabeza { width: 100%; display: flex; align-items: center; gap: 14px; padding: 16px; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.cal-celu__cabeza svg { flex: none; width: 26px; height: 26px; color: var(--caramel-600); }
+.cal-celu__cabeza span { display: grid; gap: 2px; }
+.cal-celu__cabeza strong { font-weight: 600; font-size: .95rem; }
+.cal-celu__cabeza small { font-size: .78rem; color: var(--ink-3); }
+.cal-celu__cuerpo { display: grid; gap: 16px; padding: 0 16px 16px; }
+.cal-celu__link { display: grid; gap: 8px; }
+.cal-celu__link strong { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+.cal-celu__botones { display: flex; flex-wrap: wrap; gap: 8px; }
+.cal-celu__botones .btn { display: inline-flex; align-items: center; gap: 6px; }
+.cal-celu__nota { font-size: .78rem; line-height: 1.45; }
