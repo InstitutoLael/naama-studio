@@ -1,9 +1,11 @@
-# Dispara los avisos programados del portal (recordatorio de mañana a las 18:00 y resumen del lunes a las 9:00, hora de Chile).
+# Dispara los avisos programados del portal (aseo a las 10:00 y 16:00, clientas de mañana a las 18:00 y resumen del lunes a las 9:00, hora de Chile).
 # El endpoint es idempotente: cada aviso sale una sola vez aunque se llame varias veces.
 name: Avisos programados del portal
 
 on:
   schedule:
+    - cron: '7 13,14 * * 1-6'    # ~10:00 Chile: el aseo del día
+    - cron: '7 19,20 * * 1-6'    # ~16:00 Chile: lo que queda de aseo
     - cron: '7 21,22,23 * * *'   # 18:00–20:00 Chile (verano e invierno)
     - cron: '7 12,13 * * 1'      # lunes 9:00 Chile (verano e invierno)
   workflow_dispatch:
