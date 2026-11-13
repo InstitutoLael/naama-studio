@@ -92,6 +92,14 @@ const routes = [
     h1: 'Contacto y cómo llegar',
     intro: 'Estamos en Arcadia 1297, San Miguel: la casa patrimonial de fachada terracota.',
   },
+  {
+    path: '/portal',
+    title: 'Portal del equipo · Naamá Studio',
+    description: 'Acceso privado para el equipo de Naamá Studio.',
+    h1: 'Portal del equipo',
+    intro: 'Acceso privado para el equipo de Naamá Studio.',
+    privada: true,
+  },
 ];
 
 const nav = [
@@ -138,6 +146,25 @@ const render = (r) => {
   const ld = [`<script type="application/ld+json" id="naama-schema">${JSON.stringify(BUSINESS_SCHEMA)}</script>`];
   if (r.faq) ld.push(`<script type="application/ld+json" id="naama-faq">${JSON.stringify(faqSchema(FAQ))}</script>`);
   html = html.replace('</head>', `    ${ld.join('\n    ')}\n  </head>`);
+  if (r.privada) {
+    // Zona privada: que Google no la indexe y sin texto de la web adentro.
+    // App instalable del portal: su propio manifest e íconos para iPhone y Android.
+    html = html
+      .replace('<link rel="manifest" href="/manifest.json" />', '<link rel="manifest" href="/portal-manifest.webmanifest" />')
+      .replace('<meta name="theme-color" content="#17110e" />', '<meta name="theme-color" content="#f8f3ed" />')
+      .replace(
+        '</head>',
+        [
+          '    <meta name="robots" content="noindex, nofollow" />',
+          '    <meta name="apple-mobile-web-app-capable" content="yes" />',
+          '    <meta name="mobile-web-app-capable" content="yes" />',
+          '    <meta name="apple-mobile-web-app-title" content="Naamá Equipo" />',
+          '    <meta name="apple-mobile-web-app-status-bar-style" content="default" />',
+          '  </head>',
+        ].join('\n'),
+      );
+    return html;
+  }
   html = html.replace('<div id="root"></div>', `<div id="root">${staticBody(r)}</div>`);
   return html;
 };
@@ -152,7 +179,7 @@ const today = new Date().toISOString().slice(0, 10);
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${routes
-  .filter((r) => r.path !== '/reservar')
+  .filter((r) => r.path !== '/reservar' && !r.privada)
   .map((r) => `  <url><loc>${SITE}${r.path}</loc><lastmod>${today}</lastmod></url>`)
   .join('\n')}
 </urlset>
