@@ -346,3 +346,39 @@ test('tonos y ventas: variantes del mismo tinte y «Vendí uno»', async () => {
   assert.equal(c.status, 201);
   assert.match((await gaby.pedir('compras')).data.pedidos[0].texto, /7\.1/);
 });
+
+/* ── Plata ── */
+test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', async () => {
+  const { admin, gaby } = await crearEquipo();
+  assert.equal((await gaby.pedir('plata')).status, 403, 'Gaby no ve la plata');
+  const sinLlave = await admin.pedir('plata');
+  assert.equal(sinLlave.data.conectado, false);
+
+  const ahora = new Date().toISOString();
+  env.MP_ACCESS_TOKEN = 'TEST-llave';
+  env.MP_FETCH = async (url, opciones) => {
+    assert.equal(opciones.headers.Authorization, 'Bearer TEST-llave');
+    assert.match(url, /payments\/search/);
+    return new Response(
+      JSON.stringify({
+        results: [
+          { id: 1, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 30000, fee_details: [{ amount: 1050 }], transaction_details: { net_received_amount: 28950 }, money_release_status: 'pending', money_release_date: ahora, payment_type_id: 'credit_card' },
+          { id: 2, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 10000, fee_details: [{ amount: 350 }], transaction_details: { net_received_amount: 9650 }, money_release_status: 'released', payment_type_id: 'debit_card' },
+          { id: 3, status: 'rejected', date_created: ahora, transaction_amount: 5000, fee_details: [] },
+        ],
+      }),
+    );
+  };
+  await admin.post('plata/saldo', { monto: '1.500.000' });
+  await admin.post('plata/compromisos', { nombre: 'Arriendo', monto: '900.000', dia: 28 });
+  const r = await admin.pedir('plata');
+  assert.equal(r.data.conectado, true);
+  assert.equal(r.data.hoyMP.bruto, 40000);
+  assert.equal(r.data.hoyMP.comision, 1400);
+  assert.equal(r.data.hoyMP.neto, 38600);
+  assert.equal(r.data.porLiberar.total, 28950);
+  assert.equal(r.data.disponible, 600000);
+  const arriendo = r.data.compromisos[0];
+  await admin.post(`plata/compromisos/${arriendo.id}`, { pagado: true });
+  assert.equal((await admin.pedir('plata')).data.disponible, 1500000);
+});

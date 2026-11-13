@@ -21,6 +21,7 @@ export const ICONO_MODULO = {
   servicios: ClipboardList,
   caja: Receipt,
   finanzas: Wallet,
+  plata: Wallet,
   legal: Scale,
   cuentas: KeyRound,
 };

@@ -850,6 +850,159 @@ ruta('POST', /^compras\/(\d+)$/, { permiso: 'compras' }, async ({ db, cuenta, bo
   return json({ ok: true });
 });
 
+/* ── Plata (Mercado Pago) ───────────────────────────────────
+   Solo quien tiene «finanzas» (Diego, Allison, Vivy). Lee los pagos con la llave MP_ACCESS_TOKEN
+   (secreto de Cloudflare, solo lectura). Mercado Pago no entrega el saldo por API: el saldo lo anota
+   Administración desde la app de Mercado Pago y el portal descuenta lo que falta pagar del mes. */
+
+const MP = 'https://api.mercadopago.com';
+
+/** Desfase real de Chile para una fecha (-03:00 en verano, -04:00 en invierno). */
+export const desfaseChile = (d = new Date()) => {
+  const partes = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', timeZoneName: 'longOffset' }).formatToParts(d);
+  const tz = partes.find((p) => p.type === 'timeZoneName')?.value ?? 'GMT-03:00';
+  return tz.replace('GMT', '') || '+00:00';
+};
+
+const mesChile = () => fechaChile().slice(0, 7);
+
+async function pagosMP(env, desde) {
+  const llamar = env.MP_FETCH ?? fetch;
+  const pagos = [];
+  for (let offset = 0; offset < 1000; offset += 100) {
+    const url = new URL(`${MP}/v1/payments/search`);
+    url.search = new URLSearchParams({
+      sort: 'date_created',
+      criteria: 'desc',
+      range: 'date_created',
+      begin_date: `${desde}T00:00:00.000${desfaseChile(new Date(`${desde}T12:00:00Z`))}`,
+      end_date: 'NOW',
+      limit: '100',
+      offset: String(offset),
+    }).toString();
+    const r = await llamar(url.toString(), { headers: { Authorization: `Bearer ${env.MP_ACCESS_TOKEN}` } });
+    if (r.status === 401 || r.status === 403) throw Object.assign(new Error('La llave de Mercado Pago no es válida o venció.'), { status: 502 });
+    if (!r.ok) throw Object.assign(new Error('Mercado Pago no respondió. Inténtalo en un rato.'), { status: 502 });
+    const data = await r.json();
+    pagos.push(...(data.results ?? []));
+    if ((data.results ?? []).length < 100) break;
+  }
+  return pagos;
+}
+
+const resumirPago = (p) => {
+  const comision = (p.fee_details ?? []).reduce((a, f) => a + (f.amount ?? 0), 0);
+  const bruto = p.transaction_amount ?? 0;
+  const neto = p.transaction_details?.net_received_amount ?? bruto - comision;
+  return {
+    id: p.id,
+    fecha: p.date_approved ?? p.date_created,
+    dia: fechaChile(new Date(p.date_approved ?? p.date_created)),
+    bruto,
+    comision: Math.round(comision),
+    neto: Math.round(neto),
+    estado: p.status,
+    medio: p.payment_type_id,
+    libera: p.money_release_date,
+    liberado: p.money_release_status === 'released',
+    detalle: p.description ?? null,
+  };
+};
+
+const sumar = (lista) => ({
+  cantidad: lista.length,
+  bruto: Math.round(lista.reduce((a, p) => a + p.bruto, 0)),
+  comision: Math.round(lista.reduce((a, p) => a + p.comision, 0)),
+  neto: Math.round(lista.reduce((a, p) => a + p.neto, 0)),
+});
+
+ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
+  const mes = mesChile();
+  const hoy = fechaChile();
+  const { results: compromisos } = await db.prepare('SELECT * FROM compromisos WHERE activo = 1 ORDER BY dia, nombre').all();
+  const saldoFila = await db.prepare(`SELECT valor FROM meta WHERE clave = 'saldo_mp'`).first();
+  const saldo = saldoFila ? JSON.parse(saldoFila.valor) : null;
+  const pendientes = compromisos.filter((c) => c.pagado_mes !== mes);
+  const porPagar = pendientes.reduce((a, c) => a + c.monto, 0);
+  const base = {
+    ok: true,
+    hoy,
+    mes,
+    saldo,
+    compromisos: compromisos.map((c) => ({ id: c.id, nombre: c.nombre, monto: c.monto, dia: c.dia, pagado: c.pagado_mes === mes })),
+    porPagar,
+    disponible: saldo ? saldo.monto - porPagar : null,
+  };
+  if (!env.MP_ACCESS_TOKEN) return json({ ...base, conectado: false });
+
+  const desde = haceDias(45) < `${mes}-01` ? haceDias(45) : `${mes}-01`;
+  let pagos;
+  try {
+    pagos = (await pagosMP(env, desde)).map(resumirPago);
+  } catch (e) {
+    return json({ ...base, conectado: true, errorMP: e.message });
+  }
+  const aprobados = pagos.filter((p) => p.estado === 'approved');
+  const semana = haceDias(6);
+  const porLiberar = aprobados.filter((p) => !p.liberado && p.libera);
+  const calendario = new Map();
+  for (const p of porLiberar) {
+    const d = fechaChile(new Date(p.libera));
+    calendario.set(d, (calendario.get(d) ?? 0) + p.neto);
+  }
+  const porDia = new Map();
+  for (const p of aprobados.filter((x) => x.dia >= haceDias(13))) porDia.set(p.dia, (porDia.get(p.dia) ?? 0) + p.bruto);
+  return json({
+    ...base,
+    conectado: true,
+    hoyMP: sumar(aprobados.filter((p) => p.dia === hoy)),
+    semanaMP: sumar(aprobados.filter((p) => p.dia >= semana)),
+    mesMP: sumar(aprobados.filter((p) => p.dia.startsWith(mes))),
+    porLiberar: {
+      total: Math.round(porLiberar.reduce((a, p) => a + p.neto, 0)),
+      calendario: [...calendario.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([dia, monto]) => ({ dia, monto: Math.round(monto) })),
+    },
+    devueltos: pagos.filter((p) => ['refunded', 'charged_back', 'cancelled'].includes(p.estado) && p.dia.startsWith(mes)).length,
+    porDia: [...porDia.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([dia, bruto]) => ({ dia, bruto: Math.round(bruto) })),
+    ultimos: pagos.slice(0, 25),
+  });
+});
+
+/** Saldo que muestra la app de Mercado Pago (lo anota Administración). */
+ruta('POST', /^plata\/saldo$/, { permiso: 'finanzas' }, async ({ db, cuenta, body }) => {
+  const monto = numero(String(body.monto ?? '').replace(/\./g, ''), { max: 1e10 });
+  if (monto === null) return error(400, 'Escribe el saldo (solo números).');
+  const valor = JSON.stringify({ monto: Math.round(monto), ts: ahora(), por: cuenta.nombre });
+  await db.prepare(`INSERT INTO meta (clave, valor) VALUES ('saldo_mp', ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor`).bind(valor).run();
+  await registrar(db, cuenta.id, 'saldo_mp', { monto });
+  return json({ ok: true });
+});
+
+/** Gastos fijos del mes (arriendo, luz, honorarios…): se marcan pagados mes a mes. */
+ruta('POST', /^plata\/compromisos$/, { permiso: 'finanzas' }, async ({ db, body }) => {
+  const nombre = texto(body.nombre, 50);
+  const monto = numero(String(body.monto ?? '').replace(/\./g, ''), { min: 1, max: 1e9 });
+  const dia = body.dia ? numero(body.dia, { min: 1, max: 31 }) : null;
+  if (!nombre || !monto) return error(400, 'Escribe el nombre y el monto.');
+  await db.prepare('INSERT INTO compromisos (nombre, monto, dia, creado) VALUES (?, ?, ?, ?)').bind(nombre, Math.round(monto), dia, ahora()).run();
+  return json({ ok: true }, 201);
+});
+
+ruta('POST', /^plata\/compromisos\/(\d+)$/, { permiso: 'finanzas' }, async ({ db, body, params }) => {
+  const id = Number(params[0]);
+  const c = await db.prepare('SELECT * FROM compromisos WHERE id = ?').bind(id).first();
+  if (!c) return error(404, 'No existe.');
+  if (body.borrar) {
+    await db.prepare('UPDATE compromisos SET activo = 0 WHERE id = ?').bind(id).run();
+    return json({ ok: true });
+  }
+  const monto = body.monto !== undefined ? numero(String(body.monto).replace(/\./g, ''), { min: 1, max: 1e9 }) : c.monto;
+  if (!monto) return error(400, 'El monto no es válido.');
+  const pagado = body.pagado === undefined ? c.pagado_mes : body.pagado ? mesChile() : null;
+  await db.prepare('UPDATE compromisos SET monto = ?, pagado_mes = ? WHERE id = ?').bind(Math.round(monto), pagado, id).run();
+  return json({ ok: true });
+});
+
 /* ── entrada ────────────────────────────────────────────── */
 
 export async function manejar(request, env) {

@@ -117,10 +117,19 @@ const TABLAS = [
     monto INTEGER,
     proveedor TEXT
   )`,
+  `CREATE TABLE IF NOT EXISTS compromisos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    monto INTEGER NOT NULL,
+    dia INTEGER,
+    pagado_mes TEXT,
+    activo INTEGER NOT NULL DEFAULT 1,
+    creado TEXT NOT NULL
+  )`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v3';
+export const HUELLA = 'v4';
 
 let listo = false;
 
