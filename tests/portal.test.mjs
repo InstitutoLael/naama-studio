@@ -793,3 +793,26 @@ test('avisos push: cifrado correcto (RFC 8291) y llegan a la profesional y a las
   assert.equal(r.data.avisadas, 1, 'la de Kata ya no existe (410) y se borra');
   assert.equal((await kata.pedir('avisos/llave')).data.suscripciones, 0);
 });
+
+test('insumos: bajo el mínimo entra solo a la lista de compras y «se acabó» lo deja urgente', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '16.1.1.2');
+  const r = await admin.post('insumos', { nombre: 'Tinte', variante: '5', marca: 'Igora', unidad: 'g', tamano: 60, minimo: 1, envases: 2 });
+  assert.equal(r.status, 201);
+  const id = r.data.producto.id;
+  // Usa 70 g: queda 50 g (menos de 1 envase) → entra a la lista.
+  const u = await kata.post('insumos/uso', { servicio: 'Color', items: [{ productoId: id, cantidad: 70 }] });
+  assert.equal(u.data.enLista, 1);
+  let compras = (await admin.pedir('compras')).data.pedidos.filter((p) => p.productoId === id && p.estado === 'pedido');
+  assert.equal(compras.length, 1);
+  // Otro uso no duplica el pedido.
+  await kata.post('insumos/uso', { servicio: 'Color', items: [{ productoId: id, cantidad: 10 }] });
+  // Se acabó: queda en cero y urgente.
+  assert.equal((await kata.post(`insumos/${id}/se-acabo`, {})).status, 200);
+  compras = (await admin.pedir('compras')).data.pedidos.filter((p) => p.productoId === id && p.estado === 'pedido');
+  assert.equal(compras.length, 1);
+  assert.equal(compras[0].urgente, true);
+  const prod = (await kata.pedir('insumos')).data.productos.find((p) => p.id === id);
+  assert.equal(prod.stock, 0);
+});
+
