@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Ellipsis, House, KeyRound, LogOut, Package, ShoppingBag, Smartphone, UsersRound, Wallet } from 'lucide-react';
+import { CalendarClock, Ellipsis, House, KeyRound, LogOut, Package, ShoppingBag, Smartphone, UsersRound, Wallet } from 'lucide-react';
 import Logo from '../components/common/Logo';
 import { api, post } from './api';
 import { Configurar, CrearClave, Entrar } from './Acceso';
@@ -15,6 +15,7 @@ import Caja from './Caja';
 import Disponibilidad from './Disponibilidad';
 import MiMes from './MiMes';
 import TeToca from './TeToca';
+import Agenda from './Agenda';
 import Aseo from './Aseo';
 import Resenas from './Resenas';
 import GiftCards from './GiftCards';
@@ -47,11 +48,11 @@ const usePortalHead = () => {
 /** Pestañas del menú: hasta 3 accesos + «Más». */
 const pestanas = (cuenta) => [
   { to: '/portal', label: 'Inicio', Icono: House, end: true },
+  { to: '/portal/agenda', label: 'Agenda', Icono: CalendarClock },
   { to: '/portal/clientas', label: 'Clientas', Icono: UsersRound },
   { to: '/portal/insumos', label: 'Insumos', Icono: Package },
-  { to: '/portal/compras', label: 'Compras', Icono: ShoppingBag },
   // El resto va en la barra lateral del computador; en el celular está en «Más» y en Inicio.
-  ...MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => ({
+  ...MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'agenda'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => ({
     to: `/portal/${m.id}`,
     label: m.corto ?? m.nombre,
     Icono: ICONO_MODULO[m.id],
@@ -98,7 +99,7 @@ const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
         </span>
       </div>
       <ul className="grupo-lista">
-        {MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => {
+        {MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'agenda'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => {
           const Icono = ICONO_MODULO[m.id];
           return (
             <li key={m.id}>
@@ -253,6 +254,7 @@ const PortalApp = () => {
             />
             <Route path="te-toca" element={puede(cuenta, 'clientas') ? <TeToca /> : <Navigate to="/portal" replace />} />
             <Route path="aseo" element={<Aseo />} />
+            <Route path="agenda" element={<Agenda cuenta={cuenta} />} />
             <Route path="resenas" element={<Resenas cuenta={cuenta} />} />
             <Route path="giftcards" element={puede(cuenta, 'servicios') || puede(cuenta, 'finanzas') ? <GiftCards /> : <Navigate to="/portal" replace />} />
             <Route path="caja" element={puede(cuenta, 'caja') ? <Caja /> : <Navigate to="/portal" replace />} />

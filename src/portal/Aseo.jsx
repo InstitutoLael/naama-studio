@@ -30,7 +30,8 @@ const FormTarea = ({ tarea, equipo, onListo, onCerrar }) => {
         </div>
         <div className="field">
           <label htmlFor="ta-q">¿A quién le toca?</label>
-          <select id="ta-q" name="quien" className="input" defaultValue={tarea?.cuentaId ?? ''}>
+          <select id="ta-q" name="quien" className="input" defaultValue={tarea ? (tarea.cuentaId ?? '') : '-1'}>
+            <option value="-1">Por turnos (se reparte entre las que vienen ese día)</option>
             <option value="">A cualquiera</option>
             {equipo.map((p) => (
               <option key={p.id} value={p.id}>

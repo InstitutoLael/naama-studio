@@ -1,6 +1,7 @@
 // Íconos del portal (lucide-react, ya incluido en la web).
 import {
   BellRing,
+  CalendarClock,
   CalendarDays,
   Gift,
   ListChecks,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export const ICONO_MODULO = {
+  agenda: CalendarClock,
   disponibilidad: CalendarDays,
   'te-toca': BellRing,
   aseo: ListChecks,

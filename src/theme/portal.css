@@ -829,3 +829,30 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .alerta-texto { color: var(--caramel-600); font-weight: 600; }
 .ficha-cli__datos .portal__link { display: inline-flex; align-items: center; gap: 6px; justify-self: start; }
 .portal .hoja__form label.field > span { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-3); }
+
+/* ── Agenda ── */
+.agenda { overflow-x: auto; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); -webkit-overflow-scrolling: touch; }
+.agenda__cabeza, .agenda__cuerpo { display: grid; grid-template-columns: 52px repeat(var(--cols), minmax(118px, 1fr)); min-width: calc(52px + var(--cols) * 118px); }
+.agenda__cabeza { position: sticky; top: 0; z-index: 2; background: var(--card); border-bottom: 1px solid rgba(33, 26, 23, 0.08); }
+.agenda__persona { display: grid; justify-items: center; padding: 10px 4px; font-weight: 600; font-size: 0.9rem; }
+.agenda__persona small { font-weight: 400; font-size: 0.68rem; color: var(--ink-3); min-height: 1em; }
+.agenda__persona.is-no { color: var(--ink-3); }
+.agenda__cuerpo { position: relative; }
+.agenda__horas { position: relative; }
+.agenda__horas span { position: absolute; right: 6px; transform: translateY(-50%); font-size: 0.66rem; color: var(--ink-3); }
+.agenda__horas span:first-child { transform: none; }
+.agenda__col { position: relative; border-left: 1px solid rgba(33, 26, 23, 0.06); cursor: copy; }
+.agenda__col.is-no { background: repeating-linear-gradient(135deg, rgba(166, 93, 69, 0.05) 0 8px, transparent 8px 16px); }
+.agenda__linea { position: absolute; left: 0; right: 0; border-top: 1px dashed rgba(33, 26, 23, 0.08); pointer-events: none; }
+.agenda__cita { position: absolute; left: 4px; right: 4px; display: grid; align-content: start; gap: 1px; padding: 5px 7px; border: 0; border-radius: 10px; background: var(--cacao); color: var(--crema); text-align: left; font: inherit; font-size: 0.72rem; line-height: 1.2; overflow: hidden; cursor: pointer; box-shadow: 0 4px 12px rgba(33, 26, 23, 0.18); }
+.agenda__cita strong { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agenda__cita small { opacity: 0.8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agenda__cita.is-confirmada { background: #6b4b2a; }
+.agenda__cita.is-llego { background: #2f6b3a; }
+.agenda__cita.is-no-vino, .agenda__cita.is-cancelada { background: var(--card-2); color: var(--ink-3); box-shadow: none; text-decoration: line-through; }
+.mi-cita__hora { flex: none; display: grid; place-items: center; width: 64px; height: 48px; border-radius: 14px; background: var(--cacao); color: var(--caramel-300); font-family: var(--font-display); font-size: 1.1rem; }
+.mi-cita.is-llego .mi-cita__hora { background: #2f6b3a; color: #fff; }
+.mi-cita.is-no-vino { opacity: 0.55; }
+.aviso-hoy.is-nuevo { background: var(--cacao); color: var(--crema); }
+.aviso-hoy.is-nuevo small { color: rgba(243, 234, 224, 0.75); }
+.aviso-hoy.is-nuevo > svg:first-child { color: var(--caramel-300); }

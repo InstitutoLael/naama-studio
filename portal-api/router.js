@@ -5,7 +5,7 @@ import { asegurarEsquema } from './esquema.js';
 import { claveTemporal, hashClave, igualSeguro, nuevoToken, sha256, verificarClave } from './seguridad.js';
 import { PERMISOS, ROL_IDS, permisosDe } from '../src/portal/permisos.js';
 import { normalizarTelefono, prepararContactos } from '../src/portal/contactos.js';
-import { COMISIONES, MEDIOS_PAGO, PROFESIONALES, buscarServicio, comisionSugerida, profesionalDeNombre, turnoDeHora } from '../src/portal/servicios.js';
+import { COMISIONES, MEDIOS_PAGO, PROFESIONALES, buscarServicio, comisionSugerida, minutosDe, profesionalDeNombre, turnoDeHora } from '../src/portal/servicios.js';
 
 const COOKIE = 'naama_sesion';
 const DIAS_SESION = 30;
@@ -1791,9 +1791,31 @@ ruta('GET', /^tareas$/, { sesion: true }, async ({ db, cuenta, request }) => {
   const { results: equipo } = await db.prepare('SELECT id, nombre FROM cuentas WHERE activa = 1 AND demo = 0 ORDER BY nombre').all();
   const pub = (t) => {
     const h = hechas.find((x) => x.tarea_id === t.id);
-    return { id: t.id, texto: t.texto, cuentaId: t.cuenta_id, quien: t.quien ?? 'Cualquiera', dias: t.dias.split(',').map(Number), hecha: h ? { por: h.por, ts: h.ts } : null };
+    return {
+      id: t.id,
+      texto: t.texto,
+      cuentaId: t.cuenta_id,
+      quien: t.cuenta_id === -1 ? 'Por turnos (entre las que vienen)' : (t.quien ?? 'Cualquiera'),
+      dias: t.dias.split(',').map(Number),
+      hecha: h ? { por: h.por, ts: h.ts } : null,
+    };
   };
-  const deHoy = tareas.filter((t) => t.dias.split(',').includes(dow)).map(pub);
+  // Tareas «por turnos» (cuenta_id = -1): se reparten entre las que marcaron que vienen ese día.
+  const { results: vienen } = await db
+    .prepare(
+      `SELECT c.id, c.nombre FROM disponibilidad d JOIN cuentas c ON c.id = d.cuenta_id
+       WHERE d.fecha = ? AND d.estado != 'no' AND c.activa = 1 AND c.rol != 'admin' ORDER BY c.id`,
+    )
+    .bind(fecha)
+    .all();
+  const diaN = Math.round(Date.parse(`${fecha}T12:00:00Z`) / 86400000);
+  let turno = 0;
+  const repartir = (t) => {
+    if (t.cuenta_id !== -1) return t;
+    const quien = vienen.length ? vienen[(diaN + turno++) % vienen.length] : null;
+    return { ...t, cuenta_id: quien?.id ?? null, quien: quien ? `${quien.nombre} (turno)` : 'Por turnos: nadie marcó que viene' };
+  };
+  const deHoy = tareas.filter((t) => t.dias.split(',').includes(dow)).map(repartir).map(pub);
   return json({
     ok: true,
     hoy,
@@ -1809,8 +1831,14 @@ ruta('GET', /^tareas$/, { sesion: true }, async ({ db, cuenta, request }) => {
 ruta('POST', /^tareas$/, { permiso: 'cuentas' }, async ({ db, body }) => {
   const t = texto(body.texto, 100);
   const dias = Array.isArray(body.dias) ? [...new Set(body.dias.map(Number).filter((d) => d >= 0 && d <= 6))].sort().join(',') : '';
-  if (!t || !DIAS_SEMANA.test(dias)) return error(400, 'Escribe la tarea y elige los días.');
+  if (!Array.isArray(body.lote) && (!t || !DIAS_SEMANA.test(dias))) return error(400, 'Escribe la tarea y elige los días.');
   const cuentaId = body.cuentaId ? Number(body.cuentaId) : null;
+  for (const t2 of Array.isArray(body.lote) ? body.lote.slice(0, 40) : []) {
+    const d2 = [...new Set((t2.dias ?? []).map(Number).filter((d) => d >= 0 && d <= 6))].sort().join(',');
+    if (texto(t2.texto, 100) && DIAS_SEMANA.test(d2))
+      await db.prepare('INSERT INTO tareas (texto, cuenta_id, dias, creado) VALUES (?, ?, ?, ?)').bind(texto(t2.texto, 100), t2.cuentaId ? Number(t2.cuentaId) : null, d2, ahora()).run();
+  }
+  if (Array.isArray(body.lote)) return json({ ok: true }, 201);
   await db.prepare('INSERT INTO tareas (texto, cuenta_id, dias, creado) VALUES (?, ?, ?, ?)').bind(t, cuentaId, dias, ahora()).run();
   return json({ ok: true }, 201);
 });
@@ -1831,7 +1859,7 @@ ruta('POST', /^tareas\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, body, param
 ruta('POST', /^tareas\/(\d+)\/hecha$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
   const t = await db.prepare('SELECT * FROM tareas WHERE id = ? AND activa = 1').bind(Number(params[0])).first();
   if (!t) return error(404, 'No existe.');
-  if (t.cuenta_id && t.cuenta_id !== cuenta.id && !tiene(cuenta, 'cuentas')) return error(403, 'Esa tarea le toca a otra persona.');
+  if (t.cuenta_id > 0 && t.cuenta_id !== cuenta.id && !tiene(cuenta, 'cuentas')) return error(403, 'Esa tarea le toca a otra persona.');
   const fecha = fechaChile();
   if (body.hecha === false) await db.prepare('DELETE FROM tareas_hechas WHERE tarea_id = ? AND fecha = ?').bind(t.id, fecha).run();
   else
@@ -1980,6 +2008,146 @@ ruta('GET', /^plata\/margen$/, { permiso: 'finanzas' }, async ({ db }) => {
     })
     .sort((a, b) => b.veces - a.veces);
   return json({ ok: true, desde, servicios: lista });
+});
+
+
+/* ── agenda interna (por persona) ───────────────────────── */
+
+const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
+const aMin = (h) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3));
+const ESTADOS_CITA = ['agendada', 'confirmada', 'llego', 'no-vino', 'cancelada'];
+
+const citaPublica = (c, verTel) => ({
+  id: c.id,
+  fecha: c.fecha,
+  hora: c.hora,
+  minutos: c.minutos,
+  cuentaId: c.cuenta_id,
+  quien: c.quien,
+  clienta: c.clienta,
+  clientaId: c.clienta_id,
+  servicio: c.servicio,
+  nota: c.nota,
+  estado: c.estado,
+  por: c.por,
+  recordada: c.recordada,
+  alergias: c.alergias ?? null,
+  faltas: c.faltas ?? 0,
+  ...(verTel ? { telefono: c.telefono ?? c.tel_clienta ?? null } : {}),
+});
+
+/** Quiénes atienden (las cuentas que son profesionales de la planilla). */
+async function profesionalesAgenda(db) {
+  const { results } = await db.prepare('SELECT id, nombre FROM cuentas WHERE activa = 1 AND demo = 0 ORDER BY id').all();
+  return results.filter((c) => profesionalDeNombre(c.nombre));
+}
+
+async function choque(db, { fecha, hora, minutos, cuentaId, sinId = 0 }) {
+  const { results } = await db
+    .prepare(`SELECT * FROM citas WHERE fecha = ? AND cuenta_id = ? AND id != ? AND estado NOT IN ('cancelada', 'no-vino')`)
+    .bind(fecha, cuentaId, sinId)
+    .all();
+  const ini = aMin(hora);
+  const fin = ini + minutos;
+  return results.find((c) => aMin(c.hora) < fin && ini < aMin(c.hora) + c.minutos) ?? null;
+}
+
+const CITAS_SQL = `SELECT ci.*, cu.nombre AS quien, cl.telefono AS tel_clienta, fi.alergias AS alergias,
+  (SELECT COUNT(*) FROM citas x WHERE lower(x.clienta) = lower(ci.clienta) AND x.estado = 'no-vino') AS faltas
+  FROM citas ci JOIN cuentas cu ON cu.id = ci.cuenta_id LEFT JOIN clientas cl ON cl.id = ci.clienta_id
+  LEFT JOIN fichas fi ON fi.clienta_id = ci.clienta_id`;
+
+ruta('GET', /^agenda$/, { sesion: true }, async ({ db, cuenta, request }) => {
+  const hoy = fechaChile();
+  const q = new URL(request.url).searchParams.get('fecha');
+  const fecha = FECHA.test(q ?? '') ? q : hoy;
+  const verTel = tiene(cuenta, 'clientas');
+  const { results } = await db.prepare(`${CITAS_SQL} WHERE ci.fecha = ? ORDER BY ci.hora`).bind(fecha).all();
+  const personas = await profesionalesAgenda(db);
+  const { results: dispo } = await db.prepare('SELECT cuenta_id, estado FROM disponibilidad WHERE fecha = ?').bind(fecha).all();
+  // Lo que me agendaron otras personas queda «visto» al abrir la agenda.
+  await db.prepare('UPDATE citas SET visto = 1 WHERE cuenta_id = ? AND visto = 0').bind(cuenta.id).run();
+  return json({
+    ok: true,
+    hoy,
+    fecha,
+    puedeAgendarATodas: tiene(cuenta, 'clientas'),
+    personas: personas.map((p) => ({ id: p.id, nombre: p.nombre, dispo: dispo.find((d) => d.cuenta_id === p.id)?.estado ?? null })),
+    citas: results.map((c) => citaPublica(c, verTel)),
+  });
+});
+
+ruta('GET', /^agenda\/nuevas$/, { sesion: true }, async ({ db, cuenta }) => {
+  const { results } = await db
+    .prepare(`${CITAS_SQL} WHERE ci.cuenta_id = ? AND ci.visto = 0 AND ci.estado != 'cancelada' AND ci.fecha >= ? ORDER BY ci.fecha, ci.hora`)
+    .bind(cuenta.id, fechaChile())
+    .all();
+  const hoy = fechaChile();
+  const { results: deHoy } = await db
+    .prepare(`SELECT COUNT(*) AS n FROM citas WHERE cuenta_id = ? AND fecha = ? AND estado NOT IN ('cancelada', 'no-vino')`)
+    .bind(cuenta.id, hoy)
+    .all();
+  return json({ ok: true, nuevas: results.map((c) => citaPublica(c, false)), hoy: deHoy[0]?.n ?? 0 });
+});
+
+ruta('POST', /^agenda$/, { sesion: true }, async ({ db, cuenta, body }) => {
+  const fecha = FECHA.test(body.fecha ?? '') ? body.fecha : null;
+  const hora = HORA.test(body.hora ?? '') ? body.hora : null;
+  const cuentaId = Number(body.cuentaId) || cuenta.id;
+  const clienta = texto(body.clienta, 60);
+  const servicio = texto(body.servicio, 60) || null;
+  const minutos = numero(body.minutos, { min: 15, max: 480 }) ?? minutosDe(servicio);
+  if (!fecha || !hora || !clienta) return error(400, 'Falta el día, la hora o la clienta.');
+  if (fecha < fechaChile()) return error(400, 'Ese día ya pasó.');
+  if (cuentaId !== cuenta.id && !tiene(cuenta, 'clientas')) return error(403, 'Solo puedes agendar en tu propia agenda.');
+  const quien = await db.prepare('SELECT id, nombre FROM cuentas WHERE id = ? AND activa = 1').bind(cuentaId).first();
+  if (!quien) return error(400, 'Esa persona no existe.');
+  const c = await choque(db, { fecha, hora, minutos, cuentaId });
+  if (c) return error(409, `${quien.nombre} ya tiene a ${c.clienta} a las ${c.hora} (${c.minutos} min).`);
+  const tel = tiene(cuenta, 'clientas') && body.telefono ? normalizarTelefono(body.telefono) : null;
+  const ligada = body.clientaId
+    ? Number(body.clientaId)
+    : ((await db.prepare('SELECT id FROM clientas WHERE activa = 1 AND lower(nombre) = lower(?)').bind(clienta).first())?.id ?? null);
+  const r = await db
+    .prepare(
+      `INSERT INTO citas (fecha, hora, minutos, cuenta_id, clienta, clienta_id, telefono, servicio, nota, creada_por, por, creado, visto)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    )
+    .bind(fecha, hora, Math.round(minutos), cuentaId, clienta, ligada, tel, servicio, texto(body.nota, 160) || null, cuenta.id, cuenta.nombre, ahora(), cuentaId === cuenta.id ? 1 : 0)
+    .run();
+  return json({ ok: true, id: r.meta.last_row_id }, 201);
+});
+
+ruta('POST', /^agenda\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  const c = await db.prepare('SELECT * FROM citas WHERE id = ?').bind(Number(params[0])).first();
+  if (!c) return error(404, 'No existe.');
+  const puede = c.cuenta_id === cuenta.id || c.creada_por === cuenta.id || tiene(cuenta, 'clientas');
+  if (!puede) return error(403, 'Esa cita es de otra persona.');
+  if (body.borrar) {
+    await db.prepare('DELETE FROM citas WHERE id = ?').bind(c.id).run();
+    return json({ ok: true });
+  }
+  if (body.recordada) {
+    await db.prepare('UPDATE citas SET recordada = ? WHERE id = ?').bind(ahora(), c.id).run();
+    return json({ ok: true });
+  }
+  if (body.estado) {
+    if (!ESTADOS_CITA.includes(body.estado)) return error(400, 'Estado no válido.');
+    await db.prepare('UPDATE citas SET estado = ? WHERE id = ?').bind(body.estado, c.id).run();
+    return json({ ok: true });
+  }
+  const fecha = FECHA.test(body.fecha ?? '') ? body.fecha : c.fecha;
+  const hora = HORA.test(body.hora ?? '') ? body.hora : c.hora;
+  const minutos = numero(body.minutos, { min: 15, max: 480 }) ?? c.minutos;
+  const cuentaId = body.cuentaId ? Number(body.cuentaId) : c.cuenta_id;
+  if (cuentaId !== cuenta.id && cuentaId !== c.cuenta_id && !tiene(cuenta, 'clientas')) return error(403, 'Solo puedes agendar en tu propia agenda.');
+  const x = await choque(db, { fecha, hora, minutos, cuentaId, sinId: c.id });
+  if (x) return error(409, `Choca con ${x.clienta} a las ${x.hora}.`);
+  await db
+    .prepare('UPDATE citas SET fecha = ?, hora = ?, minutos = ?, cuenta_id = ?, clienta = ?, servicio = ?, nota = ?, visto = ? WHERE id = ?')
+    .bind(fecha, hora, Math.round(minutos), cuentaId, texto(body.clienta, 60) || c.clienta, texto(body.servicio, 60) || c.servicio, texto(body.nota, 160) || null, cuentaId === cuenta.id ? 1 : 0, c.id)
+    .run();
+  return json({ ok: true });
 });
 
 
