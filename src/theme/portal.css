@@ -565,3 +565,4 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 
 /* Que el botón flotante no tape la última fila */
 @media (max-width: 899px) { .panel { padding-bottom: 72px; } }
+.importar__fila.is-revisar { background: rgba(197, 166, 117, 0.18); }

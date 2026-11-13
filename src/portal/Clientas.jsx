@@ -167,7 +167,8 @@ const Importar = ({ onListo, onCerrar }) => {
       setError('No encontré contactos con número en ese archivo.');
       return;
     }
-    const hayClientas = crudos.some((c) => PALABRA_CLIENTA.test(c.original));
+    // Si el archivo es la agenda completa (muchos contactos), partimos mostrando solo los que dicen «clienta».
+    const hayClientas = crudos.length > 300 && crudos.some((c) => PALABRA_CLIENTA.test(c.original));
     setSoloClientas(hayClientas);
     setLista(
       prepararContactos(crudos).map((p) => ({
@@ -241,7 +242,7 @@ const Importar = ({ onListo, onCerrar }) => {
           </div>
           <ul className="importar">
             {visibles.slice(0, 400).map((c) => (
-              <li key={c.i} className={`importar__fila ${c.valido && !c.repetido ? '' : 'is-mala'}`}>
+              <li key={c.i} className={`importar__fila ${c.valido && !c.repetido ? '' : 'is-mala'} ${c.revisar ? 'is-revisar' : ''}`}>
                 <input
                   type="checkbox"
                   aria-label={`Incluir ${c.nombre}`}
@@ -259,6 +260,7 @@ const Importar = ({ onListo, onCerrar }) => {
                   <span className="importar__meta">
                     {c.telefono ? mostrarTelefono(c.telefono) : 'Número no válido'}
                     {c.repetido && ' · repetido'}
+                    {c.revisar && ' · escribe su nombre'}
                     {c.original !== c.nombre && ` · estaba como «${c.original}»`}
                     {c.nota && ` · nota: ${c.nota}`}
                   </span>
