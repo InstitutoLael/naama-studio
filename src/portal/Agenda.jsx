@@ -45,7 +45,7 @@ export const mensajeRecordatorio = (c) => {
 
 const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
   const [v, setV] = useState(() => ({
-    cuentaId: cita?.cuentaId ?? inicial?.cuentaId ?? d.personas[0]?.id,
+    cuentaId: cita?.cuentaId ?? inicial?.cuentaId ?? (d.personas.some((p) => p.id === d.yo) ? d.yo : d.personas[0]?.id),
     fecha: cita?.fecha ?? d.fecha,
     hora: cita?.hora ?? inicial?.hora ?? '10:30',
     minutos: cita?.minutos ?? 60,
@@ -66,7 +66,7 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
     });
   };
   const servicios = useMemo(() => CATALOGO.filter((c) => !c.salon).map((c) => c.nombre.replace(' (ganancia)', '')), []);
-  const personas = d.puedeAgendarATodas ? d.personas : d.personas.filter((p) => p.id === d.yo);
+  const personas = d.personas;
 
   return (
     <Hoja titulo={cita ? `Cita de ${cita.clienta}` : 'Agendar'} onCerrar={onCerrar}>
@@ -119,7 +119,7 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
         }}
       >
         <div className="field">
-          <span className="field__titulo">¿Con quién?</span>
+          <span className="field__titulo">¿Con quién? (puede ser otra persona)</span>
           <div className="chips" role="radiogroup" aria-label="Profesional">
             {personas.map((p) => (
               <button
@@ -144,7 +144,7 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
             ))}
           </datalist>
         </label>
-        {d.puedeAgendarATodas && (
+        {d.verNumeros && (
           <label className="field">
             <span>WhatsApp de la clienta (para el recordatorio)</span>
             <input className="input" type="tel" value={v.telefono} onChange={cambia('telefono')} placeholder="+56 9 …" />
@@ -278,12 +278,12 @@ const Agenda = ({ cuenta }) => {
                 <span>tuyas</span>
               </div>
             </div>
-            <button type="button" className="hoy__boton" onClick={() => setHoja({ inicial: { cuentaId: d.puedeAgendarATodas ? undefined : cuenta.id } })}>
+            <button type="button" className="hoy__boton" onClick={() => setHoja({ inicial: {} })}>
               <Plus size={18} /> Agendar
             </button>
           </section>
 
-          {d.fecha === manana && d.puedeAgendarATodas && d.citas.some((c) => c.telefono && c.estado === 'agendada') && (
+          {d.fecha === manana && d.verNumeros && d.citas.some((c) => c.telefono && c.estado === 'agendada') && (
             <div className="aviso-fijo">
               <p>
                 <strong>Recordatorios de mañana:</strong> toca una cita y aprieta «Recordarle la hora». Faltan{' '}
@@ -343,7 +343,6 @@ const Agenda = ({ cuenta }) => {
                   tabIndex={-1}
                   aria-label={`Agendar con ${p.nombre}`}
                   onClick={(e) => {
-                    if (!d.puedeAgendarATodas && p.id !== cuenta.id) return;
                     const y = e.clientY - e.currentTarget.getBoundingClientRect().top;
                     const m = Math.max(ABRE, Math.min(CIERRA - 30, ABRE + Math.round(y / PX / 15) * 15));
                     setHoja({ inicial: { cuentaId: p.id, hora: aHora(m) } });

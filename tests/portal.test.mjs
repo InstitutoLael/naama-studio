@@ -699,8 +699,8 @@ test('agenda: horas por persona, choques, avisos de citas nuevas y alergias a la
   // Admin sí ve el número (para el recordatorio).
   assert.equal((await admin.pedir(`agenda?fecha=${manana}`)).data.citas.find((c) => c.clienta === 'Rosita Jara').telefono, '+56911112222');
 
-  // Kata solo agenda en su propia columna.
-  assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', cuentaId: ids.Gaby, clienta: 'X' })).status, 403);
+  // Cualquiera puede agendarle a otra (ej.: Valeria anota una hora para Vivy).
+  assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', cuentaId: ids.Gaby, clienta: 'X' })).status, 201);
   assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', clienta: 'Mía' })).status, 201);
   await kata.post(`agenda/${suya.id}`, { estado: 'no-vino' }).then((x) => assert.equal(x.status, 403));
   await gaby.post(`agenda/${suya.id}`, { estado: 'no-vino' });
