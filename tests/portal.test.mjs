@@ -383,6 +383,8 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
   assert.equal(r.data.disponible, 600000);
   assert.equal(r.data.porDia.length, 14);
   assert.deepEqual(r.data.ultimos.map((p) => p.id).sort(), [1, 2]);
+  const otra = await admin.post('plata/compromisos', { nombre: 'arriendo', monto: '900.000', dia: 28 });
+  assert.equal(otra.status, 409);
   const arriendo = r.data.compromisos[0];
   await admin.post(`plata/compromisos/${arriendo.id}`, { pagado: true });
   assert.equal((await admin.pedir('plata')).data.disponible, 1500000);
