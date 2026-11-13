@@ -2,6 +2,7 @@
 // Todo vive bajo /api/portal/… y responde JSON.
 
 import { asegurarEsquema } from './esquema.js';
+import { enviarPush, llavesVapid } from './push.js';
 import { claveTemporal, hashClave, igualSeguro, nuevoToken, sha256, verificarClave } from './seguridad.js';
 import { PERMISOS, ROL_IDS, permisosDe } from '../src/portal/permisos.js';
 import { normalizarTelefono, prepararContactos } from '../src/portal/contactos.js';
@@ -2016,6 +2017,79 @@ ruta('GET', /^plata\/margen$/, { permiso: 'finanzas' }, async ({ db }) => {
 });
 
 
+/* ── avisos en el celular (push) ────────────────────────── */
+
+/** Manda un aviso a varias cuentas (todas sus suscripciones). Borra las que ya no existen. */
+async function avisar(db, env, cuentaIds, datos) {
+  const ids = [...new Set(cuentaIds)].filter(Boolean);
+  if (!ids.length) return 0;
+  const { results } = await db.prepare(`SELECT * FROM avisos_push WHERE cuenta_id IN (${ids.map(() => '?').join(',')})`).bind(...ids).all();
+  if (!results.length) return 0;
+  const llaves = await llavesVapid(db);
+  let enviados = 0;
+  await Promise.all(
+    results.map(async (s) => {
+      const r = await enviarPush(env, llaves, { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, datos);
+      if (r === 'ok') enviados++;
+      if (r === 'borrar') await db.prepare('DELETE FROM avisos_push WHERE endpoint = ?').bind(s.endpoint).run();
+    }),
+  );
+  return enviados;
+}
+
+ruta('GET', /^avisos\/llave$/, { sesion: true }, async ({ db, cuenta }) => {
+  const llaves = await llavesVapid(db);
+  const n = await db.prepare('SELECT COUNT(*) AS n FROM avisos_push WHERE cuenta_id = ?').bind(cuenta.id).first();
+  return json({ ok: true, llave: llaves.publica, suscripciones: n?.n ?? 0 });
+});
+
+ruta('POST', /^avisos\/suscribir$/, { sesion: true }, async ({ db, cuenta, body }) => {
+  const s = body.suscripcion ?? {};
+  const endpoint = String(s.endpoint ?? '');
+  if (!/^https:\/\/[\w.-]+\//.test(endpoint) || endpoint.length > 1000 || !s.keys?.p256dh || !s.keys?.auth) return error(400, 'Suscripción no válida.');
+  await db
+    .prepare(
+      `INSERT INTO avisos_push (endpoint, cuenta_id, p256dh, auth, creado) VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(endpoint) DO UPDATE SET cuenta_id = excluded.cuenta_id, p256dh = excluded.p256dh, auth = excluded.auth`,
+    )
+    .bind(endpoint, cuenta.id, String(s.keys.p256dh).slice(0, 200), String(s.keys.auth).slice(0, 100), ahora())
+    .run();
+  return json({ ok: true });
+});
+
+ruta('POST', /^avisos\/probar$/, { sesion: true }, async ({ db, env, cuenta }) => {
+  const n = await avisar(db, env, [cuenta.id], {
+    titulo: 'Naamá ✨',
+    cuerpo: `¡Listo, ${cuenta.nombre.split(' ')[0]}! Así te van a llegar los avisos de horas nuevas.`,
+    url: '/portal/agenda',
+    tag: 'prueba',
+  });
+  return json({ ok: true, enviados: n });
+});
+
+const diaBonito = (f, hoy) => {
+  if (f === hoy) return 'hoy';
+  const manana = fechaChile(new Date(Date.parse(`${hoy}T12:00:00Z`) + 86400000));
+  if (f === manana) return 'mañana';
+  return new Date(`${f}T12:00:00Z`).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+};
+
+/** Aviso de hora nueva: a la profesional y a todas las que marcaron que vienen ese día (menos quien la anotó). */
+async function avisarCita(db, env, citaId, quienAnota) {
+  const c = await db.prepare('SELECT ci.*, cu.nombre AS quien FROM citas ci JOIN cuentas cu ON cu.id = ci.cuenta_id WHERE ci.id = ?').bind(citaId).first();
+  if (!c) return 0;
+  const { results: vienen } = await db.prepare(`SELECT cuenta_id FROM disponibilidad WHERE fecha = ? AND estado != 'no'`).bind(c.fecha).all();
+  const destino = [c.cuenta_id, ...vienen.map((v) => v.cuenta_id)].filter((id) => id !== quienAnota);
+  const primer = c.quien.split(' ')[0];
+  return avisar(db, env, destino, {
+    titulo: `Nueva hora para ${primer} ✨`,
+    cuerpo: `${c.clienta}${c.servicio ? ` · ${c.servicio}` : ''}\n${diaBonito(c.fecha, fechaChile())} a las ${c.hora}`,
+    url: `/portal/agenda?fecha=${c.fecha}`,
+    tag: `cita-${c.id}`,
+  });
+}
+
+
 /* ── agenda interna (por persona) ───────────────────────── */
 
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -2095,7 +2169,7 @@ ruta('GET', /^agenda\/nuevas$/, { sesion: true }, async ({ db, cuenta }) => {
   return json({ ok: true, nuevas: results.map((c) => citaPublica(c, false)), hoy: deHoy[0]?.n ?? 0 });
 });
 
-ruta('POST', /^agenda$/, { sesion: true }, async ({ db, cuenta, body }) => {
+ruta('POST', /^agenda$/, { sesion: true }, async ({ db, env, cuenta, body }) => {
   const fecha = FECHA.test(body.fecha ?? '') ? body.fecha : null;
   const hora = HORA.test(body.hora ?? '') ? body.hora : null;
   const cuentaId = Number(body.cuentaId) || cuenta.id;
@@ -2120,7 +2194,8 @@ ruta('POST', /^agenda$/, { sesion: true }, async ({ db, cuenta, body }) => {
     )
     .bind(fecha, hora, Math.round(minutos), cuentaId, clienta, ligada, tel, servicio, texto(body.nota, 160) || null, cuenta.id, cuenta.nombre, ahora(), cuentaId === cuenta.id ? 1 : 0)
     .run();
-  return json({ ok: true, id: r.meta.last_row_id }, 201);
+  const avisadas = await avisarCita(db, env, r.meta.last_row_id, cuenta.id).catch(() => 0);
+  return json({ ok: true, id: r.meta.last_row_id, avisadas }, 201);
 });
 
 ruta('POST', /^agenda\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, params }) => {

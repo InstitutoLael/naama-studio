@@ -152,13 +152,14 @@ const render = (r) => {
     html = html
       .replace('<link rel="manifest" href="/manifest.json" />', '<link rel="manifest" href="/portal-manifest.webmanifest" />')
       .replace('<meta name="theme-color" content="#17110e" />', '<meta name="theme-color" content="#f8f3ed" />')
+      .replace('<link rel="apple-touch-icon" href="/apple-touch-icon.png" />', '<link rel="apple-touch-icon" href="/portal-apple-touch.png" />')
       .replace(
         '</head>',
         [
           '    <meta name="robots" content="noindex, nofollow" />',
           '    <meta name="apple-mobile-web-app-capable" content="yes" />',
           '    <meta name="mobile-web-app-capable" content="yes" />',
-          '    <meta name="apple-mobile-web-app-title" content="Naamá Equipo" />',
+          '    <meta name="apple-mobile-web-app-title" content="Naamá" />',
           '    <meta name="apple-mobile-web-app-status-bar-style" content="default" />',
           '  </head>',
         ].join('\n'),

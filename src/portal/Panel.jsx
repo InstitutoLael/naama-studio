@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarClock, Cake, ChevronRight, ListChecks, Plus } from 'lucide-react';
+import { BellRing, CalendarClock, Cake, ChevronRight, ListChecks, Plus } from 'lucide-react';
+import { activarAvisos, avisosActivos, motivoSinAvisos } from './avisos';
 import { api } from './api';
 import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
 import { ICONO_MODULO } from './iconos';
@@ -21,6 +22,14 @@ const Panel = ({ cuenta }) => {
   const [cumples, setCumples] = useState([]);
   const [tareas, setTareas] = useState(null);
   const [citas, setCitas] = useState(null);
+  const [avisos, setAvisos] = useState('cargando');
+  const [errorAvisos, setErrorAvisos] = useState('');
+
+  useEffect(() => {
+    avisosActivos()
+      .then((si) => setAvisos(si ? 'activos' : 'apagados'))
+      .catch(() => setAvisos('apagados'));
+  }, []);
 
   useEffect(() => {
     api('cumpleanos')
@@ -86,6 +95,35 @@ const Panel = ({ cuenta }) => {
           </Link>
         )}
       </section>
+
+      {avisos === 'apagados' && (
+        <section className="avisos-activar">
+          <BellRing strokeWidth={1.6} />
+          <div>
+            <strong>Activa los avisos en este celular</strong>
+            <p>Te llega un aviso cuando te agendan una hora o hay una clienta nueva el día que vienes.</p>
+            {motivoSinAvisos() && <small>{motivoSinAvisos()}</small>}
+            {errorAvisos && <small className="alerta-texto">{errorAvisos}</small>}
+          </div>
+          {!motivoSinAvisos() && (
+            <button
+              type="button"
+              className="btn btn--sm"
+              onClick={async () => {
+                setErrorAvisos('');
+                try {
+                  await activarAvisos();
+                  setAvisos('activos');
+                } catch (err) {
+                  setErrorAvisos(err.message);
+                }
+              }}
+            >
+              Activar
+            </button>
+          )}
+        </section>
+      )}
 
       {(cumples.length > 0 || tareas?.length > 0 || citas?.hoy > 0 || citas?.nuevas?.length > 0) && (
         <section className="avisos-hoy">

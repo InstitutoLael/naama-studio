@@ -856,3 +856,8 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .aviso-hoy.is-nuevo { background: var(--cacao); color: var(--crema); }
 .aviso-hoy.is-nuevo small { color: rgba(243, 234, 224, 0.75); }
 .aviso-hoy.is-nuevo > svg:first-child { color: var(--caramel-300); }
+.avisos-activar { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: var(--r); background: linear-gradient(135deg, #f6e7c9, #f3eae0); box-shadow: var(--sombra); }
+.avisos-activar > svg { flex: none; width: 26px; height: 26px; color: var(--caramel-600); }
+.avisos-activar > div { flex: 1; display: grid; gap: 4px; }
+.avisos-activar p { margin: 0; font-size: 0.86rem; color: var(--ink-2); }
+.avisos-activar small { font-size: 0.78rem; color: var(--ink-3); }

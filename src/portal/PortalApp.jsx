@@ -34,12 +34,16 @@ const usePortalHead = () => {
     const robots = Object.assign(document.createElement('meta'), { name: 'robots', content: 'noindex, nofollow' });
     document.head.appendChild(robots);
     link?.setAttribute('href', '/portal-manifest.webmanifest');
+    const apple = document.querySelector('link[rel="apple-touch-icon"]');
+    const appleAntes = apple?.getAttribute('href');
+    apple?.setAttribute('href', '/portal-apple-touch.png');
     document.documentElement.classList.add('en-portal');
     registrarAppPortal();
     return () => {
       robots.remove();
       document.title = previo.titulo;
       if (previo.manifest) link?.setAttribute('href', previo.manifest);
+      if (appleAntes) apple?.setAttribute('href', appleAntes);
       document.documentElement.classList.remove('en-portal');
     };
   }, []);

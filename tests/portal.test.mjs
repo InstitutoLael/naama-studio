@@ -5,6 +5,7 @@ import { crearD1 } from './d1-memoria.mjs';
 import { manejar } from '../portal-api/router.js';
 import { reiniciarEsquema } from '../portal-api/esquema.js';
 
+const deB64 = (s) => Buffer.from(s, 'base64url');
 const BASE = 'https://naamastudio.cl/api/portal/';
 let env;
 
@@ -731,4 +732,57 @@ test('se puede cambiar el correo de una cuenta (sin repetir)', async () => {
   assert.equal((await admin.post(`cuentas/${r.data.cuenta.id}`, { email: 'kata@pendiente.naamastudio.cl' })).status, 409);
   const ok = await admin.post(`cuentas/${r.data.cuenta.id}`, { email: 'Gaby@Gmail.com' });
   assert.equal(ok.data.cuenta.email, 'gaby@gmail.com');
+});
+
+test('avisos push: cifrado correcto (RFC 8291) y llegan a la profesional y a las que vienen ese día', async () => {
+  const { cifrar } = await import('../portal-api/push.js');
+  const b64u = (b) => Buffer.from(b).toString('base64url');
+  // Un «celular» de prueba con sus llaves.
+  const ua = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+  const uaPub = new Uint8Array(await crypto.subtle.exportKey('raw', ua.publicKey));
+  const auth = crypto.getRandomValues(new Uint8Array(16));
+  const sub = { endpoint: 'https://push.ejemplo/abc', keys: { p256dh: b64u(uaPub), auth: b64u(auth) } };
+  const cuerpo = await cifrar(sub, '{"titulo":"Hola"}');
+  // Descifrar como lo haría el celular.
+  const sal = cuerpo.slice(0, 16);
+  const idlen = cuerpo[20];
+  const asPub = cuerpo.slice(21, 21 + idlen);
+  const datos = cuerpo.slice(21 + idlen);
+  const as = await crypto.subtle.importKey('raw', asPub, { name: 'ECDH', namedCurve: 'P-256' }, false, []);
+  const secreto = new Uint8Array(await crypto.subtle.deriveBits({ name: 'ECDH', public: as }, ua.privateKey, 256));
+  const hk = async (s, ikm, info, bits) =>
+    new Uint8Array(await crypto.subtle.deriveBits({ name: 'HKDF', hash: 'SHA-256', salt: s, info }, await crypto.subtle.importKey('raw', ikm, 'HKDF', false, ['deriveBits']), bits));
+  const te = new TextEncoder();
+  const ikm = await hk(auth, secreto, new Uint8Array([...te.encode('WebPush: info\0'), ...uaPub, ...asPub]), 256);
+  const cek = await hk(sal, ikm, te.encode('Content-Encoding: aes128gcm\0'), 128);
+  const nonce = await hk(sal, ikm, te.encode('Content-Encoding: nonce\0'), 96);
+  const plano = new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: nonce }, await crypto.subtle.importKey('raw', cek, 'AES-GCM', false, ['decrypt']), datos));
+  assert.equal(new TextDecoder().decode(plano.slice(0, -1)), '{"titulo":"Hola"}');
+  assert.equal(plano.at(-1), 2);
+
+  // Agenda: avisa a Gaby (su hora) y a Kata (viene ese día), no a Diego (la anotó) ni a Vivy (no viene).
+  const admin = await configurar();
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '17.1.1.1');
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '17.1.1.2');
+  const vivy = await crearYEntrar(admin, 'Vivy', 'duena', '17.1.1.3');
+  const llave = (await gaby.pedir('avisos/llave')).data.llave;
+  assert.equal(deB64(llave).length, 65);
+  for (const [c, n] of [[gaby, 'g'], [kata, 'k'], [vivy, 'v'], [admin, 'd']]) {
+    await c.post('avisos/suscribir', { suscripcion: { endpoint: `https://push.ejemplo/${n}`, keys: sub.keys } });
+  }
+  const manana = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(Date.now() + 86400000));
+  await kata.post('disponibilidad', { fecha: manana, estado: 'todo' });
+  await vivy.post('disponibilidad', { fecha: manana, estado: 'no' });
+  const llegaron = [];
+  env.PUSH_FETCH = async (url, op) => {
+    assert.match(op.headers.Authorization, /^vapid t=[\w-]+\.[\w-]+\.[\w-]+, k=/);
+    assert.equal(op.headers['Content-Encoding'], 'aes128gcm');
+    llegaron.push(url.split('/').pop());
+    return new Response('', { status: url.endsWith('/k') ? 410 : 201 });
+  };
+  const ids = Object.fromEntries((await admin.pedir('cuentas')).data.cuentas.map((x) => [x.nombre, x.id]));
+  const r = await admin.post('agenda', { fecha: manana, hora: '15:00', cuentaId: ids.Gaby, clienta: 'Rosita', servicio: 'Manos' });
+  assert.deepEqual(llegaron.sort(), ['g', 'k']);
+  assert.equal(r.data.avisadas, 1, 'la de Kata ya no existe (410) y se borra');
+  assert.equal((await kata.pedir('avisos/llave')).data.suscripciones, 0);
 });

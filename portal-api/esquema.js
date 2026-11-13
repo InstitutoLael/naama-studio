@@ -281,10 +281,17 @@ const TABLAS = [
     recordada TEXT
   )`,
   `CREATE INDEX IF NOT EXISTS citas_fecha ON citas (fecha, cuenta_id)`,
+  `CREATE TABLE IF NOT EXISTS avisos_push (
+    endpoint TEXT PRIMARY KEY,
+    cuenta_id INTEGER NOT NULL,
+    p256dh TEXT NOT NULL,
+    auth TEXT NOT NULL,
+    creado TEXT NOT NULL
+  )`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v8';
+export const HUELLA = 'v9';
 
 let listo = false;
 
