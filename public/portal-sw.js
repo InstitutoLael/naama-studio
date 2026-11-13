@@ -1,10 +1,10 @@
 // Service worker del portal (solo /portal). Guarda la app para que abra rápido
 // y muestra una página amable si no hay internet. Nunca guarda datos de la API.
-const VERSION = 'portal-v1';
+const VERSION = 'portal-v2';
 const OFFLINE = '/portal-sin-internet.html';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(VERSION).then((c) => c.addAll([OFFLINE, '/portal-manifest.webmanifest', '/icon-192.png'])));
+  event.waitUntil(caches.open(VERSION).then((c) => c.addAll([OFFLINE, '/portal-manifest.webmanifest', '/portal-icono-192.png', '/portal-badge.png'])));
   self.skipWaiting();
 });
 
@@ -42,4 +42,41 @@ self.addEventListener('fetch', (event) => {
       ),
     );
   }
+});
+
+// Avisos (notificaciones) del portal: llegan aunque la app esté cerrada.
+self.addEventListener('push', (event) => {
+  let d = {};
+  try {
+    d = event.data ? event.data.json() : {};
+  } catch {
+    d = { titulo: 'Naamá', cuerpo: event.data ? event.data.text() : '' };
+  }
+  event.waitUntil(
+    self.registration.showNotification(d.titulo || 'Naamá', {
+      body: d.cuerpo || '',
+      icon: '/portal-icono-192.png',
+      badge: '/portal-badge.png',
+      tag: d.tag || 'naama',
+      renotify: true,
+      vibrate: [80, 40, 80],
+      data: { url: d.url || '/portal' },
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/portal';
+  event.waitUntil(
+    (async () => {
+      const ventanas = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const abierta = ventanas.find((v) => v.url.includes('/portal'));
+      if (abierta) {
+        await abierta.focus();
+        return abierta.navigate(url).catch(() => {});
+      }
+      return self.clients.openWindow(url);
+    })(),
+  );
 });

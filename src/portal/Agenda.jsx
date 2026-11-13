@@ -226,7 +226,8 @@ const Agenda = ({ cuenta }) => {
     }
   }, [cuenta.id]);
   useEffect(() => {
-    cargar();
+    const f = new URLSearchParams(window.location.search).get('fecha');
+    cargar(/^\d{4}-\d{2}-\d{2}$/.test(f ?? '') ? f : undefined);
     api('clientas')
       .then((r) => setClientas(r.clientas))
       .catch(() => {});
