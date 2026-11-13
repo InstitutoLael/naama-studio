@@ -188,7 +188,7 @@ const Plata = () => {
                     </button>
                     <span className="compromiso__texto">
                       <strong>{c.nombre}</strong>
-                      <small>{c.pagadoMP ? `pagado por Mercado Pago el ${diaCorto(c.pagadoMP)}` : c.dia ? `vence el ${c.dia}` : 'sin fecha'}</small>
+                      <small>{c.pagadoMP ? `pagado ${c.pagadoMonto ? pesos(c.pagadoMonto) + " " : ""}por Mercado Pago el ${diaCorto(c.pagadoMP)}` : c.dia ? `vence el ${c.dia}` : 'sin fecha'}</small>
                     </span>
                     <strong className="compromiso__monto">{pesos(c.monto)}</strong>
                     <button type="button" className="icono-boton" aria-label={`Editar ${c.nombre}`} onClick={() => setHoja({ tipo: 'compromiso', c })}>
