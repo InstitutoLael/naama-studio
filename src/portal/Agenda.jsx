@@ -43,6 +43,23 @@ export const mensajeRecordatorio = (c) => {
   ].join('\n');
 };
 
+/** Reparte en carriles las citas que se cruzan (sobrecupo), para verlas lado a lado. */
+const carriles = (citas) => {
+  const orden = [...citas].sort((a, b) => aMin(a.hora) - aMin(b.hora));
+  const fines = [];
+  const conCarril = orden.map((c) => {
+    const ini = aMin(c.hora);
+    let carril = fines.findIndex((f) => f <= ini);
+    if (carril === -1) carril = fines.length;
+    fines[carril] = ini + c.minutos;
+    return { c, carril, ini, fin: ini + c.minutos };
+  });
+  return conCarril.map((x) => {
+    const cruzadas = conCarril.filter((y) => y.ini < x.fin && x.ini < y.fin);
+    return { c: x.c, carril: x.carril, de: Math.max(...cruzadas.map((y) => y.carril)) + 1 };
+  });
+};
+
 const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
   const [v, setV] = useState(() => ({
     cuentaId: cita?.cuentaId ?? inicial?.cuentaId ?? (d.personas.some((p) => p.id === d.yo) ? d.yo : d.personas[0]?.id),
@@ -53,8 +70,10 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
     telefono: cita?.telefono ?? '',
     servicio: cita?.servicio ?? '',
     nota: cita?.nota ?? '',
+    sobrecupo: cita?.sobrecupo ?? false,
   }));
   const [error, setError] = useState('');
+  const [choca, setChoca] = useState(false);
   const tocado = useRef(Boolean(cita));
   const cambia = (k) => (e) => {
     const val = e.target.value;
@@ -112,9 +131,10 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
           e.preventDefault();
           try {
             await post(cita ? `agenda/${cita.id}` : 'agenda', v);
-            onListo(cita ? 'Cita actualizada.' : 'Agendada.');
+            onListo(cita ? 'Cita actualizada.' : v.sobrecupo ? 'Agendada como sobrecupo.' : 'Agendada.');
           } catch (err) {
             setError(err.message);
+            setChoca(err.choque);
           }
         }}
       >
@@ -185,7 +205,39 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
           <span>Nota (opcional)</span>
           <input className="input" value={v.nota} onChange={cambia('nota')} placeholder="Ej.: pidió por WhatsApp, viene con su hija" />
         </label>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={v.sobrecupo}
+          className={`sobrecupo ${v.sobrecupo ? 'is-on' : ''}`}
+          onClick={() => setV((x) => ({ ...x, sobrecupo: !x.sobrecupo }))}
+        >
+          <span className="sobrecupo__switch" aria-hidden="true" />
+          <span>
+            <strong>Sobrecupo</strong>
+            <small>Atiende a dos clientas a la vez (ej.: mientras una espera el color)</small>
+          </span>
+        </button>
         {error && <p className="portal-error">{error}</p>}
+        {choca && !v.sobrecupo && (
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={async () => {
+              const n = { ...v, sobrecupo: true };
+              setV(n);
+              try {
+                await post(cita ? `agenda/${cita.id}` : 'agenda', n);
+                onListo('Agendada como sobrecupo.');
+              } catch (err) {
+                setError(err.message);
+                setChoca(false);
+              }
+            }}
+          >
+            Agendar igual, como sobrecupo
+          </button>
+        )}
         <div className="hoja__acciones">
           <button type="submit" className="btn">
             {cita ? 'Guardar cambios' : 'Agendar'}
@@ -351,14 +403,18 @@ const Agenda = ({ cuenta }) => {
                   {horas.map((m) => (
                     <span key={m} className="agenda__linea" style={{ top: (m - ABRE) * PX }} />
                   ))}
-                  {d.citas
-                    .filter((c) => c.cuentaId === p.id)
-                    .map((c) => (
+                  {carriles(d.citas.filter((c) => c.cuentaId === p.id)).map(({ c, carril, de }) => (
                       <button
                         key={c.id}
                         type="button"
-                        className={`agenda__cita is-${c.estado}`}
-                        style={{ top: (aMin(c.hora) - ABRE) * PX, height: Math.max(26, c.minutos * PX - 3) }}
+                        className={`agenda__cita is-${c.estado} ${c.sobrecupo ? 'is-sobrecupo' : ''}`}
+                        style={{
+                          top: (aMin(c.hora) - ABRE) * PX,
+                          height: Math.max(26, c.minutos * PX - 3),
+                          left: `calc(${(carril / de) * 100}% + 4px)`,
+                          width: `calc(${100 / de}% - 8px)`,
+                          right: 'auto',
+                        }}
                         onClick={(e) => {
                           e.stopPropagation();
                           setHoja({ cita: c });
@@ -369,6 +425,7 @@ const Agenda = ({ cuenta }) => {
                           {c.hora} {c.clienta}
                         </strong>
                         {c.servicio && <small>{c.servicio}</small>}
+                        {c.sobrecupo && <em className="agenda__sobre">Sobrecupo</em>}
                       </button>
                     ))}
                 </div>

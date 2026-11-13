@@ -701,6 +701,13 @@ test('agenda: horas por persona, choques, avisos de citas nuevas y alergias a la
 
   // Cualquiera puede agendarle a otra (ej.: Valeria anota una hora para Vivy).
   assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', cuentaId: ids.Gaby, clienta: 'X' })).status, 201);
+  // Choque a la misma hora: 409 con choque=true; con sobrecupo sí entra y queda marcada.
+  const ch = await kata.post('agenda', { fecha: manana, hora: '17:00', cuentaId: ids.Gaby, clienta: 'Y' });
+  assert.equal(ch.status, 409);
+  assert.equal(ch.data.choque, true);
+  assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', cuentaId: ids.Gaby, clienta: 'Y', sobrecupo: true })).status, 201);
+  const sc = (await kata.pedir(`agenda?fecha=${manana}`)).data.citas.filter((c) => c.cuentaId === ids.Gaby && c.hora === '17:00');
+  assert.deepEqual(sc.map((c) => c.sobrecupo).sort(), [false, true]);
   assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', clienta: 'Mía' })).status, 201);
   await kata.post(`agenda/${suya.id}`, { estado: 'no-vino' }).then((x) => assert.equal(x.status, 403));
   await gaby.post(`agenda/${suya.id}`, { estado: 'no-vino' });

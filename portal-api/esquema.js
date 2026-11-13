@@ -281,6 +281,8 @@ const TABLAS = [
     recordada TEXT
   )`,
   `CREATE INDEX IF NOT EXISTS citas_fecha ON citas (fecha, cuenta_id)`,
+  // Sobrecupo: citas que se aceptan aunque la persona ya tenga a otra clienta a esa hora.
+  `CREATE TABLE IF NOT EXISTS citas_sobrecupo (cita_id INTEGER PRIMARY KEY)`,
   `CREATE TABLE IF NOT EXISTS avisos_push (
     endpoint TEXT PRIMARY KEY,
     cuenta_id INTEGER NOT NULL,
@@ -291,7 +293,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v9';
+export const HUELLA = 'v10';
 
 let listo = false;
 
