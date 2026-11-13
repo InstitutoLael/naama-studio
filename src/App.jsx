@@ -18,6 +18,7 @@ const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
 const EmpresasPage = lazy(() => import('./pages/EmpresasPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
+const PortalApp = lazy(() => import('./portal/PortalApp'));
 
 const LegacyMundo = () => {
   const { mundoId } = useParams();
@@ -35,6 +36,17 @@ const App = () => {
     const t = setTimeout(() => scrollToElement(document.querySelector(location.hash), -80), 450);
     return () => clearTimeout(t);
   }, [location.pathname, location.hash]);
+
+  // Portal del equipo: zona privada con su propia cabecera (sin el menú ni el pie de la web).
+  if (location.pathname === '/portal' || location.pathname.startsWith('/portal/')) {
+    return (
+      <Suspense fallback={<div className="page-fallback" />}>
+        <Routes location={location}>
+          <Route path="/portal/*" element={<PortalApp />} />
+        </Routes>
+      </Suspense>
+    );
+  }
 
   return (
     <>
