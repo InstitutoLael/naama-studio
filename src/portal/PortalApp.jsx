@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { Ellipsis, House, KeyRound, LogOut, Smartphone, UsersRound } from 'lucide-react';
+import { Ellipsis, House, KeyRound, LogOut, Package, ShoppingBag, Smartphone, UsersRound } from 'lucide-react';
 import Logo from '../components/common/Logo';
 import { api, post } from './api';
 import { Configurar, CrearClave, Entrar } from './Acceso';
 import Panel from './Panel';
 import Cuentas from './Cuentas';
 import Clientas from './Clientas';
+import Insumos from './Insumos';
+import Compras from './Compras';
 import Instalar, { esApp, registrarAppPortal } from './Instalar';
 import Hoja from './Hoja';
 import { MODULOS, ROLES, puede } from './permisos';
@@ -37,7 +39,10 @@ const usePortalHead = () => {
 const pestanas = (cuenta) => [
   { to: '/portal', label: 'Inicio', Icono: House, end: true },
   { to: '/portal/clientas', label: 'Clientas', Icono: UsersRound },
-  ...(puede(cuenta, 'cuentas') ? [{ to: '/portal/cuentas', label: 'Equipo', Icono: KeyRound }] : []),
+  { to: '/portal/insumos', label: 'Insumos', Icono: Package },
+  { to: '/portal/compras', label: 'Compras', Icono: ShoppingBag },
+  // Equipo va en la barra lateral del computador; en el celular está en «Más».
+  ...(puede(cuenta, 'cuentas') ? [{ to: '/portal/cuentas', label: 'Equipo', Icono: KeyRound, soloCompu: true }] : []),
 ];
 
 const Menu = ({ cuenta, onMas }) => (
@@ -45,8 +50,8 @@ const Menu = ({ cuenta, onMas }) => (
     <Link to="/portal" className="tabbar__logo" aria-label="Inicio">
       <Logo />
     </Link>
-    {pestanas(cuenta).map(({ to, label, Icono, end }) => (
-      <NavLink key={to} to={to} end={end} className="tabbar__item">
+    {pestanas(cuenta).map(({ to, label, Icono, end, soloCompu }) => (
+      <NavLink key={to} to={to} end={end} className={`tabbar__item ${soloCompu ? 'tabbar__item--compu' : ''}`}>
         <Icono strokeWidth={1.6} />
         <span>{label}</span>
       </NavLink>
@@ -79,6 +84,13 @@ const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
         </span>
       </div>
       <ul className="grupo-lista">
+        {puede(cuenta, 'cuentas') && (
+          <li>
+            <Link to="/portal/cuentas" className="fila-lista" onClick={onCerrar}>
+              <KeyRound strokeWidth={1.6} /> Equipo y cuentas
+            </Link>
+          </li>
+        )}
         {!esApp() && (
           <li>
             <Link to="/portal/app" className="fila-lista" onClick={onCerrar}>
@@ -216,6 +228,8 @@ const PortalApp = () => {
           <Routes>
             <Route index element={<Panel cuenta={cuenta} />} />
             <Route path="clientas" element={<Clientas />} />
+            <Route path="insumos" element={<Insumos cuenta={cuenta} />} />
+            <Route path="compras" element={<Compras />} />
             <Route path="cuentas" element={puede(cuenta, 'cuentas') ? <Cuentas yo={cuenta} /> : <Navigate to="/portal" replace />} />
             <Route path="*" element={<Navigate to="/portal" replace />} />
           </Routes>

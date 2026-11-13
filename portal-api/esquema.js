@@ -54,10 +54,73 @@ const TABLAS = [
     ts TEXT NOT NULL,
     UNIQUE (clienta_id, fecha)
   )`,
+  `CREATE TABLE IF NOT EXISTS productos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    marca TEXT,
+    categoria TEXT NOT NULL DEFAULT 'Otros',
+    unidad TEXT NOT NULL DEFAULT 'g',
+    tamano REAL NOT NULL DEFAULT 1,
+    stock REAL NOT NULL DEFAULT 0,
+    minimo REAL NOT NULL DEFAULT 1,
+    costo INTEGER,
+    proveedor TEXT,
+    foto_id INTEGER,
+    variante TEXT,
+    uso TEXT NOT NULL DEFAULT 'trabajo',
+    precio_venta INTEGER,
+    activo INTEGER NOT NULL DEFAULT 1,
+    creado TEXT NOT NULL,
+    creado_por INTEGER
+  )`,
+  `CREATE TABLE IF NOT EXISTS fotos (id INTEGER PRIMARY KEY AUTOINCREMENT, tipo TEXT NOT NULL, datos TEXT NOT NULL, creada TEXT NOT NULL)`,
+  `CREATE TABLE IF NOT EXISTS usos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    producto_id INTEGER NOT NULL,
+    cantidad REAL NOT NULL,
+    servicio TEXT,
+    registro TEXT,
+    cuenta_id INTEGER,
+    fecha TEXT NOT NULL,
+    ts TEXT NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS usos_producto ON usos (producto_id, fecha)`,
+  `CREATE TABLE IF NOT EXISTS movimientos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    producto_id INTEGER NOT NULL,
+    tipo TEXT NOT NULL,
+    cantidad REAL NOT NULL,
+    nota TEXT,
+    cuenta_id INTEGER,
+    ts TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS ventas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    producto_id INTEGER NOT NULL,
+    unidades REAL NOT NULL,
+    total INTEGER,
+    cuenta_id INTEGER,
+    fecha TEXT NOT NULL,
+    ts TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS pedidos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    producto_id INTEGER,
+    texto TEXT NOT NULL,
+    cantidad TEXT,
+    urgente INTEGER NOT NULL DEFAULT 0,
+    estado TEXT NOT NULL DEFAULT 'pedido',
+    pedido_por INTEGER,
+    ts TEXT NOT NULL,
+    resuelto_por INTEGER,
+    resuelto_ts TEXT,
+    monto INTEGER,
+    proveedor TEXT
+  )`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v2';
+export const HUELLA = 'v3';
 
 let listo = false;
 

@@ -6,8 +6,8 @@ export const PERMISOS = {
   finanzas: 'Ver plata: ingresos, gastos, saldos y honorarios de todas',
   caja: 'Cierre de caja diario',
   servicios: 'Registrar servicios en la planilla',
-  compras: 'Aprobar y marcar compras',
-  insumos: 'Administrar el inventario',
+  compras: 'Marcar compras como compradas y ver costos',
+  insumos: 'Editar productos, corregir stock y ver los datos de consumo',
   clientas: 'Ver los números de las clientas e importar contactos',
   legal: 'Legal, impuestos y pagos',
 };
@@ -49,8 +49,8 @@ export const puede = (cuenta, permiso) => Boolean(cuenta?.permisos?.includes(per
 export const MODULOS = [
   { id: 'disponibilidad', nombre: 'Mi disponibilidad', bajada: 'Tus días y horas libres', permiso: null },
   { id: 'clientas', nombre: 'Clientas', bajada: 'Sube contactos y anota quién vino', permiso: null, listo: true },
-  { id: 'insumos', nombre: 'Insumos', bajada: 'Lo que usaste y lo que queda', permiso: null },
-  { id: 'compras', nombre: 'Lista de compras', bajada: 'Pide lo que falta', permiso: null },
+  { id: 'insumos', nombre: 'Insumos', bajada: 'Anota lo que usaste y mira lo que queda', permiso: null, listo: true },
+  { id: 'compras', nombre: 'Lista de compras', bajada: 'Pide lo que falta', permiso: null, listo: true },
   { id: 'mi-mes', nombre: 'Mi mes', bajada: 'Tus servicios y tu honorario', permiso: null },
   { id: 'servicios', nombre: 'Registrar servicios', bajada: 'Directo a la planilla', permiso: 'servicios' },
   { id: 'caja', nombre: 'Cierre de caja', bajada: 'Efectivo, MP y transferencias', permiso: 'caja' },

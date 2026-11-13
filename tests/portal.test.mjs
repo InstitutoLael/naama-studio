@@ -268,3 +268,81 @@ test('«Vino hoy» anota una visita por día y calcula hace cuánto no viene', a
   assert.equal(v.data.visitas.length, 2);
   assert.equal(v.data.visitas[0].anotadaPor, 'Gaby');
 });
+
+/* ── Insumos y compras ── */
+const FOTO = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=';
+
+test('insumos: crear con foto, anotar uso con la pesa y descontar stock', async () => {
+  const { admin, gaby } = await crearEquipo();
+  const r = await gaby.post('insumos', { nombre: 'Decolorante', marca: 'Wella', categoria: 'Color', unidad: 'g', tamano: 500, envases: 2, minimo: 1, costo: 20000, foto: FOTO });
+  assert.equal(r.status, 201);
+  assert.equal(r.data.producto.stock, 1000);
+  assert.equal(r.data.producto.costo, undefined, 'Gaby no ve costos');
+  const id = r.data.producto.id;
+  const foto = await manejar(new Request(`${BASE}insumos/foto/${r.data.producto.fotoId}`, { headers: { Cookie: gaby.cookie } }), env);
+  assert.equal(foto.headers.get('Content-Type'), 'image/webp');
+  // Gaby no puede poner precios: lo hace Administración.
+  assert.equal((await admin.post(`insumos/${id}`, { costo: 20000 })).status, 200);
+
+  assert.equal((await gaby.post('insumos/uso', { servicio: 'Balayage', items: [{ productoId: id, cantidad: 60 }] })).status, 200);
+  await gaby.post('insumos/uso', { servicio: 'Balayage', items: [{ productoId: id, cantidad: '40' }] });
+  const lista = await admin.pedir('insumos');
+  const p = lista.data.productos[0];
+  assert.equal(p.stock, 900);
+  assert.equal(p.envases, 1.8);
+  assert.equal(p.consumo30, 100);
+  assert.equal(p.costo, 20000, 'Administración sí ve costos');
+
+  const datos = await admin.pedir('insumos-datos');
+  assert.equal(datos.data.porServicio[0].servicio, 'Balayage');
+  assert.equal(datos.data.porServicio[0].veces, 2);
+  assert.equal(datos.data.porServicio[0].productos[0].promedio, 50);
+  assert.equal(datos.data.porServicio[0].costoPromedio, 2000); // 50 g × $40/g
+  assert.equal((await gaby.pedir('insumos-datos')).status, 403);
+
+  assert.equal((await gaby.post('insumos/uso', { servicio: 'X', items: [{ productoId: id, cantidad: 0 }] })).status, 400);
+  assert.equal((await gaby.post(`insumos/${id}/ajuste`, { envases: 3 })).status, 403);
+  assert.equal((await admin.post(`insumos/${id}/ajuste`, { envases: 3 })).status, 200);
+  assert.equal((await admin.pedir('insumos')).data.productos[0].stock, 1500);
+});
+
+test('compras: Gaby pide, Administración marca comprado y suma stock', async () => {
+  const { admin, gaby } = await crearEquipo();
+  const p = (await admin.post('insumos', { nombre: 'Cera', unidad: 'g', tamano: 800, envases: 0, minimo: 1 })).data.producto;
+  assert.equal(p.bajo, true);
+  assert.equal((await gaby.post('compras', { productoId: p.id, urgente: true })).status, 201);
+  assert.equal((await gaby.post('compras', { productoId: p.id })).data.yaEstaba, true);
+  await gaby.post('compras', { texto: 'Algodón', cantidad: '2 bolsas' });
+  const lista = await gaby.pedir('compras');
+  assert.equal(lista.data.pedidos.length, 2);
+  assert.equal(lista.data.puedeResolver, false);
+  const pedido = lista.data.pedidos.find((x) => x.productoId === p.id);
+  assert.equal(pedido.urgente, true);
+  assert.equal((await gaby.post(`compras/${pedido.id}`, { estado: 'comprado' })).status, 403);
+  assert.equal((await admin.post(`compras/${pedido.id}`, { estado: 'comprado', monto: 29100, envases: 2 })).status, 200);
+  const prod = (await admin.pedir('insumos')).data.productos.find((x) => x.id === p.id);
+  assert.equal(prod.stock, 1600);
+  const vista = await gaby.pedir('compras');
+  assert.equal(vista.data.pedidos.find((x) => x.id === pedido.id).monto, undefined, 'Gaby no ve el monto');
+});
+
+test('tonos y ventas: variantes del mismo tinte y «Vendí uno»', async () => {
+  const { admin, gaby } = await crearEquipo();
+  const a = (await admin.post('insumos', { nombre: 'Tinte Igora', marca: 'Schwarzkopf', categoria: 'Color', unidad: 'g', tamano: 60, envases: 3, variante: '7.1 Rubio ceniza' })).data.producto;
+  const b = (await admin.post('insumos', { nombre: 'Tinte Igora', marca: 'Schwarzkopf', categoria: 'Color', unidad: 'g', tamano: 60, envases: 2, variante: '9.0' })).data.producto;
+  assert.equal(a.variante, '7.1 Rubio ceniza');
+  await gaby.post('insumos/uso', { servicio: 'Tintura', items: [{ productoId: a.id, cantidad: 30 }, { productoId: b.id, cantidad: 15 }] });
+  const ps = (await admin.pedir('insumos')).data.productos;
+  assert.equal(ps.find((x) => x.id === a.id).stock, 150);
+  assert.equal(ps.find((x) => x.id === b.id).stock, 105);
+  const s = (await admin.post('insumos', { nombre: 'Protector térmico', unidad: 'u', tamano: 1, envases: 10, uso: 'venta', precioVenta: 17999 })).data.producto;
+  assert.equal(s.precioVenta, 17999, 'el precio de venta lo ven todas');
+  assert.equal((await gaby.post(`insumos/${a.id}/venta`, { unidades: 1 })).status, 400, 'un producto de trabajo no se vende');
+  assert.equal((await gaby.post(`insumos/${s.id}/venta`, { unidades: 2 })).status, 200);
+  assert.equal((await admin.pedir('insumos')).data.productos.find((x) => x.id === s.id).stock, 8);
+  const d = await admin.pedir('insumos-datos');
+  assert.equal(d.data.ventas[0].total, 35998);
+  const c = await gaby.post('compras', { productoId: a.id });
+  assert.equal(c.status, 201);
+  assert.match((await gaby.pedir('compras')).data.pedidos[0].texto, /7\.1/);
+});
