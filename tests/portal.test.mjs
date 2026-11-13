@@ -392,6 +392,16 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
   assert.equal(r.data.salidas.length, 3);
   assert.equal(r.data.porDia.length, 14);
   assert.deepEqual(r.data.ultimos.map((p) => p.id).sort(), [1, 2, 6]);
+  // Inyecciones: compra de 3 por $102.552; se cobra una en $120.000 → para Vivy la diferencia.
+  const cv = r.data.salidas.find((x) => x.id === 7);
+  assert.ok(cv);
+  await admin.post('plata/inyecciones', { costo: 102552, cantidad: 3, detalle: 'Cruz Verde' });
+  let iny = (await admin.pedir('plata')).data;
+  assert.equal(iny.inyResumen.porReponer, 102552);
+  await admin.post(`plata/inyecciones/${iny.inyecciones[0].id}`, { cobrado: 120000, clienta: 'Naty' });
+  iny = (await admin.pedir('plata')).data;
+  assert.equal(iny.inyResumen.paraVivy, 120000 - 34184);
+  assert.equal(iny.inyResumen.porReponer, 68368);
   const otra = await admin.post('plata/compromisos', { nombre: 'arriendo', monto: '900.000', dia: 28 });
   assert.equal(otra.status, 409);
   const arriendo = r.data.compromisos.find((c) => c.nombre === 'Arriendo');

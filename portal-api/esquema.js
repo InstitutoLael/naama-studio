@@ -126,10 +126,30 @@ const TABLAS = [
     activo INTEGER NOT NULL DEFAULT 1,
     creado TEXT NOT NULL
   )`,
+  // Inyecciones: Naamá paga el producto, se repone cuando la clienta paga y a Vivy se le anota solo la diferencia.
+  `CREATE TABLE IF NOT EXISTS inyecciones (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mp_id TEXT UNIQUE,
+    detalle TEXT NOT NULL,
+    costo INTEGER NOT NULL,
+    cantidad INTEGER NOT NULL DEFAULT 1,
+    dia TEXT NOT NULL,
+    por TEXT,
+    creado TEXT NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS iny_cobros (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    iny_id INTEGER NOT NULL,
+    cobrado INTEGER NOT NULL,
+    clienta TEXT,
+    dia TEXT NOT NULL,
+    por TEXT,
+    creado TEXT NOT NULL
+  )`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v4';
+export const HUELLA = 'v5';
 
 let listo = false;
 

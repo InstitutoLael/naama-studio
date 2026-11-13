@@ -203,9 +203,48 @@ const Plata = () => {
             </button>
           </section>
 
+          <section>
+            <h2 className="seccion__titulo">Inyecciones · se repone lo que cuestan</h2>
+            <p className="muted">
+              Por reponer: <strong>{pesos(d.inyResumen.porReponer)}</strong> · Diferencia para Vivy este mes: <strong>{pesos(d.inyResumen.paraVivy)}</strong>
+              {d.inyResumen.cobradas ? ` (${d.inyResumen.cobradas} cobradas)` : ''}
+            </p>
+            {d.inyecciones.length > 0 && (
+              <ul className="cuentas">
+                {d.inyecciones.map((i) => (
+                  <li key={i.id} className="compromiso">
+                    <span className="compromiso__texto">
+                      <strong>{i.detalle}</strong>
+                      <small>
+                        {diaCorto(i.dia)} · {pesos(i.costo)} · {i.cantidad} {i.cantidad === 1 ? 'unidad' : 'unidades'} de {pesos(i.unidad)} · quedan {i.quedan}
+                      </small>
+                      {i.cobros.map((c) => (
+                        <small key={c.id}>
+                          ✓ {c.clienta || 'Clienta'} pagó {pesos(c.cobrado)} → para Vivy {pesos(c.diferencia)}
+                        </small>
+                      ))}
+                    </span>
+                    {i.quedan > 0 && (
+                      <button type="button" className="btn btn--sm" onClick={() => setHoja({ tipo: 'iny-cobro', i })}>
+                        Cobré una
+                      </button>
+                    )}
+                    <button type="button" className="icono-boton" aria-label={`Editar ${i.detalle}`} onClick={() => setHoja({ tipo: 'iny-editar', i })}>
+                      <Pencil size={16} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button type="button" className="portal__link" onClick={() => setHoja({ tipo: 'iny-nueva' })}>
+              + Anotar compra de inyecciones
+            </button>
+          </section>
+
           {d.conectado && d.salidas?.length > 0 && (
             <section>
-              <h2 className="seccion__titulo">Lo que pagó Naamá por Mercado Pago este mes · {pesos(d.totalSalidas)}</h2>
+              <h2 className="seccion__titulo">Lo que pagó Naamá por Mercado Pago este mes · {pesos(d.totalSalidas)}
+                {d.totalSalidasIny > 0 ? ` (+ ${pesos(d.totalSalidasIny)} en inyecciones)` : ''}</h2>
               <ul className="cuentas">
                 {d.salidas.map((p) => (
                   <li key={p.id} className="pago">
@@ -214,8 +253,18 @@ const Plata = () => {
                       <small>
                         {hora(p.fecha)} · {p.detalle || MEDIOS[p.medio] || 'Pago'}
                         {p.gastoFijo ? ' · gasto fijo ✓' : ''}
+                        {p.inyeccion ? ' · inyecciones (se repone)' : ''}
                       </small>
                     </span>
+                    {!p.gastoFijo && !p.inyeccion && (
+                      <button
+                        type="button"
+                        className={`btn btn--sm ${/cruz ?verde/i.test(p.detalle ?? '') ? '' : 'btn--ghost'}`}
+                        onClick={() => setHoja({ tipo: 'iny-nueva', p })}
+                      >
+                        Son inyecciones
+                      </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -269,6 +318,112 @@ const Plata = () => {
             <button type="submit" className="btn">
               Guardar
             </button>
+          </form>
+        </Hoja>
+      )}
+      {hoja?.tipo === 'iny-nueva' && (
+        <Hoja titulo="Compra de inyecciones" onCerrar={() => setHoja(null)}>
+          <form
+            className="hoja__form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              accion(
+                'plata/inyecciones',
+                { costo: f.get('costo'), cantidad: f.get('cantidad'), detalle: f.get('detalle'), mpId: hoja.p?.id, dia: hoja.p?.dia },
+                'Compra anotada. Cuando una clienta pague, aprieta «Cobré una».',
+              );
+            }}
+          >
+            <div className="field">
+              <label htmlFor="iy-d">¿Dónde se compró?</label>
+              <input id="iy-d" name="detalle" className="input" defaultValue={hoja.p?.detalle ?? 'Cruz Verde'} required />
+            </div>
+            <div className="field">
+              <label htmlFor="iy-c">¿Cuánto costó en total?</label>
+              <input id="iy-c" name="costo" className="input" inputMode="numeric" defaultValue={hoja.p?.monto ?? ''} required />
+            </div>
+            <div className="field">
+              <label htmlFor="iy-n">¿Cuántas inyecciones son?</label>
+              <input id="iy-n" name="cantidad" className="input" inputMode="numeric" defaultValue="1" required autoFocus />
+            </div>
+            <button type="submit" className="btn">
+              <Plus size={16} /> Guardar
+            </button>
+          </form>
+        </Hoja>
+      )}
+      {hoja?.tipo === 'iny-cobro' && (
+        <Hoja titulo="Cobré una inyección" onCerrar={() => setHoja(null)}>
+          <p className="muted">Cada una costó {pesos(hoja.i.unidad)}. A Vivy se le anota solo la diferencia.</p>
+          <form
+            className="hoja__form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const f = new FormData(e.currentTarget);
+              const cobrado = Number(String(f.get('cobrado')).replace(/\D/g, ''));
+              accion(`plata/inyecciones/${hoja.i.id}`, { cobrado, clienta: f.get('clienta') }, `Anotado. Para Vivy: ${pesos(cobrado - hoja.i.unidad)}.`);
+            }}
+          >
+            <div className="field">
+              <label htmlFor="ic-m">¿Cuánto pagó la clienta?</label>
+              <input id="ic-m" name="cobrado" className="input" inputMode="numeric" required autoFocus />
+            </div>
+            <div className="field">
+              <label htmlFor="ic-c">Clienta (opcional)</label>
+              <input id="ic-c" name="clienta" className="input" />
+            </div>
+            <button type="submit" className="btn">
+              <Check size={16} /> Guardar
+            </button>
+          </form>
+        </Hoja>
+      )}
+      {hoja?.tipo === 'iny-editar' && (
+        <Hoja titulo={hoja.i.detalle} onCerrar={() => setHoja(null)}>
+          <form
+            className="hoja__form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              accion(`plata/inyecciones/${hoja.i.id}`, { cantidad: new FormData(e.currentTarget).get('cantidad') }, 'Cantidad actualizada.');
+            }}
+          >
+            <div className="field">
+              <label htmlFor="ie-n">¿Cuántas inyecciones trae esta compra?</label>
+              <input id="ie-n" name="cantidad" className="input" inputMode="numeric" defaultValue={hoja.i.cantidad} required />
+            </div>
+            {hoja.i.cobros.length > 0 && (
+              <ul className="cuentas">
+                {hoja.i.cobros.map((c) => (
+                  <li key={c.id} className="compromiso">
+                    <span className="compromiso__texto">
+                      <strong>{pesos(c.cobrado)}</strong>
+                      <small>{c.clienta || 'Clienta'} · {diaCorto(c.dia)}</small>
+                    </span>
+                    <button
+                      type="button"
+                      className="icono-boton"
+                      aria-label="Quitar este cobro"
+                      onClick={() => window.confirm('¿Quitar este cobro?') && accion(`plata/inyecciones/cobros/${c.id}`, { borrar: true }, 'Cobro quitado.')}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="hoja__acciones">
+              <button type="submit" className="btn">
+                Guardar
+              </button>
+              <button
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => window.confirm(`¿Quitar ${hoja.i.detalle}?`) && accion(`plata/inyecciones/${hoja.i.id}`, { borrar: true }, 'Quitado.')}
+              >
+                <Trash2 size={16} /> Quitar
+              </button>
+            </div>
           </form>
         </Hoja>
       )}
