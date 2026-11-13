@@ -1,10 +1,10 @@
 // Service worker del portal (solo /portal). Guarda la app para que abra rápido
 // y muestra una página amable si no hay internet. Nunca guarda datos de la API.
-const VERSION = 'portal-v3';
+const VERSION = 'portal-v4';
 const OFFLINE = '/portal-sin-internet.html';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(VERSION).then((c) => c.addAll([OFFLINE, '/portal-manifest.webmanifest', '/portal-icono-192.png', '/portal-badge.png'])));
+  event.waitUntil(caches.open(VERSION).then((c) => c.addAll([OFFLINE, '/portal-manifest.webmanifest', '/app-naama-192.png', '/portal-badge.png'])));
   self.skipWaiting();
 });
 
@@ -55,7 +55,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(d.titulo || 'Naamá', {
       body: d.cuerpo || '',
-      icon: '/portal-icono-192.png',
+      icon: '/app-naama-192.png',
       badge: '/portal-badge.png',
       tag: d.tag || 'naama',
       renotify: true,
