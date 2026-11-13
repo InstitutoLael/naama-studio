@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Trash2 } from 'lucide-react';
+import { CalendarHeart, ChevronLeft, ChevronRight, Copy, Plus, Trash2 } from 'lucide-react';
 import { WhatsAppIcon } from '../components/common/Icons';
 import { api, post } from './api';
 import Hoja from './Hoja';
@@ -268,6 +268,68 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
   );
 };
 
+
+/** Para ver las horas en el calendario del celu (y en su widget). */
+const CalendarioCelu = () => {
+  const [links, setLinks] = useState(null);
+  const [abierto, setAbierto] = useState(false);
+  const [copiado, setCopiado] = useState('');
+  useEffect(() => {
+    if (abierto && !links) api('calendario').then(setLinks).catch(() => {});
+  }, [abierto, links]);
+  const esIphone = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const webcal = (u) => u.replace(/^https?:/, 'webcal:');
+  const google = (u) => `https://calendar.google.com/calendar/u/0/r?cid=${encodeURIComponent(webcal(u))}`;
+  const copiar = async (u, cual) => {
+    try {
+      await navigator.clipboard.writeText(u);
+      setCopiado(cual);
+      setTimeout(() => setCopiado(''), 2500);
+    } catch {
+      window.prompt('Copia este link:', u);
+    }
+  };
+  const bloque = (u, cual, titulo) => (
+    <div className="cal-celu__link">
+      <strong>{titulo}</strong>
+      <div className="cal-celu__botones">
+        <a className="btn" href={esIphone ? webcal(u) : google(u)} target="_blank" rel="noreferrer">
+          {esIphone ? 'Agregar al calendario' : 'Agregar a Google Calendar'}
+        </a>
+        <button type="button" className="btn btn--ghost" onClick={() => copiar(u, cual)}>
+          <Copy size={15} /> {copiado === cual ? '¡Copiado!' : 'Copiar link'}
+        </button>
+      </div>
+    </div>
+  );
+  return (
+    <section className={`cal-celu ${abierto ? 'is-open' : ''}`}>
+      <button type="button" className="cal-celu__cabeza" onClick={() => setAbierto((x) => !x)} aria-expanded={abierto}>
+        <CalendarHeart strokeWidth={1.6} />
+        <span>
+          <strong>Ver mis horas en el calendario del celu</strong>
+          <small>Y en el widget de calendario de la pantalla de inicio</small>
+        </span>
+      </button>
+      {abierto && (
+        <div className="cal-celu__cuerpo">
+          {!links && <p className="muted">Preparando tu link…</p>}
+          {links && bloque(links.propio, 'propio', 'Solo mis horas')}
+          {links?.todas && bloque(links.todas, 'todas', 'Toda la agenda del salón')}
+          {links && (
+            <p className="muted cal-celu__nota">
+              {esIphone
+                ? 'Se agrega una vez y se actualiza solo. Después pon el widget de Calendario en la pantalla de inicio.'
+                : 'Se agrega una vez (si el celu no deja, ábrelo en el computador con tu cuenta de Google). Google lo actualiza cada algunas horas, así que una hora recién agendada puede tardar: el aviso del portal llega al tiro. Después pon el widget de Google Calendar en la pantalla de inicio.'}{' '}
+              Este link es solo tuyo: no lo compartas.
+            </p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+};
+
 const Agenda = ({ cuenta }) => {
   const [d, setD] = useState(null);
   const [clientas, setClientas] = useState([]);
@@ -443,6 +505,7 @@ const Agenda = ({ cuenta }) => {
             </div>
           </div>
           <p className="muted">Toca un espacio vacío en la columna de una persona para agendar a esa hora. Cada una tiene su propia columna: dos pueden atender a la vez.</p>
+          <CalendarioCelu />
         </>
       )}
       {aviso && (

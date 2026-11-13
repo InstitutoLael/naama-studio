@@ -283,6 +283,8 @@ const TABLAS = [
   `CREATE INDEX IF NOT EXISTS citas_fecha ON citas (fecha, cuenta_id)`,
   // Sobrecupo: citas que se aceptan aunque la persona ya tenga a otra clienta a esa hora.
   `CREATE TABLE IF NOT EXISTS citas_sobrecupo (cita_id INTEGER PRIMARY KEY)`,
+  // Link privado de calendario (.ics) por persona, para verlo en el calendario del celu.
+  `CREATE TABLE IF NOT EXISTS calendarios (token TEXT PRIMARY KEY, cuenta_id INTEGER NOT NULL, todas INTEGER NOT NULL DEFAULT 0, creado TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS avisos_push (
     endpoint TEXT PRIMARY KEY,
     cuenta_id INTEGER NOT NULL,
@@ -293,7 +295,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v10';
+export const HUELLA = 'v11';
 
 let listo = false;
 

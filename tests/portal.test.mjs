@@ -816,3 +816,33 @@ test('insumos: bajo el mínimo entra solo a la lista de compras y «se acabó» 
   assert.equal(prod.stock, 0);
 });
 
+
+test('calendario: link .ics privado por persona, solo con sus horas', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '17.1.1.2');
+  await crearYEntrar(admin, 'Gaby', 'socia', '17.1.1.3');
+  const ids = Object.fromEntries((await admin.pedir('cuentas')).data.cuentas.map((x) => [x.nombre, x.id]));
+  const manana = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(Date.now() + 86400000));
+  await admin.post('agenda', { fecha: manana, hora: '15:00', minutos: 90, cuentaId: ids.Kata, clienta: 'Rosita, la de siempre', servicio: 'Manos' });
+  await admin.post('agenda', { fecha: manana, hora: '16:00', cuentaId: ids.Gaby, clienta: 'Otra', servicio: 'Pies' });
+  const k = (await kata.pedir('calendario')).data;
+  assert.equal(k.todas, null);
+  const res = await manejar(new Request(k.propio), env);
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get('Content-Type'), /text\/calendar/);
+  const ics = await res.text();
+  assert.match(ics, /SUMMARY:Rosita\\, la de siempre · Manos/);
+  assert.doesNotMatch(ics, /Otra/);
+  const f = manana.replace(/-/g, '');
+  assert.match(ics, new RegExp(`DTSTART;TZID=America/Santiago:${f}T150000`));
+  assert.match(ics, new RegExp(`DTEND;TZID=America/Santiago:${f}T163000`));
+  // Diego (admin) además tiene el de todo el salón.
+  const a = (await admin.pedir('calendario')).data;
+  const todo = await (await manejar(new Request(a.todas), env)).text();
+  assert.match(todo, /Kata · Rosita/);
+  assert.match(todo, /Gaby · Otra/);
+  // Un link inventado no sirve, y al pedir uno nuevo el anterior deja de funcionar.
+  assert.equal((await manejar(new Request(k.propio.replace(/[0-9a-f]{48}/, 'a'.repeat(48))), env)).status, 404);
+  await kata.post('calendario/nuevo', {});
+  assert.equal((await manejar(new Request(k.propio), env)).status, 404);
+});
