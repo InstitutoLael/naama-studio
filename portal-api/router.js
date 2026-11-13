@@ -948,6 +948,29 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
   const { results: compromisos } = await db.prepare('SELECT * FROM compromisos WHERE activo = 1 ORDER BY dia, nombre').all();
   const saldoFila = await db.prepare(`SELECT valor FROM meta WHERE clave = 'saldo_mp'`).first();
   const saldo = saldoFila ? JSON.parse(saldoFila.valor) : null;
+  const { results: inyFilas } = await db.prepare('SELECT * FROM inyecciones ORDER BY dia DESC, id DESC LIMIT 60').all();
+  const { results: cobrosFilas } = await db.prepare('SELECT * FROM iny_cobros ORDER BY dia DESC, id DESC').all();
+  const inyecciones = inyFilas
+    .map((i) => {
+      const unidad = i.costo / i.cantidad;
+      const cobros = cobrosFilas
+        .filter((c) => c.iny_id === i.id)
+        .map((c) => ({ id: c.id, cobrado: c.cobrado, clienta: c.clienta, dia: c.dia, diferencia: Math.round(c.cobrado - unidad) }));
+      return {
+        id: i.id,
+        mpId: i.mp_id,
+        detalle: i.detalle,
+        costo: i.costo,
+        cantidad: i.cantidad,
+        unidad: Math.round(unidad),
+        dia: i.dia,
+        cobros,
+        quedan: i.cantidad - cobros.length,
+        porReponer: Math.round(unidad * Math.max(0, i.cantidad - cobros.length)),
+      };
+    })
+    .filter((i) => i.quedan > 0 || i.cobros.some((c) => c.dia >= `${mes}-01`) || i.dia >= `${mes}-01`);
+  const cobrosMes = inyecciones.flatMap((i) => i.cobros).filter((c) => c.dia >= `${mes}-01`);
   const pendientes = compromisos.filter((c) => c.pagado_mes !== mes);
   const porPagar = pendientes.reduce((a, c) => a + c.monto, 0);
   const base = {
@@ -958,6 +981,12 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
     compromisos: compromisos.map((c) => ({ id: c.id, nombre: c.nombre, monto: c.monto, dia: c.dia, pagado: c.pagado_mes === mes })),
     porPagar,
     disponible: saldo ? saldo.monto - porPagar : null,
+    inyecciones,
+    inyResumen: {
+      porReponer: inyecciones.reduce((a, i) => a + i.porReponer, 0),
+      paraVivy: cobrosMes.reduce((a, c) => a + c.diferencia, 0),
+      cobradas: cobrosMes.length,
+    },
   };
   if (!env.MP_ACCESS_TOKEN) return json({ ...base, conectado: false });
 
@@ -977,6 +1006,9 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
   }
   pagos.sort((a, b) => String(b.fecha).localeCompare(String(a.fecha)));
 
+  const { results: todasIny } = await db.prepare('SELECT mp_id FROM inyecciones WHERE mp_id IS NOT NULL').all();
+  const inyIds = new Set(todasIny.map((i) => String(i.mp_id)));
+
   // Si Naamá pagó por Mercado Pago este mes el monto exacto de un gasto fijo, se marca solo como pagado.
   // Cada pago se usa una sola vez: si alguien desmarca el gasto, no se vuelve a marcar solo.
   const filaAuto = await db.prepare(`SELECT valor FROM meta WHERE clave = 'mp_auto'`).first();
@@ -985,7 +1017,7 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
   let marcados = 0;
   for (const c of base.compromisos.filter((x) => !x.pagado)) {
     const claves = clavesGasto(c.nombre);
-    const libre = (x) => !usadas.has(x.id) && !yaUsadas.has(x.id);
+    const libre = (x) => !usadas.has(x.id) && !yaUsadas.has(x.id) && !inyIds.has(String(x.id));
     const s =
       salidas.find((x) => libre(x) && Math.abs(x.bruto - c.monto) <= 1) ??
       salidas.find((x) => libre(x) && claves.some((k) => sinTildes(x.detalle ?? '').includes(k)));
@@ -1032,8 +1064,18 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
     },
     devueltos: pagos.filter((p) => ['refunded', 'charged_back', 'cancelled'].includes(p.estado) && p.dia.startsWith(mes)).length,
     porDia: [...porDia.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([dia, bruto]) => ({ dia, bruto: Math.round(bruto) })),
-    salidas: salidas.slice(0, 40).map((p) => ({ id: p.id, dia: p.dia, fecha: p.fecha, monto: p.bruto, detalle: p.detalle, medio: p.medio, gastoFijo: usadas.has(p.id) })),
-    totalSalidas: Math.round(salidas.reduce((a, p) => a + p.bruto, 0)),
+    salidas: salidas.slice(0, 40).map((p) => ({
+      id: p.id,
+      dia: p.dia,
+      fecha: p.fecha,
+      monto: p.bruto,
+      detalle: p.detalle,
+      medio: p.medio,
+      gastoFijo: usadas.has(p.id),
+      inyeccion: inyIds.has(String(p.id)),
+    })),
+    totalSalidas: Math.round(salidas.filter((p) => !inyIds.has(String(p.id))).reduce((a, p) => a + p.bruto, 0)),
+    totalSalidasIny: Math.round(salidas.filter((p) => inyIds.has(String(p.id))).reduce((a, p) => a + p.bruto, 0)),
     ultimos: pagos
       .filter((p) => PALABRAS_ESTADO[p.estado])
       .slice(0, 25)
@@ -1075,6 +1117,52 @@ ruta('POST', /^plata\/compromisos\/(\d+)$/, { permiso: 'finanzas' }, async ({ db
   if (!monto) return error(400, 'El monto no es válido.');
   const pagado = body.pagado === undefined ? c.pagado_mes : body.pagado ? mesChile() : null;
   await db.prepare('UPDATE compromisos SET monto = ?, pagado_mes = ? WHERE id = ?').bind(Math.round(monto), pagado, id).run();
+  return json({ ok: true });
+});
+
+ruta('POST', /^plata\/inyecciones$/, { permiso: 'finanzas' }, async ({ db, body, cuenta }) => {
+  const costo = numero(String(body.costo ?? '').replace(/\./g, ''), { min: 1, max: 1e8 });
+  const cantidad = numero(body.cantidad ?? 1, { min: 1, max: 200 }) || 1;
+  const detalle = texto(body.detalle, 80) || 'Inyecciones';
+  const mpId = body.mpId ? texto(body.mpId, 30) : null;
+  const dia = /^\d{4}-\d{2}-\d{2}$/.test(body.dia ?? '') ? body.dia : fechaChile();
+  if (!costo) return error(400, 'Escribe cuánto costó.');
+  if (mpId && (await db.prepare('SELECT id FROM inyecciones WHERE mp_id = ?').bind(mpId).first())) return error(409, 'Esa compra ya está anotada como inyecciones.');
+  await db
+    .prepare('INSERT INTO inyecciones (mp_id, detalle, costo, cantidad, dia, por, creado) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .bind(mpId, detalle, Math.round(costo), Math.round(cantidad), dia, cuenta.nombre, ahora())
+    .run();
+  return json({ ok: true }, 201);
+});
+
+ruta('POST', /^plata\/inyecciones\/(\d+)$/, { permiso: 'finanzas' }, async ({ db, body, params, cuenta }) => {
+  const id = Number(params[0]);
+  const i = await db.prepare('SELECT * FROM inyecciones WHERE id = ?').bind(id).first();
+  if (!i) return error(404, 'No existe.');
+  if (body.borrar) {
+    await db.batch([db.prepare('DELETE FROM iny_cobros WHERE iny_id = ?').bind(id), db.prepare('DELETE FROM inyecciones WHERE id = ?').bind(id)]);
+    return json({ ok: true });
+  }
+  if (body.cantidad != null) {
+    const cantidad = numero(body.cantidad, { min: 1, max: 200 });
+    if (!cantidad) return error(400, 'Cantidad no válida.');
+    await db.prepare('UPDATE inyecciones SET cantidad = ? WHERE id = ?').bind(Math.round(cantidad), id).run();
+    return json({ ok: true });
+  }
+  const usados = (await db.prepare('SELECT COUNT(*) AS n FROM iny_cobros WHERE iny_id = ?').bind(id).first()).n;
+  if (usados >= i.cantidad) return error(409, 'Ya se cobraron todas las de esa compra.');
+  const cobrado = numero(String(body.cobrado ?? '').replace(/\./g, ''), { min: 1, max: 1e8 });
+  if (!cobrado) return error(400, 'Escribe cuánto se cobró.');
+  await db
+    .prepare('INSERT INTO iny_cobros (iny_id, cobrado, clienta, dia, por, creado) VALUES (?, ?, ?, ?, ?, ?)')
+    .bind(id, Math.round(cobrado), texto(body.clienta, 60) || null, fechaChile(), cuenta.nombre, ahora())
+    .run();
+  return json({ ok: true, diferencia: Math.round(cobrado - i.costo / i.cantidad) });
+});
+
+ruta('POST', /^plata\/inyecciones\/cobros\/(\d+)$/, { permiso: 'finanzas' }, async ({ db, body, params }) => {
+  if (!body.borrar) return error(400, 'Nada que hacer.');
+  await db.prepare('DELETE FROM iny_cobros WHERE id = ?').bind(Number(params[0])).run();
   return json({ ok: true });
 });
 
