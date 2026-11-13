@@ -1262,7 +1262,8 @@ ruta('POST', /^planilla\/conectar$/, { permiso: 'cuentas' }, async ({ db, cuenta
   return json({ ok: true });
 });
 
-ruta('GET', /^servicios$/, { permiso: 'servicios' }, async ({ db, request }) => {
+ruta('GET', /^servicios$/, { sesion: true }, async ({ db, request, cuenta }) => {
+  if (!['servicios', 'verServicios', 'finanzas'].some((p) => tiene(cuenta, p))) return error(403, 'No tienes acceso a esta sección.');
   const hoy = fechaChile();
   const fecha = fechaDe(new URL(request.url).searchParams.get('fecha'), hoy);
   const [{ results: lista }, { results: historial }, { results: clientas }, conectada] = await Promise.all([
@@ -1282,6 +1283,7 @@ ruta('GET', /^servicios$/, { permiso: 'servicios' }, async ({ db, request }) => 
     hoy,
     fecha,
     planillaConectada: Boolean(conectada?.valor),
+    puedeEditar: tiene(cuenta, 'servicios'),
     pendientes: pendientes?.n ?? 0,
     servicios: lista.map(servicioPublico),
     historial: historial.map((h) => ({ servicio: h.servicio, profesional: h.profesional, monto: h.monto, comision: h.comision, categoria: h.categoria })),
@@ -1419,7 +1421,7 @@ ruta('GET', /^caja$/, { permiso: 'caja' }, async ({ db, env, request }) => {
     cierre: cierre ? { ...JSON.parse(cierre.datos), efectivo: cierre.efectivo, nota: cierre.nota, por: cierre.por, ts: cierre.ts } : null,
     anteriores: anteriores.map((c) => {
       const d = JSON.parse(c.datos);
-      return { fecha: c.fecha, efectivo: c.efectivo, total: d.total, cuadra: d.cuadra, por: c.por };
+      return { fecha: c.fecha, efectivo: c.efectivo, total: d.totalContado ?? d.total, cuadra: d.cuadra, por: c.por };
     }),
   });
 });
@@ -1428,6 +1430,11 @@ ruta('POST', /^caja$/, { permiso: 'caja' }, async ({ db, env, cuenta, body }) =>
   const hoy = fechaChile();
   const fecha = fechaDe(body.fecha, hoy);
   const efectivo = plata(body.efectivo);
+  const contado = {
+    Efectivo: efectivo,
+    'Mercado Pago': body.tarjeta === '' || body.tarjeta == null ? null : plata(body.tarjeta),
+    Transferencia: body.transferencia === '' || body.transferencia == null ? null : plata(body.transferencia),
+  };
   const { results: lista } = await db.prepare('SELECT medio, monto, propina FROM servicios WHERE fecha = ?').bind(fecha).all();
   const anotado = Object.fromEntries(MEDIOS_PAGO.map((m) => [m, 0]));
   for (const x of lista) anotado[x.medio] += x.monto + (x.propina || 0);
@@ -1437,11 +1444,18 @@ ruta('POST', /^caja$/, { permiso: 'caja' }, async ({ db, env, cuenta, body }) =>
   } catch {
     mp = null;
   }
-  const difEfectivo = efectivo - anotado.Efectivo;
-  const difMaquina = mp ? mp.maquina - anotado['Mercado Pago'] : null;
-  const difTransfer = mp ? mp.transferencias - anotado.Transferencia : null;
-  const cuadra = Math.abs(difEfectivo) < 100 && (difMaquina == null || Math.abs(difMaquina) < 100) && (difTransfer == null || Math.abs(difTransfer) < 100);
-  const datos = { anotado, mp, total: Object.values(anotado).reduce((a, b) => a + b, 0), difEfectivo, difMaquina, difTransfer, cuadra, servicios: lista.length };
+  // Lo que suma Vivy se compara con Mercado Pago (tarjeta y transferencias) y con lo anotado en el portal, si hay algo anotado.
+  const hayAnotado = lista.length > 0;
+  const difs = [];
+  const difEfectivo = hayAnotado ? efectivo - anotado.Efectivo : null;
+  if (difEfectivo != null) difs.push(difEfectivo);
+  const difMaquina = mp && contado['Mercado Pago'] != null ? contado['Mercado Pago'] - mp.maquina : mp && hayAnotado ? mp.maquina - anotado['Mercado Pago'] : null;
+  const difTransfer = mp && contado.Transferencia != null ? contado.Transferencia - mp.transferencias : mp && hayAnotado ? mp.transferencias - anotado.Transferencia : null;
+  if (difMaquina != null) difs.push(difMaquina);
+  if (difTransfer != null) difs.push(difTransfer);
+  const cuadra = difs.every((d) => Math.abs(d) < 100);
+  const totalContado = efectivo + (contado['Mercado Pago'] ?? 0) + (contado.Transferencia ?? 0);
+  const datos = { anotado, contado, totalContado, mp, total: Object.values(anotado).reduce((a, b) => a + b, 0), difEfectivo, difMaquina, difTransfer, cuadra, servicios: lista.length };
   await db
     .prepare(
       `INSERT INTO cierres (fecha, datos, efectivo, nota, por, ts) VALUES (?, ?, ?, ?, ?, ?)
@@ -1568,9 +1582,11 @@ ruta('GET', /^mi-mes$/, { sesion: true }, async ({ db, cuenta, request }) => {
     .bind(quien.id, `${mes}-%`)
     .all();
   const suyos = results.map(miServicioPublico);
+  const meta = await db.prepare('SELECT monto FROM metas WHERE cuenta_id = ? AND mes = ?').bind(quien.id, mes).first();
   const base = {
     ok: true,
     mes,
+    meta: meta?.monto ?? null,
     persona: { id: quien.id, nombre: quien.nombre, profesional: profesionalDeNombre(quien.nombre) },
     servicios: suyos,
     total: suyos.reduce((a, m) => a + (m.monto || 0), 0),
@@ -1614,6 +1630,356 @@ ruta('POST', /^mi-mes\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, par
   if (!body.borrar) return error(400, 'Nada que hacer.');
   await db.prepare('DELETE FROM mis_servicios WHERE id = ?').bind(m.id).run();
   return json({ ok: true });
+});
+
+
+ruta('POST', /^mi-mes\/meta$/, { sesion: true }, async ({ db, cuenta, body }) => {
+  const mes = MES.test(body.mes ?? '') ? body.mes : fechaChile().slice(0, 7);
+  const monto = plata(body.monto);
+  if (!monto) await db.prepare('DELETE FROM metas WHERE cuenta_id = ? AND mes = ?').bind(cuenta.id, mes).run();
+  else
+    await db
+      .prepare('INSERT INTO metas (cuenta_id, mes, monto) VALUES (?, ?, ?) ON CONFLICT(cuenta_id, mes) DO UPDATE SET monto = excluded.monto')
+      .bind(cuenta.id, mes, monto)
+      .run();
+  return json({ ok: true });
+});
+
+/* ── ficha de clienta, cumpleaños y «te toca» ───────────── */
+
+const CUMPLE = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+
+ruta('GET', /^clientas\/(\d+)\/ficha$/, { sesion: true }, async ({ db, params }) => {
+  const id = Number(params[0]);
+  const f = await db.prepare('SELECT * FROM fichas WHERE clienta_id = ?').bind(id).first();
+  const { results: formulas } = await db.prepare('SELECT * FROM formulas WHERE clienta_id = ? ORDER BY fecha DESC, id DESC LIMIT 30').bind(id).all();
+  const { results: servicios } = await db
+    .prepare('SELECT fecha, servicio, profesional FROM servicios WHERE clienta_id = ? ORDER BY fecha DESC, id DESC LIMIT 20')
+    .bind(id)
+    .all();
+  return json({
+    ok: true,
+    ficha: { cumple: f?.cumple ?? null, alergias: f?.alergias ?? '', preferencias: f?.preferencias ?? '', notas: f?.notas ?? '', actualizado: f?.actualizado ?? null, por: f?.por ?? null },
+    formulas: formulas.map((x) => ({ id: x.id, fecha: x.fecha, texto: x.texto, por: x.por })),
+    servicios,
+  });
+});
+
+ruta('POST', /^clientas\/(\d+)\/ficha$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  const id = Number(params[0]);
+  if (!(await db.prepare('SELECT id FROM clientas WHERE id = ? AND activa = 1').bind(id).first())) return error(404, 'No existe esa clienta.');
+  const cumple = body.cumple ? String(body.cumple) : null;
+  if (cumple && !CUMPLE.test(cumple)) return error(400, 'El cumpleaños va como día y mes.');
+  await db
+    .prepare(
+      `INSERT INTO fichas (clienta_id, cumple, alergias, preferencias, notas, actualizado, por) VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT(clienta_id) DO UPDATE SET cumple = excluded.cumple, alergias = excluded.alergias, preferencias = excluded.preferencias,
+       notas = excluded.notas, actualizado = excluded.actualizado, por = excluded.por`,
+    )
+    .bind(id, cumple, texto(body.alergias, 200) || null, texto(body.preferencias, 200) || null, texto(body.notas, 400) || null, ahora(), cuenta.nombre)
+    .run();
+  return json({ ok: true });
+});
+
+ruta('POST', /^clientas\/(\d+)\/formulas$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  const id = Number(params[0]);
+  const t = texto(body.texto, 300);
+  if (!t) return error(400, 'Escribe la fórmula.');
+  if (!(await db.prepare('SELECT id FROM clientas WHERE id = ? AND activa = 1').bind(id).first())) return error(404, 'No existe esa clienta.');
+  await db
+    .prepare('INSERT INTO formulas (clienta_id, fecha, texto, cuenta_id, por, ts) VALUES (?, ?, ?, ?, ?, ?)')
+    .bind(id, fechaDe(body.fecha), t, cuenta.id, cuenta.nombre, ahora())
+    .run();
+  return json({ ok: true }, 201);
+});
+
+ruta('POST', /^formulas\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  const f = await db.prepare('SELECT * FROM formulas WHERE id = ?').bind(Number(params[0])).first();
+  if (!f || (f.cuenta_id !== cuenta.id && !tiene(cuenta, 'clientas'))) return error(404, 'No existe.');
+  if (!body.borrar) return error(400, 'Nada que hacer.');
+  await db.prepare('DELETE FROM formulas WHERE id = ?').bind(f.id).run();
+  return json({ ok: true });
+});
+
+/** Cada cuántos días suele volver una clienta, según lo último que se hizo. */
+const VUELVE = [
+  [/inyecc|reductiv|drenaje|masaje/i, 14],
+  [/manos|pies|pedicure|esmalt|retiro|uña|unas|diseño/i, 21],
+  [/depil|bozo|axila|pierna|bikini|cejas|mentón|menton|rebaje|glúteo|gluteo|espalda|brazo/i, 28],
+  [/facial|limpieza|pestaña|hilos/i, 30],
+  [/color|mechas|deco|baño|crecimiento|raíz|raiz/i, 42],
+  [/corte|brushing|nutritivo|tratamiento|alisado|olaplex|ampolla/i, 45],
+];
+const diasVuelve = (servicio) => VUELVE.find(([r]) => r.test(servicio ?? ''))?.[1] ?? 35;
+
+const proximoCumple = (cumple, hoy) => {
+  if (!cumple) return null;
+  const anio = Number(hoy.slice(0, 4));
+  let f = `${anio}-${cumple}`;
+  if (f < hoy) f = `${anio + 1}-${cumple}`;
+  return { fecha: f, dias: diasEntre(hoy, f) };
+};
+
+ruta('GET', /^te-toca$/, { permiso: 'clientas' }, async ({ db }) => {
+  const hoy = fechaChile();
+  const { results: clientas } = await db.prepare('SELECT * FROM clientas WHERE activa = 1 AND ultima_visita IS NOT NULL').all();
+  const { results: ultimos } = await db
+    .prepare('SELECT clienta_id, servicio, fecha FROM servicios WHERE clienta_id IS NOT NULL AND id IN (SELECT MAX(id) FROM servicios WHERE clienta_id IS NOT NULL GROUP BY clienta_id)')
+    .all();
+  const { results: avisos } = await db.prepare('SELECT clienta_id, tipo, MAX(fecha) AS fecha FROM avisos GROUP BY clienta_id, tipo').all();
+  const { results: fichas } = await db.prepare('SELECT clienta_id, cumple FROM fichas WHERE cumple IS NOT NULL').all();
+  const ultimo = new Map(ultimos.map((u) => [u.clienta_id, u]));
+  const avisada = (id, tipo) => avisos.find((a) => a.clienta_id === id && a.tipo === tipo)?.fecha ?? null;
+  const toca = [];
+  for (const c of clientas) {
+    const dias = diasEntre(c.ultima_visita, hoy);
+    const u = ultimo.get(c.id);
+    const cada = diasVuelve(u?.servicio);
+    const ultimoAviso = avisada(c.id, 'toca');
+    if (dias >= cada && dias <= 240 && !(ultimoAviso && ultimoAviso >= c.ultima_visita)) {
+      toca.push({ id: c.id, nombre: c.nombre, telefono: c.telefono, dias, cada, servicio: u?.servicio ?? null, dormida: dias >= 60 });
+    }
+  }
+  toca.sort((a, b) => a.dias - a.cada - (b.dias - b.cada));
+  const cumples = fichas
+    .map((f) => {
+      const c = clientas.find((x) => x.id === f.clienta_id);
+      const p = proximoCumple(f.cumple, hoy);
+      return c && p && p.dias <= 7 ? { id: c.id, nombre: c.nombre, telefono: c.telefono, fecha: p.fecha, dias: p.dias, saludada: avisada(c.id, 'cumple') === hoy.slice(0, 4) } : null;
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.dias - b.dias);
+  return json({ ok: true, hoy, toca, cumples });
+});
+
+ruta('POST', /^te-toca\/(\d+)$/, { permiso: 'clientas' }, async ({ db, cuenta, body, params }) => {
+  const tipo = body.tipo === 'cumple' ? 'cumple' : 'toca';
+  const hoy = fechaChile();
+  await db
+    .prepare('INSERT INTO avisos (clienta_id, tipo, fecha, por) VALUES (?, ?, ?, ?)')
+    .bind(Number(params[0]), tipo, tipo === 'cumple' ? hoy.slice(0, 4) : hoy, cuenta.nombre)
+    .run();
+  return json({ ok: true });
+});
+
+// Cumpleaños de la semana para el inicio (sin números: lo ve todo el equipo).
+ruta('GET', /^cumpleanos$/, { sesion: true }, async ({ db }) => {
+  const hoy = fechaChile();
+  const { results } = await db
+    .prepare('SELECT c.id, c.nombre, f.cumple FROM fichas f JOIN clientas c ON c.id = f.clienta_id WHERE c.activa = 1 AND f.cumple IS NOT NULL')
+    .all();
+  const lista = results
+    .map((r) => ({ id: r.id, nombre: r.nombre, ...proximoCumple(r.cumple, hoy) }))
+    .filter((r) => r.dias <= 7)
+    .sort((a, b) => a.dias - b.dias);
+  return json({ ok: true, cumples: lista });
+});
+
+/* ── aseo y tareas ──────────────────────────────────────── */
+
+const DIAS_SEMANA = /^[0-6](,[0-6])*$/;
+const diaSemanaDe = (f) => new Date(`${f}T12:00:00Z`).getUTCDay();
+
+ruta('GET', /^tareas$/, { sesion: true }, async ({ db, cuenta, request }) => {
+  const hoy = fechaChile();
+  const fecha = fechaDe(new URL(request.url).searchParams.get('fecha'), hoy);
+  const dow = String(diaSemanaDe(fecha));
+  const { results: tareas } = await db
+    .prepare('SELECT t.*, c.nombre AS quien FROM tareas t LEFT JOIN cuentas c ON c.id = t.cuenta_id WHERE t.activa = 1 ORDER BY t.id')
+    .all();
+  const { results: hechas } = await db.prepare('SELECT * FROM tareas_hechas WHERE fecha = ?').bind(fecha).all();
+  const { results: equipo } = await db.prepare('SELECT id, nombre FROM cuentas WHERE activa = 1 AND demo = 0 ORDER BY nombre').all();
+  const pub = (t) => {
+    const h = hechas.find((x) => x.tarea_id === t.id);
+    return { id: t.id, texto: t.texto, cuentaId: t.cuenta_id, quien: t.quien ?? 'Cualquiera', dias: t.dias.split(',').map(Number), hecha: h ? { por: h.por, ts: h.ts } : null };
+  };
+  const deHoy = tareas.filter((t) => t.dias.split(',').includes(dow)).map(pub);
+  return json({
+    ok: true,
+    hoy,
+    fecha,
+    mias: deHoy.filter((t) => t.cuentaId === cuenta.id || t.cuentaId == null),
+    todas: deHoy,
+    puedeAdministrar: tiene(cuenta, 'cuentas'),
+    lista: tiene(cuenta, 'cuentas') ? tareas.map(pub) : [],
+    equipo: tiene(cuenta, 'cuentas') ? equipo : [],
+  });
+});
+
+ruta('POST', /^tareas$/, { permiso: 'cuentas' }, async ({ db, body }) => {
+  const t = texto(body.texto, 100);
+  const dias = Array.isArray(body.dias) ? [...new Set(body.dias.map(Number).filter((d) => d >= 0 && d <= 6))].sort().join(',') : '';
+  if (!t || !DIAS_SEMANA.test(dias)) return error(400, 'Escribe la tarea y elige los días.');
+  const cuentaId = body.cuentaId ? Number(body.cuentaId) : null;
+  await db.prepare('INSERT INTO tareas (texto, cuenta_id, dias, creado) VALUES (?, ?, ?, ?)').bind(t, cuentaId, dias, ahora()).run();
+  return json({ ok: true }, 201);
+});
+
+ruta('POST', /^tareas\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, body, params }) => {
+  const id = Number(params[0]);
+  if (body.borrar) {
+    await db.prepare('UPDATE tareas SET activa = 0 WHERE id = ?').bind(id).run();
+    return json({ ok: true });
+  }
+  const t = texto(body.texto, 100);
+  const dias = Array.isArray(body.dias) ? [...new Set(body.dias.map(Number).filter((d) => d >= 0 && d <= 6))].sort().join(',') : '';
+  if (!t || !DIAS_SEMANA.test(dias)) return error(400, 'Escribe la tarea y elige los días.');
+  await db.prepare('UPDATE tareas SET texto = ?, dias = ?, cuenta_id = ? WHERE id = ?').bind(t, dias, body.cuentaId ? Number(body.cuentaId) : null, id).run();
+  return json({ ok: true });
+});
+
+ruta('POST', /^tareas\/(\d+)\/hecha$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  const t = await db.prepare('SELECT * FROM tareas WHERE id = ? AND activa = 1').bind(Number(params[0])).first();
+  if (!t) return error(404, 'No existe.');
+  if (t.cuenta_id && t.cuenta_id !== cuenta.id && !tiene(cuenta, 'cuentas')) return error(403, 'Esa tarea le toca a otra persona.');
+  const fecha = fechaChile();
+  if (body.hecha === false) await db.prepare('DELETE FROM tareas_hechas WHERE tarea_id = ? AND fecha = ?').bind(t.id, fecha).run();
+  else
+    await db
+      .prepare('INSERT INTO tareas_hechas (tarea_id, fecha, cuenta_id, por, ts) VALUES (?, ?, ?, ?, ?) ON CONFLICT(tarea_id, fecha) DO NOTHING')
+      .bind(t.id, fecha, cuenta.id, cuenta.nombre, ahora())
+      .run();
+  return json({ ok: true });
+});
+
+/* ── reseñas en Google ──────────────────────────────────── */
+
+const RESENA_NAAMA = 'https://search.google.com/local/writereview?placeid=ChIJI6IRvk3FYpYRnMPtgSOPH68';
+
+ruta('GET', /^resenas$/, { sesion: true }, async ({ db }) => {
+  const f = await db.prepare(`SELECT valor FROM meta WHERE clave = 'resena_url'`).first();
+  return json({ ok: true, url: f?.valor ?? RESENA_NAAMA });
+});
+
+ruta('POST', /^resenas$/, { permiso: 'cuentas' }, async ({ db, body }) => {
+  const url = String(body.url ?? '').trim();
+  if (!/^https:\/\/(search\.google\.com|g\.page|maps\.app\.goo\.gl|www\.google\.com)\//.test(url)) return error(400, 'Ese enlace no es de Google.');
+  await db.prepare(`INSERT INTO meta (clave, valor) VALUES ('resena_url', ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor`).bind(url).run();
+  return json({ ok: true });
+});
+
+/* ── gift cards ─────────────────────────────────────────── */
+
+const DISENOS_GIFT = ['espresso', 'crema', 'arcilla', 'dorado'];
+const ALFABETO_GIFT = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const codigoGift = () => {
+  const b = crypto.getRandomValues(new Uint8Array(8));
+  const s = [...b].map((x) => ALFABETO_GIFT[x % ALFABETO_GIFT.length]).join('');
+  return `NAAMA-${s.slice(0, 4)}-${s.slice(4)}`;
+};
+const giftPublica = (g, hoy) => ({
+  id: g.id,
+  codigo: g.codigo,
+  para: g.para,
+  de: g.de,
+  monto: g.monto,
+  servicio: g.servicio,
+  mensaje: g.mensaje,
+  diseno: g.diseno,
+  vence: g.vence,
+  estado: g.estado === 'activa' && g.vence < hoy ? 'vencida' : g.estado,
+  medio: g.medio,
+  por: g.por,
+  creado: g.creado,
+  canjeada: g.canjeada,
+  canjeadaPor: g.canjeada_por,
+});
+const permisoGift = (cuenta) => tiene(cuenta, 'servicios') || tiene(cuenta, 'finanzas');
+
+ruta('GET', /^giftcards$/, { sesion: true }, async ({ db, cuenta }) => {
+  if (!permisoGift(cuenta)) return error(403, 'No tienes acceso a esta sección.');
+  const hoy = fechaChile();
+  const { results } = await db.prepare('SELECT * FROM giftcards ORDER BY id DESC LIMIT 200').all();
+  return json({ ok: true, hoy, giftcards: results.map((g) => giftPublica(g, hoy)) });
+});
+
+ruta('POST', /^giftcards$/, { sesion: true }, async ({ db, cuenta, body }) => {
+  if (!permisoGift(cuenta)) return error(403, 'No tienes acceso a esta sección.');
+  const para = texto(body.para, 50);
+  const monto = plata(body.monto) || null;
+  const servicio = texto(body.servicio, 60) || null;
+  if (!para) return error(400, '¿Para quién es?');
+  if (!monto && !servicio) return error(400, 'Pon un monto o un servicio.');
+  const diseno = DISENOS_GIFT.includes(body.diseno) ? body.diseno : 'espresso';
+  const hoy = fechaChile();
+  const vence = FECHA.test(body.vence ?? '') && body.vence > hoy ? body.vence : fechaChile(new Date(Date.now() + 183 * 86400000));
+  let codigo = codigoGift();
+  while (await db.prepare('SELECT id FROM giftcards WHERE codigo = ?').bind(codigo).first()) codigo = codigoGift();
+  const r = await db
+    .prepare('INSERT INTO giftcards (codigo, para, de, monto, servicio, mensaje, diseno, vence, medio, por, creado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(codigo, para, texto(body.de, 50) || null, monto, servicio, texto(body.mensaje, 160) || null, diseno, vence, MEDIOS_PAGO.includes(body.medio) ? body.medio : null, cuenta.nombre, ahora())
+    .run();
+  const g = await db.prepare('SELECT * FROM giftcards WHERE id = ?').bind(r.meta.last_row_id).first();
+  return json({ ok: true, giftcard: giftPublica(g, hoy) }, 201);
+});
+
+ruta('POST', /^giftcards\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  if (!permisoGift(cuenta)) return error(403, 'No tienes acceso a esta sección.');
+  const g = await db.prepare('SELECT * FROM giftcards WHERE id = ?').bind(Number(params[0])).first();
+  if (!g) return error(404, 'No existe.');
+  const hoy = fechaChile();
+  if (body.accion === 'canjear') {
+    if (g.estado !== 'activa') return error(409, 'Esa gift card ya no está activa.');
+    if (g.vence < hoy) return error(409, `Esa gift card venció el ${g.vence}.`);
+    await db.prepare(`UPDATE giftcards SET estado = 'canjeada', canjeada = ?, canjeada_por = ? WHERE id = ?`).bind(ahora(), cuenta.nombre, g.id).run();
+  } else if (body.accion === 'anular') {
+    await db.prepare(`UPDATE giftcards SET estado = 'anulada' WHERE id = ?`).bind(g.id).run();
+  } else if (body.accion === 'reactivar') {
+    await db.prepare(`UPDATE giftcards SET estado = 'activa', canjeada = NULL, canjeada_por = NULL WHERE id = ?`).bind(g.id).run();
+  } else return error(400, 'Nada que hacer.');
+  const n = await db.prepare('SELECT * FROM giftcards WHERE id = ?').bind(g.id).first();
+  return json({ ok: true, giftcard: giftPublica(n, hoy) });
+});
+
+/* ── margen real por servicio (solo Administración y Vivy) ─ */
+
+ruta('GET', /^plata\/margen$/, { permiso: 'finanzas' }, async ({ db }) => {
+  const desde = haceDias(90);
+  const { results: servicios } = await db.prepare('SELECT servicio, medio, monto, comision FROM servicios WHERE fecha >= ?').bind(desde).all();
+  const { results: usos } = await db
+    .prepare('SELECT u.registro, u.servicio, u.cantidad, p.costo, p.tamano FROM usos u JOIN productos p ON p.id = u.producto_id WHERE u.fecha >= ?')
+    .bind(desde)
+    .all();
+  const insumo = new Map();
+  for (const u of usos) {
+    const k = normTexto(u.servicio);
+    const s = insumo.get(k) ?? new Map();
+    s.set(u.registro, (s.get(u.registro) ?? 0) + (u.costo ? (u.costo / u.tamano) * u.cantidad : 0));
+    insumo.set(k, s);
+  }
+  const grupos = new Map();
+  for (const x of servicios) {
+    const k = normTexto(x.servicio);
+    const g = grupos.get(k) ?? { servicio: x.servicio, veces: 0, cobrado: 0, comision: 0, mp: 0, iva: 0 };
+    const mp = x.medio === 'Mercado Pago' ? x.monto * 0.0219 * 1.19 : 0;
+    const neto = x.monto / 1.19 - mp;
+    g.veces += 1;
+    g.cobrado += x.monto;
+    g.iva += x.monto - x.monto / 1.19;
+    g.mp += mp;
+    g.comision += neto * x.comision;
+    grupos.set(k, g);
+  }
+  const lista = [...grupos.entries()]
+    .map(([k, g]) => {
+      const regs = insumo.get(k);
+      const costoInsumos = regs ? [...regs.values()].reduce((a, b) => a + b, 0) / regs.size : null;
+      const precio = g.cobrado / g.veces;
+      const ganancia = precio - g.iva / g.veces - g.mp / g.veces - g.comision / g.veces - (costoInsumos ?? 0);
+      return {
+        servicio: g.servicio,
+        veces: g.veces,
+        precio: Math.round(precio),
+        iva: Math.round(g.iva / g.veces),
+        mp: Math.round(g.mp / g.veces),
+        comision: Math.round(g.comision / g.veces),
+        insumos: costoInsumos == null ? null : Math.round(costoInsumos),
+        ganancia: Math.round(ganancia),
+        margen: Math.round((ganancia / precio) * 100),
+      };
+    })
+    .sort((a, b) => b.veces - a.veces);
+  return json({ ok: true, desde, servicios: lista });
 });
 
 

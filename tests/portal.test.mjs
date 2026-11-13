@@ -551,3 +551,115 @@ test('Mi mes: Gaby anota lo suyo, no ve lo de otras, y Administración lo cruza 
   assert.equal((await kata.post(`mi-mes/${mio.id}`, { borrar: true })).status, 404);
   assert.equal((await gaby.post(`mi-mes/${mio.id}`, { borrar: true })).status, 200);
 });
+
+test('Vivy ve los servicios pero no los anota ni borra; Gaby no los ve', async () => {
+  const admin = await configurar();
+  const vivy = await crearYEntrar(admin, 'Vivy', 'duena', '11.1.1.1');
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '11.1.1.2');
+  const r = await admin.post('servicios', { clienta: 'Ana', medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Manos', monto: 23000 }] });
+  const v = await vivy.pedir('servicios');
+  assert.equal(v.status, 200);
+  assert.equal(v.data.puedeEditar, false);
+  assert.equal(v.data.servicios.length, 1);
+  assert.equal((await vivy.post('servicios', { clienta: 'X', medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Manos', monto: 1 }] })).status, 403);
+  assert.equal((await vivy.post(`servicios/${r.data.servicios[0].id}`, { borrar: true })).status, 403);
+  assert.equal((await gaby.pedir('servicios')).status, 403);
+  assert.equal((await vivy.pedir('caja')).status, 200, 'Vivy sí hace la caja');
+});
+
+test('caja: Vivy suma tarjeta, transferencias y efectivo por separado', async () => {
+  const admin = await configurar();
+  env.MP_ACCESS_TOKEN = 'TEST';
+  const ahora = new Date().toISOString();
+  env.MP_FETCH = async (url) => {
+    if (url.endsWith('/users/me')) return new Response(JSON.stringify({ id: 1 }));
+    return new Response(
+      JSON.stringify({
+        results: [
+          { id: 1, collector_id: 1, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 50000, fee_details: [], payment_type_id: 'credit_card' },
+          { id: 2, collector_id: 1, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 30000, fee_details: [], payment_type_id: 'bank_transfer' },
+        ],
+      }),
+    );
+  };
+  let r = await admin.post('caja', { tarjeta: '50.000', transferencia: '30000', efectivo: 12000 });
+  assert.equal(r.data.cierre.cuadra, true);
+  assert.equal(r.data.cierre.totalContado, 92000);
+  r = await admin.post('caja', { tarjeta: 45000, transferencia: 30000, efectivo: 12000 });
+  assert.equal(r.data.cierre.cuadra, false);
+  assert.equal(r.data.cierre.difMaquina, -5000);
+});
+
+test('ficha de clienta: alergias, cumpleaños y fórmulas; «te toca» y cumpleaños de la semana', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '12.1.1.1');
+  await admin.post('clientas', { contactos: [{ nombre: 'Rosita Jara', telefono: '+56911112222' }], origen: 'contacto' });
+  const c = (await admin.pedir('clientas')).data.clientas[0];
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date());
+  const cumple = hoy.slice(5);
+  assert.equal((await kata.post(`clientas/${c.id}/ficha`, { cumple: '13-45' })).status, 400);
+  assert.equal((await kata.post(`clientas/${c.id}/ficha`, { cumple, alergias: 'Amoníaco', preferencias: 'Té verde' })).status, 200);
+  assert.equal((await kata.post(`clientas/${c.id}/formulas`, { texto: '7.1 + 20 vol, 45 g' })).status, 201);
+  const f = await kata.pedir(`clientas/${c.id}/ficha`);
+  assert.equal(f.data.ficha.alergias, 'Amoníaco');
+  assert.equal(f.data.formulas.length, 1);
+  const cumples = await kata.pedir('cumpleanos');
+  assert.equal(cumples.data.cumples[0].dias, 0);
+  assert.equal(cumples.data.cumples[0].telefono, undefined, 'sin números para el equipo');
+
+  // Vino hace 25 días a hacerse las manos: le toca (cada 21).
+  const hace25 = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(Date.now() - 25 * 86400000));
+  await admin.post('servicios', { fecha: hace25, clienta: 'Rosita Jara', clientaId: c.id, medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Manos', monto: 23000 }] });
+  assert.equal((await kata.pedir('te-toca')).status, 403);
+  let t = await admin.pedir('te-toca');
+  assert.equal(t.data.toca.length, 1);
+  assert.equal(t.data.toca[0].cada, 21);
+  assert.equal(t.data.cumples.length, 1);
+  await admin.post(`te-toca/${c.id}`, { tipo: 'toca' });
+  t = await admin.pedir('te-toca');
+  assert.equal(t.data.toca.length, 0, 'ya avisada: sale de la lista hasta que vuelva');
+});
+
+test('aseo: Administración crea tareas por persona y día; cada una marca las suyas', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '13.1.1.1');
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '13.1.1.2');
+  const idKata = (await admin.pedir('cuentas')).data.cuentas.find((x) => x.nombre === 'Kata').id;
+  const todos = [0, 1, 2, 3, 4, 5, 6];
+  assert.equal((await kata.post('tareas', { texto: 'X', dias: todos })).status, 403);
+  await admin.post('tareas', { texto: 'Esterilizar alicates', cuentaId: idKata, dias: todos });
+  await admin.post('tareas', { texto: 'Barrer', dias: todos });
+  let k = await kata.pedir('tareas');
+  assert.equal(k.data.mias.length, 2);
+  const g = await gaby.pedir('tareas');
+  assert.equal(g.data.mias.length, 1, 'Gaby solo ve «Barrer» como suya');
+  const ester = k.data.mias.find((x) => x.texto.startsWith('Ester'));
+  assert.equal((await gaby.post(`tareas/${ester.id}/hecha`, {})).status, 403);
+  await kata.post(`tareas/${ester.id}/hecha`, {});
+  k = await kata.pedir('tareas');
+  assert.equal(k.data.mias.find((x) => x.id === ester.id).hecha.por, 'Kata');
+});
+
+test('gift cards: crear con código, canjear una sola vez; metas y reseñas', async () => {
+  const admin = await configurar();
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '14.1.1.1');
+  assert.equal((await gaby.pedir('giftcards')).status, 403);
+  assert.equal((await admin.post('giftcards', { para: 'Ana' })).status, 400);
+  const r = await admin.post('giftcards', { para: 'Ana', de: 'Tomás', monto: '30.000', diseno: 'arcilla', mensaje: 'Para ti' });
+  assert.equal(r.status, 201);
+  assert.match(r.data.giftcard.codigo, /^NAAMA-[A-Z2-9]{4}-[A-Z2-9]{4}$/);
+  assert.equal(r.data.giftcard.monto, 30000);
+  const id = r.data.giftcard.id;
+  assert.equal((await admin.post(`giftcards/${id}`, { accion: 'canjear' })).data.giftcard.estado, 'canjeada');
+  assert.equal((await admin.post(`giftcards/${id}`, { accion: 'canjear' })).status, 409);
+
+  await gaby.post('mi-mes/meta', { monto: '400.000' });
+  await gaby.post('mi-mes', { servicio: 'Manos', monto: 100000 });
+  const m = await gaby.pedir('mi-mes');
+  assert.equal(m.data.meta, 400000);
+  assert.equal(m.data.total, 100000);
+  assert.match((await gaby.pedir('resenas')).data.url, /writereview\?placeid=ChIJ/);
+  assert.equal((await gaby.post('resenas', { url: 'https://evil.cl' })).status, 403);
+  assert.equal((await admin.pedir('plata/margen')).status, 200);
+  assert.equal((await gaby.pedir('plata/margen')).status, 403);
+});

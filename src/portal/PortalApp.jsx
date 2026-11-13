@@ -14,9 +14,13 @@ import Servicios from './Servicios';
 import Caja from './Caja';
 import Disponibilidad from './Disponibilidad';
 import MiMes from './MiMes';
+import TeToca from './TeToca';
+import Aseo from './Aseo';
+import Resenas from './Resenas';
+import GiftCards from './GiftCards';
 import Instalar, { esApp, registrarAppPortal } from './Instalar';
 import Hoja from './Hoja';
-import { MODULOS, ROLES, puede } from './permisos';
+import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
 import { ICONO_MODULO } from './iconos';
 import '../theme/booking.css';
 import '../theme/portal.css';
@@ -47,7 +51,7 @@ const pestanas = (cuenta) => [
   { to: '/portal/insumos', label: 'Insumos', Icono: Package },
   { to: '/portal/compras', label: 'Compras', Icono: ShoppingBag },
   // El resto va en la barra lateral del computador; en el celular está en «Más» y en Inicio.
-  ...MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && (!m.permiso || puede(cuenta, m.permiso))).map((m) => ({
+  ...MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => ({
     to: `/portal/${m.id}`,
     label: m.corto ?? m.nombre,
     Icono: ICONO_MODULO[m.id],
@@ -81,7 +85,7 @@ const Menu = ({ cuenta, onMas }) => (
 );
 
 const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
-  const pronto = MODULOS.filter((m) => !m.listo && (!m.permiso || puede(cuenta, m.permiso)));
+  const pronto = MODULOS.filter((m) => !m.listo && puedeModulo(cuenta, m));
   return (
     <Hoja titulo="Más" onCerrar={onCerrar}>
       <div className="mas__yo">
@@ -94,7 +98,7 @@ const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
         </span>
       </div>
       <ul className="grupo-lista">
-        {MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && (!m.permiso || puede(cuenta, m.permiso))).map((m) => {
+        {MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => {
           const Icono = ICONO_MODULO[m.id];
           return (
             <li key={m.id}>
@@ -240,10 +244,17 @@ const PortalApp = () => {
         ) : (
           <Routes>
             <Route index element={<Panel cuenta={cuenta} />} />
-            <Route path="clientas" element={<Clientas />} />
+            <Route path="clientas" element={<Clientas cuenta={cuenta} />} />
             <Route path="insumos" element={<Insumos cuenta={cuenta} />} />
             <Route path="compras" element={<Compras />} />
-            <Route path="servicios" element={puede(cuenta, 'servicios') ? <Servicios cuenta={cuenta} /> : <Navigate to="/portal" replace />} />
+            <Route
+              path="servicios"
+              element={puede(cuenta, 'servicios') || puede(cuenta, 'verServicios') ? <Servicios cuenta={cuenta} /> : <Navigate to="/portal" replace />}
+            />
+            <Route path="te-toca" element={puede(cuenta, 'clientas') ? <TeToca /> : <Navigate to="/portal" replace />} />
+            <Route path="aseo" element={<Aseo />} />
+            <Route path="resenas" element={<Resenas cuenta={cuenta} />} />
+            <Route path="giftcards" element={puede(cuenta, 'servicios') || puede(cuenta, 'finanzas') ? <GiftCards /> : <Navigate to="/portal" replace />} />
             <Route path="caja" element={puede(cuenta, 'caja') ? <Caja /> : <Navigate to="/portal" replace />} />
             <Route path="disponibilidad" element={<Disponibilidad />} />
             <Route path="mi-mes" element={<MiMes cuenta={cuenta} />} />

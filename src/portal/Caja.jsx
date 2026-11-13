@@ -11,17 +11,19 @@ const moverDia = (f, n) => {
   return d.toISOString().slice(0, 10);
 };
 
-/** Una línea de la comparación: lo anotado contra lo que de verdad entró. */
-const Linea = ({ titulo, anotado, real, detalle }) => {
-  const dif = real == null ? null : real - anotado;
+/** Una línea: lo que sumó Vivy contra lo que de verdad entró (Mercado Pago) y lo anotado en el portal. */
+const Linea = ({ titulo, contado, real, anotado, detalle }) => {
+  const base = real ?? (anotado || null);
+  const dif = contado == null || base == null ? null : contado - base;
   const ok = dif != null && Math.abs(dif) < 100;
   return (
     <li className="caja-linea">
       <span className="caja-linea__texto">
         <strong>{titulo}</strong>
         <small>
-          Anotado {pesos(anotado)}
-          {real != null ? ` · Entró ${pesos(real)}` : ''}
+          {contado != null ? `Sumado ${pesos(contado)}` : 'Falta sumar'}
+          {real != null ? ` · Entró a MP ${pesos(real)}` : ''}
+          {anotado ? ` · Anotado ${pesos(anotado)}` : ''}
           {detalle ? ` · ${detalle}` : ''}
         </small>
       </span>
@@ -39,10 +41,27 @@ const Linea = ({ titulo, anotado, real, detalle }) => {
   );
 };
 
+const Monto = ({ id, label, valor, onCambio, ayuda }) => (
+  <div className="field">
+    <label htmlFor={id}>{label}</label>
+    <input
+      id={id}
+      className="input pesada__input"
+      inputMode="numeric"
+      placeholder="$"
+      value={valor === '' ? '' : Number(valor).toLocaleString('es-CL')}
+      onChange={(e) => onCambio(e.target.value.replace(/\D/g, ''))}
+    />
+    {ayuda && <small className="muted">{ayuda}</small>}
+  </div>
+);
+
 const Caja = () => {
   const [d, setD] = useState(null);
   const [error, setError] = useState('');
   const [efectivo, setEfectivo] = useState('');
+  const [tarjeta, setTarjeta] = useState('');
+  const [transfer, setTransfer] = useState('');
   const [nota, setNota] = useState('');
   const [aviso, setAviso] = useState('');
   const avisoT = useRef();
@@ -52,6 +71,8 @@ const Caja = () => {
       const r = await api(`caja${f ? `?fecha=${f}` : ''}`);
       setD(r);
       setEfectivo(r.cierre?.efectivo != null ? String(r.cierre.efectivo) : '');
+      setTarjeta(r.cierre?.contado?.['Mercado Pago'] != null ? String(r.cierre.contado['Mercado Pago']) : '');
+      setTransfer(r.cierre?.contado?.Transferencia != null ? String(r.cierre.contado.Transferencia) : '');
       setNota(r.cierre?.nota ?? '');
     } catch (err) {
       setError(err.message);
@@ -61,7 +82,8 @@ const Caja = () => {
     cargar();
   }, [cargar]);
 
-  const contado = Number(String(efectivo).replace(/\D/g, '')) || 0;
+  const num = (v) => (v === '' ? null : Number(v));
+  const totalSumado = (num(efectivo) ?? 0) + (num(tarjeta) ?? 0) + (num(transfer) ?? 0);
 
   return (
     <div className="panel">
@@ -109,22 +131,18 @@ const Caja = () => {
             {d.errorMP && <p className="portal-error">{d.errorMP}</p>}
             <ul className="cuentas">
               <Linea
-                titulo="Máquina (Mercado Pago)"
-                anotado={d.anotado['Mercado Pago']}
+                titulo="Tarjeta (máquina)"
+                contado={num(tarjeta)}
                 real={d.mp?.maquina ?? null}
+                anotado={d.anotado['Mercado Pago']}
                 detalle={d.mp ? `${d.mp.maquinaPagos} pagos · comisión ${pesos(d.mp.comision)}` : 'sin conexión a MP'}
               />
-              <Linea
-                titulo="Transferencias"
-                anotado={d.anotado.Transferencia}
-                real={d.mp?.transferencias ?? null}
-                detalle={d.mp ? `${d.mp.transferenciasPagos} a la cuenta MP` : ''}
-              />
-              <Linea titulo="Efectivo" anotado={d.anotado.Efectivo} real={efectivo === '' ? null : contado} detalle={efectivo === '' ? 'cuenta la plata del cajón' : 'contado'} />
+              <Linea titulo="Transferencias" contado={num(transfer)} real={d.mp?.transferencias ?? null} anotado={d.anotado.Transferencia} />
+              <Linea titulo="Efectivo" contado={num(efectivo)} real={null} anotado={d.anotado.Efectivo} detalle={d.anotado.Efectivo ? '' : 'se compara con lo anotado'} />
             </ul>
             <p className="muted">
-              Si «Faltan» en la máquina o transferencias, falta anotar un servicio. Si «Sobran», hay algo anotado de más o pagaron algo que no se anotó como servicio
-              (ej.: transferencias que no son de clientas).
+              «Cuadra» = lo que sumaste es igual a lo que entró a Mercado Pago (o a lo anotado, en el efectivo). Si dice «Faltan» o «Sobran», revisa si quedó un pago
+              sin sumar o una transferencia que no era de clienta.
             </p>
           </section>
 
@@ -135,7 +153,7 @@ const Caja = () => {
               onSubmit={async (e) => {
                 e.preventDefault();
                 try {
-                  const r = await post('caja', { fecha: d.fecha, efectivo: contado, nota });
+                  const r = await post('caja', { fecha: d.fecha, efectivo: num(efectivo) ?? 0, tarjeta, transferencia: transfer, nota });
                   setAviso(r.cierre.cuadra ? 'Caja cerrada. ¡Todo cuadra!' : 'Caja cerrada con diferencias (quedó anotado).');
                   clearTimeout(avisoT.current);
                   avisoT.current = setTimeout(() => setAviso(''), 4000);
@@ -145,17 +163,12 @@ const Caja = () => {
                 }
               }}
             >
-              <div className="field">
-                <label htmlFor="cj-e">Efectivo contado en el cajón</label>
-                <input
-                  id="cj-e"
-                  className="input pesada__input"
-                  inputMode="numeric"
-                  placeholder="$"
-                  value={efectivo === '' ? '' : contado.toLocaleString('es-CL')}
-                  onChange={(e) => setEfectivo(e.target.value.replace(/\D/g, ''))}
-                />
-              </div>
+              <Monto id="cj-t" label="Total tarjeta (cierre de la máquina)" valor={tarjeta} onCambio={setTarjeta} ayuda="Débito + crédito + prepago, como sale en el cierre de la Point." />
+              <Monto id="cj-tr" label="Total transferencias" valor={transfer} onCambio={setTransfer} />
+              <Monto id="cj-e" label="Efectivo contado en el cajón" valor={efectivo} onCambio={setEfectivo} />
+              <p className="caja-total">
+                Total del día: <strong>{pesos(totalSumado)}</strong>
+              </p>
               <div className="field">
                 <label htmlFor="cj-n">Nota (opcional)</label>
                 <input id="cj-n" className="input" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej.: se pagó el gas en efectivo" />

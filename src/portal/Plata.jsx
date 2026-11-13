@@ -35,6 +35,7 @@ const Cifra = ({ titulo, datos }) => (
 
 const Plata = () => {
   const [d, setD] = useState(null);
+  const [margen, setMargen] = useState(null);
   const [error, setError] = useState('');
   const [cargandoFijos, setCargandoFijos] = useState(false);
   const [hoja, setHoja] = useState(null);
@@ -50,6 +51,9 @@ const Plata = () => {
   }, []);
   useEffect(() => {
     cargar();
+    api('plata/margen')
+      .then((r) => setMargen(r.servicios))
+      .catch(() => setMargen([]));
   }, [cargar]);
 
   const mostrar = (t) => {
@@ -239,6 +243,39 @@ const Plata = () => {
             <button type="button" className="portal__link" onClick={() => setHoja({ tipo: 'iny-nueva' })}>
               + Anotar compra de inyecciones
             </button>
+          </section>
+
+          <section>
+            <h2 className="seccion__titulo">Cuánto le queda a Naamá por servicio (últimos 90 días)</h2>
+            {!margen || margen.length === 0 ? (
+              <p className="muted">Aparece cuando se anoten servicios en «Servicios». Usa el precio cobrado, el IVA, la comisión de Mercado Pago, el % de la profesional y lo que se gastó en insumos (si lo anotaron con la pesa).</p>
+            ) : (
+              <div className="tabla-margen" role="table" aria-label="Margen por servicio">
+                <div className="tabla-margen__fila tabla-margen__cabeza" role="row">
+                  <span role="columnheader">Servicio</span>
+                  <span role="columnheader">Precio</span>
+                  <span role="columnheader">IVA + MP</span>
+                  <span role="columnheader">Profesional</span>
+                  <span role="columnheader">Insumos</span>
+                  <span role="columnheader">Naamá</span>
+                </div>
+                {margen.map((m) => (
+                  <div key={m.servicio} className="tabla-margen__fila" role="row">
+                    <span role="cell">
+                      <strong>{m.servicio}</strong>
+                      <small> ×{m.veces}</small>
+                    </span>
+                    <span role="cell">{pesos(m.precio)}</span>
+                    <span role="cell">{pesos(m.iva + m.mp)}</span>
+                    <span role="cell">{pesos(m.comision)}</span>
+                    <span role="cell">{m.insumos == null ? '—' : pesos(m.insumos)}</span>
+                    <span role="cell" className={m.margen < 15 ? 'alerta-texto' : 'ok-texto'}>
+                      {pesos(m.ganancia)} <small>({m.margen}%)</small>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           {d.conectado && d.salidas?.length > 0 && (
