@@ -857,7 +857,7 @@ test('avisos programados: el de mañana y el resumen del lunes salen una sola ve
   // Antes de las 18:00 no hace nada.
   env.RELOJ = `${hoy}T12:00:00-03:00`;
   let r = await admin.post('cron', {});
-  assert.deepEqual(r.data.hecho, {});
+  assert.equal(r.data.hecho.manana, undefined);
   // A las 19:00 avisa una vez.
   env.RELOJ = `${hoy}T19:00:00-03:00`;
   r = await admin.post('cron', {});
@@ -873,5 +873,28 @@ test('avisos programados: el de mañana y el resumen del lunes salen una sola ve
   assert.ok(r.data.hecho.semana.lineas.length >= 2);
   r = await admin.post('cron', {});
   assert.equal(r.data.hecho.semana, undefined);
+  delete env.RELOJ;
+});
+
+test('aseo: aviso en la mañana con lo que toca y en la tarde solo lo que falta', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '19.1.1.2');
+  const ids = Object.fromEntries((await admin.pedir('cuentas')).data.cuentas.map((x) => [x.nombre, x.id]));
+  const dia = '2026-11-17'; // martes
+  assert.equal((await admin.post('tareas', { texto: 'Barrer', cuentaId: ids.Kata, dias: [2] })).status, 201);
+  assert.equal((await admin.post('tareas', { texto: 'Toallas', cuentaId: ids.Kata, dias: [2] })).status, 201);
+  env.RELOJ = `${dia}T10:30:00-03:00`;
+  let r = await admin.post('cron', {});
+  assert.deepEqual(r.data.hecho.aseo, { personas: 1, tareas: 2 });
+  assert.equal((await admin.post('cron', {})).data.hecho.aseo, undefined);
+  // Kata hace una (la marca con la fecha de ese día).
+  const t = (await admin.pedir("tareas")).data.lista.find((x) => x.texto === "Barrer");
+  assert.equal((await kata.post(`tareas/${t.id}/hecha`, {})).status, 200);
+  env.RELOJ = `${dia}T16:30:00-03:00`;
+  r = await admin.post('cron', {});
+  assert.deepEqual(r.data.hecho.aseoTarde, { personas: 1, tareas: 1 });
+  // Domingo no hay aviso de aseo.
+  env.RELOJ = '2026-11-22T10:30:00-03:00';
+  assert.equal((await admin.post('cron', {})).data.hecho.aseo, undefined);
   delete env.RELOJ;
 });

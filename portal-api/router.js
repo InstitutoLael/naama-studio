@@ -1814,15 +1814,13 @@ ruta('GET', /^cumpleanos$/, { sesion: true }, async ({ db }) => {
 const DIAS_SEMANA = /^[0-6](,[0-6])*$/;
 const diaSemanaDe = (f) => new Date(`${f}T12:00:00Z`).getUTCDay();
 
-ruta('GET', /^tareas$/, { sesion: true }, async ({ db, cuenta, request }) => {
-  const hoy = fechaChile();
-  const fecha = fechaDe(new URL(request.url).searchParams.get('fecha'), hoy);
+/** Tareas de un día, ya repartidas (las «por turnos» entre las que vienen). */
+async function tareasDelDia(db, fecha) {
   const dow = String(diaSemanaDe(fecha));
   const { results: tareas } = await db
     .prepare('SELECT t.*, c.nombre AS quien FROM tareas t LEFT JOIN cuentas c ON c.id = t.cuenta_id WHERE t.activa = 1 ORDER BY t.id')
     .all();
   const { results: hechas } = await db.prepare('SELECT * FROM tareas_hechas WHERE fecha = ?').bind(fecha).all();
-  const { results: equipo } = await db.prepare('SELECT id, nombre FROM cuentas WHERE activa = 1 AND demo = 0 ORDER BY nombre').all();
   const pub = (t) => {
     const h = hechas.find((x) => x.tarea_id === t.id);
     return {
@@ -1850,6 +1848,14 @@ ruta('GET', /^tareas$/, { sesion: true }, async ({ db, cuenta, request }) => {
     return { ...t, cuenta_id: quien?.id ?? null, quien: quien ? `${quien.nombre} (turno)` : 'Por turnos: nadie marcó que viene' };
   };
   const deHoy = tareas.filter((t) => t.dias.split(',').includes(dow)).map(repartir).map(pub);
+  return { tareas, pub, deHoy, vienen };
+}
+
+ruta('GET', /^tareas$/, { sesion: true }, async ({ db, cuenta, request }) => {
+  const hoy = fechaChile();
+  const fecha = fechaDe(new URL(request.url).searchParams.get('fecha'), hoy);
+  const { results: equipo } = await db.prepare('SELECT id, nombre FROM cuentas WHERE activa = 1 AND demo = 0 ORDER BY nombre').all();
+  const { tareas, pub, deHoy } = await tareasDelDia(db, fecha);
   return json({
     ok: true,
     hoy,
@@ -1890,11 +1896,11 @@ ruta('POST', /^tareas\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, body, param
   return json({ ok: true });
 });
 
-ruta('POST', /^tareas\/(\d+)\/hecha$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+ruta('POST', /^tareas\/(\d+)\/hecha$/, { sesion: true }, async ({ db, env, cuenta, body, params }) => {
   const t = await db.prepare('SELECT * FROM tareas WHERE id = ? AND activa = 1').bind(Number(params[0])).first();
   if (!t) return error(404, 'No existe.');
   if (t.cuenta_id > 0 && t.cuenta_id !== cuenta.id && !tiene(cuenta, 'cuentas')) return error(403, 'Esa tarea le toca a otra persona.');
-  const fecha = fechaChile();
+  const fecha = fechaChile(reloj(env));
   if (body.hecha === false) await db.prepare('DELETE FROM tareas_hechas WHERE tarea_id = ? AND fecha = ?').bind(t.id, fecha).run();
   else
     await db
@@ -2199,6 +2205,31 @@ async function resumenSemanal(db, env, hoy) {
   return { desde: ini, hasta: fin, lineas };
 }
 
+
+/** Aseo del día: en la mañana lo que toca y en la tarde lo que falta, a cada una («si te da el tiempo»). */
+async function avisoDeTareas(db, env, hoy, momento) {
+  const { deHoy, vienen } = await tareasDelDia(db, hoy);
+  const pendientes = momento === 'tarde' ? deHoy.filter((t) => !t.hecha) : deHoy;
+  if (!pendientes.length) return { personas: 0 };
+  const porPersona = new Map();
+  const sumar = (id, t) => porPersona.set(id, [...(porPersona.get(id) ?? []), t]);
+  for (const t of pendientes) {
+    if (t.cuentaId > 0) sumar(t.cuentaId, t);
+    else if (t.cuentaId == null) for (const v of vienen) sumar(v.id, t); // «Cualquiera»: a todas las que vienen
+  }
+  for (const [id, lista] of porPersona) {
+    const items = lista.slice(0, 5).map((t) => `• ${t.texto}`);
+    if (lista.length > 5) items.push(`… y ${lista.length - 5} más`);
+    await avisar(db, env, [id], {
+      titulo: momento === 'tarde' ? 'Si te da el tiempo, todavía queda 🌿' : 'Lo de hoy en el salón, si te da el tiempo 🧹',
+      cuerpo: items.join('\n'),
+      url: '/portal/aseo',
+      tag: `aseo-${hoy}`,
+    }).catch(() => 0);
+  }
+  return { personas: porPersona.size, tareas: pendientes.length };
+}
+
 /** Se llama desde un cron externo y, por si acaso, cuando alguien abre el portal. Cada aviso sale una sola vez. */
 async function tareasProgramadas(db, env) {
   const d = reloj(env);
@@ -2206,6 +2237,9 @@ async function tareasProgramadas(db, env) {
   const hora = Number(enChile(d, { hour: 'numeric', hourCycle: 'h23' }));
   const dia = enChile(d, { weekday: 'short' });
   const hecho = {};
+  const abre = dia !== 'Sun';
+  if (abre && hora >= 10 && hora < 13 && (await reclamar(db, 'cron_aseo_am', hoy))) hecho.aseo = await avisoDeTareas(db, env, hoy, 'manana');
+  if (abre && hora >= 16 && hora < 19 && (await reclamar(db, 'cron_aseo_pm', hoy))) hecho.aseoTarde = await avisoDeTareas(db, env, hoy, 'tarde');
   if (hora >= 18 && hora < 23 && (await reclamar(db, 'cron_manana', hoy))) hecho.manana = await avisoDeManana(db, env, hoy);
   if (dia === 'Mon' && hora >= 9 && (await reclamar(db, 'cron_semana', hoy))) hecho.semana = await resumenSemanal(db, env, hoy);
   return hecho;
