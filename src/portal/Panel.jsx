@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Cake, ChevronRight, ListChecks, Plus } from 'lucide-react';
+import { CalendarClock, Cake, ChevronRight, ListChecks, Plus } from 'lucide-react';
 import { api } from './api';
 import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
 import { ICONO_MODULO } from './iconos';
@@ -20,6 +20,7 @@ const Panel = ({ cuenta }) => {
   const [resumen, setResumen] = useState(null);
   const [cumples, setCumples] = useState([]);
   const [tareas, setTareas] = useState(null);
+  const [citas, setCitas] = useState(null);
 
   useEffect(() => {
     api('cumpleanos')
@@ -27,6 +28,9 @@ const Panel = ({ cuenta }) => {
       .catch(() => {});
     api('tareas')
       .then((r) => setTareas(r.mias))
+      .catch(() => {});
+    api('agenda/nuevas')
+      .then(setCitas)
       .catch(() => {});
   }, []);
 
@@ -83,8 +87,27 @@ const Panel = ({ cuenta }) => {
         )}
       </section>
 
-      {(cumples.length > 0 || tareas?.length > 0) && (
+      {(cumples.length > 0 || tareas?.length > 0 || citas?.hoy > 0 || citas?.nuevas?.length > 0) && (
         <section className="avisos-hoy">
+          {(citas?.hoy > 0 || citas?.nuevas?.length > 0) && (
+            <Link to="/portal/agenda" className={`aviso-hoy ${citas.nuevas.length ? 'is-nuevo' : ''}`}>
+              <CalendarClock strokeWidth={1.6} />
+              <span>
+                <strong>
+                  {citas.nuevas.length
+                    ? `¡Te agendaron ${citas.nuevas.length === 1 ? 'una hora nueva' : `${citas.nuevas.length} horas nuevas`}!`
+                    : `Hoy tienes ${citas.hoy} ${citas.hoy === 1 ? 'clienta' : 'clientas'}`}
+                </strong>
+                <small>
+                  {citas.nuevas
+                    .slice(0, 3)
+                    .map((c) => `${c.clienta} · ${new Date(`${c.fecha}T12:00:00`).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric' })} ${c.hora}`)
+                    .join(' · ')}
+                </small>
+              </span>
+              <ChevronRight strokeWidth={1.6} />
+            </Link>
+          )}
           {tareas?.length > 0 && (
             <Link to="/portal/aseo" className="aviso-hoy">
               <ListChecks strokeWidth={1.6} />

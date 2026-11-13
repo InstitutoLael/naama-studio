@@ -261,10 +261,30 @@ const TABLAS = [
     canjeada TEXT,
     canjeada_por TEXT
   )`,
+  // Agenda interna: horas por persona (dos pueden atender a la vez).
+  `CREATE TABLE IF NOT EXISTS citas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fecha TEXT NOT NULL,
+    hora TEXT NOT NULL,
+    minutos INTEGER NOT NULL,
+    cuenta_id INTEGER NOT NULL,
+    clienta TEXT NOT NULL,
+    clienta_id INTEGER,
+    telefono TEXT,
+    servicio TEXT,
+    nota TEXT,
+    estado TEXT NOT NULL DEFAULT 'agendada',
+    creada_por INTEGER,
+    por TEXT,
+    creado TEXT NOT NULL,
+    visto INTEGER NOT NULL DEFAULT 0,
+    recordada TEXT
+  )`,
+  `CREATE INDEX IF NOT EXISTS citas_fecha ON citas (fecha, cuenta_id)`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v7';
+export const HUELLA = 'v8';
 
 let listo = false;
 

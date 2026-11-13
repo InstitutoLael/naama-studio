@@ -663,3 +663,63 @@ test('gift cards: crear con código, canjear una sola vez; metas y reseñas', as
   assert.equal((await admin.pedir('plata/margen')).status, 200);
   assert.equal((await gaby.pedir('plata/margen')).status, 403);
 });
+
+test('agenda: horas por persona, choques, avisos de citas nuevas y alergias a la vista', async () => {
+  const admin = await configurar();
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '15.1.1.1');
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '15.1.1.2');
+  const ids = Object.fromEntries((await admin.pedir('cuentas')).data.cuentas.map((x) => [x.nombre, x.id]));
+  const manana = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date(Date.now() + 86400000));
+  await admin.post('clientas', { contactos: [{ nombre: 'Rosita Jara', telefono: '+56911112222' }], origen: 'contacto' });
+  const cid = (await admin.pedir('clientas')).data.clientas[0].id;
+  await admin.post(`clientas/${cid}/ficha`, { alergias: 'Amoníaco' });
+
+  // Diego agenda a Gaby y a Kata a la misma hora: se puede, son personas distintas.
+  let r = await admin.post('agenda', { fecha: manana, hora: '15:00', cuentaId: ids.Gaby, clienta: 'Rosita Jara', servicio: 'Manos' });
+  assert.equal(r.status, 201);
+  r = await admin.post('agenda', { fecha: manana, hora: '15:00', cuentaId: ids.Kata, clienta: 'Ely', servicio: 'Pedicure' });
+  assert.equal(r.status, 201);
+  // Pero no dos a la vez con Gaby.
+  r = await admin.post('agenda', { fecha: manana, hora: '15:30', cuentaId: ids.Gaby, clienta: 'Otra', servicio: 'Bozo' });
+  assert.equal(r.status, 409);
+  assert.match(r.data.error, /Rosita/);
+
+  // Gaby ve el aviso de hora nueva; al abrir la agenda queda vista.
+  let n = await gaby.pedir('agenda/nuevas');
+  assert.equal(n.data.nuevas.length, 1);
+  const ag = await gaby.pedir(`agenda?fecha=${manana}`);
+  assert.equal(ag.data.citas.length, 2);
+  const suya = ag.data.citas.find((c) => c.clienta === 'Rosita Jara');
+  assert.equal(suya.alergias, 'Amoníaco');
+  assert.equal(suya.minutos, 60);
+  assert.equal(suya.telefono, undefined, 'Gaby no ve números');
+  n = await gaby.pedir('agenda/nuevas');
+  assert.equal(n.data.nuevas.length, 0);
+  // Admin sí ve el número (para el recordatorio).
+  assert.equal((await admin.pedir(`agenda?fecha=${manana}`)).data.citas.find((c) => c.clienta === 'Rosita Jara').telefono, '+56911112222');
+
+  // Kata solo agenda en su propia columna.
+  assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', cuentaId: ids.Gaby, clienta: 'X' })).status, 403);
+  assert.equal((await kata.post('agenda', { fecha: manana, hora: '17:00', clienta: 'Mía' })).status, 201);
+  await kata.post(`agenda/${suya.id}`, { estado: 'no-vino' }).then((x) => assert.equal(x.status, 403));
+  await gaby.post(`agenda/${suya.id}`, { estado: 'no-vino' });
+  await admin.post('agenda', { fecha: manana, hora: '18:00', cuentaId: ids.Gaby, clienta: 'rosita jara' });
+  const otra = (await admin.pedir(`agenda?fecha=${manana}`)).data.citas.find((c) => c.hora === '18:00');
+  assert.equal(otra.faltas, 1);
+});
+
+test('aseo por turnos: se reparte entre las que marcaron que vienen', async () => {
+  const admin = await configurar();
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '16.1.1.1');
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '16.1.1.2');
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date());
+  await gaby.post('disponibilidad', { fecha: hoy, estado: 'todo' });
+  await kata.post('disponibilidad', { fecha: hoy, estado: 'manana' });
+  const todos = [0, 1, 2, 3, 4, 5, 6];
+  await admin.post('tareas', { lote: [{ texto: 'Barrer', cuentaId: -1, dias: todos }, { texto: 'Toallas', cuentaId: -1, dias: todos }] });
+  const g = await gaby.pedir('tareas');
+  const k = await kata.pedir('tareas');
+  assert.equal(g.data.mias.length + k.data.mias.length, 2);
+  assert.equal(g.data.mias.length, 1, 'una para cada una');
+  assert.match(g.data.mias[0].quien, /Gaby \(turno\)/);
+});

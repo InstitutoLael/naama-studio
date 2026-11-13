@@ -132,3 +132,16 @@ export const calcular = ({ medio, monto, propina = 0, comision }) => {
   const honorario = neto * comision + propina;
   return { neto: Math.round(neto), honorario: Math.round(honorario), naama: Math.round(neto - neto * comision) };
 };
+
+/** Cuánto suele durar un servicio (para proponer el largo de la cita; siempre se puede cambiar). */
+const DURACION = [
+  [/mechas|deco|balayage|alisado|keratina/i, 180],
+  [/color|tinte|baño/i, 120],
+  [/pack|reductiv|maquillaje|peinado/i, 90],
+  [/pedicure|pies|podolog|facial|limpieza|masaje|drenaje|pestaña/i, 60],
+  [/manos|esmalt|uña|uñas|tratamiento|nutritivo|brushing/i, 60],
+  [/corte/i, 45],
+  [/bozo|axila|mentón|menton|cejas|retiro|inyecc|hilos|vitamina/i, 30],
+  [/pierna|bikini|depil|espalda|brazo|glúteo|gluteo/i, 45],
+];
+export const minutosDe = (servicio) => DURACION.find(([r]) => r.test(servicio ?? ''))?.[1] ?? 60;
