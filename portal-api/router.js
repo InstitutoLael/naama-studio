@@ -571,7 +571,7 @@ ruta('POST', /^insumos$/, { sesion: true }, async ({ db, cuenta, body }) => {
 });
 
 /** «Anotar lo que usé»: un servicio y uno o más productos con lo que marcó la pesa. */
-ruta('POST', /^insumos\/uso$/, { sesion: true }, async ({ db, cuenta, body }) => {
+ruta('POST', /^insumos\/uso$/, { sesion: true }, async ({ db, env, cuenta, body }) => {
   const items = Array.isArray(body.items) ? body.items.slice(0, 15) : [];
   const servicio = texto(body.servicio, 80) || null;
   if (!items.length) return error(400, 'Elige al menos un producto.');
@@ -599,7 +599,8 @@ ruta('POST', /^insumos\/uso$/, { sesion: true }, async ({ db, cuenta, body }) =>
     ]),
   );
   await registrar(db, cuenta.id, 'uso_insumos', { servicio, productos: limpios.length });
-  return json({ ok: true, registro });
+  const enLista = await revisarMinimos(db, env, ids, cuenta).catch(() => 0);
+  return json({ ok: true, registro, enLista });
 });
 
 /** Llegó una compra: suma envases al stock. */
@@ -620,7 +621,7 @@ ruta('POST', /^insumos\/(\d+)\/llego$/, { sesion: true }, async ({ db, cuenta, b
 });
 
 /** Vendí: descuenta unidades del stock y anota la venta (el total solo lo ven quienes ven plata). */
-ruta('POST', /^insumos\/(\d+)\/venta$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+ruta('POST', /^insumos\/(\d+)\/venta$/, { sesion: true }, async ({ db, env, cuenta, body, params }) => {
   const id = Number(params[0]);
   const p = await db.prepare('SELECT * FROM productos WHERE id = ? AND activo = 1').bind(id).first();
   if (!p) return error(404, 'No existe ese producto.');
@@ -638,11 +639,12 @@ ruta('POST', /^insumos\/(\d+)\/venta$/, { sesion: true }, async ({ db, cuenta, b
       .bind(id, 'venta', -unidades * p.tamano, `${unidades} vendido(s)`, cuenta.id, ahora()),
   ]);
   await registrar(db, cuenta.id, 'venta', { id, unidades });
+  await revisarMinimos(db, env, [id], cuenta).catch(() => 0);
   return json({ ok: true });
 });
 
 /** Corregir el stock contando lo que hay (permiso «insumos»). */
-ruta('POST', /^insumos\/(\d+)\/ajuste$/, { permiso: 'insumos' }, async ({ db, cuenta, body, params }) => {
+ruta('POST', /^insumos\/(\d+)\/ajuste$/, { permiso: 'insumos' }, async ({ db, env, cuenta, body, params }) => {
   const id = Number(params[0]);
   const p = await db.prepare('SELECT * FROM productos WHERE id = ?').bind(id).first();
   if (!p) return error(404, 'No existe ese producto.');
@@ -655,6 +657,25 @@ ruta('POST', /^insumos\/(\d+)\/ajuste$/, { permiso: 'insumos' }, async ({ db, cu
       .prepare('INSERT INTO movimientos (producto_id, tipo, cantidad, nota, cuenta_id, ts) VALUES (?, ?, ?, ?, ?, ?)')
       .bind(id, 'ajuste', nuevo - p.stock, 'conteo', cuenta.id, ahora()),
   ]);
+  await revisarMinimos(db, env, [id], cuenta).catch(() => 0);
+  return json({ ok: true });
+});
+
+/** «Se acabó»: cualquiera lo marca en cero; queda urgente en la lista de compras y avisa. */
+ruta('POST', /^insumos\/(\d+)\/se-acabo$/, { sesion: true }, async ({ db, env, cuenta, params }) => {
+  const id = Number(params[0]);
+  const p = await db.prepare('SELECT * FROM productos WHERE id = ? AND activo = 1').bind(id).first();
+  if (!p) return error(404, 'No existe ese producto.');
+  await db.batch([
+    db.prepare('UPDATE productos SET stock = 0 WHERE id = ?').bind(id),
+    db
+      .prepare('INSERT INTO movimientos (producto_id, tipo, cantidad, nota, cuenta_id, ts) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(id, 'ajuste', -p.stock, 'se acabó', cuenta.id, ahora()),
+  ]);
+  // Si ya estaba pedido, lo marca urgente.
+  await db.prepare(`UPDATE pedidos SET urgente = 1 WHERE producto_id = ? AND estado = 'pedido'`).bind(id).run();
+  await revisarMinimos(db, env, [id], cuenta, { urgente: true }).catch(() => 0);
+  await registrar(db, cuenta.id, 'se_acabo', { id });
   return json({ ok: true });
 });
 
@@ -806,7 +827,7 @@ ruta('GET', /^compras$/, { sesion: true }, async ({ db, cuenta }) => {
   return json({ ok: true, puedeResolver: tiene(cuenta, 'compras'), verCostos: ver, pedidos: results.map((p) => pedidoPublico(p, ver)) });
 });
 
-ruta('POST', /^compras$/, { sesion: true }, async ({ db, cuenta, body }) => {
+ruta('POST', /^compras$/, { sesion: true }, async ({ db, env, cuenta, body }) => {
   let productoId = body.productoId ? Number(body.productoId) : null;
   let t = texto(body.texto, 80);
   if (productoId) {
@@ -824,6 +845,13 @@ ruta('POST', /^compras$/, { sesion: true }, async ({ db, cuenta, body }) => {
     .bind(productoId, t, texto(body.cantidad, 30) || null, body.urgente ? 1 : 0, cuenta.id, ahora())
     .run();
   await registrar(db, cuenta.id, 'pedir_compra', { productoId });
+  const destino = (await conPermiso(db, 'compras')).filter((id) => id !== cuenta.id);
+  await avisar(db, env, destino, {
+    titulo: `${cuenta.nombre.split(' ')[0]} pidió comprar algo${body.urgente ? ' (urgente)' : ''} 🛒`,
+    cuerpo: `${t}${body.cantidad ? ` · ${texto(body.cantidad, 30)}` : ''}`,
+    url: '/portal/compras',
+    tag: 'compras',
+  }).catch(() => 0);
   return json({ ok: true }, 201);
 });
 
@@ -2089,6 +2117,53 @@ async function avisarCita(db, env, citaId, quienAnota) {
   });
 }
 
+
+
+/* ── Avisos de compras: cuando algo se acaba ─────────────── */
+
+/** Cuentas activas que tienen un permiso (para avisarles). */
+async function conPermiso(db, permiso) {
+  const { results } = await db.prepare('SELECT id, rol, extras FROM cuentas WHERE activa = 1 AND demo = 0').all();
+  return results.filter((c) => tiene(c, permiso)).map((c) => c.id);
+}
+
+const nombreProducto = (p) => [p.nombre, p.variante, p.marca].filter(Boolean).join(' · ');
+
+/**
+ * Revisa si los productos quedaron bajo su mínimo. Si no estaban ya en la lista de compras,
+ * los agrega solos y les avisa a quienes compran.
+ */
+async function revisarMinimos(db, env, ids, cuenta, { urgente = false, motivo = 'queda poco' } = {}) {
+  if (!ids.length) return 0;
+  const { results } = await db
+    .prepare(`SELECT * FROM productos WHERE activo = 1 AND id IN (${ids.map(() => '?').join(',')})`)
+    .bind(...ids)
+    .all();
+  const nuevos = [];
+  for (const p of results) {
+    const bajo = p.stock <= 0 || (p.minimo > 0 && p.stock <= p.minimo * p.tamano);
+    if (!bajo) continue;
+    const ya = await db.prepare(`SELECT id FROM pedidos WHERE producto_id = ? AND estado = 'pedido'`).bind(p.id).first();
+    if (ya) continue;
+    const seAcabo = p.stock <= 0;
+    await db
+      .prepare('INSERT INTO pedidos (producto_id, texto, cantidad, urgente, pedido_por, ts) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(p.id, nombreProducto(p), null, urgente || seAcabo ? 1 : 0, cuenta.id, ahora())
+      .run();
+    nuevos.push({ nombre: nombreProducto(p), seAcabo });
+  }
+  if (!nuevos.length) return 0;
+  const destino = (await conPermiso(db, 'compras')).filter((id) => id !== cuenta.id);
+  const primero = cuenta.nombre.split(' ')[0];
+  const titulo = nuevos.some((n) => n.seAcabo) ? 'Se acabó algo en el salón 🛒' : 'Se está acabando algo 🛒';
+  await avisar(db, env, destino, {
+    titulo,
+    cuerpo: `${nuevos.map((n) => `${n.nombre}${n.seAcabo ? ' (se acabó)' : ''}`).join(', ')}\nYa quedó en la lista de compras${motivo ? ` · ${primero}` : ''}.`,
+    url: '/portal/compras',
+    tag: 'compras',
+  }).catch(() => 0);
+  return nuevos.length;
+}
 
 /* ── agenda interna (por persona) ───────────────────────── */
 

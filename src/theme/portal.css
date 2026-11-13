@@ -728,6 +728,8 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .pildora--venta { background: rgba(197, 166, 117, 0.45); }
 .accion-grande--fuerte { background: var(--cacao); color: var(--crema); }
 .accion-grande--fuerte svg { color: var(--caramel-300); }
+.accion-grande--alerta { background: #f6e4dc; color: #8c3a24; }
+.accion-grande--alerta svg { color: #a65d45; }
 .fila-dato--boton { width: 100%; text-align: left; }
 .fila-dato--boton strong { font-weight: 600; }
 .texto-alerta { color: var(--arcilla); font-weight: 600; }

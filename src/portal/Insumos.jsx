@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Camera, Check, ChevronLeft, ChevronRight, Copy, Minus, Package, Plus, Scale, ShoppingBag, Tag, Trash2 } from 'lucide-react';
+import { Camera, Check, ChevronLeft, ChevronRight, Copy, Minus, Package, PackageX, Plus, Scale, ShoppingBag, Tag, Trash2 } from 'lucide-react';
 import { SearchIcon } from '../components/common/Icons';
 import { servicesData } from '../data/servicesData';
 import { api, post } from './api';
@@ -576,7 +576,17 @@ const FichaProducto = ({ p, verCostos, puedeEditar, onUsar, onEditar, onOtroTono
           <Plus strokeWidth={1.6} /> Llegó compra
         </button>
         <button type="button" className="accion-grande" onClick={() => accion('compras', { productoId: p.id }, `${nombreCompleto(p)} quedó en la lista de compras.`)}>
-          <ShoppingBag strokeWidth={1.6} /> Pedir que compren
+          <ShoppingBag strokeWidth={1.6} /> Queda poco
+        </button>
+        <button
+          type="button"
+          className="accion-grande accion-grande--alerta"
+          onClick={() =>
+            window.confirm(`¿Se acabó ${nombreCompleto(p)}? Queda urgente en la lista de compras y les avisa.`) &&
+            accion(`insumos/${p.id}/se-acabo`, {}, `Listo: ${nombreCompleto(p)} quedó urgente en la lista de compras.`)
+          }
+        >
+          <PackageX strokeWidth={1.6} /> Se acabó
         </button>
         <button type="button" className="accion-grande" onClick={onOtroTono}>
           <Copy strokeWidth={1.6} /> Agregar otro tono
