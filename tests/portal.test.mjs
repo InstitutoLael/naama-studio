@@ -367,6 +367,8 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
           { id: 2, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 10000, fee_details: [{ amount: 350 }], transaction_details: { net_received_amount: 9650 }, money_release_status: 'released', payment_type_id: 'debit_card' },
           { id: 3, status: 'rejected', date_created: ahora, transaction_amount: 5000, fee_details: [] },
           { id: 4, status: 'approved', collector_id: 555, date_created: ahora, date_approved: ahora, transaction_amount: 14990, fee_details: [], payment_type_id: 'account_money' },
+          { id: 6, status: 'approved', operation_type: 'account_fund', collector_id: 99, date_created: ahora, date_approved: ahora, transaction_amount: 20000, fee_details: [], payment_type_id: 'bank_transfer', money_release_status: 'released' },
+          { id: 7, status: 'approved', collector_id: 555, date_created: ahora, date_approved: ahora, transaction_amount: 900000, description: 'Arriendo local', fee_details: [], payment_type_id: 'account_money' },
           { id: 5, status: 'authorized', collector_id: 99, date_created: ahora, transaction_amount: 5500, fee_details: [], payment_type_id: 'account_money' },
         ],
       }),
@@ -376,16 +378,20 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
   await admin.post('plata/compromisos', { nombre: 'Arriendo', monto: '900.000', dia: 28 });
   const r = await admin.pedir('plata');
   assert.equal(r.data.conectado, true);
-  assert.equal(r.data.hoyMP.bruto, 40000);
+  assert.equal(r.data.hoyMP.bruto, 60000);
   assert.equal(r.data.hoyMP.comision, 1400);
-  assert.equal(r.data.hoyMP.neto, 38600);
+  assert.equal(r.data.hoyMP.neto, 58600);
   assert.equal(r.data.porLiberar.total, 28950);
-  assert.equal(r.data.disponible, 600000);
+  assert.equal(r.data.disponible, 1500000, 'el arriendo pagado por MP se marca solo');
+  assert.equal(r.data.compromisos[0].pagado, true);
+  assert.equal(r.data.salidas.length, 2);
   assert.equal(r.data.porDia.length, 14);
-  assert.deepEqual(r.data.ultimos.map((p) => p.id).sort(), [1, 2]);
+  assert.deepEqual(r.data.ultimos.map((p) => p.id).sort(), [1, 2, 6]);
   const otra = await admin.post('plata/compromisos', { nombre: 'arriendo', monto: '900.000', dia: 28 });
   assert.equal(otra.status, 409);
   const arriendo = r.data.compromisos[0];
+  await admin.post(`plata/compromisos/${arriendo.id}`, { pagado: false });
+  assert.equal((await admin.pedir('plata')).data.disponible, 600000, 'si lo desmarcan no vuelve a marcarse solo');
   await admin.post(`plata/compromisos/${arriendo.id}`, { pagado: true });
   assert.equal((await admin.pedir('plata')).data.disponible, 1500000);
 });
