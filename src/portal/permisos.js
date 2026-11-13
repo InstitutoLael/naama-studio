@@ -8,7 +8,7 @@ export const PERMISOS = {
   servicios: 'Registrar servicios en la planilla',
   compras: 'Aprobar y marcar compras',
   insumos: 'Administrar el inventario',
-  clientas: 'Ver todas las clientas nuevas',
+  clientas: 'Ver los números de las clientas e importar contactos',
   legal: 'Legal, impuestos y pagos',
 };
 
@@ -25,12 +25,12 @@ export const ROLES = {
   },
   socia: {
     nombre: 'Socia',
-    detalle: 'Su agenda, sus clientas, insumos y pedidos de compra. Sin plata ni caja.',
+    detalle: 'Su agenda, sube clientas, insumos y compras. Sin plata, caja ni números de clientas.',
     permisos: [],
   },
   equipo: {
     nombre: 'Equipo',
-    detalle: 'Su agenda, sus clientas, insumos y pedidos de compra.',
+    detalle: 'Su agenda, sube clientas, insumos y compras. Sin números de clientas.',
     permisos: [],
   },
 };
@@ -48,7 +48,7 @@ export const puede = (cuenta, permiso) => Boolean(cuenta?.permisos?.includes(per
 // Módulos del panel. `permiso: null` = lo tienen todas las cuentas.
 export const MODULOS = [
   { id: 'disponibilidad', nombre: 'Mi disponibilidad', bajada: 'Tus días y horas libres', permiso: null },
-  { id: 'clientas', nombre: 'Clientas nuevas', bajada: 'Anota nombre y número', permiso: null },
+  { id: 'clientas', nombre: 'Clientas', bajada: 'Sube contactos y anota quién vino', permiso: null, listo: true },
   { id: 'insumos', nombre: 'Insumos', bajada: 'Lo que usaste y lo que queda', permiso: null },
   { id: 'compras', nombre: 'Lista de compras', bajada: 'Pide lo que falta', permiso: null },
   { id: 'mi-mes', nombre: 'Mi mes', bajada: 'Tus servicios y tu honorario', permiso: null },

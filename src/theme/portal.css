@@ -259,3 +259,89 @@ a.modulo .modulo__n { color: var(--caramel-300); }
   html, body, #root, .portal { height: auto !important; overflow: visible !important; }
   .portal__barra { position: static; }
 }
+
+/* ── Clientas ── */
+.panel__botones { display: flex; flex-wrap: wrap; gap: 10px; }
+.clienta { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; }
+.clienta__fila { grid-template-columns: 44px 1fr auto; }
+.clienta__acciones { display: flex; align-items: center; gap: 8px; }
+.clienta__wa {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  color: var(--ink-2);
+  transition: border-color 0.3s, color 0.3s;
+}
+.clienta__wa:hover { border-color: var(--ink); color: var(--ink); }
+.clienta__wa svg { width: 18px; height: 18px; }
+.clienta__vino { min-height: 44px; min-width: 124px; justify-content: center; gap: 6px; white-space: nowrap; }
+.clienta__vino svg { width: 14px; height: 14px; }
+@media (max-width: 560px) {
+  .clienta { grid-template-columns: 1fr; gap: 0; }
+  .clienta__fila { border-bottom-left-radius: 0; border-bottom-right-radius: 0; border-bottom: 0; }
+  .clienta__acciones {
+    justify-content: flex-end;
+    padding: 0 14px 12px;
+    border: 1px solid var(--line);
+    border-top: 0;
+    border-radius: 0 0 14px 14px;
+  }
+}
+
+.aviso {
+  position: fixed;
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 600;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  padding: 14px 22px;
+  border-radius: 999px;
+  background: var(--cacao);
+  color: var(--paper);
+  font-size: 0.88rem;
+  box-shadow: 0 12px 40px rgba(23, 17, 14, 0.25);
+  animation: hoja-sube 0.4s var(--ease-out);
+}
+
+.subir { display: grid; gap: 12px; justify-items: center; text-align: center; }
+.subir__agenda { width: 100%; min-height: 72px; font-size: 0.85rem; }
+.subir__ayuda { font-size: 0.88rem; }
+.subir__o {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.subir__o::before, .subir__o::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.subir__antes { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--ink-3); }
+.subir__archivo { cursor: pointer; width: 100%; }
+
+.pasos-ayuda { display: grid; gap: 10px; padding-left: 20px; list-style: decimal; font-size: 0.92rem; color: var(--ink-2); }
+.pasos-ayuda em { font-style: normal; font-weight: 600; color: var(--ink); }
+
+.importar__marcar { display: flex; gap: 20px; }
+.importar { display: grid; gap: 2px; max-height: 46vh; overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--line); }
+.importar__fila { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: center; padding: 10px 2px; border-bottom: 1px solid var(--line); }
+.importar__fila input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--cacao); }
+.importar__fila.is-mala { opacity: 0.5; }
+.importar__datos { display: grid; gap: 2px; min-width: 0; }
+.importar__nombre { width: 100%; border: 0; background: transparent; font-family: var(--font-display); font-size: 1.08rem; padding: 2px 0; border-bottom: 1px dashed transparent; }
+.importar__nombre:focus { outline: none; border-bottom-color: var(--caramel-600); }
+.importar__meta { font-size: 0.74rem; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hoja__acciones--pegadas { position: sticky; bottom: -28px; padding: 12px 0; background: var(--paper); }
+
+.ficha__resumen { font-size: 0.95rem; }
+.ficha__otra { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; }
+.grupo__titulo { margin-bottom: 8px; font-size: var(--fs-eyebrow); font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-2); }
+.ficha__visitas { display: grid; }
+.ficha__visitas li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+.ficha__visitas small { color: var(--ink-3); }

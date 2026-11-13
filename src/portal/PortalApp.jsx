@@ -5,6 +5,7 @@ import { api, post } from './api';
 import { Configurar, CrearClave, Entrar } from './Acceso';
 import Panel from './Panel';
 import Cuentas from './Cuentas';
+import Clientas from './Clientas';
 import { puede } from './permisos';
 import '../theme/booking.css';
 import '../theme/portal.css';
@@ -80,6 +81,7 @@ const PortalApp = () => {
     contenido = (
       <Routes>
         <Route index element={<Panel cuenta={cuenta} />} />
+        <Route path="clientas" element={<Clientas />} />
         <Route path="cuentas" element={puede(cuenta, 'cuentas') ? <Cuentas yo={cuenta} /> : <Navigate to="/portal" replace />} />
         <Route path="*" element={<Navigate to="/portal" replace />} />
       </Routes>

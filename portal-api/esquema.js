@@ -34,10 +34,30 @@ const TABLAS = [
     detalle TEXT,
     ts TEXT NOT NULL
   )`,
+  `CREATE TABLE IF NOT EXISTS clientas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nombre TEXT NOT NULL,
+    telefono TEXT NOT NULL UNIQUE,
+    nota TEXT,
+    origen TEXT NOT NULL,
+    creada TEXT NOT NULL,
+    creada_por INTEGER,
+    ultima_visita TEXT,
+    visitas INTEGER NOT NULL DEFAULT 0,
+    activa INTEGER NOT NULL DEFAULT 1
+  )`,
+  `CREATE TABLE IF NOT EXISTS visitas (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    clienta_id INTEGER NOT NULL,
+    fecha TEXT NOT NULL,
+    cuenta_id INTEGER,
+    ts TEXT NOT NULL,
+    UNIQUE (clienta_id, fecha)
+  )`,
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v1';
+export const HUELLA = 'v2';
 
 let listo = false;
 

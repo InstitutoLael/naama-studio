@@ -4,6 +4,7 @@
 import { asegurarEsquema } from './esquema.js';
 import { claveTemporal, hashClave, igualSeguro, nuevoToken, sha256, verificarClave } from './seguridad.js';
 import { PERMISOS, ROL_IDS, permisosDe } from '../src/portal/permisos.js';
+import { normalizarTelefono, prepararContactos } from '../src/portal/contactos.js';
 
 const COOKIE = 'naama_sesion';
 const DIAS_SESION = 30;
@@ -286,6 +287,140 @@ ruta('POST', /^cuentas\/(\d+)\/restablecer$/, { permiso: 'cuentas' }, async ({ d
   ]);
   await registrar(db, cuenta.id, 'restablecer_clave', { id });
   return json({ ok: true, claveTemporal: temporal });
+});
+
+/* ── Clientas ───────────────────────────────────────────────
+   Todas las cuentas pueden subir clientas y anotar visitas.
+   Solo quien tiene el permiso «clientas» (Administración y Dueña) ve los números. */
+
+const tiene = (cuenta, permiso) => permisosDe(cuenta.rol, JSON.parse(cuenta.extras || '[]')).includes(permiso);
+
+const diasEntre = (desde, hasta) => Math.round((Date.parse(`${hasta}T12:00:00Z`) - Date.parse(`${desde}T12:00:00Z`)) / 86400000);
+
+const clientaPublica = (c, verNumero, hoy) => ({
+  id: c.id,
+  nombre: c.nombre,
+  nota: c.nota,
+  visitas: c.visitas,
+  ultimaVisita: c.ultima_visita,
+  diasSinVenir: c.ultima_visita ? diasEntre(c.ultima_visita, hoy) : null,
+  creada: c.creada,
+  ...(verNumero ? { telefono: c.telefono, origen: c.origen } : {}),
+});
+
+const MAX_IMPORTAR = 1000;
+const TANDA = 40; // D1 acepta ~90 variables por consulta: insertamos de a una fila, en tandas de 40 consultas
+
+ruta('GET', /^clientas$/, { sesion: true }, async ({ db, cuenta }) => {
+  const { results } = await db.prepare('SELECT * FROM clientas WHERE activa = 1 ORDER BY nombre COLLATE NOCASE').all();
+  const hoy = fechaChile();
+  const ver = tiene(cuenta, 'clientas');
+  return json({ ok: true, hoy, verNumeros: ver, clientas: results.map((c) => clientaPublica(c, ver, hoy)) });
+});
+
+/** Sube una o varias clientas. Body: { contactos: [{ nombre, telefono }], origen }. Se limpian y se saltan las repetidas. */
+ruta('POST', /^clientas$/, { sesion: true }, async ({ db, cuenta, body }) => {
+  const lista = Array.isArray(body.contactos) ? body.contactos : [];
+  if (!lista.length) return error(400, 'No hay contactos para subir.');
+  const origen = ['contacto', 'archivo', 'manual'].includes(body.origen) ? body.origen : 'manual';
+  if (lista.length > 1 && !tiene(cuenta, 'clientas')) return error(403, 'Solo Administración puede importar listas de contactos.');
+  if (lista.length > MAX_IMPORTAR) return error(400, `Máximo ${MAX_IMPORTAR} contactos por vez.`);
+
+  const preparados = prepararContactos(lista.map((c) => ({ original: c.nombre, telefono: c.telefono })));
+  // Si viene un nombre ya editado a mano, se respeta tal cual (solo se recorta).
+  preparados.forEach((p, i) => {
+    if (lista[i].editado && String(lista[i].nombre ?? '').trim()) {
+      p.nombre = String(lista[i].nombre).trim().replace(/\s+/g, ' ').slice(0, 60);
+      p.valido = Boolean(p.telefono);
+    }
+    if (lista[i].nota !== undefined) p.nota = String(lista[i].nota ?? '').trim().slice(0, 80);
+  });
+  const validos = preparados.filter((p) => p.valido && !p.repetido);
+  const invalidas = preparados.filter((p) => !p.valido).length;
+
+  // ¿Cuáles ya existen? Se consulta por tandas para no pasar el límite de variables de D1.
+  const existentes = new Map();
+  for (let i = 0; i < validos.length; i += 80) {
+    const tanda = validos.slice(i, i + 80).map((p) => p.telefono);
+    const { results } = await db
+      .prepare(`SELECT id, nombre, telefono FROM clientas WHERE telefono IN (${tanda.map(() => '?').join(',')})`)
+      .bind(...tanda)
+      .all();
+    results.forEach((r) => existentes.set(r.telefono, r));
+  }
+  const nuevos = validos.filter((p) => !existentes.has(p.telefono));
+  const t = ahora();
+  for (let i = 0; i < nuevos.length; i += TANDA) {
+    await db.batch(
+      nuevos.slice(i, i + TANDA).map((p) =>
+        db
+          .prepare('INSERT INTO clientas (nombre, telefono, nota, origen, creada, creada_por) VALUES (?, ?, ?, ?, ?, ?) ON CONFLICT(telefono) DO NOTHING')
+          .bind(p.nombre, p.telefono, p.nota || null, origen, t, cuenta.id),
+      ),
+    );
+  }
+  await registrar(db, cuenta.id, 'subir_clientas', { nuevas: nuevos.length, origen });
+  const repetidas = validos.length - nuevos.length + preparados.filter((p) => p.repetido).length;
+  // A quien no ve números, solo se le dice el nombre con que ya estaba guardada.
+  const yaEstaban = validos.filter((p) => existentes.has(p.telefono)).map((p) => existentes.get(p.telefono).nombre);
+  return json({ ok: true, creadas: nuevos.length, repetidas, invalidas, yaEstaban: yaEstaban.slice(0, 20) }, 201);
+});
+
+ruta('POST', /^clientas\/(\d+)\/visita$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  const id = Number(params[0]);
+  const c = await db.prepare('SELECT id FROM clientas WHERE id = ? AND activa = 1').bind(id).first();
+  if (!c) return error(404, 'No existe esa clienta.');
+  const hoy = fechaChile();
+  const fecha = /^\d{4}-\d{2}-\d{2}$/.test(body.fecha ?? '') ? body.fecha : hoy;
+  if (fecha > hoy) return error(400, 'La fecha no puede ser futura.');
+  const r = await db
+    .prepare('INSERT INTO visitas (clienta_id, fecha, cuenta_id, ts) VALUES (?, ?, ?, ?) ON CONFLICT(clienta_id, fecha) DO NOTHING')
+    .bind(id, fecha, cuenta.id, ahora())
+    .run();
+  if (r.meta.changes) {
+    await db
+      .prepare(
+        `UPDATE clientas SET visitas = (SELECT COUNT(*) FROM visitas WHERE clienta_id = ?),
+         ultima_visita = (SELECT MAX(fecha) FROM visitas WHERE clienta_id = ?) WHERE id = ?`,
+      )
+      .bind(id, id, id)
+      .run();
+    await registrar(db, cuenta.id, 'visita', { clienta: id, fecha });
+  }
+  const fila = await db.prepare('SELECT * FROM clientas WHERE id = ?').bind(id).first();
+  return json({ ok: true, yaEstaba: !r.meta.changes, clienta: clientaPublica(fila, tiene(cuenta, 'clientas'), hoy) });
+});
+
+ruta('GET', /^clientas\/(\d+)\/visitas$/, { sesion: true }, async ({ db, params }) => {
+  const { results } = await db
+    .prepare(
+      `SELECT v.fecha, c.nombre AS anotada_por FROM visitas v LEFT JOIN cuentas c ON c.id = v.cuenta_id
+       WHERE v.clienta_id = ? ORDER BY v.fecha DESC LIMIT 50`,
+    )
+    .bind(Number(params[0]))
+    .all();
+  return json({ ok: true, visitas: results.map((v) => ({ fecha: v.fecha, anotadaPor: v.anotada_por })) });
+});
+
+ruta('POST', /^clientas\/(\d+)$/, { permiso: 'clientas' }, async ({ db, cuenta, body, params }) => {
+  const id = Number(params[0]);
+  const c = await db.prepare('SELECT * FROM clientas WHERE id = ?').bind(id).first();
+  if (!c) return error(404, 'No existe esa clienta.');
+  const nombre = body.nombre !== undefined ? String(body.nombre).trim().replace(/\s+/g, ' ').slice(0, 60) : c.nombre;
+  const nota = body.nota !== undefined ? String(body.nota ?? '').trim().slice(0, 80) : c.nota;
+  const activa = body.activa !== undefined ? (body.activa ? 1 : 0) : c.activa;
+  let telefono = c.telefono;
+  if (body.telefono !== undefined) {
+    telefono = normalizarTelefono(body.telefono);
+    if (!telefono) return error(400, 'El número no es válido.');
+    const otra = await db.prepare('SELECT id FROM clientas WHERE telefono = ? AND id != ?').bind(telefono, id).first();
+    if (otra) return error(409, 'Ese número ya es de otra clienta.');
+  }
+  if (!nombre) return error(400, 'El nombre no puede quedar vacío.');
+  await db.prepare('UPDATE clientas SET nombre = ?, nota = ?, telefono = ?, activa = ? WHERE id = ?').bind(nombre, nota, telefono, activa, id).run();
+  await registrar(db, cuenta.id, 'editar_clienta', { id, activa });
+  const fila = await db.prepare('SELECT * FROM clientas WHERE id = ?').bind(id).first();
+  return json({ ok: true, clienta: clientaPublica(fila, true, fechaChile()) });
 });
 
 /* ── entrada ────────────────────────────────────────────── */

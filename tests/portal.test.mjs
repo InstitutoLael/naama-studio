@@ -177,3 +177,94 @@ test('lista de cuentas marca quién entró hoy (hora de Chile)', async () => {
   assert.equal(allison.entroHoy, false);
   assert.match(r.data.hoy, /^\d{4}-\d{2}-\d{2}$/);
 });
+
+/* ── Clientas ── */
+import { limpiarNombre, normalizarTelefono, leerVcf, mostrarTelefono } from '../src/portal/contactos.js';
+
+test('limpia nombres de contactos guardados como «Clienta …»', () => {
+  assert.deepEqual(limpiarNombre('Clienta María uñas 💅'), { nombre: 'María', nota: 'uñas' });
+  assert.deepEqual(limpiarNombre('cliente JAVIERA soto (balayage)'), { nombre: 'Javiera Soto', nota: 'balayage' });
+  assert.deepEqual(limpiarNombre('Carmen Gloria - Naamá'), { nombre: 'Carmen Gloria', nota: '' });
+  assert.equal(limpiarNombre('Clienta 2').nombre, '');
+});
+
+test('normaliza teléfonos chilenos', () => {
+  assert.equal(normalizarTelefono('9 1234 5678'), '+56912345678');
+  assert.equal(normalizarTelefono('+56 9 1234-5678'), '+56912345678');
+  assert.equal(normalizarTelefono('56912345678'), '+56912345678');
+  assert.equal(normalizarTelefono('(09) 1234 5678'), '+56912345678');
+  assert.equal(normalizarTelefono('12345678'), '+56912345678');
+  assert.equal(normalizarTelefono('123'), null);
+  assert.equal(mostrarTelefono('+56912345678'), '+56 9 1234 5678');
+});
+
+test('lee un archivo .vcf del iPhone', () => {
+  const vcf = 'BEGIN:VCARD\r\nVERSION:3.0\r\nN:Clienta;Ana;;;\r\nFN:Ana Clienta Uñas\r\nTEL;type=CELL;type=VOICE;type=pref:+56 9 8765 4321\r\nEND:VCARD\r\nBEGIN:VCARD\r\nVERSION:3.0\r\nFN:Sin Fono\r\nEND:VCARD\r\n';
+  assert.deepEqual(leerVcf(vcf), [{ original: 'Ana Clienta Uñas', telefono: '+56 9 8765 4321' }]);
+});
+
+const crearEquipo = async () => {
+  const admin = await configurar();
+  const g = await admin.post('cuentas', { nombre: 'Gaby', email: 'gaby@naama.cl', rol: 'socia' });
+  const gaby = cliente('4.4.4.4');
+  await gaby.post('entrar', { email: 'gaby@naama.cl', clave: g.data.claveTemporal });
+  await gaby.post('clave', { actual: g.data.claveTemporal, nueva: 'gabyClave1' });
+  return { admin, gaby };
+};
+
+test('Gaby sube una clienta pero no ve números; Administración sí', async () => {
+  const { admin, gaby } = await crearEquipo();
+  const r = await gaby.post('clientas', { contactos: [{ nombre: 'Clienta Fernanda uñas', telefono: '9 1111 2222' }], origen: 'contacto' });
+  assert.equal(r.status, 201);
+  assert.equal(r.data.creadas, 1);
+  const vistaGaby = await gaby.pedir('clientas');
+  assert.equal(vistaGaby.data.verNumeros, false);
+  assert.equal(vistaGaby.data.clientas[0].nombre, 'Fernanda');
+  assert.equal(vistaGaby.data.clientas[0].telefono, undefined);
+  const vistaAdmin = await admin.pedir('clientas');
+  assert.equal(vistaAdmin.data.clientas[0].telefono, '+56911112222');
+  assert.equal(vistaAdmin.data.clientas[0].nota, 'uñas');
+  // Gaby no puede importar listas ni editar
+  assert.equal((await gaby.post('clientas', { contactos: [{ nombre: 'A', telefono: '911112223' }, { nombre: 'B', telefono: '911112224' }] })).status, 403);
+  assert.equal((await gaby.post(`clientas/${vistaAdmin.data.clientas[0].id}`, { nombre: 'X' })).status, 403);
+});
+
+test('importar lista: salta repetidas e inválidas', async () => {
+  const { admin } = await crearEquipo();
+  await admin.post('clientas', { contactos: [{ nombre: 'Ana', telefono: '+56 9 3333 4444' }] });
+  const r = await admin.post('clientas', {
+    origen: 'archivo',
+    contactos: [
+      { nombre: 'Clienta Ana', telefono: '933334444' },
+      { nombre: 'Bea cejas', telefono: '955556666' },
+      { nombre: 'Bea otra vez', telefono: '+56955556666' },
+      { nombre: 'Sin número', telefono: '12' },
+      ...Array.from({ length: 120 }, (_, i) => ({ nombre: `Clienta ${String.fromCharCode(65 + (i % 26))}ita`, telefono: `97${String(i).padStart(7, '0')}` })),
+    ],
+  });
+  assert.equal(r.status, 201);
+  assert.equal(r.data.creadas, 121);
+  assert.equal(r.data.repetidas, 2);
+  assert.equal(r.data.invalidas, 1);
+  const lista = await admin.pedir('clientas');
+  assert.equal(lista.data.clientas.length, 122);
+});
+
+test('«Vino hoy» anota una visita por día y calcula hace cuánto no viene', async () => {
+  const { admin, gaby } = await crearEquipo();
+  await gaby.post('clientas', { contactos: [{ nombre: 'Rosa', telefono: '922223333' }] });
+  const id = (await gaby.pedir('clientas')).data.clientas[0].id;
+  const a = await gaby.post(`clientas/${id}/visita`, { fecha: '2026-09-01' });
+  assert.equal(a.data.clienta.visitas, 1);
+  assert.ok(a.data.clienta.diasSinVenir > 30);
+  const b = await gaby.post(`clientas/${id}/visita`, {});
+  assert.equal(b.data.clienta.diasSinVenir, 0);
+  assert.equal(b.data.clienta.visitas, 2);
+  const c = await admin.post(`clientas/${id}/visita`, {});
+  assert.equal(c.data.yaEstaba, true);
+  assert.equal(c.data.clienta.visitas, 2);
+  assert.equal((await gaby.post(`clientas/${id}/visita`, { fecha: '2999-01-01' })).status, 400);
+  const v = await admin.pedir(`clientas/${id}/visitas`);
+  assert.equal(v.data.visitas.length, 2);
+  assert.equal(v.data.visitas[0].anotadaPor, 'Gaby');
+});
