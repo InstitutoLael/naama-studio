@@ -1754,8 +1754,7 @@ const proximoCumple = (cumple, hoy) => {
   return { fecha: f, dias: diasEntre(hoy, f) };
 };
 
-ruta('GET', /^te-toca$/, { permiso: 'clientas' }, async ({ db }) => {
-  const hoy = fechaChile();
+async function clientasQueToca(db, hoy) {
   const { results: clientas } = await db.prepare('SELECT * FROM clientas WHERE activa = 1 AND ultima_visita IS NOT NULL').all();
   const { results: ultimos } = await db
     .prepare('SELECT clienta_id, servicio, fecha FROM servicios WHERE clienta_id IS NOT NULL AND id IN (SELECT MAX(id) FROM servicios WHERE clienta_id IS NOT NULL GROUP BY clienta_id)')
@@ -1783,7 +1782,12 @@ ruta('GET', /^te-toca$/, { permiso: 'clientas' }, async ({ db }) => {
     })
     .filter(Boolean)
     .sort((a, b) => a.dias - b.dias);
-  return json({ ok: true, hoy, toca, cumples });
+  return { toca, cumples };
+}
+
+ruta('GET', /^te-toca$/, { permiso: 'clientas' }, async ({ db }) => {
+  const hoy = fechaChile();
+  return json({ ok: true, hoy, ...(await clientasQueToca(db, hoy)) });
 });
 
 ruta('POST', /^te-toca\/(\d+)$/, { permiso: 'clientas' }, async ({ db, cuenta, body, params }) => {
@@ -2206,28 +2210,75 @@ async function resumenSemanal(db, env, hoy) {
 }
 
 
-/** Aseo del día: en la mañana lo que toca y en la tarde lo que falta, a cada una («si te da el tiempo»). */
-async function avisoDeTareas(db, env, hoy, momento) {
+/**
+ * «Tu día»: en la mañana, a cada una lo que tiene hoy (clientas, aseo, cumpleaños, pendientes);
+ * en la tarde, «antes de irte» con lo que falta. Todo en tono «si te da el tiempo».
+ */
+async function avisoDelDia(db, env, hoy, momento) {
+  const { results: cuentas } = await db.prepare('SELECT * FROM cuentas WHERE activa = 1 AND demo = 0').all();
   const { deHoy, vienen } = await tareasDelDia(db, hoy);
-  const pendientes = momento === 'tarde' ? deHoy.filter((t) => !t.hecha) : deHoy;
-  if (!pendientes.length) return { personas: 0 };
-  const porPersona = new Map();
-  const sumar = (id, t) => porPersona.set(id, [...(porPersona.get(id) ?? []), t]);
-  for (const t of pendientes) {
-    if (t.cuentaId > 0) sumar(t.cuentaId, t);
-    else if (t.cuentaId == null) for (const v of vienen) sumar(v.id, t); // «Cualquiera»: a todas las que vienen
+  const { results: citas } = await db
+    .prepare(`SELECT * FROM citas WHERE fecha = ? AND estado NOT IN ('cancelada', 'no-vino') ORDER BY hora`)
+    .bind(hoy)
+    .all();
+  const { results: marcas } = await db.prepare('SELECT cuenta_id, fecha, estado FROM disponibilidad WHERE fecha >= ?').bind(hoy).all();
+  const vieneHoy = new Set(vienen.map((v) => v.id));
+  const corta = (txt, n = 38) => (txt.length > n ? `${txt.slice(0, n - 1)}…` : txt);
+  const lista = (xs, n = 3) => xs.slice(0, n).join(', ') + (xs.length > n ? ` y ${xs.length - n} más` : '');
+
+  // Cosas del salón que ven solo algunas.
+  let toca = { toca: [], cumples: [] };
+  try {
+    toca = await clientasQueToca(db, hoy);
+  } catch {
+    /* sin clientas todavía */
   }
-  for (const [id, lista] of porPersona) {
-    const items = lista.slice(0, 5).map((t) => `• ${t.texto}`);
-    if (lista.length > 5) items.push(`… y ${lista.length - 5} más`);
-    await avisar(db, env, [id], {
-      titulo: momento === 'tarde' ? 'Si te da el tiempo, todavía queda 🌿' : 'Lo de hoy en el salón, si te da el tiempo 🧹',
-      cuerpo: items.join('\n'),
-      url: '/portal/aseo',
-      tag: `aseo-${hoy}`,
+  const cumpleHoy = toca.cumples.filter((c) => c.dias === 0).map((c) => c.nombre.split(' ')[0]);
+  const compras = await db.prepare(`SELECT COUNT(*) AS n, COALESCE(SUM(urgente), 0) AS u FROM pedidos WHERE estado = 'pedido'`).first();
+  const servHoy = await db.prepare('SELECT COUNT(*) AS n FROM servicios WHERE fecha = ?').bind(hoy).first();
+  const { results: misHoy } = await db.prepare('SELECT DISTINCT cuenta_id FROM mis_servicios WHERE fecha = ?').bind(hoy).all();
+  const anotoHoy = new Set(misHoy.map((m) => m.cuenta_id));
+  const proximos = (() => {
+    const out = [];
+    for (let k = 1; out.length < 6 && k < 10; k++) {
+      const f = new Date(Date.parse(`${hoy}T12:00:00Z`) + k * 86400000);
+      if (f.getUTCDay() !== 0) out.push(f.toISOString().slice(0, 10));
+    }
+    return out;
+  })();
+
+  let enviados = 0;
+  for (const c of cuentas) {
+    const esAdmin = c.rol === 'admin';
+    const mias = citas.filter((x) => x.cuenta_id === c.id);
+    const aseo = deHoy.filter((t) => (t.cuentaId === c.id || (t.cuentaId == null && vieneHoy.has(c.id))) && (momento === 'manana' || !t.hecha));
+    const trabaja = vieneHoy.has(c.id) || mias.length > 0 || aseo.length > 0;
+    const l = [];
+    if (momento === 'manana') {
+      if (mias.length) l.push(`📅 ${mias.length === 1 ? 'Tu clienta' : `Tus ${mias.length} clientas`}: ${lista(mias.map((x) => `${x.hora} ${x.clienta.split(' ')[0]}`), 4)}`);
+      if (aseo.length) l.push(`🧹 Aseo: ${lista(aseo.map((t) => corta(t.texto, 30)), 2)}`);
+      if (cumpleHoy.length && (trabaja || esAdmin)) l.push(`🎂 Hoy está de cumpleaños: ${lista(cumpleHoy)}`);
+      if (tiene(c, 'clientas') && toca.toca.length) l.push(`💬 ${plural(toca.toca.length, 'clienta para invitar', 'clientas para invitar')} a volver`);
+      if (tiene(c, 'compras') && compras.n) l.push(`🛒 Por comprar: ${compras.n}${compras.u ? ` (${compras.u} urgente${compras.u > 1 ? 's' : ''})` : ''}`);
+      const marco = marcas.some((m) => m.cuenta_id === c.id && proximos.includes(m.fecha));
+      if (!esAdmin && !marco) l.push('🗓️ Marca qué días vienes esta semana');
+    } else {
+      if (aseo.length) l.push(`🧹 Aseo que queda: ${lista(aseo.map((t) => corta(t.texto, 30)), 2)}`);
+      if (!esAdmin && (mias.length || vieneHoy.has(c.id)) && !anotoHoy.has(c.id)) l.push('✍️ Anota tus servicios de hoy en «Mi mes»');
+      if (tiene(c, 'servicios') && citas.length && !servHoy.n) l.push('🧾 Todavía no hay servicios anotados hoy (van a la planilla)');
+    }
+    if (!l.length) continue;
+    // Solo a quien trabaja hoy, salvo admin/dueña que reciben lo del salón igual.
+    if (!trabaja && !esAdmin && c.rol !== 'duena') continue;
+    await avisar(db, env, [c.id], {
+      titulo: momento === 'manana' ? `Tu día en Naamá, ${c.nombre.split(' ')[0]} ☀️` : 'Antes de irte, si te da el tiempo 🌿',
+      cuerpo: l.join('\n'),
+      url: '/portal',
+      tag: `dia-${hoy}`,
     }).catch(() => 0);
+    enviados++;
   }
-  return { personas: porPersona.size, tareas: pendientes.length };
+  return { personas: enviados };
 }
 
 /** Se llama desde un cron externo y, por si acaso, cuando alguien abre el portal. Cada aviso sale una sola vez. */
@@ -2238,8 +2289,8 @@ async function tareasProgramadas(db, env) {
   const dia = enChile(d, { weekday: 'short' });
   const hecho = {};
   const abre = dia !== 'Sun';
-  if (abre && hora >= 10 && hora < 13 && (await reclamar(db, 'cron_aseo_am', hoy))) hecho.aseo = await avisoDeTareas(db, env, hoy, 'manana');
-  if (abre && hora >= 16 && hora < 19 && (await reclamar(db, 'cron_aseo_pm', hoy))) hecho.aseoTarde = await avisoDeTareas(db, env, hoy, 'tarde');
+  if (abre && hora >= 10 && hora < 13 && (await reclamar(db, 'cron_aseo_am', hoy))) hecho.dia = await avisoDelDia(db, env, hoy, 'manana');
+  if (abre && hora >= 16 && hora < 19 && (await reclamar(db, 'cron_aseo_pm', hoy))) hecho.tarde = await avisoDelDia(db, env, hoy, 'tarde');
   if (hora >= 18 && hora < 23 && (await reclamar(db, 'cron_manana', hoy))) hecho.manana = await avisoDeManana(db, env, hoy);
   if (dia === 'Mon' && hora >= 9 && (await reclamar(db, 'cron_semana', hoy))) hecho.semana = await resumenSemanal(db, env, hoy);
   return hecho;

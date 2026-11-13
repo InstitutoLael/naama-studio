@@ -876,25 +876,27 @@ test('avisos programados: el de mañana y el resumen del lunes salen una sola ve
   delete env.RELOJ;
 });
 
-test('aseo: aviso en la mañana con lo que toca y en la tarde solo lo que falta', async () => {
+test('tu día: en la mañana lo de hoy (clientas, aseo, días) y en la tarde lo que falta', async () => {
   const admin = await configurar();
   const kata = await crearYEntrar(admin, 'Kata', 'equipo', '19.1.1.2');
+  await crearYEntrar(admin, 'Valeria', 'equipo', '19.1.1.3');
   const ids = Object.fromEntries((await admin.pedir('cuentas')).data.cuentas.map((x) => [x.nombre, x.id]));
   const dia = '2026-11-17'; // martes
   assert.equal((await admin.post('tareas', { texto: 'Barrer', cuentaId: ids.Kata, dias: [2] })).status, 201);
-  assert.equal((await admin.post('tareas', { texto: 'Toallas', cuentaId: ids.Kata, dias: [2] })).status, 201);
+  await admin.post('agenda', { fecha: dia, hora: '11:00', cuentaId: ids.Kata, clienta: 'Rosita', servicio: 'Manos' });
   env.RELOJ = `${dia}T10:30:00-03:00`;
   let r = await admin.post('cron', {});
-  assert.deepEqual(r.data.hecho.aseo, { personas: 1, tareas: 2 });
-  assert.equal((await admin.post('cron', {})).data.hecho.aseo, undefined);
-  // Kata hace una (la marca con la fecha de ese día).
-  const t = (await admin.pedir("tareas")).data.lista.find((x) => x.texto === "Barrer");
+  // Kata (clienta + aseo + marcar días). Valeria no viene hoy y Diego no tiene nada → no les llega.
+  assert.equal(r.data.hecho.dia.personas, 1);
+  assert.equal((await admin.post('cron', {})).data.hecho.dia, undefined);
+  // Kata barre; en la tarde igual le recuerda anotar en Mi mes. Diego ve que no hay servicios anotados.
+  const t = (await admin.pedir('tareas')).data.lista.find((x) => x.texto === 'Barrer');
   assert.equal((await kata.post(`tareas/${t.id}/hecha`, {})).status, 200);
   env.RELOJ = `${dia}T16:30:00-03:00`;
   r = await admin.post('cron', {});
-  assert.deepEqual(r.data.hecho.aseoTarde, { personas: 1, tareas: 1 });
-  // Domingo no hay aviso de aseo.
+  assert.equal(r.data.hecho.tarde.personas, 2);
+  // Domingo no hay.
   env.RELOJ = '2026-11-22T10:30:00-03:00';
-  assert.equal((await admin.post('cron', {})).data.hecho.aseo, undefined);
+  assert.equal((await admin.post('cron', {})).data.hecho.dia, undefined);
   delete env.RELOJ;
 });
