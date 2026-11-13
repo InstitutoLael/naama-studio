@@ -528,25 +528,26 @@ test('Mi mes: Gaby anota lo suyo, no ve lo de otras, y Administración lo cruza 
   const kata = await crearYEntrar(admin, 'Kata', 'equipo', '8.8.8.8');
   await gaby.post('mi-mes', { servicio: 'Manos', clienta: 'Rosita', monto: '23.000' });
   await gaby.post('mi-mes', { servicio: 'Pedicure', clienta: 'Ely', monto: 25000 });
+  await gaby.post('mi-mes', { servicio: 'Bozo', clienta: 'Rosita', monto: 3500 });
   await kata.post('mi-mes', { servicio: 'Manos', monto: 21000 });
   await admin.post('servicios', { clienta: 'Rosita Jara', medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Manos', monto: 23000 }] });
   await admin.post('servicios', { clienta: 'Olga', medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Bozo', monto: 3500 }] });
 
   const suyo = await gaby.pedir('mi-mes');
-  assert.equal(suyo.data.servicios.length, 2);
-  assert.equal(suyo.data.total, 48000);
+  assert.equal(suyo.data.servicios.length, 3);
+  assert.equal(suyo.data.total, 51500);
   assert.equal(suyo.data.cruce, undefined, 'ella no ve el cruce');
   const idKata = (await admin.pedir('mi-mes')).data.equipo.find((p) => p.nombre === 'Kata').id;
   assert.equal((await gaby.pedir(`mi-mes?cuenta=${idKata}`)).status, 403);
 
   const idGaby = (await admin.pedir('mi-mes')).data.equipo.find((p) => p.nombre === 'Gaby').id;
   const cruce = (await admin.pedir(`mi-mes?cuenta=${idGaby}`)).data.cruce;
-  assert.equal(cruce.filas.filter((f) => f.coincide).length, 1);
+  assert.equal(cruce.filas.find((f) => f.servicio === 'Manos').coincide.servicio, 'Manos', 'no se confunde con el bozo de la misma clienta');
+  assert.equal(cruce.filas.find((f) => f.servicio === 'Bozo').coincide.clienta, 'Olga', 'mismo monto y servicio, aunque escriba otro nombre');
   assert.equal(cruce.filas.find((f) => f.servicio === 'Pedicure').coincide, null);
-  assert.equal(cruce.soloNuestros.length, 1);
-  assert.equal(cruce.soloNuestros[0].servicio, 'Bozo');
+  assert.equal(cruce.soloNuestros.length, 0);
 
-  const mio = suyo.data.servicios[0];
+  const mio = suyo.data.servicios.find((x) => x.servicio === 'Pedicure');
   assert.equal((await kata.post(`mi-mes/${mio.id}`, { borrar: true })).status, 404);
   assert.equal((await gaby.post(`mi-mes/${mio.id}`, { borrar: true })).status, 200);
 });
