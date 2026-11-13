@@ -4,6 +4,10 @@ import { WhatsAppIcon } from '../components/common/Icons';
 import { api, post } from './api';
 import Hoja from './Hoja';
 import { CATALOGO, minutosDe } from './servicios';
+import { servicesData } from '../data/servicesData';
+import { duracionDeServicio } from '../data/menuPrecios';
+
+const duracion = (servicio) => Math.max(15, duracionDeServicio(servicesData, servicio) || minutosDe(servicio));
 
 const ABRE = 10 * 60; // 10:00
 const CIERRA = 21 * 60; // 21:00 (los procesos largos de color terminan tarde)
@@ -65,10 +69,10 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
     cuentaId: cita?.cuentaId ?? inicial?.cuentaId ?? (d.personas.some((p) => p.id === d.yo) ? d.yo : d.personas[0]?.id),
     fecha: cita?.fecha ?? d.fecha,
     hora: cita?.hora ?? inicial?.hora ?? '10:30',
-    minutos: cita?.minutos ?? 60,
+    minutos: cita?.minutos ?? (inicial?.servicio ? duracion(inicial.servicio) : 60),
     clienta: cita?.clienta ?? '',
     telefono: cita?.telefono ?? '',
-    servicio: cita?.servicio ?? '',
+    servicio: cita?.servicio ?? inicial?.servicio ?? '',
     nota: cita?.nota ?? '',
     sobrecupo: cita?.sobrecupo ?? false,
   }));
@@ -79,12 +83,15 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
     const val = e.target.value;
     setV((x) => {
       const n = { ...x, [k]: val };
-      if (k === 'servicio' && !tocado.current) n.minutos = minutosDe(val);
+      if (k === 'servicio' && !tocado.current) n.minutos = duracion(val);
       if (k === 'minutos') tocado.current = true;
       return n;
     });
   };
-  const servicios = useMemo(() => CATALOGO.filter((c) => !c.salon).map((c) => c.nombre.replace(' (ganancia)', '')), []);
+  const servicios = useMemo(
+    () => [...new Set([...CATALOGO.filter((c) => !c.salon).map((c) => c.nombre.replace(' (ganancia)', '')), ...servicesData.map((x) => x.name)])],
+    [],
+  );
   const personas = d.personas;
 
   return (
@@ -278,8 +285,11 @@ const Agenda = ({ cuenta }) => {
     }
   }, [cuenta.id]);
   useEffect(() => {
-    const f = new URLSearchParams(window.location.search).get('fecha');
+    const q = new URLSearchParams(window.location.search);
+    const f = q.get('fecha');
     cargar(/^\d{4}-\d{2}-\d{2}$/.test(f ?? '') ? f : undefined);
+    // Desde «Precios» o desde el atajo del ícono: abre el formulario de una.
+    if (q.get('servicio') || q.get('nueva')) setHoja({ inicial: { servicio: q.get('servicio') ?? '' } });
     api('clientas')
       .then((r) => setClientas(r.clientas))
       .catch(() => {});
@@ -440,7 +450,7 @@ const Agenda = ({ cuenta }) => {
           {aviso}
         </p>
       )}
-      {hoja && <FormCita d={datos} cita={hoja.cita} inicial={hoja.inicial} onListo={listo} onCerrar={() => setHoja(null)} />}
+      {hoja && datos && <FormCita d={datos} cita={hoja.cita} inicial={hoja.inicial} onListo={listo} onCerrar={() => setHoja(null)} />}
     </div>
   );
 };

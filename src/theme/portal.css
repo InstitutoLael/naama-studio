@@ -874,3 +874,31 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .sobrecupo.is-on .sobrecupo__switch::after { transform: translateX(18px); }
 .agenda__cita.is-sobrecupo { background: var(--terracota, #b0573b); }
 .agenda__sobre { font-style: normal; font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; opacity: .85; }
+
+/* Precios */
+.precios__barra { position: sticky; top: calc(var(--safe-t, 0px) + 8px); z-index: 5; display: grid; gap: 10px; margin: 0 -4px 18px; padding: 8px 4px 10px; background: linear-gradient(var(--app-bg) 82%, transparent); }
+.precios__barra .buscador { position: relative; }
+.precios__borrar { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 50%; background: rgba(33,26,23,.07); color: var(--ink-2); }
+.precios__mundos { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -4px; padding-inline: 4px; }
+.precios__mundos::-webkit-scrollbar { display: none; }
+.precios__mundos .chip { flex: none; min-height: 36px; padding: 0 14px; font-size: .8rem; }
+.precios__mundo { margin-bottom: 18px; padding: 18px 16px 6px; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); }
+.precios__titulo { font-family: var(--font-display); font-weight: 400; font-size: 1.45rem; line-height: 1.1; padding-bottom: 10px; border-bottom: 1px solid var(--ink); }
+.precios__sub { margin: 16px 0 2px; font-size: .64rem; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: var(--caramel-600); }
+.precios__lista { list-style: none; margin: 0; padding: 0; }
+.precio { border-bottom: 1px dashed rgba(33,26,23,.12); }
+.precio:last-child { border-bottom: 0; }
+.precio__fila { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; padding: 12px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.precio__nombre { font-family: var(--font-display); font-size: 1.04rem; line-height: 1.25; }
+.precio__monto { font-family: var(--font-display); font-size: 1.04rem; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+.precio__monto small { font-family: var(--font-sans); font-size: .6rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.precio__meta { grid-column: 1 / -1; font-size: .74rem; color: var(--ink-3); }
+.precio__largos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding-bottom: 12px; }
+.precio__largo { display: grid; gap: 1px; padding: 7px 7px; border-radius: 10px; background: rgba(33,26,23,.045); min-width: 0; }
+.precio__largo small { font-size: .56rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.precio__largo strong { font-family: var(--font-display); font-weight: 400; font-size: .88rem; white-space: nowrap; font-variant-numeric: lining-nums tabular-nums; }
+.precio__largo em { font-style: normal; font-size: .66rem; color: var(--ink-3); }
+.precio__detalle { display: grid; gap: 10px; padding: 0 0 14px; font-size: .86rem; color: var(--ink-2); }
+.precio__agendar { justify-self: start; display: inline-flex; align-items: center; gap: 8px; }
+.precios__nada { padding: 24px 4px; }
+.precios__nota { font-size: .78rem; padding: 4px 4px 24px; }

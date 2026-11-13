@@ -3,7 +3,8 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
 import Photo from '../components/common/Photo';
-import ServiceRow from '../components/common/ServiceRow';
+import MenuItem from '../components/common/MenuItem';
+import { agrupar, enSecciones } from '../data/menuPrecios';
 import { Reveal, SplitText } from '../components/common/Motion';
 import { ArrowRight } from '../components/common/Icons';
 import { legacyMundoIds, mundos, servicesForMundo } from '../data/categories';
@@ -74,11 +75,18 @@ const WorldPage = () => {
             Todos los servicios <ArrowRight />
           </Link>
         </aside>
-        <ul className="srows">
-          {services.map((s, i) => (
-            <ServiceRow key={`${s.name}-${i}`} service={s} />
+        <div className="world__carta">
+          {enSecciones(mundo.id, agrupar(services)).map((sec, _i, todas) => (
+            <div key={sec.titulo} className="carta__seccion">
+              {todas.length > 1 && <h3 className="carta__sub">{sec.titulo}</h3>}
+              <ul className="mitems">
+                {sec.items.map((it, i) => (
+                  <MenuItem key={`${it.nombre}-${i}`} item={it} />
+                ))}
+              </ul>
+            </div>
           ))}
-        </ul>
+        </div>
       </section>
 
       <section className="world__others on-ivory section" aria-labelledby="otros">

@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SEOHead from '../components/shared/SEOHead';
-import ServiceRow from '../components/common/ServiceRow';
+import MenuItem from '../components/common/MenuItem';
+import { agrupar, enSecciones } from '../data/menuPrecios';
 import { Reveal, SplitText } from '../components/common/Motion';
 import { ArrowRight, CloseIcon, SearchIcon } from '../components/common/Icons';
 import { mundos, servicesForMundo } from '../data/categories';
@@ -35,12 +36,14 @@ const ServicesPage = () => {
     const words = normalize(query).split(/\s+/).filter(Boolean);
     return mundos
       .filter((m) => mundoFilter === 'todos' || m.id === mundoFilter)
-      .map((m) => ({
-        mundo: m,
-        items: servicesForMundo(servicesData, m).filter(
-          (s) => matches(s, words) && (!person || (s.worker ?? '').includes(person)),
-        ),
-      }))
+      .map((m) => {
+        const items = agrupar(
+          servicesForMundo(servicesData, m).filter(
+            (s) => matches(s, words) && (!person || (s.worker ?? '').includes(person)),
+          ),
+        );
+        return { mundo: m, items, secciones: enSecciones(m.id, items) };
+      })
       .filter((g) => g.items.length > 0);
   }, [query, mundoFilter, person]);
 
@@ -144,19 +147,29 @@ const ServicesPage = () => {
           </div>
         )}
 
-        {groups.map(({ mundo, items }) => (
-          <section key={mundo.id} className="catalog__group" aria-labelledby={`g-${mundo.id}`}>
-            <div className="catalog__group-head">
-              <h2 id={`g-${mundo.id}`} className="h3">{mundo.name}</h2>
-              <Link to={`/servicios/${mundo.id}`} className="link-arrow">
+        {groups.map(({ mundo, items, secciones }, gi) => (
+          <section key={mundo.id} className="carta" aria-labelledby={`g-${mundo.id}`}>
+            <header className="carta__cabeza">
+              <span className="carta__num">{String(gi + 1).padStart(2, '0')}</span>
+              <div>
+                <h2 id={`g-${mundo.id}`} className="carta__titulo">{mundo.name}</h2>
+                <p className="carta__bajada">{mundo.description}</p>
+              </div>
+              <Link to={`/servicios/${mundo.id}`} className="link-arrow carta__ver">
                 Ver mundo <ArrowRight />
               </Link>
-            </div>
-            <ul className="srows">
-              {items.map((s, i) => (
-                <ServiceRow key={`${s.name}-${i}`} service={s} />
-              ))}
-            </ul>
+            </header>
+            {secciones.map((sec) => (
+              <div key={sec.titulo} className="carta__seccion">
+                {secciones.length > 1 && <h3 className="carta__sub">{sec.titulo}</h3>}
+                <ul className="mitems">
+                  {sec.items.map((it, i) => (
+                    <MenuItem key={`${it.nombre}-${i}`} item={it} />
+                  ))}
+                </ul>
+              </div>
+            ))}
+            {items.length === 0 && null}
           </section>
         ))}
 
