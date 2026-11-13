@@ -10,6 +10,10 @@ import Clientas from './Clientas';
 import Insumos from './Insumos';
 import Compras from './Compras';
 import Plata from './Plata';
+import Servicios from './Servicios';
+import Caja from './Caja';
+import Disponibilidad from './Disponibilidad';
+import MiMes from './MiMes';
 import Instalar, { esApp, registrarAppPortal } from './Instalar';
 import Hoja from './Hoja';
 import { MODULOS, ROLES, puede } from './permisos';
@@ -42,9 +46,13 @@ const pestanas = (cuenta) => [
   { to: '/portal/clientas', label: 'Clientas', Icono: UsersRound },
   { to: '/portal/insumos', label: 'Insumos', Icono: Package },
   { to: '/portal/compras', label: 'Compras', Icono: ShoppingBag },
-  // Plata y Equipo van en la barra lateral del computador; en el celular están en «Más» y en Inicio.
-  ...(puede(cuenta, 'finanzas') ? [{ to: '/portal/plata', label: 'Plata', Icono: Wallet, soloCompu: true }] : []),
-  ...(puede(cuenta, 'cuentas') ? [{ to: '/portal/cuentas', label: 'Equipo', Icono: KeyRound, soloCompu: true }] : []),
+  // El resto va en la barra lateral del computador; en el celular está en «Más» y en Inicio.
+  ...MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && (!m.permiso || puede(cuenta, m.permiso))).map((m) => ({
+    to: `/portal/${m.id}`,
+    label: m.corto ?? m.nombre,
+    Icono: ICONO_MODULO[m.id],
+    soloCompu: true,
+  })),
 ];
 
 const Menu = ({ cuenta, onMas }) => (
@@ -86,20 +94,16 @@ const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
         </span>
       </div>
       <ul className="grupo-lista">
-        {puede(cuenta, 'finanzas') && (
-          <li>
-            <Link to="/portal/plata" className="fila-lista" onClick={onCerrar}>
-              <Wallet strokeWidth={1.6} /> La plata
-            </Link>
-          </li>
-        )}
-        {puede(cuenta, 'cuentas') && (
-          <li>
-            <Link to="/portal/cuentas" className="fila-lista" onClick={onCerrar}>
-              <KeyRound strokeWidth={1.6} /> Equipo y cuentas
-            </Link>
-          </li>
-        )}
+        {MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'compras'].includes(m.id) && (!m.permiso || puede(cuenta, m.permiso))).map((m) => {
+          const Icono = ICONO_MODULO[m.id];
+          return (
+            <li key={m.id}>
+              <Link to={`/portal/${m.id}`} className="fila-lista" onClick={onCerrar}>
+                {Icono && <Icono strokeWidth={1.6} />} {m.id === 'cuentas' ? 'Equipo y cuentas' : m.nombre}
+              </Link>
+            </li>
+          );
+        })}
         {!esApp() && (
           <li>
             <Link to="/portal/app" className="fila-lista" onClick={onCerrar}>
@@ -239,6 +243,10 @@ const PortalApp = () => {
             <Route path="clientas" element={<Clientas />} />
             <Route path="insumos" element={<Insumos cuenta={cuenta} />} />
             <Route path="compras" element={<Compras />} />
+            <Route path="servicios" element={puede(cuenta, 'servicios') ? <Servicios cuenta={cuenta} /> : <Navigate to="/portal" replace />} />
+            <Route path="caja" element={puede(cuenta, 'caja') ? <Caja /> : <Navigate to="/portal" replace />} />
+            <Route path="disponibilidad" element={<Disponibilidad />} />
+            <Route path="mi-mes" element={<MiMes cuenta={cuenta} />} />
             <Route path="plata" element={puede(cuenta, 'finanzas') ? <Plata /> : <Navigate to="/portal" replace />} />
             <Route path="cuentas" element={puede(cuenta, 'cuentas') ? <Cuentas yo={cuenta} /> : <Navigate to="/portal" replace />} />
             <Route path="*" element={<Navigate to="/portal" replace />} />

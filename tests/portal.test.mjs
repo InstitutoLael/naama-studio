@@ -410,3 +410,143 @@ test('plata: solo finanzas, lee pagos de Mercado Pago y calcula disponible', asy
   await admin.post(`plata/compromisos/${arriendo.id}`, { pagado: true });
   assert.equal((await admin.pedir('plata')).data.disponible, 1500000);
 });
+
+/** Crea una cuenta y entra con ella (ya con clave propia). */
+const crearYEntrar = async (admin, nombre, rol, ip) => {
+  const email = `${nombre.toLowerCase()}@naama.cl`;
+  const r = await admin.post('cuentas', { nombre, email, rol, extras: [] });
+  const c = cliente(ip);
+  await c.post('entrar', { email, clave: r.data.claveTemporal });
+  await c.post('clave', { actual: r.data.claveTemporal, nueva: `${nombre}Clave123` });
+  return c;
+};
+
+test('anotar servicios: se guardan, el Apps Script viene a buscar la fila y queda en la planilla', async () => {
+  const admin = await configurar();
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '5.5.5.5');
+  assert.equal((await gaby.pedir('servicios')).status, 403);
+
+  // Sin planilla conectada: queda guardado y pendiente.
+  let r = await admin.post('servicios', { clienta: 'Rosita Jara', medio: 'Mercado Pago', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Manos', monto: '23.000' }] });
+  assert.equal(r.status, 201);
+  assert.equal(r.data.servicios[0].estado, 'pendiente');
+  assert.equal(r.data.servicios[0].comision, 0.5);
+
+  assert.equal((await admin.post('planilla/conectar', { url: 'https://evil.example/exec' })).status, 400);
+  assert.equal((await admin.post('planilla/conectar', { url: 'https://script.google.com/macros/s/AKfycbx_abcdefghijklmnopqrstuvwxyz/exec' })).status, 200);
+
+  // El «Apps Script» de prueba: recibe solo el código y pide la fila al portal, sin sesión.
+  const filas = [];
+  env.PLANILLA_FETCH = async (url, opciones) => {
+    assert.match(url, /script\.google\.com/);
+    const { token } = JSON.parse(opciones.body);
+    assert.match(token, /^[0-9a-f]{64}$/);
+    const fila = await cliente('9.9.9.9').pedir(`planilla/fila/${token}`);
+    assert.equal(fila.status, 200);
+    filas.push(fila.data.fila);
+    return new Response(JSON.stringify({ ok: true, hoja: 'INGRESO NOV 26', fila: 54 + filas.length }));
+  };
+  r = await admin.post('servicios/reintentar');
+  assert.equal(r.data.listos, 1);
+  assert.equal(filas[0].maquina, 23000);
+  assert.equal(filas[0].efectivo, '');
+
+  r = await admin.post('servicios', {
+    clienta: 'Naty',
+    medio: 'Transferencia',
+    items: [
+      { profesional: 'VALERIA - ESTILISTA', servicio: 'Color', monto: 55000 },
+      { profesional: 'VALERIA - ESTILISTA', servicio: 'Corte', monto: 16000, propina: 2000 },
+    ],
+  });
+  assert.equal(r.data.servicios.length, 2);
+  assert.ok(r.data.servicios.every((x) => x.estado === 'en_planilla'));
+  assert.equal(r.data.servicios[0].comision, 0.4, 'Valeria: color al 40%');
+  assert.equal(r.data.servicios[1].comision, 0.5, 'Valeria: corte al 50%');
+  assert.equal(filas[2].propina, 2000);
+  assert.equal(filas[1].efectivo, 55000);
+
+  // Ya en planilla: el código no vuelve a servir.
+  const usados = await env.DB.prepare('SELECT token FROM servicios').all();
+  assert.equal((await cliente('9.9.9.9').pedir(`planilla/fila/${usados.results[0].token}`)).status, 404);
+  assert.equal((await cliente('9.9.9.9').pedir(`planilla/fila/${'0'.repeat(64)}`)).status, 404);
+
+  const lista = await admin.pedir('servicios');
+  assert.equal(lista.data.servicios.length, 3);
+  assert.equal(lista.data.pendientes, 0);
+});
+
+test('cierre de caja: compara lo anotado con Mercado Pago y el efectivo contado', async () => {
+  const admin = await configurar();
+  env.MP_ACCESS_TOKEN = 'TEST';
+  const ahora = new Date().toISOString();
+  env.MP_FETCH = async (url) => {
+    if (url.endsWith('/users/me')) return new Response(JSON.stringify({ id: 1 }));
+    return new Response(
+      JSON.stringify({
+        results: [
+          { id: 1, collector_id: 1, status: 'approved', date_created: ahora, date_approved: ahora, transaction_amount: 23000, fee_details: [{ amount: 600 }], payment_type_id: 'debit_card' },
+          { id: 2, collector_id: 1, status: 'approved', operation_type: 'account_fund', date_created: ahora, date_approved: ahora, transaction_amount: 16000, fee_details: [], payment_type_id: 'bank_transfer' },
+        ],
+      }),
+    );
+  };
+  await admin.post('servicios', { clienta: 'A', medio: 'Mercado Pago', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Manos', monto: 23000 }] });
+  await admin.post('servicios', { clienta: 'B', medio: 'Transferencia', items: [{ profesional: 'VIVY - MASOTERAPEUTA', servicio: 'Corte', monto: 16000 }] });
+  await admin.post('servicios', { clienta: 'C', medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Bozo', monto: 3500 }] });
+  const c = await admin.pedir('caja');
+  assert.equal(c.data.mp.maquina, 23000);
+  assert.equal(c.data.mp.transferencias, 16000);
+  assert.equal(c.data.anotado.Efectivo, 3500);
+  let r = await admin.post('caja', { efectivo: 3500 });
+  assert.equal(r.data.cierre.cuadra, true);
+  r = await admin.post('caja', { efectivo: 1000, nota: 'faltan' });
+  assert.equal(r.data.cierre.cuadra, false);
+  assert.equal(r.data.cierre.difEfectivo, -2500);
+  assert.equal((await admin.pedir('caja')).data.anteriores.length, 1);
+});
+
+test('disponibilidad: cada una marca sus días y todas ven al equipo', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '6.6.6.6');
+  const d = await kata.pedir('disponibilidad');
+  assert.equal(d.data.dias.length, 14);
+  assert.ok(d.data.dias.every((f) => new Date(`${f}T12:00:00Z`).getUTCDay() !== 0), 'sin domingos');
+  assert.equal((await kata.post('disponibilidad', { fechas: d.data.dias.slice(0, 2), estado: 'manana' })).status, 200);
+  assert.equal((await kata.post('disponibilidad', { fecha: '2020-01-01', estado: 'todo' })).status, 400);
+  assert.equal((await kata.post('disponibilidad', { fecha: d.data.dias[0], estado: 'cualquiera' })).status, 400);
+  const vista = await admin.pedir('disponibilidad');
+  const k = vista.data.equipo.find((p) => p.nombre === 'Kata');
+  assert.equal(k.marcas[d.data.dias[0]].estado, 'manana');
+  await kata.post('disponibilidad', { fecha: d.data.dias[0], estado: '' });
+  assert.equal((await kata.pedir('disponibilidad')).data.yo.marcas[d.data.dias[0]], undefined);
+});
+
+test('Mi mes: Gaby anota lo suyo, no ve lo de otras, y Administración lo cruza con lo anotado', async () => {
+  const admin = await configurar();
+  const gaby = await crearYEntrar(admin, 'Gaby', 'socia', '7.7.7.7');
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '8.8.8.8');
+  await gaby.post('mi-mes', { servicio: 'Manos', clienta: 'Rosita', monto: '23.000' });
+  await gaby.post('mi-mes', { servicio: 'Pedicure', clienta: 'Ely', monto: 25000 });
+  await kata.post('mi-mes', { servicio: 'Manos', monto: 21000 });
+  await admin.post('servicios', { clienta: 'Rosita Jara', medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Manos', monto: 23000 }] });
+  await admin.post('servicios', { clienta: 'Olga', medio: 'Efectivo', items: [{ profesional: 'GABY - MANICURISTA', servicio: 'Bozo', monto: 3500 }] });
+
+  const suyo = await gaby.pedir('mi-mes');
+  assert.equal(suyo.data.servicios.length, 2);
+  assert.equal(suyo.data.total, 48000);
+  assert.equal(suyo.data.cruce, undefined, 'ella no ve el cruce');
+  const idKata = (await admin.pedir('mi-mes')).data.equipo.find((p) => p.nombre === 'Kata').id;
+  assert.equal((await gaby.pedir(`mi-mes?cuenta=${idKata}`)).status, 403);
+
+  const idGaby = (await admin.pedir('mi-mes')).data.equipo.find((p) => p.nombre === 'Gaby').id;
+  const cruce = (await admin.pedir(`mi-mes?cuenta=${idGaby}`)).data.cruce;
+  assert.equal(cruce.filas.filter((f) => f.coincide).length, 1);
+  assert.equal(cruce.filas.find((f) => f.servicio === 'Pedicure').coincide, null);
+  assert.equal(cruce.soloNuestros.length, 1);
+  assert.equal(cruce.soloNuestros[0].servicio, 'Bozo');
+
+  const mio = suyo.data.servicios[0];
+  assert.equal((await kata.post(`mi-mes/${mio.id}`, { borrar: true })).status, 404);
+  assert.equal((await gaby.post(`mi-mes/${mio.id}`, { borrar: true })).status, 200);
+});

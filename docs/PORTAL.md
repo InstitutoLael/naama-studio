@@ -62,3 +62,25 @@ npm run portal:local   # probar en http://localhost:8788/portal (clave de config
 ## SII
 
 Desde el 1 de diciembre de 2026 el modelo de emisión es «Siempre emito Boleta… aun cuando reciba un pago electrónico» (las boletas las emite el plan de Mercado Pago). Así el F29 ya no duplica boletas y comprobantes.
+
+
+## Anotar servicios → planilla (Apps Script)
+
+Los servicios que anota Administración se guardan en D1 y se mandan a la «Planilla Ingreso-egreso 2026», a la última hoja «INGRESO …».
+
+1. En la planilla: **Extensiones → Apps Script**, pegar `docs/planilla-apps-script.gs` y guardar.
+2. **Implementar → Nueva implementación → Aplicación web** · Ejecutar como: *yo* · Acceso: *cualquier persona*. Autorizar.
+3. Copiar el enlace que termina en `/exec` y pegarlo en el portal: **Anotar servicios → Conectar**.
+
+No hay clave compartida: el portal le manda al script solo un código de 64 caracteres; el script viene a buscar la fila a
+`/api/portal/planilla/fila/<código>` (sirve una vez y por 2 días). Si algo falla, el servicio queda «pendiente» y se reintenta
+con un toque.
+
+Cuando se crea la hoja del mes nuevo (copiando la anterior), los servicios caen ahí solos.
+
+## Cierre de caja, disponibilidad y Mi mes
+
+- **Cierre de caja** (permiso `caja`): compara lo anotado del día con Mercado Pago (máquina y transferencias) y con el efectivo contado.
+- **Disponibilidad** (todas): cada una marca los próximos 14 días (sin domingos); todas ven la tabla del equipo.
+- **Mi mes** (todas): cada trabajadora anota lo que hizo. **No va a la planilla.** Administración y Vivy lo cruzan con lo anotado
+  antes de pagar (mismo día; mismo monto o mismo servicio).

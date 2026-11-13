@@ -61,9 +61,15 @@ const Panel = ({ cuenta }) => {
             <span>+60 días sin venir</span>
           </div>
         </div>
-        <Link to="/portal/clientas" className="hoy__boton">
-          <Plus size={18} strokeWidth={2} /> Anotar quién vino
-        </Link>
+        {puede(cuenta, 'servicios') ? (
+          <Link to="/portal/servicios" className="hoy__boton">
+            <Plus size={18} strokeWidth={2} /> Anotar servicio
+          </Link>
+        ) : (
+          <Link to="/portal/mi-mes" className="hoy__boton">
+            <Plus size={18} strokeWidth={2} /> Anotar lo que hice
+          </Link>
+        )}
       </section>
 
       <section>

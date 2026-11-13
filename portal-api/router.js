@@ -5,6 +5,7 @@ import { asegurarEsquema } from './esquema.js';
 import { claveTemporal, hashClave, igualSeguro, nuevoToken, sha256, verificarClave } from './seguridad.js';
 import { PERMISOS, ROL_IDS, permisosDe } from '../src/portal/permisos.js';
 import { normalizarTelefono, prepararContactos } from '../src/portal/contactos.js';
+import { COMISIONES, MEDIOS_PAGO, PROFESIONALES, buscarServicio, comisionSugerida, profesionalDeNombre, turnoDeHora } from '../src/portal/servicios.js';
 
 const COOKIE = 'naama_sesion';
 const DIAS_SESION = 30;
@@ -1167,6 +1168,436 @@ ruta('POST', /^plata\/inyecciones\/cobros\/(\d+)$/, { permiso: 'finanzas' }, asy
 });
 
 /* ── entrada ────────────────────────────────────────────── */
+
+/* ── servicios → planilla ───────────────────────────────── */
+
+const FECHA = /^\d{4}-\d{2}-\d{2}$/;
+const fechaDe = (v, hoy = fechaChile()) => (FECHA.test(v ?? '') && v <= hoy ? v : hoy);
+const plata = (v, max = 1e8) => numero(String(v ?? '').replace(/\D/g, ''), { min: 0, max }) ?? 0;
+const horaChile = () => Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Santiago', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
+const URL_PLANILLA = /^https:\/\/script\.google\.com\/macros\/s\/[\w-]{20,}\/exec$/;
+
+const servicioPublico = (x) => ({
+  id: x.id,
+  fecha: x.fecha,
+  clienta: x.clienta,
+  clientaId: x.clienta_id,
+  profesional: x.profesional,
+  servicio: x.servicio,
+  categoria: x.categoria,
+  medio: x.medio,
+  monto: x.monto,
+  propina: x.propina,
+  comision: x.comision,
+  estado: x.estado,
+  hoja: x.hoja,
+  fila: x.fila,
+  error: x.error,
+  por: x.por,
+});
+
+/** Manda un servicio a la planilla. El Apps Script recibe solo un código y viene a buscar la fila aquí (no hay claves compartidas). */
+async function mandarAPlanilla(db, env, id) {
+  const fila = await db.prepare('SELECT * FROM servicios WHERE id = ?').bind(id).first();
+  if (!fila || fila.estado === 'en_planilla') return fila;
+  const url = (await db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_url'`).first())?.valor;
+  const marcar = (estado, extra = {}) =>
+    db
+      .prepare('UPDATE servicios SET estado = ?, hoja = ?, fila = ?, error = ? WHERE id = ?')
+      .bind(estado, extra.hoja ?? null, extra.fila ?? null, extra.error ?? null, id)
+      .run();
+  if (!url) {
+    await marcar('pendiente', { error: 'Falta conectar la planilla.' });
+    return { ...fila, estado: 'pendiente', error: 'Falta conectar la planilla.' };
+  }
+  try {
+    const r = await (env.PLANILLA_FETCH ?? fetch)(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ token: fila.token }),
+      redirect: 'follow',
+    });
+    const d = await r.json().catch(() => null);
+    if (d?.ok) {
+      await marcar('en_planilla', { hoja: d.hoja, fila: d.fila });
+      return { ...fila, estado: 'en_planilla', hoja: d.hoja, fila: d.fila, error: null };
+    }
+    const msg = String(d?.error ?? `La planilla respondió ${r.status}.`).slice(0, 200);
+    await marcar('error', { error: msg });
+    return { ...fila, estado: 'error', error: msg };
+  } catch {
+    await marcar('error', { error: 'No se pudo llegar a la planilla.' });
+    return { ...fila, estado: 'error', error: 'No se pudo llegar a la planilla.' };
+  }
+}
+
+// Lo que el Apps Script de la planilla viene a buscar con el código. Sin sesión: el código (64 caracteres al azar) es la llave
+// y solo sirve una vez y por 2 días.
+ruta('GET', /^planilla\/fila\/([0-9a-f]{64})$/, {}, async ({ db, params }) => {
+  const x = await db.prepare('SELECT * FROM servicios WHERE token = ?').bind(params[0]).first();
+  if (!x || x.estado === 'en_planilla' || Date.now() - Date.parse(x.creado) > 2 * 86400000) return error(404, 'No encontrado.');
+  return json({
+    ok: true,
+    fila: {
+      fecha: x.fecha,
+      clienta: x.clienta,
+      profesional: x.profesional,
+      servicio: x.servicio,
+      medio: x.medio,
+      efectivo: x.medio === 'Mercado Pago' ? '' : x.monto,
+      maquina: x.medio === 'Mercado Pago' ? x.monto : '',
+      propina: x.propina || '',
+      comision: x.comision,
+      turno: x.turno ?? '',
+      categoria: x.categoria ?? '',
+    },
+  });
+});
+
+ruta('POST', /^planilla\/conectar$/, { permiso: 'cuentas' }, async ({ db, cuenta, body }) => {
+  const url = String(body.url ?? '').trim();
+  if (!URL_PLANILLA.test(url)) return error(400, 'Ese enlace no es el de la aplicación web de Apps Script (termina en /exec).');
+  await db.prepare(`INSERT INTO meta (clave, valor) VALUES ('planilla_url', ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor`).bind(url).run();
+  await registrar(db, cuenta.id, 'planilla', { conectada: true });
+  return json({ ok: true });
+});
+
+ruta('GET', /^servicios$/, { permiso: 'servicios' }, async ({ db, request }) => {
+  const hoy = fechaChile();
+  const fecha = fechaDe(new URL(request.url).searchParams.get('fecha'), hoy);
+  const [{ results: lista }, { results: historial }, { results: clientas }, conectada] = await Promise.all([
+    db.prepare('SELECT * FROM servicios WHERE fecha = ? ORDER BY id DESC').bind(fecha).all(),
+    db
+      .prepare(
+        `SELECT servicio, profesional, monto, comision, categoria FROM servicios
+         WHERE id IN (SELECT MAX(id) FROM servicios GROUP BY lower(servicio), profesional)`,
+      )
+      .all(),
+    db.prepare('SELECT id, nombre FROM clientas WHERE activa = 1 ORDER BY nombre').all(),
+    db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_url'`).first(),
+  ]);
+  const pendientes = await db.prepare(`SELECT COUNT(*) AS n FROM servicios WHERE estado != 'en_planilla'`).first();
+  return json({
+    ok: true,
+    hoy,
+    fecha,
+    planillaConectada: Boolean(conectada?.valor),
+    pendientes: pendientes?.n ?? 0,
+    servicios: lista.map(servicioPublico),
+    historial: historial.map((h) => ({ servicio: h.servicio, profesional: h.profesional, monto: h.monto, comision: h.comision, categoria: h.categoria })),
+    clientas,
+  });
+});
+
+ruta('POST', /^servicios$/, { permiso: 'servicios' }, async ({ db, env, cuenta, body }) => {
+  const hoy = fechaChile();
+  const fecha = fechaDe(body.fecha, hoy);
+  const medio = MEDIOS_PAGO.includes(body.medio) ? body.medio : null;
+  if (!medio) return error(400, 'Elige cómo pagó.');
+  let clientaId = body.clientaId ? Number(body.clientaId) : null;
+  let clienta = texto(body.clienta, 60);
+  if (clientaId) {
+    const c = await db.prepare('SELECT id, nombre FROM clientas WHERE id = ? AND activa = 1').bind(clientaId).first();
+    if (!c) clientaId = null;
+    else clienta = c.nombre;
+  }
+  if (!clienta) return error(400, 'Escribe el nombre de la clienta.');
+  const items = Array.isArray(body.items) ? body.items.slice(0, 12) : [];
+  if (!items.length) return error(400, 'Agrega al menos un servicio.');
+  const limpios = [];
+  for (const it of items) {
+    const profesional = PROFESIONALES.some((p) => p.id === it.profesional) ? it.profesional : null;
+    const servicio = texto(it.servicio, 60);
+    const monto = plata(it.monto);
+    if (!profesional || !servicio || !monto) return error(400, 'A cada servicio le falta profesional, nombre o monto.');
+    const comision = COMISIONES.includes(Number(it.comision)) ? Number(it.comision) : comisionSugerida(profesional, servicio);
+    const cat = buscarServicio(servicio)?.categoria ?? texto(it.categoria, 30) ?? null;
+    limpios.push({ profesional, servicio, monto, propina: plata(it.propina, 1e6), comision, categoria: cat || null });
+  }
+  const turno = fecha === hoy ? turnoDeHora(horaChile()) : null;
+  const ids = [];
+  for (const it of limpios) {
+    const r = await db
+      .prepare(
+        `INSERT INTO servicios (fecha, clienta, clienta_id, profesional, servicio, categoria, medio, monto, propina, comision, turno, token, por, creado)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(fecha, clienta, clientaId, it.profesional, it.servicio, it.categoria, medio, it.monto, it.propina, it.comision, turno, nuevoToken(), cuenta.nombre, ahora())
+      .run();
+    ids.push(r.meta.last_row_id);
+  }
+  if (clientaId) {
+    const v = await db
+      .prepare('INSERT INTO visitas (clienta_id, fecha, cuenta_id, ts) VALUES (?, ?, ?, ?) ON CONFLICT(clienta_id, fecha) DO NOTHING')
+      .bind(clientaId, fecha, cuenta.id, ahora())
+      .run();
+    if (v.meta.changes) {
+      await db
+        .prepare(
+          `UPDATE clientas SET visitas = (SELECT COUNT(*) FROM visitas WHERE clienta_id = ?),
+           ultima_visita = (SELECT MAX(fecha) FROM visitas WHERE clienta_id = ?) WHERE id = ?`,
+        )
+        .bind(clientaId, clientaId, clientaId)
+        .run();
+    }
+  }
+  const resultado = [];
+  for (const id of ids) resultado.push(servicioPublico(await mandarAPlanilla(db, env, id)));
+  await registrar(db, cuenta.id, 'servicio', { clienta, n: ids.length });
+  return json({ ok: true, servicios: resultado }, 201);
+});
+
+ruta('POST', /^servicios\/(\d+)\/reintentar$/, { permiso: 'servicios' }, async ({ db, env, params }) => {
+  const x = await mandarAPlanilla(db, env, Number(params[0]));
+  if (!x) return error(404, 'No existe.');
+  return json({ ok: true, servicio: servicioPublico(x) });
+});
+
+ruta('POST', /^servicios\/reintentar$/, { permiso: 'servicios' }, async ({ db, env }) => {
+  const { results } = await db.prepare(`SELECT id FROM servicios WHERE estado != 'en_planilla' ORDER BY id LIMIT 40`).all();
+  let listos = 0;
+  for (const { id } of results) if ((await mandarAPlanilla(db, env, id))?.estado === 'en_planilla') listos++;
+  return json({ ok: true, listos, total: results.length });
+});
+
+ruta('POST', /^servicios\/(\d+)$/, { permiso: 'servicios' }, async ({ db, cuenta, body, params }) => {
+  const x = await db.prepare('SELECT * FROM servicios WHERE id = ?').bind(Number(params[0])).first();
+  if (!x) return error(404, 'No existe.');
+  if (!body.borrar) return error(400, 'Nada que hacer.');
+  await db.prepare('DELETE FROM servicios WHERE id = ?').bind(x.id).run();
+  await registrar(db, cuenta.id, 'servicio-borrado', { id: x.id, clienta: x.clienta, hoja: x.hoja, fila: x.fila });
+  return json({ ok: true, enPlanilla: x.estado === 'en_planilla', hoja: x.hoja, fila: x.fila });
+});
+
+/* ── cierre de caja ─────────────────────────────────────── */
+
+const TARJETAS = new Set(['credit_card', 'debit_card', 'prepaid_card', 'account_money']);
+
+async function mpDelDia(env, fecha) {
+  if (!env.MP_ACCESS_TOKEN) return null;
+  const [crudos, yo] = await Promise.all([pagosMP(env, fecha), cuentaMP(env)]);
+  const pagos = crudos
+    .map(resumirPago)
+    .filter((p) => (yo == null || p.cobrador == null || String(p.cobrador) === String(yo)) && !NO_VENTA.has(p.operacion))
+    .filter((p) => p.estado === 'approved' && p.dia === fecha);
+  const tarjetas = pagos.filter((p) => TARJETAS.has(p.medio));
+  const transferencias = pagos.filter((p) => p.medio === 'bank_transfer');
+  const suma = (l) => Math.round(l.reduce((a, p) => a + p.bruto, 0));
+  return {
+    maquina: suma(tarjetas),
+    maquinaPagos: tarjetas.length,
+    comision: Math.round(tarjetas.reduce((a, p) => a + p.comision, 0)),
+    transferencias: suma(transferencias),
+    transferenciasPagos: transferencias.length,
+  };
+}
+
+ruta('GET', /^caja$/, { permiso: 'caja' }, async ({ db, env, request }) => {
+  const hoy = fechaChile();
+  const fecha = fechaDe(new URL(request.url).searchParams.get('fecha'), hoy);
+  const { results: lista } = await db.prepare('SELECT * FROM servicios WHERE fecha = ? ORDER BY id').bind(fecha).all();
+  const porMedio = Object.fromEntries(MEDIOS_PAGO.map((m) => [m, 0]));
+  for (const x of lista) porMedio[x.medio] += x.monto + (x.propina || 0);
+  let mp = null;
+  let errorMP = null;
+  try {
+    mp = await mpDelDia(env, fecha);
+  } catch (e) {
+    errorMP = e.message;
+  }
+  const cierre = await db.prepare('SELECT * FROM cierres WHERE fecha = ?').bind(fecha).first();
+  const { results: anteriores } = await db.prepare('SELECT fecha, efectivo, datos, por FROM cierres ORDER BY fecha DESC LIMIT 14').all();
+  return json({
+    ok: true,
+    hoy,
+    fecha,
+    servicios: lista.length,
+    anotado: porMedio,
+    total: Object.values(porMedio).reduce((a, b) => a + b, 0),
+    mp,
+    errorMP,
+    cierre: cierre ? { ...JSON.parse(cierre.datos), efectivo: cierre.efectivo, nota: cierre.nota, por: cierre.por, ts: cierre.ts } : null,
+    anteriores: anteriores.map((c) => {
+      const d = JSON.parse(c.datos);
+      return { fecha: c.fecha, efectivo: c.efectivo, total: d.total, cuadra: d.cuadra, por: c.por };
+    }),
+  });
+});
+
+ruta('POST', /^caja$/, { permiso: 'caja' }, async ({ db, env, cuenta, body }) => {
+  const hoy = fechaChile();
+  const fecha = fechaDe(body.fecha, hoy);
+  const efectivo = plata(body.efectivo);
+  const { results: lista } = await db.prepare('SELECT medio, monto, propina FROM servicios WHERE fecha = ?').bind(fecha).all();
+  const anotado = Object.fromEntries(MEDIOS_PAGO.map((m) => [m, 0]));
+  for (const x of lista) anotado[x.medio] += x.monto + (x.propina || 0);
+  let mp = null;
+  try {
+    mp = await mpDelDia(env, fecha);
+  } catch {
+    mp = null;
+  }
+  const difEfectivo = efectivo - anotado.Efectivo;
+  const difMaquina = mp ? mp.maquina - anotado['Mercado Pago'] : null;
+  const difTransfer = mp ? mp.transferencias - anotado.Transferencia : null;
+  const cuadra = Math.abs(difEfectivo) < 100 && (difMaquina == null || Math.abs(difMaquina) < 100) && (difTransfer == null || Math.abs(difTransfer) < 100);
+  const datos = { anotado, mp, total: Object.values(anotado).reduce((a, b) => a + b, 0), difEfectivo, difMaquina, difTransfer, cuadra, servicios: lista.length };
+  await db
+    .prepare(
+      `INSERT INTO cierres (fecha, datos, efectivo, nota, por, ts) VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(fecha) DO UPDATE SET datos = excluded.datos, efectivo = excluded.efectivo, nota = excluded.nota, por = excluded.por, ts = excluded.ts`,
+    )
+    .bind(fecha, JSON.stringify(datos), efectivo, texto(body.nota, 300) || null, cuenta.nombre, ahora())
+    .run();
+  await registrar(db, cuenta.id, 'cierre', { fecha, cuadra });
+  return json({ ok: true, cierre: { ...datos, efectivo } });
+});
+
+/* ── disponibilidad ─────────────────────────────────────── */
+
+const ESTADOS_DISPO = ['todo', 'manana', 'tarde', 'no'];
+
+/** Próximos días con el salón abierto (lunes a sábado). */
+const proximosDias = (n = 14) => {
+  const dias = [];
+  for (let i = 0; dias.length < n && i < n + 4; i++) {
+    const d = new Date(Date.now() + i * 86400000);
+    const f = fechaChile(d);
+    const dow = new Date(`${f}T12:00:00Z`).getUTCDay();
+    if (dow !== 0) dias.push(f);
+  }
+  return dias;
+};
+
+ruta('GET', /^disponibilidad$/, { sesion: true }, async ({ db, cuenta }) => {
+  const dias = proximosDias(14);
+  const { results: equipo } = await db.prepare('SELECT id, nombre FROM cuentas WHERE activa = 1 AND demo = 0 ORDER BY nombre').all();
+  const { results: marcas } = await db
+    .prepare('SELECT cuenta_id, fecha, estado, nota FROM disponibilidad WHERE fecha >= ? AND fecha <= ?')
+    .bind(dias[0], dias[dias.length - 1])
+    .all();
+  const de = (id) => Object.fromEntries(marcas.filter((m) => m.cuenta_id === id).map((m) => [m.fecha, { estado: m.estado, nota: m.nota }]));
+  return json({
+    ok: true,
+    dias,
+    yo: { id: cuenta.id, marcas: de(cuenta.id) },
+    equipo: equipo.map((c) => ({ id: c.id, nombre: c.nombre, marcas: de(c.id) })),
+  });
+});
+
+ruta('POST', /^disponibilidad$/, { sesion: true }, async ({ db, cuenta, body }) => {
+  const dias = (Array.isArray(body.fechas) ? body.fechas : [body.fecha]).filter((f) => FECHA.test(f ?? '')).slice(0, 31);
+  if (!dias.length) return error(400, 'Elige el día.');
+  const hoy = fechaChile();
+  if (dias.some((f) => f < hoy)) return error(400, 'No se puede cambiar un día que ya pasó.');
+  const estado = String(body.estado ?? '');
+  for (const f of dias) {
+    if (!estado) await db.prepare('DELETE FROM disponibilidad WHERE cuenta_id = ? AND fecha = ?').bind(cuenta.id, f).run();
+    else {
+      if (!ESTADOS_DISPO.includes(estado)) return error(400, 'Estado no válido.');
+      await db
+        .prepare(
+          `INSERT INTO disponibilidad (cuenta_id, fecha, estado, nota, ts) VALUES (?, ?, ?, ?, ?)
+           ON CONFLICT(cuenta_id, fecha) DO UPDATE SET estado = excluded.estado, nota = excluded.nota, ts = excluded.ts`,
+        )
+        .bind(cuenta.id, f, estado, texto(body.nota, 80) || null, ahora())
+        .run();
+    }
+  }
+  return json({ ok: true });
+});
+
+/* ── mi mes ─────────────────────────────────────────────── */
+
+const MES = /^\d{4}-\d{2}$/;
+const normTexto = (t) =>
+  String(t ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+/** Cruza lo que anotó ella con lo que anotó Administración (mismo día; mismo monto o mismo servicio). */
+function cruzar(suyos, nuestros) {
+  const libres = new Set(nuestros.map((x) => x.id));
+  const filas = suyos.map((m) => {
+    const candidatos = nuestros.filter((x) => libres.has(x.id) && x.fecha === m.fecha);
+    const par =
+      candidatos.find((x) => m.monto && x.monto === m.monto) ??
+      candidatos.find((x) => normTexto(x.servicio) === normTexto(m.servicio)) ??
+      candidatos.find((x) => m.clienta && normTexto(x.clienta).split(' ')[0] === normTexto(m.clienta).split(' ')[0]);
+    if (par) libres.delete(par.id);
+    return { ...m, coincide: par ? { id: par.id, servicio: par.servicio, monto: par.monto, clienta: par.clienta } : null };
+  });
+  return { filas, soloNuestros: nuestros.filter((x) => libres.has(x.id)).map((x) => ({ id: x.id, fecha: x.fecha, clienta: x.clienta, servicio: x.servicio, monto: x.monto })) };
+}
+
+const miServicioPublico = (m) => ({ id: m.id, fecha: m.fecha, clienta: m.clienta, servicio: m.servicio, monto: m.monto, nota: m.nota });
+
+ruta('GET', /^mi-mes$/, { sesion: true }, async ({ db, cuenta, request }) => {
+  const q = new URL(request.url).searchParams;
+  const mes = MES.test(q.get('mes') ?? '') ? q.get('mes') : fechaChile().slice(0, 7);
+  const revisa = tiene(cuenta, 'servicios') || tiene(cuenta, 'finanzas');
+  let quien = cuenta;
+  if (q.get('cuenta') && Number(q.get('cuenta')) !== cuenta.id) {
+    if (!revisa) return error(403, 'Solo ves tu propio mes.');
+    quien = await db.prepare('SELECT * FROM cuentas WHERE id = ?').bind(Number(q.get('cuenta'))).first();
+    if (!quien) return error(404, 'No existe.');
+  }
+  const { results } = await db
+    .prepare('SELECT * FROM mis_servicios WHERE cuenta_id = ? AND fecha LIKE ? ORDER BY fecha DESC, id DESC')
+    .bind(quien.id, `${mes}-%`)
+    .all();
+  const suyos = results.map(miServicioPublico);
+  const base = {
+    ok: true,
+    mes,
+    persona: { id: quien.id, nombre: quien.nombre, profesional: profesionalDeNombre(quien.nombre) },
+    servicios: suyos,
+    total: suyos.reduce((a, m) => a + (m.monto || 0), 0),
+    revisa,
+  };
+  if (!revisa) return json(base);
+  const { results: equipo } = await db
+    .prepare(
+      `SELECT c.id, c.nombre, (SELECT COUNT(*) FROM mis_servicios m WHERE m.cuenta_id = c.id AND m.fecha LIKE ?) AS n
+       FROM cuentas c WHERE c.activa = 1 AND c.demo = 0 ORDER BY c.nombre`,
+    )
+    .bind(`${mes}-%`)
+    .all();
+  let cruce = null;
+  if (base.persona.profesional) {
+    const { results: nuestros } = await db
+      .prepare('SELECT * FROM servicios WHERE profesional = ? AND fecha LIKE ? ORDER BY fecha')
+      .bind(base.persona.profesional, `${mes}-%`)
+      .all();
+    cruce = cruzar(suyos, nuestros);
+  }
+  return json({ ...base, equipo, cruce });
+});
+
+ruta('POST', /^mi-mes$/, { sesion: true }, async ({ db, cuenta, body }) => {
+  const hoy = fechaChile();
+  const fecha = FECHA.test(body.fecha ?? '') ? body.fecha : hoy;
+  if (fecha > hoy) return error(400, 'La fecha no puede ser futura.');
+  const servicio = texto(body.servicio, 60);
+  if (!servicio) return error(400, '¿Qué servicio hiciste?');
+  await db
+    .prepare('INSERT INTO mis_servicios (cuenta_id, fecha, clienta, servicio, monto, nota, creado) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .bind(cuenta.id, fecha, texto(body.clienta, 60) || null, servicio, plata(body.monto) || null, texto(body.nota, 120) || null, ahora())
+    .run();
+  return json({ ok: true }, 201);
+});
+
+ruta('POST', /^mi-mes\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, params }) => {
+  const m = await db.prepare('SELECT * FROM mis_servicios WHERE id = ?').bind(Number(params[0])).first();
+  if (!m || (m.cuenta_id !== cuenta.id && !tiene(cuenta, 'servicios'))) return error(404, 'No existe.');
+  if (!body.borrar) return error(400, 'Nada que hacer.');
+  await db.prepare('DELETE FROM mis_servicios WHERE id = ?').bind(m.id).run();
+  return json({ ok: true });
+});
+
 
 export async function manejar(request, env) {
   const db = env.DB;
