@@ -191,7 +191,10 @@ const Panel = ({ cuenta }) => {
               <ListChecks strokeWidth={1.6} />
               <span>
                 <strong>
-                  Te toca hoy: {tareas.filter((t) => !t.hecha).length ? `${tareas.filter((t) => !t.hecha).length} tareas` : '¡todo listo!'}
+                  {(() => {
+                    const n = tareas.filter((t) => !t.hecha).length;
+                    return n ? `Te toca hoy: ${n} ${n === 1 ? 'tarea' : 'tareas'}` : 'Aseo de hoy: ¡todo listo!';
+                  })()}
                 </strong>
                 <small>{tareas.filter((t) => !t.hecha).map((t) => t.texto).slice(0, 2).join(' · ')}</small>
               </span>

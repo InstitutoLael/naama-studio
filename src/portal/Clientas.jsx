@@ -692,8 +692,8 @@ const Clientas = ({ cuenta }) => {
                 <span className="cuenta__meta">
                   {haceCuanto(c)}
                   {c.visitas > 1 && ` · ${c.visitas} visitas`}
-                  {datos.verNumeros && c.telefono && ` · ${mostrarTelefono(c.telefono)}`}
                 </span>
+                {datos.verNumeros && c.telefono && <span className="cuenta__meta cuenta__tel">{mostrarTelefono(c.telefono)}</span>}
               </span>
               {c.diasSinVenir !== null && c.diasSinVenir >= 60 && <span className="etiqueta">Hace tiempo</span>}
             </button>

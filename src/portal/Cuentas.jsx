@@ -243,7 +243,9 @@ const Cuentas = ({ yo }) => {
       <header className="panel__cabeza panel__cabeza--fila">
         <div>
           <span className="eyebrow">Dirección</span>
-          <h1 className="panel__titulo">Equipo</h1>
+          <h1 className="panel__titulo">
+            El <em>equipo</em>
+          </h1>
         </div>
         <button type="button" className="btn btn--sm solo-compu" onClick={() => setHoja({ tipo: 'nueva' })}>
           <PlusIcon /> Nueva cuenta

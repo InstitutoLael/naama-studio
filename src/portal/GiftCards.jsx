@@ -298,7 +298,7 @@ const GiftCards = () => {
           </section>
           <label className="buscador">
             <Search size={16} />
-            <input className="input" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar por código o nombre (para canjear)" />
+            <input className="input" value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Código o nombre" />
           </label>
           <ul className="cuentas">
             {lista.map((g) => (

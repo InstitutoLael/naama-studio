@@ -112,7 +112,7 @@ const Caja = () => {
             <div className="hoy__cifras">
               <div>
                 <strong>{d.servicios}</strong>
-                <span>servicios anotados</span>
+                <span>{d.servicios === 1 ? 'servicio anotado' : 'servicios anotados'}</span>
               </div>
               <div>
                 <strong>{pesos(d.total)}</strong>

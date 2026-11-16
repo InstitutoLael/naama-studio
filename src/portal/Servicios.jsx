@@ -345,7 +345,7 @@ const Servicios = ({ cuenta }) => {
             <div className="hoy__cifras">
               <div>
                 <strong>{datos.servicios.length}</strong>
-                <span>servicios</span>
+                <span>{datos.servicios.length === 1 ? 'servicio' : 'servicios'}</span>
               </div>
               <div>
                 <strong>{pesos(total)}</strong>
