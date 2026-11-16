@@ -284,6 +284,9 @@ const TABLAS = [
   // Sobrecupo: citas que se aceptan aunque la persona ya tenga a otra clienta a esa hora.
   `CREATE TABLE IF NOT EXISTS citas_sobrecupo (cita_id INTEGER PRIMARY KEY)`,
   // Link privado de calendario (.ics) por persona, para verlo en el calendario del celu.
+  // Mensajes de la administración a una persona: salen en su Inicio hasta que toca «Listo» (y llegan al celu).
+  `CREATE TABLE IF NOT EXISTS mensajes (id INTEGER PRIMARY KEY AUTOINCREMENT, cuenta_id INTEGER NOT NULL, titulo TEXT NOT NULL, cuerpo TEXT, pasos TEXT, de TEXT, creado TEXT NOT NULL, visto TEXT)`,
+  `CREATE INDEX IF NOT EXISTS mensajes_cuenta ON mensajes (cuenta_id, visto)`,
   `CREATE TABLE IF NOT EXISTS calendarios (token TEXT PRIMARY KEY, cuenta_id INTEGER NOT NULL, todas INTEGER NOT NULL DEFAULT 0, creado TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS avisos_push (
     endpoint TEXT PRIMARY KEY,
@@ -295,7 +298,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v11';
+export const HUELLA = 'v12';
 
 let listo = false;
 
