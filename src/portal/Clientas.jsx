@@ -430,6 +430,105 @@ const Ficha = ({ clienta, verNumeros, yo, onCambio, onCerrar }) => {
 
 /* ── Página ───────────────────────────────────────────── */
 
+
+/* ── Repetidas (Administración): mismo número con distintos nombres ── */
+const fin4 = (t) => String(t ?? '').replace(/\D/g, '').slice(-4);
+
+const Repetidas = ({ onCambio }) => {
+  const [d, setD] = useState(null);
+  const [abierto, setAbierto] = useState(false);
+  const [nombres, setNombres] = useState({});
+  const [ocupado, setOcupado] = useState(null);
+  const [error, setError] = useState('');
+  const cargar = useCallback(() => api('clientas/repetidas').then(setD).catch(() => {}), []);
+  useEffect(() => {
+    cargar();
+  }, [cargar]);
+  if (!d || (!d.mismoNumero.length && !d.mismoNombre.length)) return null;
+
+  const juntar = async (grupo, quedaId) => {
+    setOcupado(quedaId);
+    setError('');
+    try {
+      const nombre = nombres[grupo[0].id] ?? grupo.find((c) => c.id === quedaId).nombre;
+      for (const c of grupo) if (c.id !== quedaId) await post(`clientas/${quedaId}/juntar`, { con: c.id, nombre });
+      await cargar();
+      onCambio(`Listo: quedó una sola «${nombre}» con todas sus visitas.`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setOcupado(null);
+    }
+  };
+  const renombrar = async (c, nombre) => {
+    if (!nombre.trim() || nombre.trim() === c.nombre) return;
+    try {
+      await post(`clientas/${c.id}`, { nombre });
+      await cargar();
+      onCambio(`Guardado: ${nombre.trim()}.`);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <section className={`repetidas ${abierto ? 'is-open' : ''}`}>
+      <button type="button" className="repetidas__cabeza" onClick={() => setAbierto((x) => !x)} aria-expanded={abierto}>
+        <span className="repetidas__icono" aria-hidden="true">!</span>
+        <span>
+          <strong>
+            {d.mismoNumero.length > 0
+              ? `${d.mismoNumero.length === 1 ? 'Hay 1 clienta repetida' : `Hay ${d.mismoNumero.length} clientas repetidas`}`
+              : 'Clientas con el mismo nombre'}
+          </strong>
+          <small>Toca para revisarlas y dejarlas ordenadas</small>
+        </span>
+      </button>
+      {abierto && (
+        <div className="repetidas__cuerpo">
+          {error && <p className="portal-error">{error}</p>}
+          {d.mismoNumero.map((g) => (
+            <div key={g[0].id} className="repetida">
+              <p className="repetida__titulo">Mismo número (…{fin4(g[0].telefono)}), distinto nombre</p>
+              <label className="field">
+                <span>¿Cómo se llama?</span>
+                <input
+                  className="input"
+                  value={nombres[g[0].id] ?? g[0].nombre}
+                  onChange={(e) => setNombres((n) => ({ ...n, [g[0].id]: e.target.value }))}
+                />
+              </label>
+              <div className="repetida__opciones">
+                {g.map((c) => (
+                  <button key={c.id} type="button" className="chip" onClick={() => setNombres((n) => ({ ...n, [g[0].id]: c.nombre }))}>
+                    {c.nombre}
+                    {c.visitas ? ` · ${c.visitas} visita${c.visitas > 1 ? 's' : ''}` : ''}
+                  </button>
+                ))}
+              </div>
+              <button type="button" className="btn" disabled={ocupado !== null} onClick={() => juntar(g, [...g].sort((a, b) => b.visitas - a.visitas)[0].id)}>
+                {ocupado ? 'Juntando…' : 'Juntar en una sola'}
+              </button>
+            </div>
+          ))}
+          {d.mismoNombre.length > 0 && (
+            <div className="repetida">
+              <p className="repetida__titulo">Mismo nombre, distinto número</p>
+              <p className="muted repetida__ayuda">Son personas distintas. Ponles el apellido (o algo que las diferencie) para no confundirlas.</p>
+              {d.mismoNombre.flat().map((c) => (
+                <label key={c.id} className="repetida__fila">
+                  <span>…{fin4(c.telefono)}</span>
+                  <input className="input" defaultValue={c.nombre} onBlur={(e) => renombrar(c, e.target.value)} />
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+};
+
 const Clientas = ({ cuenta }) => {
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
@@ -528,6 +627,15 @@ const Clientas = ({ cuenta }) => {
           )}
         </div>
       </header>
+
+      {datos?.verNumeros && (
+        <Repetidas
+          onCambio={(t) => {
+            cargar();
+            mostrarAviso(t);
+          }}
+        />
+      )}
 
       <dl className="cifras">
         <div>

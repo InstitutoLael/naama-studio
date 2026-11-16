@@ -430,6 +430,71 @@ ruta('POST', /^clientas\/(\d+)$/, { permiso: 'clientas' }, async ({ db, cuenta, 
   return json({ ok: true, clienta: clientaPublica(fila, true, fechaChile()) });
 });
 
+
+/* ── Clientas repetidas: mismo número con distintos nombres ── */
+
+const ultimos9 = (t) => String(t ?? '').replace(/\D/g, '').slice(-9);
+
+ruta('GET', /^clientas\/repetidas$/, { permiso: 'clientas' }, async ({ db }) => {
+  const { results } = await db.prepare('SELECT id, nombre, telefono, visitas, ultima_visita FROM clientas WHERE activa = 1').all();
+  const porNumero = new Map();
+  const porNombre = new Map();
+  for (const c of results) {
+    const n = ultimos9(c.telefono);
+    if (n.length >= 8) porNumero.set(n, [...(porNumero.get(n) ?? []), c]);
+    const k = c.nombre.trim().toLowerCase();
+    porNombre.set(k, [...(porNombre.get(k) ?? []), c]);
+  }
+  const pub = (c) => ({ id: c.id, nombre: c.nombre, telefono: c.telefono, visitas: c.visitas ?? 0, ultimaVisita: c.ultima_visita });
+  return json({
+    ok: true,
+    mismoNumero: [...porNumero.values()].filter((g) => g.length > 1).map((g) => g.map(pub)),
+    mismoNombre: [...porNombre.values()].filter((g) => g.length > 1).map((g) => g.map(pub)),
+  });
+});
+
+/** Junta la clienta `con` dentro de `:id`: pasa visitas, servicios, citas, ficha y fórmulas, y borra la repetida. */
+ruta('POST', /^clientas\/(\d+)\/juntar$/, { permiso: 'clientas' }, async ({ db, cuenta, body, params }) => {
+  const queda = await db.prepare('SELECT * FROM clientas WHERE id = ?').bind(Number(params[0])).first();
+  const sale = await db.prepare('SELECT * FROM clientas WHERE id = ?').bind(Number(body.con)).first();
+  if (!queda || !sale || queda.id === sale.id) return error(400, 'Elige dos clientas distintas.');
+  const nombre = String(body.nombre ?? '').trim().replace(/\s+/g, ' ').slice(0, 60) || queda.nombre;
+  const [a, b] = [queda.id, sale.id];
+  await db.batch([
+    db.prepare('UPDATE visitas SET clienta_id = ? WHERE clienta_id = ? AND fecha NOT IN (SELECT fecha FROM visitas WHERE clienta_id = ?)').bind(a, b, a),
+    db.prepare('DELETE FROM visitas WHERE clienta_id = ?').bind(b),
+    db.prepare('UPDATE servicios SET clienta_id = ?, clienta = ? WHERE clienta_id = ?').bind(a, nombre, b),
+    db.prepare('UPDATE citas SET clienta_id = ? WHERE clienta_id = ?').bind(a, b),
+    db.prepare('UPDATE formulas SET clienta_id = ? WHERE clienta_id = ?').bind(a, b),
+    db.prepare('UPDATE avisos SET clienta_id = ? WHERE clienta_id = ?').bind(a, b),
+    // Ficha: lo que le falte a la que queda, lo toma de la otra.
+    db.prepare('INSERT OR IGNORE INTO fichas (clienta_id) SELECT ? WHERE EXISTS (SELECT 1 FROM fichas WHERE clienta_id = ?)').bind(a, b),
+    db
+      .prepare(
+        `UPDATE fichas SET
+           cumple = COALESCE(NULLIF(cumple, ''), (SELECT cumple FROM fichas WHERE clienta_id = ?)),
+           alergias = TRIM(COALESCE(alergias, '') || CASE WHEN (SELECT alergias FROM fichas WHERE clienta_id = ?) IS NOT NULL AND COALESCE(alergias, '') != (SELECT alergias FROM fichas WHERE clienta_id = ?) THEN ' · ' || (SELECT alergias FROM fichas WHERE clienta_id = ?) ELSE '' END, ' ·'),
+           preferencias = COALESCE(NULLIF(preferencias, ''), (SELECT preferencias FROM fichas WHERE clienta_id = ?)),
+           notas = COALESCE(NULLIF(notas, ''), (SELECT notas FROM fichas WHERE clienta_id = ?))
+         WHERE clienta_id = ?`,
+      )
+      .bind(b, b, b, b, b, b, a),
+    db.prepare('DELETE FROM fichas WHERE clienta_id = ?').bind(b),
+    db.prepare('DELETE FROM clientas WHERE id = ?').bind(b),
+    db
+      .prepare(
+        `UPDATE clientas SET nombre = ?, telefono = COALESCE(telefono, ?), nota = COALESCE(NULLIF(nota, ''), ?),
+           visitas = (SELECT COUNT(*) FROM visitas WHERE clienta_id = ?),
+           ultima_visita = (SELECT MAX(fecha) FROM visitas WHERE clienta_id = ?),
+           creada = MIN(creada, ?)
+         WHERE id = ?`,
+      )
+      .bind(nombre, sale.telefono, sale.nota, a, a, sale.creada, a),
+  ]);
+  await registrar(db, cuenta.id, 'juntar_clientas', { queda: a, sale: b });
+  return json({ ok: true });
+});
+
 /* ── Insumos ────────────────────────────────────────────────
    Todas: ver productos, crear uno con foto, anotar lo que usaron y avisar que llegó una compra.
    Permiso «insumos»: editar productos y corregir stock.

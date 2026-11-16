@@ -900,3 +900,24 @@ test('tu día: en la mañana lo de hoy (clientas, aseo, días) y en la tarde lo 
   assert.equal((await admin.post('cron', {})).data.hecho.dia, undefined);
   delete env.RELOJ;
 });
+
+test('clientas: encuentra el mismo número con dos nombres y las junta sin perder visitas', async () => {
+  const admin = await configurar();
+  await admin.post('clientas', { contactos: [{ nombre: 'Naty Aravena', telefono: '+56 9 1111 2222' }], origen: 'manual' });
+  const todas = (await admin.pedir('clientas')).data.clientas;
+  const naty = todas.find((c) => c.nombre === 'Naty Aravena');
+  // Simula la repetida con el mismo número en otro formato (como pasó en producción).
+  await env.DB.prepare("INSERT INTO clientas (nombre, telefono, origen, creada) VALUES ('Naly Aravena', '56911112222', 'manual', '2026-01-01')").run();
+  const naly = (await admin.pedir('clientas')).data.clientas.find((c) => c.nombre === 'Naly Aravena');
+  await admin.post(`clientas/${naly.id}/visita`, { fecha: '2026-11-10' });
+  await admin.post(`clientas/${naly.id}/ficha`, { alergias: 'Amoníaco' });
+  const rep = (await admin.pedir('clientas/repetidas')).data;
+  assert.equal(rep.mismoNumero.length, 1);
+  assert.equal((await admin.post(`clientas/${naty.id}/juntar`, { con: naly.id, nombre: 'Naty Aravena' })).status, 200);
+  const despues = (await admin.pedir('clientas')).data.clientas.filter((c) => /Aravena/.test(c.nombre));
+  assert.equal(despues.length, 1);
+  assert.equal(despues[0].visitas, 1);
+  const ficha = (await admin.pedir(`clientas/${naty.id}/ficha`)).data;
+  assert.match(JSON.stringify(ficha), /Amoníaco/);
+  assert.equal((await admin.pedir('clientas/repetidas')).data.mismoNumero.length, 0);
+});
