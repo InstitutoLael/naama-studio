@@ -951,3 +951,35 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .repetida__opciones { display: flex; flex-wrap: wrap; gap: 8px; }
 .repetida__ayuda { font-size: .82rem; }
 .repetida__fila { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 10px; font-size: .82rem; color: var(--ink-3); }
+
+/* ── Pulido (nov 2026): detalles de px, contraste y toques ── */
+/* Las chips siempre se ven como botón, también dentro de tarjetas claras. */
+.portal .chip { border: 1px solid rgba(33, 26, 23, 0.12); color: var(--ink); transition: background .18s, color .18s, border-color .18s, transform .12s; }
+.portal .chip:active { transform: scale(0.97); }
+.portal .chip[aria-pressed='true'], .portal .chip.is-active { border-color: var(--cacao); }
+.portal .cuentas .chip, .portal .hoja .chip, .portal .dispo-dia .chip { background: var(--card-2); }
+.portal .chip--no.is-active { background: #8c3a24; border-color: #8c3a24; }
+/* Nada se sale de la pantalla en el celu. */
+.panel > *, .pantalla > * { min-width: 0; }
+.dispo-tabla { max-width: 100%; }
+/* Que el botón flotante (+) y el menú no tapen lo último de la lista. */
+@media (max-width: 899px) {
+  .portal__cuerpo { padding-bottom: calc(var(--tab-h) + var(--safe-b) + 104px); }
+}
+/* Aviso para activar notificaciones: texto arriba, botón ancho abajo. */
+.avisos-activar { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 12px 14px; padding: 18px; }
+.avisos-activar > svg { margin-top: 2px; }
+.avisos-activar strong { font-size: 1rem; line-height: 1.3; }
+.avisos-activar > .btn { grid-column: 1 / -1; width: 100%; min-height: 48px; }
+/* Links con ícono alineados en una línea. */
+.portal__link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+.portal__link svg { flex: none; }
+/* Precios: sin hueco bajo el buscador y subtítulos en la letra de la app. */
+.precios__barra { margin-bottom: 6px; }
+.precios__sub { font-family: var(--font-sans, 'Montserrat', system-ui, sans-serif); }
+/* Clientas: el número en su propia línea, sin cortarse. */
+.cuenta__tel { font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+/* Disponibilidad: 4 botones del mismo tamaño en 2×2, fáciles de tocar. */
+.dispo-dia .chips--chicos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.portal .dispo-dia .chips--chicos .chip { min-height: 44px; justify-content: center; font-size: 0.82rem; padding: 0 10px; }
+@media (min-width: 600px) { .dispo-dia .chips--chicos { grid-template-columns: repeat(4, 1fr); } }

@@ -143,7 +143,7 @@ const MiMes = ({ cuenta }) => {
             <div className="hoy__cifras">
               <div>
                 <strong>{d.servicios.length}</strong>
-                <span>servicios anotados</span>
+                <span>{d.servicios.length === 1 ? 'servicio anotado' : 'servicios anotados'}</span>
               </div>
               <div>
                 <strong>{pesos(d.total)}</strong>
