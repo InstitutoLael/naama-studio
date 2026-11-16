@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Check, ChevronLeft, ChevronRight, ClipboardList, Plus, RefreshCw, Trash2, X } from 'lucide-react';
 import { api, post } from './api';
 import Hoja from './Hoja';
+import ElegirDia from './ElegirDia';
 import { pesos } from './insumosBase';
 import { CATALOGO, COMISIONES, MEDIOS_PAGO, PROFESIONALES, buscarServicio, calcular, comisionSugerida } from './servicios';
 
@@ -24,6 +25,7 @@ const Anotar = ({ datos, fecha, onListo, onCerrar }) => {
   const [medio, setMedio] = useState('Mercado Pago');
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [dia, setDia] = useState(fecha);
 
   const nombresServicios = useMemo(() => {
     const set = new Map(CATALOGO.map((c) => [c.nombre.toLowerCase(), c.nombre]));
@@ -66,7 +68,7 @@ const Anotar = ({ datos, fecha, onListo, onCerrar }) => {
     setEnviando(true);
     try {
       const r = await post('servicios', {
-        fecha,
+        fecha: dia,
         clienta: clienta.trim(),
         clientaId: encontrada?.id,
         medio,
@@ -93,6 +95,7 @@ const Anotar = ({ datos, fecha, onListo, onCerrar }) => {
   return (
     <Hoja titulo="Anotar servicio" onCerrar={onCerrar}>
       <form className="hoja__form" onSubmit={guardar}>
+        <ElegirDia valor={dia} onCambio={setDia} />
         <div className="field">
           <label htmlFor="sv-c">Clienta</label>
           <input

@@ -4,6 +4,7 @@ import { api, post } from './api';
 import Hoja from './Hoja';
 import { pesos } from './insumosBase';
 import { CATALOGO } from './servicios';
+import ElegirDia from './ElegirDia';
 
 const nombreMes = (m) => new Date(`${m}-15T12:00:00`).toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
 const moverMes = (m, n) => {
@@ -16,6 +17,7 @@ const hoyChile = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/San
 
 const Anotar = ({ onListo, onCerrar }) => {
   const [error, setError] = useState('');
+  const [fecha, setFecha] = useState(hoyChile());
   const nombres = useMemo(() => CATALOGO.filter((c) => !c.salon).map((c) => c.nombre.replace(' (ganancia)', '')), []);
   return (
     <Hoja titulo="¿Qué hiciste?" onCerrar={onCerrar}>
@@ -25,16 +27,17 @@ const Anotar = ({ onListo, onCerrar }) => {
           e.preventDefault();
           const f = new FormData(e.currentTarget);
           try {
-            await post('mi-mes', { fecha: f.get('fecha'), clienta: f.get('clienta'), servicio: f.get('servicio'), monto: f.get('monto'), nota: f.get('nota') });
+            await post('mi-mes', { fecha, clienta: f.get('clienta'), servicio: f.get('servicio'), monto: f.get('monto'), nota: f.get('nota') });
             onListo('Anotado en tu mes.');
           } catch (err) {
             setError(err.message);
           }
         }}
       >
+        <ElegirDia valor={fecha} onCambio={setFecha} />
         <div className="field">
           <label htmlFor="mm-s">Servicio</label>
-          <input id="mm-s" name="servicio" className="input" list="mm-servicios" placeholder="Ej.: Manos" autoComplete="off" required autoFocus />
+          <input id="mm-s" name="servicio" className="input" list="mm-servicios" placeholder="Ej.: Manos" autoComplete="off" required />
           <datalist id="mm-servicios">
             {nombres.map((n) => (
               <option key={n} value={n} />
@@ -45,16 +48,10 @@ const Anotar = ({ onListo, onCerrar }) => {
           <label htmlFor="mm-c">Clienta</label>
           <input id="mm-c" name="clienta" className="input" placeholder="Nombre" />
         </div>
-        <div className="fila-campos">
-          <label className="field">
-            <span>¿Cuánto pagó?</span>
-            <input name="monto" className="input" inputMode="numeric" placeholder="$" />
-          </label>
-          <label className="field">
-            <span>Día</span>
-            <input name="fecha" type="date" className="input" defaultValue={hoyChile()} max={hoyChile()} />
-          </label>
-        </div>
+        <label className="field">
+          <span>¿Cuánto pagó?</span>
+          <input name="monto" className="input" inputMode="numeric" placeholder="$" />
+        </label>
         <div className="field">
           <label htmlFor="mm-n">Nota (opcional)</label>
           <input id="mm-n" name="nota" className="input" placeholder="Ej.: le hice diseño en 2 uñas" />

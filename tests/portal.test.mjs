@@ -868,7 +868,7 @@ test('avisos programados: el de mañana y el resumen del lunes salen una sola ve
   r = await admin.post('cron', {});
   assert.equal(r.data.hecho.manana, undefined);
   // Resumen del lunes a las 10:00.
-  env.RELOJ = '2026-11-16T10:00:00-03:00';
+  env.RELOJ = '2030-01-07T10:00:00-03:00'; // un lunes que no es hoy
   r = await admin.post('cron', {});
   assert.ok(r.data.hecho.semana.lineas.length >= 2);
   r = await admin.post('cron', {});

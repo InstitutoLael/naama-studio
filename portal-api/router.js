@@ -1648,7 +1648,7 @@ ruta('GET', /^mi-mes$/, { sesion: true }, async ({ db, cuenta, request }) => {
 ruta('POST', /^mi-mes$/, { sesion: true }, async ({ db, cuenta, body }) => {
   const hoy = fechaChile();
   const fecha = FECHA.test(body.fecha ?? '') ? body.fecha : hoy;
-  if (fecha > hoy) return error(400, 'La fecha no puede ser futura.');
+  if (fecha > hoy) return error(400, 'Ese día todavía no llega: elige hoy o un día anterior.');
   const servicio = texto(body.servicio, 60);
   if (!servicio) return error(400, '¿Qué servicio hiciste?');
   await db
@@ -2544,7 +2544,9 @@ ruta('POST', /^agenda$/, { sesion: true }, async ({ db, env, cuenta, body }) => 
   const servicio = texto(body.servicio, 60) || null;
   const minutos = numero(body.minutos, { min: 15, max: 480 }) ?? minutosDe(servicio);
   if (!fecha || !hora || !clienta) return error(400, 'Falta el día, la hora o la clienta.');
-  if (fecha < fechaChile()) return error(400, 'Ese día ya pasó.');
+  const hoyAg = fechaChile();
+  const haceDos = new Date(Date.parse(`${hoyAg}T12:00:00Z`) - 62 * 86400000).toISOString().slice(0, 10);
+  if (fecha < haceDos) return error(400, 'Solo se pueden anotar horas de los últimos 2 meses.');
   const quien = await db.prepare('SELECT id, nombre FROM cuentas WHERE id = ? AND activa = 1').bind(cuentaId).first();
   if (!quien) return error(400, 'Esa persona no existe.');
   const sobrecupo = Boolean(body.sobrecupo);
@@ -2562,7 +2564,8 @@ ruta('POST', /^agenda$/, { sesion: true }, async ({ db, env, cuenta, body }) => 
     .bind(fecha, hora, Math.round(minutos), cuentaId, clienta, ligada, tel, servicio, texto(body.nota, 160) || null, cuenta.id, cuenta.nombre, ahora(), cuentaId === cuenta.id ? 1 : 0)
     .run();
   if (sobrecupo) await db.prepare('INSERT OR IGNORE INTO citas_sobrecupo (cita_id) VALUES (?)').bind(r.meta.last_row_id).run();
-  const avisadas = await avisarCita(db, env, r.meta.last_row_id, cuenta.id).catch(() => 0);
+  // Una hora de un día que ya pasó es solo para dejar registro: no avisa a nadie.
+  const avisadas = fecha >= hoyAg ? await avisarCita(db, env, r.meta.last_row_id, cuenta.id).catch(() => 0) : 0;
   return json({ ok: true, id: r.meta.last_row_id, avisadas }, 201);
 });
 

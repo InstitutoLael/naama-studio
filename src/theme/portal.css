@@ -918,3 +918,10 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .cal-celu__botones { display: flex; flex-wrap: wrap; gap: 8px; }
 .cal-celu__botones .btn { display: inline-flex; align-items: center; gap: 6px; }
 .cal-celu__nota { font-size: .78rem; line-height: 1.45; }
+
+/* Elegir día con botones */
+.elegir-dia { display: grid; gap: 8px; }
+.elegir-dia__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.elegir-dia__chips .chip { min-height: 40px; padding: 0 16px; font-size: .88rem; }
+.elegir-dia__texto { display: block; font-size: .8rem; color: var(--ink-3); }
+.elegir-dia__texto::first-letter { text-transform: uppercase; }
