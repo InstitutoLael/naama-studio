@@ -925,3 +925,15 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .elegir-dia__chips .chip { min-height: 40px; padding: 0 16px; font-size: .88rem; }
 .elegir-dia__texto { display: block; font-size: .8rem; color: var(--ink-3); }
 .elegir-dia__texto::first-letter { text-transform: uppercase; }
+
+/* Mensajes de la administración en el Inicio */
+.mensaje { display: grid; gap: 10px; margin-bottom: 18px; padding: 20px 18px; border-radius: var(--r); background: linear-gradient(160deg, #fff8f1, #f6e7dc); box-shadow: var(--sombra); border: 1px solid rgba(176, 87, 59, .18); }
+.mensaje__titulo { font-family: var(--font-display); font-weight: 400; font-size: 1.4rem; line-height: 1.15; }
+.mensaje__cuerpo { font-size: .92rem; line-height: 1.5; color: var(--ink-2); }
+.mensaje__pasos { display: grid; gap: 8px; margin: 2px 0 4px; padding: 0; list-style: none; counter-reset: paso; }
+.mensaje__pasos li { counter-increment: paso; }
+.mensaje__pasos li > a, .mensaje__pasos li > span { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, .8); color: inherit; text-decoration: none; font-size: .92rem; line-height: 1.35; }
+.mensaje__pasos li > a::before, .mensaje__pasos li > span::before { content: counter(paso); flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff; font-size: .78rem; font-weight: 600; }
+.mensaje__pasos li > a span { flex: 1; }
+.mensaje__pasos li > a svg { flex: none; width: 18px; opacity: .5; }
+.mensaje .btn { justify-self: start; }

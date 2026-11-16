@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BellRing, CalendarClock, Cake, ChevronRight, ListChecks, Plus } from 'lucide-react';
 import { activarAvisos, avisosActivos, motivoSinAvisos } from './avisos';
-import { api } from './api';
+import { api, post } from './api';
 import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
 import { ICONO_MODULO } from './iconos';
 
@@ -24,6 +24,7 @@ const Panel = ({ cuenta }) => {
   const [citas, setCitas] = useState(null);
   const [avisos, setAvisos] = useState('cargando');
   const [errorAvisos, setErrorAvisos] = useState('');
+  const [mensajes, setMensajes] = useState([]);
 
   useEffect(() => {
     avisosActivos()
@@ -40,6 +41,9 @@ const Panel = ({ cuenta }) => {
       .catch(() => {});
     api('agenda/nuevas')
       .then(setCitas)
+      .catch(() => {});
+    api('mensajes')
+      .then((r) => setMensajes(r.mensajes))
       .catch(() => {});
   }, []);
 
@@ -95,6 +99,42 @@ const Panel = ({ cuenta }) => {
           </Link>
         )}
       </section>
+
+      {mensajes.map((m) => (
+        <section key={m.id} className="mensaje">
+          <span className="eyebrow">Mensaje de {m.de}</span>
+          <h2 className="mensaje__titulo">{m.titulo}</h2>
+          {m.cuerpo && <p className="mensaje__cuerpo">{m.cuerpo}</p>}
+          {m.pasos.length > 0 && (
+            <ol className="mensaje__pasos">
+              {m.pasos.map((p, i) =>
+                p.url ? (
+                  <li key={i}>
+                    <Link to={p.url}>
+                      <span>{p.texto}</span>
+                      <ChevronRight strokeWidth={1.6} />
+                    </Link>
+                  </li>
+                ) : (
+                  <li key={i}>
+                    <span>{p.texto}</span>
+                  </li>
+                ),
+              )}
+            </ol>
+          )}
+          <button
+            type="button"
+            className="btn btn--sm"
+            onClick={() => {
+              setMensajes((xs) => xs.filter((x) => x.id !== m.id));
+              post(`mensajes/${m.id}/visto`, {}).catch(() => {});
+            }}
+          >
+            ¡Entendido!
+          </button>
+        </section>
+      ))}
 
       {avisos === 'apagados' && (
         <section className="avisos-activar">

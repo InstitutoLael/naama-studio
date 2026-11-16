@@ -2298,6 +2298,59 @@ async function tareasProgramadas(db, env) {
 
 ruta('POST', /^cron$/, {}, async ({ db, env }) => json({ ok: true, hecho: await tareasProgramadas(db, env) }));
 
+
+/* ── Mensajes al equipo (Inicio + aviso al celu) ─────────── */
+
+const RUTAS_PASO = /^\/portal(\/[a-z-]*)?(\?[a-z0-9=&-]*)?$/;
+
+ruta('POST', /^mensajes$/, { permiso: 'cuentas' }, async ({ db, env, cuenta, body }) => {
+  const titulo = texto(body.titulo, 80);
+  if (!titulo) return error(400, 'Escribe un título para el mensaje.');
+  const cuerpo = texto(body.cuerpo, 400) || null;
+  const pasos = (Array.isArray(body.pasos) ? body.pasos : [])
+    .slice(0, 8)
+    .map((p) => ({ texto: texto(p?.texto, 90), url: RUTAS_PASO.test(p?.url ?? '') ? p.url : null }))
+    .filter((p) => p.texto);
+  const ids = [...new Set((Array.isArray(body.a) ? body.a : []).map(Number).filter(Boolean))].slice(0, 30);
+  if (!ids.length) return error(400, 'Elige a quién se lo mandas.');
+  const { results: destino } = await db
+    .prepare(`SELECT id, nombre FROM cuentas WHERE activa = 1 AND id IN (${ids.map(() => '?').join(',')})`)
+    .bind(...ids)
+    .all();
+  const resultado = [];
+  for (const c of destino) {
+    await db
+      .prepare('INSERT INTO mensajes (cuenta_id, titulo, cuerpo, pasos, de, creado) VALUES (?, ?, ?, ?, ?, ?)')
+      .bind(c.id, titulo, cuerpo, pasos.length ? JSON.stringify(pasos) : null, cuenta.nombre.split(' ')[0], ahora())
+      .run();
+    const alCelu = await avisar(db, env, [c.id], {
+      titulo,
+      cuerpo: cuerpo ?? pasos.map((p) => `• ${p.texto}`).join('\n'),
+      url: '/portal',
+      tag: `mensaje-${c.id}`,
+    }).catch(() => 0);
+    resultado.push({ id: c.id, nombre: c.nombre, alCelu });
+  }
+  await registrar(db, cuenta.id, 'mensaje', { a: ids, titulo });
+  return json({ ok: true, resultado }, 201);
+});
+
+ruta('GET', /^mensajes$/, { sesion: true }, async ({ db, cuenta }) => {
+  const { results } = await db
+    .prepare('SELECT * FROM mensajes WHERE cuenta_id = ? AND visto IS NULL ORDER BY id DESC LIMIT 10')
+    .bind(cuenta.id)
+    .all();
+  return json({
+    ok: true,
+    mensajes: results.map((m) => ({ id: m.id, titulo: m.titulo, cuerpo: m.cuerpo, pasos: m.pasos ? JSON.parse(m.pasos) : [], de: m.de, creado: m.creado })),
+  });
+});
+
+ruta('POST', /^mensajes\/(\d+)\/visto$/, { sesion: true }, async ({ db, cuenta, params }) => {
+  await db.prepare('UPDATE mensajes SET visto = ? WHERE id = ? AND cuenta_id = ?').bind(ahora(), Number(params[0]), cuenta.id).run();
+  return json({ ok: true });
+});
+
 /* ── Calendario del celu (.ics) ─────────────────────────── */
 
 const tokenNuevo = () => [...crypto.getRandomValues(new Uint8Array(24))].map((b) => b.toString(16).padStart(2, '0')).join('');
