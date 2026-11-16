@@ -348,7 +348,7 @@ const Ficha = ({ clienta, verNumeros, yo, onCambio, onCerrar }) => {
       >
         <div className="field">
           <label htmlFor="fv">Anotar una visita de otro día</label>
-          <input id="fv" name="fecha" type="date" className="input" required max={new Date().toLocaleDateString('en-CA')} />
+          <input id="fv" name="fecha" type="date" className="input" required />
         </div>
         <button type="submit" className="btn btn--ghost btn--sm">
           Anotar

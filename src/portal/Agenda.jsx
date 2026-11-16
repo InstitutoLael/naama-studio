@@ -189,11 +189,11 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
         <div className="fila-campos">
           <label className="field">
             <span>Día</span>
-            <input className="input" type="date" value={v.fecha} onChange={cambia('fecha')} min={d.hoy} required />
+            <input className="input" type="date" value={v.fecha} onChange={cambia('fecha')} required />
           </label>
           <label className="field">
             <span>Hora</span>
-            <input className="input" type="time" value={v.hora} onChange={cambia('hora')} step={900} required />
+            <input className="input" type="time" value={v.hora} onChange={cambia('hora')} required />
           </label>
         </div>
         <label className="field">
