@@ -19,6 +19,7 @@ import Agenda from './Agenda';
 import Aseo from './Aseo';
 import Resenas from './Resenas';
 import Precios from './Precios';
+import Ayuda from './Ayuda';
 import GiftCards from './GiftCards';
 import Instalar, { esApp, registrarAppPortal } from './Instalar';
 import Hoja from './Hoja';
@@ -262,6 +263,7 @@ const PortalApp = () => {
             <Route path="agenda" element={<Agenda cuenta={cuenta} />} />
             <Route path="resenas" element={<Resenas cuenta={cuenta} />} />
             <Route path="precios" element={<Precios />} />
+            <Route path="ayuda" element={<Ayuda cuenta={cuenta} />} />
             <Route path="giftcards" element={puede(cuenta, 'servicios') || puede(cuenta, 'finanzas') ? <GiftCards /> : <Navigate to="/portal" replace />} />
             <Route path="caja" element={puede(cuenta, 'caja') ? <Caja /> : <Navigate to="/portal" replace />} />
             <Route path="disponibilidad" element={<Disponibilidad />} />

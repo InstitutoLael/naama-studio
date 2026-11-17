@@ -66,5 +66,6 @@ export const MODULOS = [
   { id: 'caja', nombre: 'Cierre de caja', corto: 'Caja', bajada: 'Efectivo, máquina y transferencias', permiso: 'caja', listo: true },
   { id: 'plata', nombre: 'La plata', corto: 'Plata', bajada: 'Mercado Pago, disponible y gastos fijos', permiso: 'finanzas', listo: true },
   { id: 'legal', nombre: 'Legal y pagos', bajada: 'Impuestos, honorarios, documentos', permiso: 'legal' },
+  { id: 'ayuda', nombre: 'Ayuda', bajada: 'Dudas, fallas o algo que cambiar', permiso: null, listo: true },
   { id: 'cuentas', nombre: 'Cuentas', corto: 'Equipo', bajada: 'Quién entra y qué ve', permiso: 'cuentas', listo: true },
 ];

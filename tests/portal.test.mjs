@@ -921,3 +921,19 @@ test('clientas: encuentra el mismo número con dos nombres y las junta sin perde
   assert.match(JSON.stringify(ficha), /Amoníaco/);
   assert.equal((await admin.pedir('clientas/repetidas')).data.mismoNumero.length, 0);
 });
+
+test('ayuda: el equipo escribe, admin lo ve, responde y lo marca resuelto', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '21.1.1.2');
+  assert.equal((await kata.post('ayuda', { tipo: 'falta', texto: 'Falta el tinte 5', pantalla: 'Insumos' })).status, 201);
+  assert.equal((await kata.post('ayuda', { tipo: 'falla', texto: '' })).status, 400);
+  const a = (await admin.pedir('ayuda')).data;
+  assert.equal(a.admin, true);
+  assert.equal(a.lista[0].quien, 'Kata');
+  assert.equal((await kata.post(`ayuda/${a.lista[0].id}`, { estado: 'resuelta' })).status, 403);
+  assert.equal((await admin.post(`ayuda/${a.lista[0].id}`, { estado: 'resuelta', respuesta: 'Ya lo compramos' })).status, 200);
+  const k = (await kata.pedir('ayuda')).data;
+  assert.equal(k.admin, false);
+  assert.equal(k.lista[0].estado, 'resuelta');
+  assert.equal(k.lista[0].respuesta, 'Ya lo compramos');
+});

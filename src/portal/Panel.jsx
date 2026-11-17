@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BellRing, CalendarClock, Cake, ChevronRight, ListChecks, Plus } from 'lucide-react';
+import { BellRing, CalendarClock, Cake, ChevronRight, LifeBuoy, ListChecks, Plus } from 'lucide-react';
 import { activarAvisos, avisosActivos, motivoSinAvisos } from './avisos';
 import { api, post } from './api';
 import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
@@ -218,6 +218,15 @@ const Panel = ({ cuenta }) => {
       )}
 
       <section>
+        <Link to="/portal/ayuda" className="ayuda-acceso">
+          <LifeBuoy strokeWidth={1.6} />
+          <span>
+            <strong>¿Necesitas ayuda o algo falla?</strong>
+            <small>Escríbenos aquí y nos llega al tiro</small>
+          </span>
+          <ChevronRight strokeWidth={1.6} />
+        </Link>
+
         <h2 className="seccion__titulo">Accesos</h2>
         <ul className="accesos">
           {listos.map((m) => {

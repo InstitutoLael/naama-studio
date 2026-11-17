@@ -8,6 +8,7 @@ import {
   QrCode,
   ClipboardList,
   KeyRound,
+  LifeBuoy,
   Package,
   Receipt,
   Scale,
@@ -36,4 +37,5 @@ export const ICONO_MODULO = {
   plata: Wallet,
   legal: Scale,
   cuentas: KeyRound,
+  ayuda: LifeBuoy,
 };
