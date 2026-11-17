@@ -36,8 +36,100 @@ async function achicar(archivo) {
   }
 }
 
+
+const PLANTILLAS = [
+  {
+    id: 'pendientes',
+    nombre: 'Lo que falta anotar',
+    titulo: 'Equipo 💛 les pedimos esto, por favor',
+    cuerpo: 'Con esto podemos mandarles recordatorios y ofertas a las clientas, y comprar a tiempo lo que falta. Toca cada paso y te lleva directo:',
+    pasos: [
+      { texto: 'Anota el día que vino cada clienta (Clientas → toca su nombre → «Vino hoy» o elige el día)', url: '/portal/clientas' },
+      { texto: 'Sube a Insumos todo lo que hay en el salón, con su foto', url: '/portal/insumos' },
+      { texto: 'Si algo se acaba o falta, márcalo («Queda poco» o «Se acabó»)', url: '/portal/insumos' },
+      { texto: 'Revisa los precios y avísanos si alguno está mal', url: '/portal/precios' },
+      { texto: '¿Dudas o algo no funciona? Escríbenos aquí', url: '/portal/ayuda' },
+    ],
+  },
+  { id: 'libre', nombre: 'Escribir otro', titulo: '', cuerpo: '', pasos: [] },
+];
+
+/** Solo administración: mandar un mensaje que sale en el Inicio de cada una y les llega al celu. */
+const MandarMensaje = ({ yoId }) => {
+  const [equipo, setEquipo] = useState([]);
+  const [a, setA] = useState([]);
+  const [pl, setPl] = useState(PLANTILLAS[0]);
+  const [titulo, setTitulo] = useState(PLANTILLAS[0].titulo);
+  const [cuerpo, setCuerpo] = useState(PLANTILLAS[0].cuerpo);
+  const [estado, setEstado] = useState('');
+  useEffect(() => {
+    api('cuentas')
+      .then((r) => {
+        const otras = r.cuentas.filter((c) => c.activa !== false && !c.demo && c.id !== yoId);
+        setEquipo(otras);
+        setA(otras.map((c) => c.id));
+      })
+      .catch(() => {});
+  }, [yoId]);
+  const elegir = (x) => {
+    setPl(x);
+    setTitulo(x.titulo);
+    setCuerpo(x.cuerpo);
+  };
+  const enviar = async () => {
+    setEstado('Enviando…');
+    try {
+      const r = await post('mensajes', { a, titulo, cuerpo, pasos: pl.pasos });
+      const celu = r.resultado.filter((x) => x.alCelu).map((x) => x.nombre.split(' ')[0]);
+      setEstado(`¡Listo! Les sale en el Inicio a ${r.resultado.length}.${celu.length ? ` Al celu le llegó a: ${celu.join(', ')}.` : ''}`);
+    } catch (err) {
+      setEstado(err.message);
+    }
+  };
+  return (
+    <section className="mandar">
+      <h2 className="seccion__titulo">Mandar un mensaje al equipo</h2>
+      <div className="mandar__chips">
+        {PLANTILLAS.map((x) => (
+          <button key={x.id} type="button" className={`chip ${pl.id === x.id ? 'is-active' : ''}`} onClick={() => elegir(x)}>
+            {x.nombre}
+          </button>
+        ))}
+      </div>
+      <input className="input" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Título" />
+      <textarea className="input" rows={3} value={cuerpo} onChange={(e) => setCuerpo(e.target.value)} placeholder="Mensaje" />
+      {pl.pasos.length > 0 && (
+        <ol className="mensaje__pasos">
+          {pl.pasos.map((p) => (
+            <li key={p.texto}>
+              <span>{p.texto}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+      <p className="ayuda__paso">¿A quién?</p>
+      <div className="mandar__chips">
+        {equipo.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={`chip ${a.includes(c.id) ? 'is-active' : ''}`}
+            onClick={() => setA((xs) => (xs.includes(c.id) ? xs.filter((x) => x !== c.id) : [...xs, c.id]))}
+          >
+            {c.nombre.split(' ')[0]}
+          </button>
+        ))}
+      </div>
+      <button type="button" className="btn" disabled={!a.length || !titulo.trim() || estado === 'Enviando…'} onClick={enviar}>
+        <Send strokeWidth={1.8} /> Enviar a {a.length === equipo.length ? 'todas' : `${a.length}`}
+      </button>
+      {estado && <p className="muted" role="status">{estado}</p>}
+    </section>
+  );
+};
+
 /** Pantalla de ayuda: escriben lo que necesitan y a la administración le llega al celu. */
-const Ayuda = () => {
+const Ayuda = ({ cuenta }) => {
   const [d, setD] = useState(null);
   const [tipo, setTipo] = useState(null);
   const [texto, setTexto] = useState('');
@@ -92,6 +184,8 @@ const Ayuda = () => {
           ¿Necesitas <em>ayuda?</em>
         </h1>
       </header>
+
+      {d?.admin && <MandarMensaje yoId={cuenta?.id} />}
 
       {listo && (
         <div className="ayuda__listo" role="status">
