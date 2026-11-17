@@ -1032,3 +1032,20 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .mandar__chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .mandar .mensaje__pasos li > span { background: var(--card-2); }
 .mandar .btn { width: 100%; }
+
+/* Precios del producto (proveedores, precio clientas y equipo) */
+.precios-prod { display: grid; gap: 10px; }
+.precios-prod__ayuda { font-size: .82rem; color: var(--ink-3); margin: 0; }
+.precios-prod__titulo { margin: 8px 0 0; font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--caramel-600); }
+.prov-fila { position: relative; display: grid; grid-template-columns: 1fr 104px; gap: 8px; }
+.prov-fila.is-barato .input { border-color: rgba(47, 107, 58, .45); }
+.prov-fila__precio { text-align: right; font-variant-numeric: tabular-nums; }
+.prov-fila__tag { position: absolute; right: 8px; top: -9px; padding: 2px 8px; border-radius: 99px; background: #2f6b3a; color: #fff; font-size: .62rem; font-weight: 700; letter-spacing: .04em; }
+.precio-calculado { display: grid; justify-items: start; gap: 2px; padding: 14px 16px; border-radius: 14px; background: var(--card-2); }
+.precio-calculado span { font-size: .82rem; color: var(--ink-3); }
+.precio-calculado strong { font-family: var(--font-display); font-weight: 400; font-size: 1.9rem; line-height: 1.1; }
+.precio-calculado small { font-size: .72rem; color: var(--ink-3); }
+/* La chip elegida siempre oscura con letra clara, también dentro de hojas y tarjetas. */
+.portal .chip[aria-pressed='true'], .portal .chip.is-active,
+.portal .hoja .chip[aria-pressed='true'], .portal .hoja .chip.is-active,
+.portal .cuentas .chip.is-active, .portal .dispo-dia .chip.is-active { background: var(--cacao); color: var(--paper); border-color: var(--cacao); }

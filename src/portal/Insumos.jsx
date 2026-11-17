@@ -42,6 +42,98 @@ async function achicarFoto(archivo) {
   }
 }
 
+const redondearCerrado = (n) => (n <= 10000 ? Math.ceil(n / 500) * 500 : Math.ceil(n / 1000) * 1000);
+const precioEquipoDe = (c) => Math.ceil(c / 100) * 100;
+const soloNum = (v) => Number(String(v ?? '').replace(/\D/g, '')) || 0;
+const MARGENES = [30, 50, 70, 100];
+
+/** Proveedores con su precio, precio para clientas calculado solo y precio para el equipo. */
+const PreciosProducto = ({ uso, molde, estado, setEstado }) => {
+  const { proveedores, modo, margen, alCosto, manual } = estado;
+  const cambia = (k, v) => setEstado((e) => ({ ...e, [k]: v }));
+  const validos = proveedores.filter((x) => x.proveedor.trim() && soloNum(x.precio));
+  const barato = validos.length ? validos.reduce((a, b) => (soloNum(b.precio) < soloNum(a.precio) ? b : a)) : null;
+  const costo = barato ? soloNum(barato.precio) : molde?.costo ?? 0;
+  const vende = uso !== 'trabajo';
+  const pv = modo === 'auto' && costo ? redondearCerrado(costo * (1 + margen / 100)) : null;
+  return (
+    <fieldset className="grupo precios-prod">
+      <legend>Precios (solo lo ven ustedes)</legend>
+      <p className="precios-prod__ayuda">¿Dónde se compra y a cuánto? Si anotas varios, el portal usa solo el más barato.</p>
+      {proveedores.map((x, i) => (
+        <div key={i} className={`prov-fila ${barato === x ? 'is-barato' : ''}`}>
+          <input
+            className="input"
+            list="proveedores"
+            placeholder={i === 0 ? 'Ej.: Lider, Te Ves Linda…' : 'Otro proveedor'}
+            value={x.proveedor}
+            onChange={(e) => cambia('proveedores', proveedores.map((y, j) => (j === i ? { ...y, proveedor: e.target.value } : y)))}
+          />
+          <input
+            className="input prov-fila__precio"
+            inputMode="numeric"
+            placeholder="$"
+            value={x.precio}
+            onChange={(e) => cambia('proveedores', proveedores.map((y, j) => (j === i ? { ...y, precio: e.target.value } : y)))}
+          />
+          {barato === x && validos.length > 1 && <span className="prov-fila__tag">Más barato</span>}
+        </div>
+      ))}
+      {proveedores.length < 6 && (
+        <button type="button" className="portal__link" onClick={() => cambia('proveedores', [...proveedores, { proveedor: '', precio: '' }])}>
+          <Plus size={14} /> Agregar otro proveedor
+        </button>
+      )}
+
+      {vende && (
+        <>
+          <p className="precios-prod__titulo">Precio para las clientas</p>
+          <div className="segmentado">
+            <button type="button" aria-pressed={modo === 'auto'} onClick={() => cambia('modo', 'auto')}>
+              Calcularlo solo
+            </button>
+            <button type="button" aria-pressed={modo === 'manual'} onClick={() => cambia('modo', 'manual')}>
+              Lo pongo yo
+            </button>
+          </div>
+          {modo === 'auto' ? (
+            <>
+              <div className="chips-envueltos">
+                {MARGENES.map((m) => (
+                  <button key={m} type="button" className="chip" aria-pressed={margen === m} onClick={() => cambia('margen', m)}>
+                    +{m}%
+                  </button>
+                ))}
+              </div>
+              <div className="precio-calculado">
+                {costo ? (
+                  <>
+                    <span>Costo {pesos(costo)} + {margen}%</span>
+                    <strong>{pesos(pv)}</strong>
+                    <small>Redondeado a número cerrado</small>
+                  </>
+                ) : (
+                  <span>Anota arriba cuánto costó y aquí sale el precio.</span>
+                )}
+              </div>
+            </>
+          ) : (
+            <input className="input" inputMode="numeric" placeholder="$" value={manual} onChange={(e) => cambia('manual', e.target.value)} />
+          )}
+
+          <button type="button" role="switch" aria-checked={alCosto} className={`sobrecupo ${alCosto ? 'is-on' : ''}`} onClick={() => cambia('alCosto', !alCosto)}>
+            <span className="sobrecupo__switch" aria-hidden="true" />
+            <span>
+              <strong>Venderlo al equipo a precio costo</strong>
+              <small>{alCosto && costo ? `Para el equipo: ${pesos(precioEquipoDe(costo))}` : 'Las trabajadoras pagan lo que nos costó'}</small>
+            </span>
+          </button>
+        </>
+      )}
+    </fieldset>
+  );
+};
+
 const quedan = (p) => {
   if (p.unidad === 'u') return `${num(p.stock)} unidades`;
   if (p.envases >= 1 || p.stock === 0) return `${num(p.envases, 1)} ${p.envases === 1 ? 'envase' : 'envases'}`;
@@ -333,6 +425,15 @@ const FormProducto = ({ producto, base, verCostos, onListo, onCerrar }) => {
   const [unidad, setUnidad] = useState(molde?.unidad ?? 'g');
   const [categoria, setCategoria] = useState(molde?.categoria ?? '');
   const [uso, setUso] = useState(molde?.uso ?? 'trabajo');
+  const [precios, setPrecios] = useState(() => ({
+    proveedores: molde?.proveedores?.length
+      ? molde.proveedores.map((x) => ({ proveedor: x.proveedor, precio: x.precio ? String(x.precio) : '' }))
+      : [{ proveedor: molde?.proveedor ?? '', precio: molde?.costo ? String(molde.costo) : '' }],
+    modo: molde?.precioVenta && !molde?.precioAuto ? 'manual' : 'auto',
+    margen: molde?.margen ?? 50,
+    alCosto: Boolean(molde?.alCosto),
+    manual: molde?.precioVenta ? String(molde.precioVenta) : '',
+  }));
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const camara = useRef();
@@ -357,11 +458,17 @@ const FormProducto = ({ producto, base, verCostos, onListo, onCerrar }) => {
             unidad,
             uso,
             variante: f.get('variante'),
-            precioVenta: uso === 'trabajo' ? '' : String(f.get('precioVenta') ?? '').replace(/\D/g, ''),
+            precioVenta: uso === 'trabajo' ? '' : verCostos ? (precios.modo === 'manual' ? precios.manual.replace(/\D/g, '') : undefined) : String(f.get('precioVenta') ?? '').replace(/\D/g, ''),
             tamano: String(f.get('tamano')).replace(',', '.'),
             minimo: String(f.get('minimo') || '1').replace(',', '.'),
-            proveedor: f.get('proveedor'),
-            ...(verCostos ? { costo: String(f.get('costo') ?? '').replace(/\D/g, '') } : {}),
+            ...(verCostos
+              ? {
+                  proveedores: precios.proveedores,
+                  proveedor: precios.proveedores.find((x) => x.proveedor.trim())?.proveedor ?? '',
+                  margen: uso !== 'trabajo' && precios.modo === 'auto' ? precios.margen : null,
+                  alCosto: uso !== 'trabajo' && precios.alCosto,
+                }
+              : { proveedor: f.get('proveedor') }),
             ...(foto ? { foto } : {}),
             ...(!editando ? { envases: String(f.get('envases') || '0').replace(',', '.') } : {}),
           };
@@ -431,7 +538,7 @@ const FormProducto = ({ producto, base, verCostos, onListo, onCerrar }) => {
             ))}
           </div>
         </fieldset>
-        {uso !== 'trabajo' && (
+        {uso !== 'trabajo' && !verCostos && (
           <div className="field">
             <label htmlFor="pr-pv">Precio de venta a la clienta</label>
             <input id="pr-pv" name="precioVenta" className="input" inputMode="numeric" placeholder="$" defaultValue={molde?.precioVenta ?? ''} />
@@ -485,15 +592,15 @@ const FormProducto = ({ producto, base, verCostos, onListo, onCerrar }) => {
             <span>envases</span>
           </div>
         </div>
-        {verCostos && (
+        {verCostos ? (
+          <PreciosProducto uso={uso} molde={molde} estado={precios} setEstado={setPrecios} />
+        ) : (
           <div className="field">
-            <label htmlFor="pr-costo">Precio de cada envase (solo lo ven ustedes)</label>
-            <input id="pr-costo" name="costo" className="input" inputMode="numeric" placeholder="$" defaultValue={molde?.costo ?? ''} />
+            <label htmlFor="pr-prov">¿Dónde se compra? (opcional)</label>
+            <input id="pr-prov" name="proveedor" className="input" list="proveedores" defaultValue={molde?.proveedor ?? ''} />
           </div>
         )}
-        <div className="field">
-          <label htmlFor="pr-prov">¿Dónde se compra? (opcional)</label>
-          <input id="pr-prov" name="proveedor" className="input" list="proveedores" defaultValue={molde?.proveedor ?? ''} />
+        <div>
           <datalist id="proveedores">
             {PROVEEDORES.map((p) => (
               <option key={p} value={p} />
@@ -549,7 +656,9 @@ const FichaProducto = ({ p, verCostos, puedeEditar, onUsar, onEditar, onOtroTono
             Cada envase: {num(p.tamano)} {u}
             {verCostos && p.costo ? ` · ${pesos(p.costo)}` : ''}
           </span>
-          {p.uso !== 'trabajo' && <span className="pildora pildora--venta">Se vende{p.precioVenta ? ` · ${pesos(p.precioVenta)}` : ''}</span>}
+          {p.uso !== 'trabajo' && <span className="pildora pildora--venta">Clientas{p.precioVenta ? ` · ${pesos(p.precioVenta)}` : ''}</span>}
+          {p.precioEquipo && <span className="pildora">Equipo · {pesos(p.precioEquipo)}</span>}
+          {p.proveedores?.length > 0 && <span className="muted">Se compra en: {p.proveedores.map((x) => x.proveedor + (x.precio ? ` (${pesos(x.precio)})` : '')).join(', ')}</span>}
           {p.diasRestantes !== null && <span className="pildora">Se acaba en ~{p.diasRestantes} días</span>}
         </div>
       </div>
@@ -560,11 +669,23 @@ const FichaProducto = ({ p, verCostos, puedeEditar, onUsar, onEditar, onOtroTono
             type="button"
             className="accion-grande accion-grande--fuerte"
             onClick={() =>
-              window.confirm(`¿Vendiste 1 ${nombreCompleto(p)}${p.precioVenta ? ` a ${pesos(p.precioVenta)}` : ''}?`) &&
+              window.confirm(`¿Vendiste 1 ${nombreCompleto(p)} a una clienta${p.precioVenta ? ` a ${pesos(p.precioVenta)}` : ''}?`) &&
               accion(`insumos/${p.id}/venta`, { unidades: 1 }, `Venta anotada: ${nombreCompleto(p)}.`)
             }
           >
-            <Tag strokeWidth={1.6} /> Vendí uno
+            <Tag strokeWidth={1.6} /> {p.precioEquipo ? 'Vendí a clienta' : 'Vendí uno'}
+          </button>
+        )}
+        {p.uso !== 'trabajo' && p.precioEquipo && (
+          <button
+            type="button"
+            className="accion-grande"
+            onClick={() =>
+              window.confirm(`¿Alguien del equipo compró 1 ${nombreCompleto(p)} a ${pesos(p.precioEquipo)}?`) &&
+              accion(`insumos/${p.id}/venta`, { unidades: 1, paraEquipo: true }, `Venta al equipo anotada: ${nombreCompleto(p)}.`)
+            }
+          >
+            <Tag strokeWidth={1.6} /> Compra del equipo · {pesos(p.precioEquipo)}
           </button>
         )}
         {p.uso !== 'venta' && (

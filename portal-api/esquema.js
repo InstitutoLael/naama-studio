@@ -289,6 +289,11 @@ const TABLAS = [
   `CREATE INDEX IF NOT EXISTS mensajes_cuenta ON mensajes (cuenta_id, visto)`,
   // Ayuda: dudas, fallas y pedidos del equipo para la administración.
   `CREATE TABLE IF NOT EXISTS ayuda (id INTEGER PRIMARY KEY AUTOINCREMENT, cuenta_id INTEGER NOT NULL, tipo TEXT NOT NULL, texto TEXT NOT NULL, pantalla TEXT, foto TEXT, estado TEXT NOT NULL DEFAULT 'nueva', respuesta TEXT, respondio TEXT, creado TEXT NOT NULL, resuelto TEXT)`,
+  // Precios automáticos por producto: margen para clientas y precio para el equipo (a costo).
+  `CREATE TABLE IF NOT EXISTS precios_extra (producto_id INTEGER PRIMARY KEY, margen INTEGER, al_costo INTEGER NOT NULL DEFAULT 0)`,
+  // Varios proveedores por producto con su precio; el más barato queda como costo.
+  `CREATE TABLE IF NOT EXISTS ofertas_proveedor (id INTEGER PRIMARY KEY AUTOINCREMENT, producto_id INTEGER NOT NULL, proveedor TEXT NOT NULL, precio INTEGER NOT NULL, actualizado TEXT NOT NULL)`,
+  `CREATE INDEX IF NOT EXISTS ofertas_producto ON ofertas_proveedor (producto_id)`,
   `CREATE TABLE IF NOT EXISTS calendarios (token TEXT PRIMARY KEY, cuenta_id INTEGER NOT NULL, todas INTEGER NOT NULL DEFAULT 0, creado TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS avisos_push (
     endpoint TEXT PRIMARY KEY,
@@ -300,7 +305,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v13';
+export const HUELLA = 'v14';
 
 let listo = false;
 
