@@ -8,6 +8,7 @@ import './theme/base.css';
 import './theme/layout.css';
 import ErrorBoundary from './components/shared/ErrorBoundary';
 import App from './App.jsx';
+import './data/preciosVivos';
 
 // La versión anterior registraba un service worker que podía servir contenido viejo.
 // Lo desregistramos y limpiamos sus cachés para que todas las visitas vean la versión actual.

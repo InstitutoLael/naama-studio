@@ -10,6 +10,7 @@ import { team } from '../data/team';
 import { whatsappUrl } from '../data/site';
 import { scrollToTop } from '../lib/smoothScroll';
 import '../theme/booking.css';
+import { usePreciosVivos } from '../data/preciosVivos';
 
 const STEPS = ['Servicio', 'Especialista', 'Día', 'Hora', 'Confirmar'];
 const ANY = { name: 'Sin preferencia', role: 'Te asignamos a quien esté disponible' };
@@ -47,6 +48,7 @@ const fmtLong = (d) =>
   d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 
 const BookingFlow = () => {
+  const versionPrecios = usePreciosVivos();
   const [params] = useSearchParams();
   const preService = servicesData.find((s) => s.name === params.get('servicio')) ?? null;
   const preMundo =
@@ -69,14 +71,14 @@ const BookingFlow = () => {
     const q = normalize(query.trim());
     const pool = q ? servicesData : servicesForMundo(servicesData, mundo);
     return q ? pool.filter((s) => normalize(`${s.name} ${s.cat}`).includes(q)) : pool;
-  }, [mundo, query]);
+  }, [mundo, query, versionPrecios]);
 
   const people = useMemo(() => {
     if (!service?.worker) return [...team, ANY_PERSON];
     const names = service.worker.split(',').map((w) => w.trim());
     const found = team.filter((t) => names.includes(t.name));
     return found.length ? [...found, ANY_PERSON] : [ANY_PERSON];
-  }, [service]);
+  }, [service, versionPrecios]);
 
   const canNext = [!!service, !!person, !!date, !!time, true][step - 1];
 

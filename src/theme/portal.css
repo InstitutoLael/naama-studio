@@ -1049,3 +1049,13 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .portal .chip[aria-pressed='true'], .portal .chip.is-active,
 .portal .hoja .chip[aria-pressed='true'], .portal .hoja .chip.is-active,
 .portal .cuentas .chip.is-active, .portal .dispo-dia .chip.is-active { background: var(--cacao); color: var(--paper); border-color: var(--cacao); }
+
+/* Cambiar precio de un servicio */
+.editar-precio { display: grid; gap: 8px; padding: 12px; border-radius: 14px; background: var(--card-2); }
+.editar-precio__fila { display: grid; grid-template-columns: 70px 1fr 1fr; align-items: center; gap: 8px; font-size: .8rem; color: var(--ink-3); }
+.editar-precio__fila .input { min-height: 44px; padding: 0 10px; font-size: .95rem; }
+.con-signo { position: relative; display: block; }
+.con-signo b { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-weight: 500; color: var(--ink-3); pointer-events: none; }
+.con-signo .input { padding-left: 22px; font-variant-numeric: tabular-nums; }
+.editar-precio__acciones { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
+.aviso-ok { margin: 0; padding: 12px 14px; border-radius: 14px; background: rgba(47, 107, 58, .12); color: #2f6b3a; font-size: .86rem; font-weight: 500; }

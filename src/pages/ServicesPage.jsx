@@ -9,6 +9,7 @@ import { mundos, servicesForMundo } from '../data/categories';
 import { servicesData } from '../data/servicesData';
 import { team } from '../data/team';
 import '../theme/services.css';
+import { usePreciosVivos } from '../data/preciosVivos';
 
 // Minúsculas y sin tildes, para que "unas" encuentre "uñas" y "depilacion" encuentre "depilación".
 const normalize = (s = '') =>
@@ -20,6 +21,7 @@ const matches = (service, words) => {
 };
 
 const ServicesPage = () => {
+  const versionPrecios = usePreciosVivos();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const mundoFilter = params.get('mundo') ?? 'todos';
@@ -45,7 +47,7 @@ const ServicesPage = () => {
         return { mundo: m, items, secciones: enSecciones(m.id, items) };
       })
       .filter((g) => g.items.length > 0);
-  }, [query, mundoFilter, person]);
+  }, [query, mundoFilter, person, versionPrecios]);
 
   const total = groups.reduce((n, g) => n + g.items.length, 0);
 

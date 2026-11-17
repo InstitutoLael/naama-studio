@@ -963,3 +963,17 @@ test('precios automáticos: el proveedor más barato es el costo, clientas con m
   const v = await env.DB.prepare('SELECT total FROM ventas WHERE producto_id = ?').bind(p.id).first();
   assert.equal(v.total, 1800);
 });
+
+test('precios de servicios: admin los cambia, la página los lee y se pueden devolver al original', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '23.1.1.2');
+  const clave = 'Depilación|Depilación Rebaje Completo';
+  assert.equal((await kata.post('precios-servicios', { clave, precio: '25000' })).status, 403);
+  assert.equal((await admin.post('precios-servicios', { cambios: [{ clave, precio: '25000', tiempo: '30 min' }] })).status, 200);
+  const r = await manejar(new Request('https://naamastudio.cl/api/portal/precios-servicios'), env);
+  const d = await r.json();
+  assert.deepEqual(d.cambios[clave], { precio: '25.000', tiempo: '30 min' });
+  await admin.post('precios-servicios', { cambios: [{ clave, volver: true }] });
+  const d2 = await (await manejar(new Request('https://naamastudio.cl/api/portal/precios-servicios'), env)).json();
+  assert.equal(d2.cambios[clave], undefined);
+});
