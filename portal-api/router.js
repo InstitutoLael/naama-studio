@@ -2478,6 +2478,46 @@ ruta('POST', /^ayuda\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, env, cuenta,
   return json({ ok: true });
 });
 
+
+/* ── Precios de servicios editables (los ve la página pública y el portal) ── */
+
+const formatoPrecio = (v) => {
+  const n = Number(String(v ?? '').replace(/\D/g, ''));
+  return n > 0 && n < 10000000 ? n.toLocaleString('es-CL').replace(/,/g, '.') : null;
+};
+
+ruta('GET', /^precios-servicios$/, {}, async ({ db }) => {
+  const { results } = await db.prepare('SELECT * FROM servicios_precios').all();
+  const cambios = {};
+  for (const r of results) cambios[r.clave] = { ...(r.precio ? { precio: r.precio } : {}), ...(r.tiempo ? { tiempo: r.tiempo } : {}) };
+  return new Response(JSON.stringify({ ok: true, cambios }), {
+    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'public, max-age=30' },
+  });
+});
+
+ruta('POST', /^precios-servicios$/, { permiso: 'servicios' }, async ({ db, cuenta, body }) => {
+  const items = (Array.isArray(body.cambios) ? body.cambios : [body]).slice(0, 10);
+  for (const it of items) {
+    const clave = String(it?.clave ?? '').slice(0, 200);
+    if (!clave.includes('|')) return error(400, 'Servicio no válido.');
+    if (it.volver) {
+      await db.prepare('DELETE FROM servicios_precios WHERE clave = ?').bind(clave).run();
+      continue;
+    }
+    const precio = it.precio === undefined || it.precio === '' ? null : formatoPrecio(it.precio);
+    if (it.precio && !precio) return error(400, 'Ese precio no es válido.');
+    const tiempo = texto(it.tiempo, 30) || null;
+    await db
+      .prepare(
+        'INSERT INTO servicios_precios (clave, precio, tiempo, por, actualizado) VALUES (?, ?, ?, ?, ?) ON CONFLICT(clave) DO UPDATE SET precio = excluded.precio, tiempo = excluded.tiempo, por = excluded.por, actualizado = excluded.actualizado',
+      )
+      .bind(clave, precio, tiempo, cuenta.nombre.split(' ')[0], ahora())
+      .run();
+  }
+  await registrar(db, cuenta.id, 'precio_servicio', { n: items.length });
+  return json({ ok: true });
+});
+
 /* ── Mensajes al equipo (Inicio + aviso al celu) ─────────── */
 
 const RUTAS_PASO = /^\/portal(\/[a-z-]*)?(\?[a-z0-9=&-]*)?$/;

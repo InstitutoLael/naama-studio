@@ -262,7 +262,7 @@ const PortalApp = () => {
             <Route path="aseo" element={<Aseo />} />
             <Route path="agenda" element={<Agenda cuenta={cuenta} />} />
             <Route path="resenas" element={<Resenas cuenta={cuenta} />} />
-            <Route path="precios" element={<Precios />} />
+            <Route path="precios" element={<Precios cuenta={cuenta} />} />
             <Route path="ayuda" element={<Ayuda cuenta={cuenta} />} />
             <Route path="giftcards" element={puede(cuenta, 'servicios') || puede(cuenta, 'finanzas') ? <GiftCards /> : <Navigate to="/portal" replace />} />
             <Route path="caja" element={puede(cuenta, 'caja') ? <Caja /> : <Navigate to="/portal" replace />} />

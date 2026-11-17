@@ -11,8 +11,10 @@ import { legacyMundoIds, mundos, servicesForMundo } from '../data/categories';
 import { servicesData } from '../data/servicesData';
 import '../theme/services.css';
 import '../theme/world.css';
+import { usePreciosVivos } from '../data/preciosVivos';
 
 const WorldPage = () => {
+  usePreciosVivos();
   const { mundoId } = useParams();
   const reduce = useReducedMotion();
   const index = mundos.findIndex((m) => m.id === mundoId);

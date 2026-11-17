@@ -294,6 +294,8 @@ const TABLAS = [
   // Varios proveedores por producto con su precio; el más barato queda como costo.
   `CREATE TABLE IF NOT EXISTS ofertas_proveedor (id INTEGER PRIMARY KEY AUTOINCREMENT, producto_id INTEGER NOT NULL, proveedor TEXT NOT NULL, precio INTEGER NOT NULL, actualizado TEXT NOT NULL)`,
   `CREATE INDEX IF NOT EXISTS ofertas_producto ON ofertas_proveedor (producto_id)`,
+  // Cambios a los precios y tiempos de los servicios de la página (clave: «categoría|nombre»).
+  `CREATE TABLE IF NOT EXISTS servicios_precios (clave TEXT PRIMARY KEY, precio TEXT, tiempo TEXT, por TEXT, actualizado TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS calendarios (token TEXT PRIMARY KEY, cuenta_id INTEGER NOT NULL, todas INTEGER NOT NULL DEFAULT 0, creado TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS avisos_push (
     endpoint TEXT PRIMARY KEY,
@@ -305,7 +307,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v14';
+export const HUELLA = 'v15';
 
 let listo = false;
 
