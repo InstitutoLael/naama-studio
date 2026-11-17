@@ -2364,6 +2364,70 @@ async function tareasProgramadas(db, env) {
 ruta('POST', /^cron$/, {}, async ({ db, env }) => json({ ok: true, hecho: await tareasProgramadas(db, env) }));
 
 
+
+/* ── Ayuda: el equipo escribe, a la administración le llega al celu ── */
+
+const TIPOS_AYUDA = { falla: 'Algo no funciona', duda: 'Tengo una duda', cambio: 'Quiero cambiar algo', falta: 'Falta algo' };
+
+ruta('POST', /^ayuda$/, { sesion: true }, async ({ db, env, cuenta, body }) => {
+  const tipo = TIPOS_AYUDA[body.tipo] ? body.tipo : 'duda';
+  const t = texto(body.texto, 1000);
+  if (!t) return error(400, 'Cuéntanos qué pasó, aunque sea en una frase.');
+  const foto = typeof body.foto === 'string' && /^data:image\/(jpeg|webp|png);base64,/.test(body.foto) && body.foto.length < 450000 ? body.foto : null;
+  const pantalla = texto(body.pantalla, 60) || null;
+  const r = await db
+    .prepare('INSERT INTO ayuda (cuenta_id, tipo, texto, pantalla, foto, creado) VALUES (?, ?, ?, ?, ?, ?)')
+    .bind(cuenta.id, tipo, t, pantalla, foto, ahora())
+    .run();
+  const destino = (await conPermiso(db, 'cuentas')).filter((id) => id !== cuenta.id);
+  await avisar(db, env, destino, {
+    titulo: `${cuenta.nombre.split(' ')[0]}: ${TIPOS_AYUDA[tipo]} 🙋‍♀️`,
+    cuerpo: t.length > 140 ? `${t.slice(0, 139)}…` : t,
+    url: '/portal/ayuda',
+    tag: `ayuda-${r.meta.last_row_id}`,
+  }).catch(() => 0);
+  return json({ ok: true, id: r.meta.last_row_id }, 201);
+});
+
+ruta('GET', /^ayuda$/, { sesion: true }, async ({ db, cuenta }) => {
+  const admin = tiene(cuenta, 'cuentas');
+  const { results } = await db
+    .prepare(
+      `SELECT a.*, c.nombre AS quien FROM ayuda a JOIN cuentas c ON c.id = a.cuenta_id
+       ${admin ? '' : 'WHERE a.cuenta_id = ?'} ORDER BY (a.estado = 'resuelta'), a.id DESC LIMIT 100`,
+    )
+    .bind(...(admin ? [] : [cuenta.id]))
+    .all();
+  return json({
+    ok: true,
+    admin,
+    tipos: TIPOS_AYUDA,
+    lista: results.map((a) => ({
+      id: a.id, tipo: a.tipo, texto: a.texto, pantalla: a.pantalla, foto: a.foto, estado: a.estado,
+      respuesta: a.respuesta, respondio: a.respondio, creado: a.creado, quien: a.quien, mia: a.cuenta_id === cuenta.id,
+    })),
+  });
+});
+
+ruta('POST', /^ayuda\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, env, cuenta, body, params }) => {
+  const a = await db.prepare('SELECT * FROM ayuda WHERE id = ?').bind(Number(params[0])).first();
+  if (!a) return error(404, 'No existe.');
+  const respuesta = texto(body.respuesta, 600) || a.respuesta;
+  const estado = body.estado === 'resuelta' ? 'resuelta' : body.estado === 'nueva' ? 'nueva' : 'vista';
+  await db
+    .prepare('UPDATE ayuda SET estado = ?, respuesta = ?, respondio = ?, resuelto = ? WHERE id = ?')
+    .bind(estado, respuesta, cuenta.nombre.split(' ')[0], estado === 'resuelta' ? ahora() : null, a.id)
+    .run();
+  if (respuesta && respuesta !== a.respuesta)
+    await avisar(db, env, [a.cuenta_id], {
+      titulo: `${cuenta.nombre.split(' ')[0]} te respondió 💬`,
+      cuerpo: respuesta,
+      url: '/portal/ayuda',
+      tag: `ayuda-r-${a.id}`,
+    }).catch(() => 0);
+  return json({ ok: true });
+});
+
 /* ── Mensajes al equipo (Inicio + aviso al celu) ─────────── */
 
 const RUTAS_PASO = /^\/portal(\/[a-z-]*)?(\?[a-z0-9=&-]*)?$/;

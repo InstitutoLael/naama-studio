@@ -983,3 +983,48 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .dispo-dia .chips--chicos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .portal .dispo-dia .chips--chicos .chip { min-height: 44px; justify-content: center; font-size: 0.82rem; padding: 0 10px; }
 @media (min-width: 600px) { .dispo-dia .chips--chicos { grid-template-columns: repeat(4, 1fr); } }
+
+/* ── Ayuda ── */
+.ayuda-acceso { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); color: inherit; text-decoration: none; border: 1px solid rgba(166, 93, 69, .18); }
+.ayuda-acceso > svg:first-child { flex: none; width: 28px; height: 28px; color: var(--caramel-600); }
+.ayuda-acceso > span { flex: 1; display: grid; gap: 2px; }
+.ayuda-acceso strong { font-size: .95rem; font-weight: 600; }
+.ayuda-acceso small { font-size: .8rem; color: var(--ink-3); }
+.ayuda-acceso > svg:last-child { flex: none; width: 20px; opacity: .45; }
+.ayuda__form { display: grid; gap: 12px; }
+.ayuda__paso { font-size: .72rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--caramel-600); margin-top: 6px; }
+.ayuda__paso span { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--ink-3); }
+.ayuda__tipos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ayuda__tipo { display: grid; justify-items: start; align-content: start; gap: 4px; min-height: 112px; padding: 16px 14px; border-radius: 18px; background: var(--card); border: 2px solid transparent; box-shadow: var(--sombra); text-align: left; color: inherit; font: inherit; cursor: pointer; transition: border-color .18s, transform .12s; }
+.ayuda__tipo:active { transform: scale(.98); }
+.ayuda__tipo svg { width: 26px; height: 26px; color: var(--caramel-600); margin-bottom: 4px; }
+.ayuda__tipo strong { font-size: .92rem; font-weight: 600; line-height: 1.25; }
+.ayuda__tipo small { font-size: .74rem; color: var(--ink-3); line-height: 1.3; }
+.ayuda__tipo.is-on { border-color: var(--cacao); background: #fff; }
+.ayuda__texto { min-height: 120px; resize: vertical; line-height: 1.45; }
+.ayuda__pantallas { display: flex; flex-wrap: wrap; gap: 8px; }
+.ayuda__foto { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-sm); border: 1.5px dashed rgba(33, 26, 23, .2); background: var(--card); cursor: pointer; font-size: .86rem; color: var(--ink-2); }
+.ayuda__foto svg { width: 24px; height: 24px; color: var(--caramel-600); flex: none; }
+.ayuda__foto img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; flex: none; }
+.ayuda__enviar { width: 100%; margin-top: 4px; }
+.ayuda__enviar:disabled { opacity: .45; }
+.ayuda__listo { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; align-items: center; padding: 20px 18px; border-radius: var(--r); background: linear-gradient(160deg, #eef5ec, #f6f1e9); box-shadow: var(--sombra); }
+.ayuda__check { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #2f6b3a; color: #fff; }
+.ayuda__listo strong { font-size: 1.05rem; }
+.ayuda__listo p { margin: 2px 0 0; font-size: .86rem; color: var(--ink-2); }
+.ayuda__listo .portal__link { grid-column: 1 / -1; }
+.ayuda__historial { display: grid; gap: 10px; }
+.ayuda__item { display: grid; gap: 8px; padding: 16px; border-radius: 18px; background: var(--card); box-shadow: var(--sombra); }
+.ayuda__item.is-resuelta { opacity: .7; }
+.ayuda__item header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ayuda__estado { padding: 3px 10px; border-radius: 99px; font-size: .68rem; font-weight: 700; letter-spacing: .04em; }
+.ayuda__estado--nueva { background: #a65d45; color: #fff; }
+.ayuda__estado--vista { background: rgba(197, 166, 117, .35); color: #6b4b1a; }
+.ayuda__estado--resuelta { background: rgba(47, 107, 58, .16); color: #2f6b3a; }
+.ayuda__meta { font-size: .78rem; color: var(--ink-3); }
+.ayuda__msg { margin: 0; font-size: .95rem; line-height: 1.45; white-space: pre-wrap; }
+.ayuda__img { max-width: 100%; max-height: 260px; border-radius: 12px; justify-self: start; }
+.ayuda__fecha { font-size: .74rem; color: var(--ink-3); }
+.ayuda__resp { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--card-2); font-size: .88rem; }
+.ayuda__admin { display: grid; gap: 8px; }
+.ayuda__acciones { display: flex; gap: 8px; flex-wrap: wrap; }

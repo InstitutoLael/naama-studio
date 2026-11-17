@@ -287,6 +287,8 @@ const TABLAS = [
   // Mensajes de la administración a una persona: salen en su Inicio hasta que toca «Listo» (y llegan al celu).
   `CREATE TABLE IF NOT EXISTS mensajes (id INTEGER PRIMARY KEY AUTOINCREMENT, cuenta_id INTEGER NOT NULL, titulo TEXT NOT NULL, cuerpo TEXT, pasos TEXT, de TEXT, creado TEXT NOT NULL, visto TEXT)`,
   `CREATE INDEX IF NOT EXISTS mensajes_cuenta ON mensajes (cuenta_id, visto)`,
+  // Ayuda: dudas, fallas y pedidos del equipo para la administración.
+  `CREATE TABLE IF NOT EXISTS ayuda (id INTEGER PRIMARY KEY AUTOINCREMENT, cuenta_id INTEGER NOT NULL, tipo TEXT NOT NULL, texto TEXT NOT NULL, pantalla TEXT, foto TEXT, estado TEXT NOT NULL DEFAULT 'nueva', respuesta TEXT, respondio TEXT, creado TEXT NOT NULL, resuelto TEXT)`,
   `CREATE TABLE IF NOT EXISTS calendarios (token TEXT PRIMARY KEY, cuenta_id INTEGER NOT NULL, todas INTEGER NOT NULL DEFAULT 0, creado TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS avisos_push (
     endpoint TEXT PRIMARY KEY,
@@ -298,7 +300,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v12';
+export const HUELLA = 'v13';
 
 let listo = false;
 
