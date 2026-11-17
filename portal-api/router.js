@@ -521,6 +521,42 @@ async function guardarFoto(db, foto) {
   return r.meta.last_row_id;
 }
 
+/** Números cerrados: hasta $10.000 sube a la de $500; sobre eso, a la de $1.000. */
+export const redondearCerrado = (n) => (n <= 10000 ? Math.ceil(n / 500) * 500 : Math.ceil(n / 1000) * 1000);
+/** Precio para el equipo: el costo, subido a la de $100. */
+export const precioEquipoDe = (costo) => Math.ceil(costo / 100) * 100;
+
+/** Guarda proveedores (el más barato pasa a ser el costo), margen y precio al equipo; recalcula el precio de venta. */
+async function guardarPrecios(db, id, body, cuenta) {
+  const ver = verCostos(cuenta);
+  if (ver && Array.isArray(body.proveedores)) {
+    const filas = body.proveedores
+      .map((x) => ({ proveedor: texto(x?.proveedor, 60), precio: numero(String(x?.precio ?? '').replace(/\D/g, ''), { min: 1, max: 10000000 }) }))
+      .filter((x) => x.proveedor && x.precio)
+      .slice(0, 8);
+    await db.prepare('DELETE FROM ofertas_proveedor WHERE producto_id = ?').bind(id).run();
+    for (const f of filas)
+      await db.prepare('INSERT INTO ofertas_proveedor (producto_id, proveedor, precio, actualizado) VALUES (?, ?, ?, ?)').bind(id, f.proveedor, Math.round(f.precio), ahora()).run();
+    if (filas.length) {
+      const barato = filas.reduce((a, b) => (b.precio < a.precio ? b : a));
+      await db.prepare('UPDATE productos SET costo = ?, proveedor = ? WHERE id = ?').bind(Math.round(barato.precio), barato.proveedor, id).run();
+    }
+  }
+  if (ver && (body.margen !== undefined || body.alCosto !== undefined)) {
+    const previo = await db.prepare('SELECT * FROM precios_extra WHERE producto_id = ?').bind(id).first();
+    const margen = body.margen === undefined ? previo?.margen ?? null : body.margen === null || body.margen === '' ? null : numero(body.margen, { min: 0, max: 500 });
+    const alCosto = body.alCosto === undefined ? previo?.al_costo ?? 0 : body.alCosto ? 1 : 0;
+    await db
+      .prepare('INSERT INTO precios_extra (producto_id, margen, al_costo) VALUES (?, ?, ?) ON CONFLICT(producto_id) DO UPDATE SET margen = excluded.margen, al_costo = excluded.al_costo')
+      .bind(id, margen === null ? null : Math.round(margen), alCosto)
+      .run();
+  }
+  // Precio para clientas calculado solo, si tiene margen y costo.
+  const p = await db.prepare('SELECT p.costo, x.margen FROM productos p LEFT JOIN precios_extra x ON x.producto_id = p.id WHERE p.id = ?').bind(id).first();
+  if (p?.costo && p.margen !== null && p.margen !== undefined)
+    await db.prepare('UPDATE productos SET precio_venta = ? WHERE id = ?').bind(redondearCerrado(p.costo * (1 + p.margen / 100)), id).run();
+}
+
 const productoPublico = (p, ver) => {
   const tam = p.tamano || 1;
   const consumoDia = (p.c30 ?? 0) / 30;
@@ -543,18 +579,28 @@ const productoPublico = (p, ver) => {
     consumo30: Math.round((p.c30 ?? 0) * 10) / 10,
     usos30: p.n30 ?? 0,
     diasRestantes: consumoDia > 0 ? Math.floor(p.stock / consumoDia) : null,
-    ...(ver ? { costo: p.costo, costoUnidad: p.costo ? p.costo / tam : null } : {}),
+    precioEquipo: p.al_costo && p.costo ? precioEquipoDe(p.costo) : null,
+    precioAuto: p.margen !== null && p.margen !== undefined,
+    ...(ver ? { costo: p.costo, costoUnidad: p.costo ? p.costo / tam : null, margen: p.margen ?? null, alCosto: Boolean(p.al_costo) } : {}),
   };
 };
 
-const SQL_PRODUCTOS = `SELECT p.*, COALESCE(SUM(u.cantidad), 0) AS c30, COUNT(u.id) AS n30
-  FROM productos p LEFT JOIN usos u ON u.producto_id = p.id AND u.fecha >= ?
+const SQL_PRODUCTOS = `SELECT p.*, x.margen, x.al_costo, COALESCE(SUM(u.cantidad), 0) AS c30, COUNT(u.id) AS n30
+  FROM productos p LEFT JOIN precios_extra x ON x.producto_id = p.id LEFT JOIN usos u ON u.producto_id = p.id AND u.fecha >= ?
   WHERE p.activo = 1 GROUP BY p.id ORDER BY p.categoria, p.nombre COLLATE NOCASE, p.variante COLLATE NOCASE`;
 
 ruta('GET', /^insumos$/, { sesion: true }, async ({ db, cuenta }) => {
   const { results } = await db.prepare(SQL_PRODUCTOS).bind(haceDias(30)).all();
   const ver = verCostos(cuenta);
-  return json({ ok: true, verCostos: ver, puedeEditar: tiene(cuenta, 'insumos'), productos: results.map((p) => productoPublico(p, ver)) });
+  const { results: ofertas } = await db.prepare('SELECT * FROM ofertas_proveedor ORDER BY precio').all();
+  const porProd = new Map();
+  for (const o of ofertas) porProd.set(o.producto_id, [...(porProd.get(o.producto_id) ?? []), ver ? { proveedor: o.proveedor, precio: o.precio } : { proveedor: o.proveedor }]);
+  return json({
+    ok: true,
+    verCostos: ver,
+    puedeEditar: tiene(cuenta, 'insumos'),
+    productos: results.map((p) => ({ ...productoPublico(p, ver), proveedores: porProd.get(p.id) ?? [] })),
+  });
 });
 
 ruta('GET', /^insumos\/foto\/(\d+)$/, { sesion: true }, async ({ db, params }) => {
@@ -630,6 +676,7 @@ ruta('POST', /^insumos$/, { sesion: true }, async ({ db, cuenta, body }) => {
       .bind(id, 'inicial', cuantos * datos.tamano, null, cuenta.id, ahora())
       .run();
   }
+  await guardarPrecios(db, id, body, cuenta);
   await registrar(db, cuenta.id, 'crear_producto', { id });
   const p = await db.prepare(SQL_PRODUCTOS.replace('WHERE p.activo = 1', 'WHERE p.id = ?')).bind(haceDias(30), id).first();
   return json({ ok: true, producto: productoPublico(p, verCostos(cuenta)) }, 201);
@@ -693,7 +740,9 @@ ruta('POST', /^insumos\/(\d+)\/venta$/, { sesion: true }, async ({ db, env, cuen
   if (p.uso === 'trabajo') return error(400, 'Este producto no está marcado para vender.');
   const unidades = numero(body.unidades ?? 1, { min: 1, max: 1000 });
   if (!unidades) return error(400, '¿Cuántos vendiste?');
-  const total = body.total !== undefined && body.total !== '' ? numero(body.total, { max: 100000000 }) : p.precio_venta ? p.precio_venta * unidades : null;
+  const extra = await db.prepare('SELECT al_costo FROM precios_extra WHERE producto_id = ?').bind(id).first();
+  const unitario = body.paraEquipo && extra?.al_costo && p.costo ? precioEquipoDe(p.costo) : p.precio_venta;
+  const total = body.total !== undefined && body.total !== '' ? numero(body.total, { max: 100000000 }) : unitario ? unitario * unidades : null;
   await db.batch([
     db.prepare('UPDATE productos SET stock = MAX(0, stock - ?) WHERE id = ?').bind(unidades * p.tamano, id),
     db
@@ -768,6 +817,7 @@ ruta('POST', /^insumos\/(\d+)$/, { permiso: 'insumos' }, async ({ db, cuenta, bo
     )
     .bind(datos.nombre, datos.marca, datos.categoria, datos.unidad, datos.tamano, datos.minimo, datos.costo, datos.proveedor, fotoId, stock, datos.variante, datos.uso, datos.precioVenta, id)
     .run();
+  await guardarPrecios(db, id, body, cuenta);
   await registrar(db, cuenta.id, 'editar_producto', { id });
   return json({ ok: true });
 });

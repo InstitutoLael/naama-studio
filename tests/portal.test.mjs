@@ -937,3 +937,29 @@ test('ayuda: el equipo escribe, admin lo ve, responde y lo marca resuelto', asyn
   assert.equal(k.lista[0].estado, 'resuelta');
   assert.equal(k.lista[0].respuesta, 'Ya lo compramos');
 });
+
+test('precios automáticos: el proveedor más barato es el costo, clientas con margen en números cerrados y equipo a costo', async () => {
+  const admin = await configurar();
+  const kata = await crearYEntrar(admin, 'Kata', 'equipo', '22.1.1.2');
+  const r = await admin.post('insumos', {
+    nombre: 'Bebida energética', categoria: 'Otros', unidad: 'u', tamano: 1, envases: 12, uso: 'venta',
+    proveedores: [{ proveedor: 'Lider', precio: '1.190' }, { proveedor: 'Mayorista 10', precio: '890' }],
+    margen: 60, alCosto: true,
+  });
+  assert.equal(r.status, 201);
+  const p = (await admin.pedir('insumos')).data.productos.find((x) => x.nombre === 'Bebida energética');
+  assert.equal(p.costo, 890);
+  assert.equal(p.proveedor, 'Mayorista 10');
+  assert.equal(p.precioVenta, 1500); // 890 × 1,6 = 1.424 → $1.500
+  assert.equal(p.precioEquipo, 900);
+  assert.equal(p.proveedores.length, 2);
+  // Kata ve el precio al equipo y los proveedores, pero no los precios de compra.
+  const k = (await kata.pedir('insumos')).data.productos.find((x) => x.id === p.id);
+  assert.equal(k.precioEquipo, 900);
+  assert.equal(k.costo, undefined);
+  assert.equal(k.proveedores[0].precio, undefined);
+  // Venta al equipo usa el precio de costo.
+  assert.equal((await kata.post(`insumos/${p.id}/venta`, { unidades: 2, paraEquipo: true })).status, 200);
+  const v = await env.DB.prepare('SELECT total FROM ventas WHERE producto_id = ?').bind(p.id).first();
+  assert.equal(v.total, 1800);
+});

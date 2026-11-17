@@ -12,7 +12,7 @@ export const UNIDADES = {
 
 // Sacados de GASTOS 2026 (a quién le compra el salón).
 export const PROVEEDORES = [
-  'Te Ves Linda Pro Spa', 'Optima SpA', 'Silucbeautystore', 'Cruz Verde', 'La Oferta', 'Jumbo El Llano', 'Shein', 'Mercado Libre', 'Portal El Llano',
+  'Te Ves Linda Pro Spa', 'Optima SpA', 'Silucbeautystore', 'Cruz Verde', 'La Oferta', 'Jumbo El Llano', 'Shein', 'Mercado Libre', 'Portal El Llano', 'Portal Exposición Estación Central', 'Lider', 'Alvi', 'Mayorista 10', 'Unimarc', 'Dans',
 ];
 
 /** Cuántos envases son una cantidad (1 decimal). */
