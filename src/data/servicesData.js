@@ -418,7 +418,7 @@ export const servicesData = [
     {
       name: "Laminado de Cejas",
       worker: "Gaby",
-      cat: "Estetica",
+      cat: "Pestañas y Cejas",
       old: "12.990",
       price: "15.000",
       time: "45 min",
@@ -428,7 +428,7 @@ export const servicesData = [
     {
       name: "Tinte de Pestañas",
       worker: "Gaby",
-      cat: "Estetica",
+      cat: "Pestañas y Cejas",
       old: "---",
       price: "8.000",
       time: "20 min",
@@ -438,7 +438,7 @@ export const servicesData = [
     {
       name: "Henna de Cejas",
       worker: "Gaby",
-      cat: "Estetica",
+      cat: "Pestañas y Cejas",
       old: "---",
       price: "12.000",
       time: "30 min",
@@ -775,17 +775,6 @@ export const servicesData = [
       desc: "Aclarado global con técnica de micro-tejido para cabellos largos.",
       why: "Proceso extendido que garantiza una transición de color impecable sin marcas de crecimiento."
     },
-    {
-      name: "Babylights sin crecimiento (Extra largo)",
-      worker: "Valeria",
-      cat: "Peluquería",
-      old: "90.990",
-      price: "100.000",
-      time: "6 horas",
-      desc: "Máxima iluminación artística para cabellos extra largos o muy abundantes.",
-      why: "Dedicación exclusiva de media jornada para lograr un rubio perfecto y uniforme en toda la extensión."
-    },
-
     // --- BALAYAGE ---
     {
       name: "Balayage Tradicional sin crecimiento (Corto)",
@@ -817,17 +806,6 @@ export const servicesData = [
       desc: "Diseño de color en tendencia para melenas largas, aportando dimensión y movimiento.",
       why: "Mayor cantidad de matizadores y protectores térmicos para mantener la salud de las puntas aclaradas."
     },
-    {
-      name: "Balayage Tradicional sin crecimiento (Extra largo)",
-      worker: "Valeria",
-      cat: "Peluquería",
-      old: "85.990",
-      price: "100.000",
-      time: "6 horas",
-      desc: "Tratamiento de color de autor para cabellos extra largos o muy densos.",
-      why: "Dedicación de alta complejidad técnica para un degradado suave y sofisticado en grandes superficies."
-    },
-
     // --- BAÑOS DE COLOR ---
     {
       name: "Baño de color + Crecimiento",
@@ -1037,23 +1015,12 @@ export const servicesData = [
       desc: "Aclarado potente y definido para cabellos largos.",
       why: "Requiere una aplicación minuciosa y gran cantidad de producto para saturar cada sección de papel."
     },
-    {
-      name: "Balayage con papel (Extra largo)",
-      worker: "Valeria",
-      cat: "Peluquería",
-      old: "85.990",
-      price: "120.000",
-      time: "6.5 horas",
-      desc: "Servicio de alta peluquería para aclarados máximos en melenas extra largas.",
-      why: "Máxima complejidad técnica y dedicación horaria para un rubio de lujo sin daño capilar."
-    },
-
     // --- SERVICIOS INDIVIDUALES Y OTROS ---
     {
       name: "Brushing Solo",
       worker: "Valeria, Viviana, Katalina",
       cat: "Peluquería",
-      old: "15.990",
+      old: "---",
       price: "15.000",
       time: "30 min",
       desc: "Lavado clínico y modelado profesional con secador.",
@@ -1299,7 +1266,7 @@ export const servicesData = [
       name: "Podología Clínica Avanzada",
       worker: "Podóloga",
       cat: "Podología",
-      old: "25.990",
+      old: "---",
       price: "25.000",
       time: "1.3 horas",
       desc: "Tratamiento profundo para patologías específicas como onicocriptosis (uñeros), tratamiento de hongos o atención de pie diabético.",

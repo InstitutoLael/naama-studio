@@ -40,6 +40,7 @@ const MenuItem = ({ item }) => {
               </>
             ) : (
               <>
+                {item.desdeTexto && <><small>desde</small> </>}
                 {esRebaja(item.old, item.price) && <s>${item.old}</s>}
                 {precioTexto(item.price)}
               </>

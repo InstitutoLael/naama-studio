@@ -145,7 +145,7 @@ const Precios = ({ cuenta }) => {
               {secciones.length > 1 && <h3 className="precios__sub">{sec.titulo}</h3>}
               <ul className="precios__lista">
                 {sec.items.map((it) => {
-                  const clave = `${m.id}-${it.nombre}`;
+                  const clave = `${m.id}-${it.original ?? it.nombre}`;
                   const abre = abierto === clave;
                   return (
                     <li key={clave} className={`precio ${abre ? 'is-open' : ''}`}>
@@ -157,7 +157,9 @@ const Precios = ({ cuenta }) => {
                               <small>desde</small> ${it.desde.toLocaleString('es-CL')}
                             </>
                           ) : (
-                            plata(it.price)
+                            <>
+                              {it.desdeTexto && <small>desde</small>} {plata(it.price)}
+                            </>
                           )}
                         </span>
                         <span className="precio__meta">
@@ -179,7 +181,7 @@ const Precios = ({ cuenta }) => {
                       {abre && (
                         <div className="precio__detalle">
                           {hay(it.desc) && <p>{it.desc}</p>}
-                          <button type="button" className="btn btn--ghost precio__agendar" onClick={() => agendar(it.nombre)}>
+                          <button type="button" className="btn btn--ghost precio__agendar" onClick={() => agendar(it.original ?? it.nombre)}>
                             <CalendarPlus size={16} /> Agendar este servicio
                           </button>
                           {puedeCambiar &&
