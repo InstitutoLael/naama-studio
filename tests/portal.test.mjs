@@ -977,3 +977,62 @@ test('precios de servicios: admin los cambia, la página los lee y se pueden dev
   const d2 = await (await manejar(new Request('https://naamastudio.cl/api/portal/precios-servicios'), env)).json();
   assert.equal(d2.cambios[clave], undefined);
 });
+
+test('«¿Quién vino?» se llena solo con Mi mes y la planilla; lo dudoso queda por confirmar', async () => {
+  const { admin, gaby } = await crearEquipo();
+  await admin.post('clientas', {
+    contactos: [
+      { nombre: 'Rosa Oteiza', telefono: '911110001' },
+      { nombre: 'Claudia Pérez', telefono: '911110002' },
+      { nombre: 'Claudia Soto', telefono: '911110003' },
+    ],
+    origen: 'contacto',
+  });
+  // Mi mes: «Rosa» calza con una sola clienta → visita anotada.
+  await gaby.post('mi-mes', { servicio: 'Manos', clienta: 'Rosa', monto: 23000, fecha: '2026-11-02' });
+  // «Claudia» calza con dos → por confirmar.
+  await gaby.post('mi-mes', { servicio: 'Pies', clienta: 'Claudia', monto: 25000, fecha: '2026-11-03' });
+  env.RELOJ = '2026-11-20T15:00:00Z';
+  const lista = await admin.pedir('clientas');
+  const rosa = lista.data.clientas.find((c) => c.nombre === 'Rosa Oteiza');
+  assert.equal(rosa.visitas, 1);
+  assert.equal(rosa.ultimaVisita, '2026-11-02');
+
+  // La planilla contesta solo si el código es real.
+  const { procesarFilas, filasDePlanilla } = await import('../portal-api/visitasAuto.js');
+  const filas = filasDePlanilla([
+    { f: '2026-03-10', c: 'Rosa ', s: 'Limpieza facial' },
+    { f: '2026-03-10', c: 'Rosa', s: 'Limpieza facial' },
+    { f: '2026-04-01', c: 'Claudia', s: 'Color' },
+    { f: '2026-04-02', c: 'Caja', s: 'Venta' },
+    { f: 'malo', c: 'Ana', s: 'x' },
+  ]);
+  const r = await procesarFilas(env.DB, filas, { hoy: '2026-11-20', ts: '2026-11-20T15:00:00Z' });
+  assert.equal(r.anotadas, 1);
+  assert.equal(r.porConfirmar, 1);
+  // Repetir no duplica.
+  assert.equal((await procesarFilas(env.DB, filas, { hoy: '2026-11-20', ts: 'x' })).nuevas, 0);
+
+  const gabyNo = await gaby.pedir('visitas/por-confirmar');
+  assert.equal(gabyNo.status, 403);
+  const pc = await admin.pedir('visitas/por-confirmar');
+  assert.equal(pc.data.grupos.length, 1);
+  assert.equal(pc.data.grupos[0].n, 2);
+  assert.equal(pc.data.grupos[0].candidatas.length, 2);
+  const soto = pc.data.grupos[0].candidatas.find((c) => c.nombre === 'Claudia Soto');
+  const ok = await admin.post('visitas/por-confirmar', { clave: pc.data.grupos[0].clave, clientaId: soto.id });
+  assert.equal(ok.data.anotadas, 2);
+  const despues = await admin.pedir('clientas');
+  assert.equal(despues.data.clientas.find((c) => c.nombre === 'Claudia Soto').visitas, 2);
+  assert.equal((await admin.pedir('visitas/por-confirmar')).data.grupos.length, 0);
+
+  // Una clienta nueva que calza sola con lo pendiente se lleva sus visitas.
+  await procesarFilas(env.DB, filasDePlanilla([{ f: '2026-05-05', c: 'Maite', s: 'Corte' }]), { hoy: '2026-11-20', ts: 'x' });
+  await admin.post('clientas', { contactos: [{ nombre: 'Maite González', telefono: '911110009' }], origen: 'contacto' });
+  const maite = (await admin.pedir('clientas')).data.clientas.find((c) => c.nombre === 'Maite González');
+  assert.equal(maite.visitas, 1);
+
+  // Sin planilla conectada, traer no rompe nada.
+  const t = await admin.post('visitas/planilla', {});
+  assert.equal(t.data.planillaConectada, false);
+});

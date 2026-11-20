@@ -1059,3 +1059,20 @@ html.en-portal, html.en-portal body { background: #f4ede4; }
 .con-signo .input { padding-left: 22px; font-variant-numeric: tabular-nums; }
 .editar-precio__acciones { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 4px; }
 .aviso-ok { margin: 0; padding: 12px 14px; border-radius: 14px; background: rgba(47, 107, 58, .12); color: #2f6b3a; font-size: .86rem; font-weight: 500; }
+
+/* Visitas por confirmar */
+.porconfirmar { background: #f6f1e7; border-color: rgba(120, 98, 60, .22); }
+.porconfirmar .repetidas__icono { background: #8a6d3b; }
+.porconfirmar.is-ok .repetidas__icono { background: #5f7d5a; }
+.porconfirmar.is-ok .repetidas__icono svg { width: 16px; height: 16px; }
+.porconfirmar__planilla { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; font-size: .82rem; color: var(--ink-3); }
+.confirmar__cabeza { display: grid; gap: 2px; }
+.confirmar__nombre { font-family: var(--serif, inherit); font-size: 1.15rem; font-weight: 500; }
+.confirmar__dato { font-size: .85rem; }
+.confirmar__origen { font-size: .74rem; color: var(--ink-3); }
+.confirmar__pregunta { font-size: .85rem; font-weight: 600; }
+.chip--elegir { min-height: 44px; padding-inline: 16px; }
+.chip--elegir small { color: var(--ink-3); font-weight: 400; }
+.confirmar__buscar { margin: 0; }
+.confirmar__descartar { justify-self: start; font-size: .8rem; color: var(--ink-3); background: none; border: 0; padding: 6px 0; text-decoration: underline; cursor: pointer; }
+.sinclienta { display: grid; gap: 10px; padding: 14px; border-radius: 14px; background: rgba(255, 255, 255, .55); }
