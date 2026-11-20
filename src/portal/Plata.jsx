@@ -88,21 +88,32 @@ const Plata = () => {
 
       {d && (
         <>
+          {d.saldo?.auto && (
+            <section className="plata-ahora">
+              <span className="plata-ahora__titulo">
+                <span className="plata-ahora__punto" aria-hidden="true" /> En Mercado Pago ahora mismo
+              </span>
+              <strong className="plata-ahora__monto">{pesos(d.saldo.monto)}</strong>
+              {d.saldo.porLiberar > 0 && <span className="plata-ahora__detalle">+ {pesos(d.saldo.porLiberar)} que todavía se está liberando</span>}
+            </section>
+          )}
           <section className="hoy plata-heroe">
             <span className="plata-heroe__titulo">Disponible para gastar</span>
             <strong className="plata-heroe__monto">{d.disponible === null ? '—' : pesos(d.disponible)}</strong>
             <span className="plata-heroe__detalle">
               {d.saldo ? (
                 <>
-                  Saldo {pesos(d.saldo.monto)} (anotado {hora(d.saldo.ts)} por {d.saldo.por}) − {pesos(d.porPagar)} que falta pagar este mes
+                  {d.saldo.auto ? 'Saldo de Mercado Pago' : `Saldo ${pesos(d.saldo.monto)} (anotado ${hora(d.saldo.ts)} por ${d.saldo.por})`} − {pesos(d.porPagar)} que falta pagar este mes
                 </>
               ) : (
                 'Anota el saldo que te muestra la app de Mercado Pago y te digo cuánto queda libre.'
               )}
             </span>
-            <button type="button" className="hoy__boton" onClick={() => setHoja({ tipo: 'saldo' })}>
-              <Wallet size={18} /> {d.saldo ? 'Actualizar saldo' : 'Anotar saldo'}
-            </button>
+            {!d.saldo?.auto && (
+              <button type="button" className="hoy__boton" onClick={() => setHoja({ tipo: 'saldo' })}>
+                <Wallet size={18} /> {d.saldo ? 'Actualizar saldo' : 'Anotar saldo'}
+              </button>
+            )}
           </section>
 
           {!d.conectado && (

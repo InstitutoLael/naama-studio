@@ -1031,6 +1031,25 @@ async function cuentaMP(env) {
   }
 }
 
+/**
+ * Saldo de la cuenta en este momento. Mercado Pago no lo publica en su API documentada; probamos la
+ * consulta de saldo de la cuenta y, si responde, se usa sola. Si no, queda el saldo anotado a mano.
+ */
+async function saldoMP(env, yo) {
+  if (!env.MP_ACCESS_TOKEN || !yo) return { ok: false, motivo: 'sin-cuenta' };
+  try {
+    const r = await (env.MP_FETCH ?? fetch)(`${MP}/users/${yo}/mercadopago_account/balance`, { headers: { Authorization: `Bearer ${env.MP_ACCESS_TOKEN}` } });
+    if (!r.ok) return { ok: false, motivo: `http-${r.status}` };
+    const d = await r.json();
+    const disponible = Number(d.available_balance ?? d.availableBalance);
+    const total = Number(d.total_amount ?? d.totalAmount ?? disponible);
+    if (!Number.isFinite(disponible)) return { ok: false, motivo: 'sin-dato' };
+    return { ok: true, disponible: Math.round(disponible), total: Math.round(total), porLiberar: Math.round(Number(d.unavailable_balance ?? total - disponible) || 0) };
+  } catch {
+    return { ok: false, motivo: 'error' };
+  }
+}
+
 async function pagosMP(env, desde) {
   const llamar = env.MP_FETCH ?? fetch;
   const pagos = [];
@@ -1149,6 +1168,11 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
   let salidas = [];
   try {
     const [crudos, yo] = await Promise.all([pagosMP(env, desde), cuentaMP(env)]);
+    const enVivo = await saldoMP(env, yo);
+    if (enVivo.ok) {
+      base.saldo = { monto: enVivo.disponible, ts: ahora(), por: 'Mercado Pago', auto: true, total: enVivo.total, porLiberar: enVivo.porLiberar };
+      base.disponible = enVivo.disponible - base.porPagar;
+    }
     const todos = crudos.map(resumirPago);
     const esMio = (p) => yo == null || p.cobrador == null || String(p.cobrador) === String(yo);
     pagos = todos.filter((p) => esMio(p) && !NO_VENTA.has(p.operacion));
@@ -1193,7 +1217,7 @@ ruta('GET', /^plata$/, { permiso: 'finanzas' }, async ({ db, env }) => {
   }
   if (marcados) {
     base.porPagar -= marcados;
-    base.disponible = saldo ? saldo.monto - base.porPagar : null;
+    base.disponible = base.saldo ? base.saldo.monto - base.porPagar : null;
   }
   const aprobados = pagos.filter((p) => p.estado === 'approved');
   const semana = haceDias(6);
@@ -2413,6 +2437,10 @@ async function tareasProgramadas(db, env) {
   if (hora >= 18 && hora < 23 && (await reclamar(db, 'cron_manana', hoy))) hecho.manana = await avisoDeManana(db, env, hoy);
   if (dia === 'Mon' && hora >= 9 && (await reclamar(db, 'cron_semana', hoy))) hecho.semana = await resumenSemanal(db, env, hoy);
   hecho.visitas = await sincronizarPortal(db, { hoy, ts: ahora() }).catch(() => null);
+  if (env.MP_ACCESS_TOKEN && (await reclamar(db, 'cron_mp_saldo', hoy))) {
+    const prueba = await saldoMP(env, await cuentaMP(env));
+    hecho.saldoMP = prueba.ok ? 'en-vivo' : prueba.motivo;
+  }
   // Una vez al día, y de nuevo mientras queden filas de la planilla por traer.
   const ultimaPlanilla = (await db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_visitas'`).first())?.valor ?? '';
   const faltan = /"quedan":[1-9]/.test(ultimaPlanilla);
