@@ -529,6 +529,187 @@ const Repetidas = ({ onCambio }) => {
   );
 };
 
+
+/* ── Visitas por confirmar (Administración): la planilla y Mi mes traen nombres que calzan con varias clientas ── */
+const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const mesCorto = (iso) => (iso ? `${Number(iso.slice(8, 10))} ${MESES_CORTOS[Number(iso.slice(5, 7)) - 1]}` : '');
+const cuandoFue = (ts) => {
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.toLocaleString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' });
+};
+const sinTildes = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+const GrupoPorConfirmar = ({ g, clientas, ocupado, onElegir, onDescartar }) => {
+  const [buscar, setBuscar] = useState('');
+  const q = sinTildes(buscar.trim());
+  const encontradas = q.length >= 2 ? clientas.filter((c) => sinTildes(c.nombre).includes(q)).slice(0, 6) : [];
+  const rango = g.desde === g.hasta ? mesCorto(g.desde) : `${mesCorto(g.desde)} → ${mesCorto(g.hasta)}`;
+  return (
+    <div className="repetida confirmar">
+      <div className="confirmar__cabeza">
+        <strong className="confirmar__nombre">«{g.nombre}»</strong>
+        <span className="confirmar__dato">
+          {g.n === 1 ? '1 visita' : `${g.n} visitas`} · {rango}
+        </span>
+        <span className="confirmar__origen">Anotado en: {g.origenes.join(', ')}</span>
+      </div>
+      <p className="confirmar__pregunta">{g.candidatas.length ? '¿Cuál de estas es?' : 'No la encontré en tus clientas. Búscala:'}</p>
+      {g.candidatas.length > 0 && (
+        <div className="repetida__opciones">
+          {g.candidatas.map((c) => (
+            <button key={c.id} type="button" className="chip chip--elegir" disabled={ocupado} onClick={() => onElegir(g, c)}>
+              {c.nombre}
+              {c.visitas ? <small> · {c.visitas} visita{c.visitas > 1 ? 's' : ''}</small> : null}
+            </button>
+          ))}
+        </div>
+      )}
+      <label className="buscador confirmar__buscar">
+        <SearchIcon />
+        <span className="visually-hidden">Buscar otra clienta</span>
+        <input className="input" placeholder={g.candidatas.length ? 'Es otra: buscar por nombre' : 'Buscar por nombre o apellido'} value={buscar} onChange={(e) => setBuscar(e.target.value)} />
+      </label>
+      {encontradas.length > 0 && (
+        <div className="repetida__opciones">
+          {encontradas.map((c) => (
+            <button key={c.id} type="button" className="chip chip--elegir" disabled={ocupado} onClick={() => onElegir(g, c)}>
+              {c.nombre}
+            </button>
+          ))}
+        </div>
+      )}
+      {q.length >= 2 && !encontradas.length && <p className="muted repetida__ayuda">No hay ninguna clienta con ese nombre. Súbela primero y sus visitas se anotan solas.</p>}
+      <button type="button" className="link-btn confirmar__descartar" disabled={ocupado} onClick={() => onDescartar(g)}>
+        No es una clienta (sacar de la lista)
+      </button>
+    </div>
+  );
+};
+
+const SinClienta = ({ sin, clientas, ocupado, onElegir, onDescartar }) => {
+  const [elegido, setElegido] = useState(null);
+  const g = sin.lista.find((x) => x.clave === elegido);
+  return (
+    <div className="sinclienta">
+      <p className="repetida__titulo">No están en tus clientas</p>
+      <p className="muted repetida__ayuda">
+        {sin.nombres === 1 ? '1 nombre' : `${sin.nombres.toLocaleString('es-CL')} nombres`} ({sin.visitas.toLocaleString('es-CL')} visitas) que no
+        encontré en los contactos. Cuando subas a esa clienta, sus visitas se anotan solas. Si ya está con otro nombre, tócala y búscala.
+      </p>
+      <div className="repetida__opciones">
+        {sin.lista.map((x) => (
+          <button key={x.clave} type="button" className="chip" aria-pressed={elegido === x.clave} onClick={() => setElegido(elegido === x.clave ? null : x.clave)}>
+            {x.nombre} · {x.n}
+          </button>
+        ))}
+      </div>
+      {g && <GrupoPorConfirmar key={g.clave} g={g} clientas={clientas} ocupado={ocupado} onElegir={onElegir} onDescartar={onDescartar} />}
+    </div>
+  );
+};
+
+const PorConfirmar = ({ clientas, onCambio }) => {
+  const [d, setD] = useState(null);
+  const [abierto, setAbierto] = useState(false);
+  const [ocupado, setOcupado] = useState(false);
+  const [trayendo, setTrayendo] = useState(false);
+  const [error, setError] = useState('');
+  const cargar = useCallback(() => api('visitas/por-confirmar').then(setD).catch(() => {}), []);
+  useEffect(() => {
+    cargar();
+  }, [cargar]);
+  if (!d) return null;
+
+  const elegir = async (g, c) => {
+    setOcupado(true);
+    setError('');
+    try {
+      const r = await post('visitas/por-confirmar', { clave: g.clave, clientaId: c.id });
+      await cargar();
+      onCambio(`Listo: ${r.anotadas === 1 ? '1 visita anotada' : `${r.anotadas} visitas anotadas`} a ${c.nombre}.`);
+    } catch (err) {
+      setError(err.message);
+    }
+    setOcupado(false);
+  };
+  const descartar = async (g) => {
+    setOcupado(true);
+    try {
+      await post('visitas/por-confirmar', { clave: g.clave, descartar: true });
+      await cargar();
+    } catch (err) {
+      setError(err.message);
+    }
+    setOcupado(false);
+  };
+  const traer = async () => {
+    setTrayendo(true);
+    setError('');
+    try {
+      const r = await post('visitas/planilla', {});
+      setD(r);
+      const x = r.resultado ?? {};
+      if (x.error) setError(x.error);
+      else onCambio(x.anotadas ? `Listo: ${x.anotadas} visitas nuevas desde la planilla.` : 'La planilla ya estaba al día.');
+    } catch (err) {
+      setError(err.message);
+    }
+    setTrayendo(false);
+  };
+
+  const p = d.planilla;
+  const estadoPlanilla = !d.planillaConectada
+    ? 'La planilla todavía no está conectada.'
+    : p?.error
+      ? `No se pudo leer la planilla (${cuandoFue(p.ts)}).`
+      : p
+        ? `Planilla revisada el ${cuandoFue(p.ts)} · ${p.filas.toLocaleString('es-CL')} filas${p.quedan ? ` · faltan ${p.quedan}` : ''}`
+        : 'La planilla se revisa sola una vez al día.';
+  const hay = d.totalGrupos > 0;
+  const sin = d.sinClienta ?? { nombres: 0, visitas: 0, lista: [] };
+
+  return (
+    <section className={`repetidas porconfirmar ${abierto ? 'is-open' : ''} ${hay ? '' : 'is-ok'}`}>
+      <button type="button" className="repetidas__cabeza" onClick={() => setAbierto((x) => !x)} aria-expanded={abierto}>
+        <span className="repetidas__icono" aria-hidden="true">{hay ? '?' : <CheckIcon />}</span>
+        <span>
+          <strong>
+            {hay
+              ? `${d.totalVisitas === 1 ? '1 visita' : `${d.totalVisitas.toLocaleString('es-CL')} visitas`} por confirmar`
+              : 'Las visitas se anotan solas'}
+          </strong>
+          <small>
+            {hay
+              ? `${d.totalGrupos === 1 ? '1 nombre calza' : `${d.totalGrupos} nombres calzan`} con más de una clienta. Toca para elegir cuál es.`
+              : 'Desde Mi mes, la agenda, Servicios y la planilla del año.'}
+          </small>
+        </span>
+      </button>
+      {abierto && (
+        <div className="repetidas__cuerpo">
+          <div className="porconfirmar__planilla">
+            <span>{estadoPlanilla}</span>
+            {d.planillaConectada && (
+              <button type="button" className="btn btn--sm btn--ghost" disabled={trayendo} onClick={traer}>
+                {trayendo ? 'Leyendo la planilla…' : p?.quedan ? 'Seguir trayendo' : 'Traer ahora'}
+              </button>
+            )}
+          </div>
+          {error && <p className="portal-error">{error}</p>}
+          {d.grupos.map((g) => (
+            <GrupoPorConfirmar key={g.clave} g={g} clientas={clientas} ocupado={ocupado} onElegir={elegir} onDescartar={descartar} />
+          ))}
+          {d.totalGrupos > d.grupos.length && <p className="muted repetida__ayuda">Van los {d.grupos.length} nombres con más visitas. Al confirmarlos aparecen los que siguen.</p>}
+          {sin.nombres > 0 && (
+            <SinClienta sin={sin} clientas={clientas} ocupado={ocupado} onElegir={elegir} onDescartar={descartar} />
+          )}
+        </div>
+      )}
+    </section>
+  );
+};
+
 const Clientas = ({ cuenta }) => {
   const [datos, setDatos] = useState(null);
   const [error, setError] = useState('');
@@ -627,6 +808,16 @@ const Clientas = ({ cuenta }) => {
           )}
         </div>
       </header>
+
+      {datos?.verNumeros && (
+        <PorConfirmar
+          clientas={todas}
+          onCambio={(t) => {
+            cargar();
+            mostrarAviso(t);
+          }}
+        />
+      )}
 
       {datos?.verNumeros && (
         <Repetidas

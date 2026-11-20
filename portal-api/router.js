@@ -2,6 +2,7 @@
 // Todo vive bajo /api/portal/… y responde JSON.
 
 import { asegurarEsquema } from './esquema.js';
+import { emparejar, filasDePlanilla, indiceClientas, normNombre, recontar, procesarFilas, reintentarPendientes, sincronizarPortal } from './visitasAuto.js';
 import { enviarPush, llavesVapid } from './push.js';
 import { claveTemporal, hashClave, igualSeguro, nuevoToken, sha256, verificarClave } from './seguridad.js';
 import { PERMISOS, ROL_IDS, permisosDe } from '../src/portal/permisos.js';
@@ -318,7 +319,9 @@ const clientaPublica = (c, verNumero, hoy) => ({
 const MAX_IMPORTAR = 1000;
 const TANDA = 40; // D1 acepta ~90 variables por consulta: insertamos de a una fila, en tandas de 40 consultas
 
-ruta('GET', /^clientas$/, { sesion: true }, async ({ db, cuenta }) => {
+ruta('GET', /^clientas$/, { sesion: true }, async ({ db, env, cuenta }) => {
+  // Lo que anotaron en Mi mes, Servicios y la agenda pasa solo a «¿Quién vino?».
+  await sincronizarPortal(db, { hoy: fechaChile(reloj(env)), ts: ahora() }).catch((e) => console.error('visitas', e));
   const { results } = await db.prepare('SELECT * FROM clientas WHERE activa = 1 ORDER BY nombre COLLATE NOCASE').all();
   const hoy = fechaChile();
   const ver = tiene(cuenta, 'clientas');
@@ -370,6 +373,7 @@ ruta('POST', /^clientas$/, { sesion: true }, async ({ db, cuenta, body }) => {
   const repetidas = validos.length - nuevos.length + preparados.filter((p) => p.repetido).length;
   // A quien no ve números, solo se le dice el nombre con que ya estaba guardada.
   const yaEstaban = validos.filter((p) => existentes.has(p.telefono)).map((p) => existentes.get(p.telefono).nombre);
+  if (nuevos.length) await reintentarPendientes(db, { ts: ahora() }).catch(() => null);
   return json({ ok: true, creadas: nuevos.length, repetidas, invalidas, yaEstaban: yaEstaban.slice(0, 20) }, 201);
 });
 
@@ -2408,12 +2412,144 @@ async function tareasProgramadas(db, env) {
   if (abre && hora >= 16 && hora < 19 && (await reclamar(db, 'cron_aseo_pm', hoy))) hecho.tarde = await avisoDelDia(db, env, hoy, 'tarde');
   if (hora >= 18 && hora < 23 && (await reclamar(db, 'cron_manana', hoy))) hecho.manana = await avisoDeManana(db, env, hoy);
   if (dia === 'Mon' && hora >= 9 && (await reclamar(db, 'cron_semana', hoy))) hecho.semana = await resumenSemanal(db, env, hoy);
+  hecho.visitas = await sincronizarPortal(db, { hoy, ts: ahora() }).catch(() => null);
+  if (await reclamar(db, 'cron_planilla', hoy)) hecho.planilla = await traerPlanilla(db, env).catch((e) => ({ error: String(e) }));
   return hecho;
 }
 
 ruta('POST', /^cron$/, {}, async ({ db, env }) => json({ ok: true, hecho: await tareasProgramadas(db, env) }));
 
 
+
+/* ── «¿Quién vino?» desde la planilla (Excel) del año ──────────────
+   El portal no guarda claves de Google. Pide las filas al Apps Script de la planilla con un código
+   de un solo uso; el script le pregunta al portal si ese código es real antes de contestar. */
+
+async function traerPlanilla(db, env) {
+  const url = (await db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_url'`).first())?.valor;
+  if (!url) return { conectada: false };
+  const token = nuevoToken();
+  const guardarMeta = (clave, valor) =>
+    db.prepare('INSERT INTO meta (clave, valor) VALUES (?, ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor').bind(clave, valor).run();
+  await guardarMeta('planilla_pedido', `${token}|${Date.now() + 3 * 60000}`);
+  let d = null;
+  try {
+    const r = await fetch(`${url}?pedido=${token}`, { redirect: 'follow' });
+    d = await r.json().catch(() => null);
+  } catch {
+    d = null;
+  } finally {
+    await guardarMeta('planilla_pedido', '');
+  }
+  if (!d?.ok) {
+    const msg = d?.error ? String(d.error).slice(0, 160) : 'La planilla no contestó. Puede que falte actualizar el código de la planilla.';
+    await guardarMeta('planilla_visitas', JSON.stringify({ ts: ahora(), error: msg }));
+    return { conectada: true, error: msg };
+  }
+  const filas = filasDePlanilla(d.filas);
+  const res = await procesarFilas(db, filas, { hoy: fechaChile(reloj(env)), ts: ahora() });
+  await reintentarPendientes(db, { ts: ahora() }).catch(() => null);
+  const resumen = { ts: ahora(), filas: filas.length, ...res };
+  await guardarMeta('planilla_visitas', JSON.stringify(resumen));
+  return { conectada: true, ...resumen };
+}
+
+// El Apps Script pregunta si el código es real (sin sesión: el código es de un solo uso y dura 3 minutos).
+ruta('GET', /^planilla\/pedido\/([0-9a-f]{64})$/, {}, async ({ db, params }) => {
+  const [token, vence] = String((await db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_pedido'`).first())?.valor ?? '').split('|');
+  if (!token || !igualSeguro(token, params[0]) || Date.now() > Number(vence)) return error(404, 'No encontrado.');
+  return json({ ok: true });
+});
+
+const resumenPorConfirmar = async (db) => {
+  const [{ results: todos }, { results: clientas }, estado, conectada] = await Promise.all([
+    db
+      .prepare(
+        `SELECT nombre_n, MAX(nombre) AS nombre, COUNT(*) AS n, MIN(fecha) AS desde, MAX(fecha) AS hasta,
+           GROUP_CONCAT(DISTINCT origen) AS origenes
+         FROM visitas_auto WHERE estado = 'pendiente' GROUP BY nombre_n ORDER BY n DESC, nombre_n`,
+      )
+      .all(),
+    db.prepare('SELECT id, nombre, visitas FROM clientas WHERE activa = 1').all(),
+    db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_visitas'`).first(),
+    db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_url'`).first(),
+  ]);
+  const indice = indiceClientas(clientas);
+  let planilla = null;
+  try {
+    planilla = estado?.valor ? JSON.parse(estado.valor) : null;
+  } catch {
+    planilla = null;
+  }
+  const grupos = todos.map((g) => ({
+    clave: g.nombre_n,
+    nombre: g.nombre,
+    n: g.n,
+    desde: g.desde,
+    hasta: g.hasta,
+    origenes: String(g.origenes ?? '').split(',').filter(Boolean),
+    candidatas: (emparejar(indice, g.nombre).candidatas ?? [])
+      .sort((a, b) => b.visitas - a.visitas)
+      .slice(0, 5)
+      .map((c) => ({ id: c.id, nombre: c.nombre, visitas: c.visitas })),
+  }));
+  // Dudosas: calzan con varias clientas. Sin clienta: no están en los contactos (se anotan solas cuando las suban).
+  const dudosas = grupos.filter((g) => g.candidatas.length);
+  const sinClienta = grupos.filter((g) => !g.candidatas.length);
+  const suma = (l) => l.reduce((t, g) => t + g.n, 0);
+  return {
+    ok: true,
+    planillaConectada: Boolean(conectada?.valor),
+    planilla,
+    totalGrupos: dudosas.length,
+    totalVisitas: suma(dudosas),
+    grupos: dudosas.slice(0, 60),
+    sinClienta: { nombres: sinClienta.length, visitas: suma(sinClienta), lista: sinClienta.slice(0, 120) },
+  };
+};
+
+ruta('GET', /^visitas\/por-confirmar$/, { permiso: 'clientas' }, async ({ db, env }) => {
+  await sincronizarPortal(db, { hoy: fechaChile(reloj(env)), ts: ahora() }).catch(() => null);
+  await reintentarPendientes(db, { ts: ahora() }).catch(() => null);
+  return json(await resumenPorConfirmar(db));
+});
+
+/** Body: { clave (nombre normalizado), clientaId } para asignar, o { clave, descartar: true } si no es clienta. */
+ruta('POST', /^visitas\/por-confirmar$/, { permiso: 'clientas' }, async ({ db, cuenta, body }) => {
+  const clave = normNombre(body.clave);
+  if (!clave) return error(400, 'Falta el nombre.');
+  if (body.descartar) {
+    await db.prepare(`UPDATE visitas_auto SET estado = 'descartada' WHERE estado = 'pendiente' AND nombre_n = ?`).bind(clave).run();
+    return json({ ok: true, anotadas: 0 });
+  }
+  const id = Number(body.clientaId);
+  const c = await db.prepare('SELECT id, nombre FROM clientas WHERE id = ? AND activa = 1').bind(id).first();
+  if (!c) return error(404, 'No encontré esa clienta.');
+  const { results: filas } = await db
+    .prepare(`SELECT clave, fecha FROM visitas_auto WHERE estado = 'pendiente' AND nombre_n = ?`)
+    .bind(clave)
+    .all();
+  let anotadas = 0;
+  const ts = ahora();
+  for (let i = 0; i < filas.length; i += 40) {
+    const tanda = filas.slice(i, i + 40);
+    const res = await db.batch(
+      tanda.map((f) =>
+        db.prepare('INSERT INTO visitas (clienta_id, fecha, cuenta_id, ts) VALUES (?, ?, ?, ?) ON CONFLICT(clienta_id, fecha) DO NOTHING').bind(c.id, f.fecha, cuenta.id, ts),
+      ),
+    );
+    anotadas += res.filter((r) => (r?.meta?.changes ?? 0) > 0).length;
+    await db.batch(tanda.map((f) => db.prepare(`UPDATE visitas_auto SET estado = 'lista', clienta_id = ? WHERE clave = ?`).bind(c.id, f.clave)));
+  }
+  await recontar(db, [c.id]);
+  await registrar(db, cuenta.id, 'visitas-confirmadas', { clienta: c.id, n: anotadas });
+  return json({ ok: true, anotadas, clienta: c.nombre });
+});
+
+ruta('POST', /^visitas\/planilla$/, { permiso: 'clientas' }, async ({ db, env }) => {
+  const r = await traerPlanilla(db, env);
+  return json({ ok: true, ...r, ...(await resumenPorConfirmar(db)), resultado: r });
+});
 
 /* ── Ayuda: el equipo escribe, a la administración le llega al celu ── */
 
