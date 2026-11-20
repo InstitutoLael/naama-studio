@@ -797,6 +797,36 @@ ruta('POST', /^insumos\/(\d+)\/se-acabo$/, { sesion: true }, async ({ db, env, c
   return json({ ok: true });
 });
 
+/* Fotos oficiales desde la web (catálogos de tiendas): el servidor baja la imagen y la deja
+   a uno o varios productos. Solo hosts de catálogo conocidos. Body: { fotos: [{ url, ids: [..] }] } */
+const HOSTS_FOTOS = new Set(['statics.promofarma.com', 'http2.mlstatic.com']);
+ruta('POST', /^insumos\/fotos-web$/, { permiso: 'insumos' }, async ({ db, cuenta, body }) => {
+  const lista = Array.isArray(body.fotos) ? body.fotos.slice(0, 20) : [];
+  const hechos = [];
+  for (const f of lista) {
+    let url;
+    try {
+      url = new URL(String(f.url));
+    } catch {
+      return error(400, 'Enlace no válido.');
+    }
+    if (url.protocol !== 'https:' || !HOSTS_FOTOS.has(url.hostname)) return error(400, `No se aceptan fotos de ${url.hostname}.`);
+    const ids = (Array.isArray(f.ids) ? f.ids : []).map(Number).filter((n) => Number.isInteger(n) && n > 0).slice(0, 80);
+    if (!ids.length) continue;
+    const r = await fetch(url.toString());
+    const tipo = (r.headers.get('content-type') || '').split(';')[0].trim();
+    if (!r.ok || !/^image\/(jpeg|png|webp)$/.test(tipo)) return error(502, `No pude bajar la foto (${r.status} ${tipo}).`);
+    const bytes = new Uint8Array(await r.arrayBuffer());
+    let bin = '';
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+    const fotoId = await guardarFoto(db, `data:${tipo};base64,${btoa(bin)}`);
+    await db.batch(ids.map((id) => db.prepare('UPDATE productos SET foto_id = ? WHERE id = ?').bind(fotoId, id)));
+    hechos.push({ url: url.toString(), fotoId, productos: ids.length });
+  }
+  await registrar(db, cuenta.id, 'fotos-web', { n: hechos.length });
+  return json({ ok: true, hechos });
+});
+
 ruta('POST', /^insumos\/(\d+)$/, { permiso: 'insumos' }, async ({ db, cuenta, body, params }) => {
   const id = Number(params[0]);
   const actual = await db.prepare('SELECT * FROM productos WHERE id = ?').bind(id).first();
