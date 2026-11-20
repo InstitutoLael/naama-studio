@@ -120,7 +120,6 @@ const CARTA = {
       ['Camuflaje de Canas (Varón)', 'Camuflaje de canas (varón)'],
       ['Baño de Color', 'Baño de color'],
       ['Crecimiento (Retoque)', 'Crecimiento (retoque de raíz)'],
-      ['Baño de color + Crecimiento', 'Baño de color + crecimiento'],
       ['Tinte Global', 'Tinte global'],
     ]],
     ['Balayage, mechas y babylights', [
