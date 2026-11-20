@@ -808,16 +808,6 @@ export const servicesData = [
     },
     // --- BAÑOS DE COLOR ---
     {
-      name: "Baño de color + Crecimiento",
-      worker: "Valeria",
-      cat: "Peluquería",
-      old: "---",
-      price: "59.000",
-      time: "1.5 horas",
-      desc: "Retoque de raíz más refresco de color y brillo en el resto del cabello.",
-      why: "Servicio dual que unifica el tono desde el nacimiento hasta las puntas con máxima intensidad."
-    },
-    {
       name: "Baño de Color (Corto)",
       worker: "Valeria",
       cat: "Peluquería",
