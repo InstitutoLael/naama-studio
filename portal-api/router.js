@@ -2413,7 +2413,10 @@ async function tareasProgramadas(db, env) {
   if (hora >= 18 && hora < 23 && (await reclamar(db, 'cron_manana', hoy))) hecho.manana = await avisoDeManana(db, env, hoy);
   if (dia === 'Mon' && hora >= 9 && (await reclamar(db, 'cron_semana', hoy))) hecho.semana = await resumenSemanal(db, env, hoy);
   hecho.visitas = await sincronizarPortal(db, { hoy, ts: ahora() }).catch(() => null);
-  if (await reclamar(db, 'cron_planilla', hoy)) hecho.planilla = await traerPlanilla(db, env).catch((e) => ({ error: String(e) }));
+  // Una vez al día, y de nuevo mientras queden filas de la planilla por traer.
+  const ultimaPlanilla = (await db.prepare(`SELECT valor FROM meta WHERE clave = 'planilla_visitas'`).first())?.valor ?? '';
+  const faltan = /"quedan":[1-9]/.test(ultimaPlanilla);
+  if ((await reclamar(db, 'cron_planilla', hoy)) || faltan) hecho.planilla = await traerPlanilla(db, env).catch((e) => ({ error: String(e) }));
   return hecho;
 }
 
