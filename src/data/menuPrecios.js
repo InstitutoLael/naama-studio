@@ -111,6 +111,7 @@ const SECCIONES = {
 const CARTA = {
   cabello: [
     ['Cortes', [
+      ['Evaluación de Cabello', 'Evaluación de cabello'],
       ['Corte de Dama', 'Corte de dama'],
       ['Corte de Varón', 'Corte de varón'],
       ['Corte + Bordado', 'Corte + bordado'],
@@ -345,7 +346,8 @@ export const enSecciones = (mundoId, items) => {
     .map(([titulo, lista]) => ({ titulo, items: lista.sort((a, b) => a._orden - b._orden) }));
 };
 
-export const precioTexto = (v) => (hay(v) ? `$${v}` : 'Consultar');
+export const esSinCosto = (v) => /sin costo|gratis/i.test(String(v ?? ''));
+export const precioTexto = (v) => (esSinCosto(v) ? 'Sin costo' : hay(v) ? `$${v}` : 'Consultar');
 export const esRebaja = (old, price) => hay(old) && hay(price) && aNumero(old) > aNumero(price);
 
 /** Duración en minutos de un servicio escrito libremente («balayage largo», «rebaje completo»). */

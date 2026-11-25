@@ -115,7 +115,7 @@ const nav = [
 
 const staticBody = (r) => {
   const services = (r.services ?? [])
-    .map((s) => `<li>${esc(s.name)}${s.time ? ` · ${esc(s.time)}` : ''} · $${esc(s.price)}</li>`)
+    .map((s) => `<li>${esc(s.name)}${s.time ? ` · ${esc(s.time)}` : ''} · ${/sin costo|gratis/i.test(s.price) ? 'Sin costo' : '$' + esc(s.price)}</li>`)
     .join('');
   const faq = r.faq ? `<h2>Preguntas frecuentes</h2>${FAQ.map((f) => `<h3>${esc(f.q)}</h3><p>${esc(f.a)}</p>`).join('')}` : '';
   return `<div class="seo-static"><header><a href="/">Naamá Studio</a><nav>${nav
