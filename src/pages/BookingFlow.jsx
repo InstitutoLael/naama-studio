@@ -11,6 +11,7 @@ import { whatsappUrl } from '../data/site';
 import { scrollToTop } from '../lib/smoothScroll';
 import '../theme/booking.css';
 import { usePreciosVivos } from '../data/preciosVivos';
+import { precioTexto } from '../data/menuPrecios';
 
 const STEPS = ['Servicio', 'Especialista', 'Día', 'Hora', 'Confirmar'];
 const ANY = { name: 'Sin preferencia', role: 'Te asignamos a quien esté disponible' };
@@ -167,7 +168,7 @@ const BookingFlow = () => {
                               <span className="option__name">{s.name}</span>
                               <span className="option__meta">{s.time}</span>
                             </span>
-                            <span className="option__price">{s.price ? `$${s.price}` : 'Consultar'}</span>
+                            <span className="option__price">{precioTexto(s.price)}</span>
                             <span className="option__check"><CheckIcon /></span>
                           </button>
                         </li>
@@ -295,7 +296,7 @@ const BookingFlow = () => {
           </dl>
           <div className="summary__total">
             <span>Valor referencial</span>
-            <strong>{service?.price ? `$${service.price}` : '—'}</strong>
+            <strong>{service?.price ? precioTexto(service.price) : '—'}</strong>
           </div>
         </aside>
       </div>

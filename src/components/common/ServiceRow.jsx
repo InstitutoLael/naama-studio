@@ -1,3 +1,4 @@
+import { precioTexto } from '../../data/menuPrecios';
 import React, { useId, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -30,7 +31,7 @@ const ServiceRow = ({ service }) => {
         </span>
         <span className="srow__price">
           {isDiscount(service) && <s>${service.old}</s>}
-          {hasValue(service.price) ? `$${service.price}` : 'Consultar'}
+          {precioTexto(service.price)}
         </span>
         {hasDetail && <PlusIcon className="srow__icon" />}
       </button>

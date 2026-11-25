@@ -1027,6 +1027,16 @@ export const servicesData = [
       why: "Limpieza profunda de la hebra que previene el quiebre y promueve un crecimiento sano."
     },
     {
+      name: "Evaluación de Cabello",
+      worker: "Valeria, Viviana",
+      cat: "Peluquería",
+      old: "---",
+      price: "Sin costo",
+      time: "20 min",
+      desc: "Revisamos tu cabello antes de un cambio de color, alisado o tratamiento: estado, porosidad y qué le conviene.",
+      why: "Sin costo y sin compromiso: así sabes qué servicio necesitas y cuánto sale antes de decidir."
+    },
+    {
       name: "Corte de Dama",
       worker: "Valeria, Viviana",
       cat: "Peluquería",

@@ -9,7 +9,7 @@ import { post } from './api';
 import { puede } from './permisos';
 
 const hay = (v) => v && String(v).trim() !== '' && v !== '---';
-const plata = (v) => (aNumero(v) ? `$${aNumero(v).toLocaleString('es-CL')}` : 'Consultar');
+const plata = (v) => (/sin costo|gratis/i.test(String(v ?? '')) ? 'Sin costo' : aNumero(v) ? `$${aNumero(v).toLocaleString('es-CL')}` : 'Consultar');
 const corto = (t = '') => t.replace(' horas', ' h').replace(' hora', ' h');
 
 /** Precios del salón para responderle rápido a una clienta (los mismos de la página). */
