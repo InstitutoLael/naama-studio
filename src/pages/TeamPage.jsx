@@ -27,9 +27,9 @@ const TeamPage = () => (
 
     <section className="container equipo-grilla" aria-label="Especialistas">
       {team.map((p, i) => (
-        <Reveal key={p.name} delay={(i % 3) * 0.06} y={30}>
+        <Reveal key={p.name} delay={(i % 3) * 0.06} y={30} sinAnimar={i < 2}>
           <article className="retrato">
-            <Photo name={p.photo} alt={`${p.name}, ${p.role}`} sizes="(min-width: 1024px) 16vw, 46vw" position="50% 22%" />
+            <Photo name={p.photo} alt={`${p.name}, ${p.role}`} priority={i < 2} sizes="(min-width: 1024px) 16vw, 46vw" position="50% 22%" />
             <h2>{p.name}</h2>
             <p>{p.role}</p>
             <Link to={`/reservar?con=${encodeURIComponent(p.name)}`} className="btn btn--sm">
