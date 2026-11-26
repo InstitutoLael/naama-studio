@@ -94,7 +94,7 @@ const TeToca = () => {
               <div className="vacio">
                 <BellRing strokeWidth={1.2} />
                 <p>
-                  <strong>Nadie por ahora.</strong>
+                  <strong>Nadie por ahora</strong>
                   <br />
                   Mientras más visitas y servicios se anoten, mejor calcula.
                 </p>

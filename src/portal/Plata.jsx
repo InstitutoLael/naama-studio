@@ -75,8 +75,8 @@ const Plata = () => {
   const maxDia = Math.max(1, ...(d?.porDia ?? []).map((x) => x.bruto));
 
   return (
-    <div className="panel">
-      <header className="panel__cabeza">
+    <div className="panel plata">
+      <header className="panel__cabeza plata__cabeza">
         <span className="eyebrow">Solo Administración y Vivy</span>
         <h1 className="panel__titulo">
           La <em>plata</em>
@@ -165,6 +165,22 @@ const Plata = () => {
             </>
           )}
 
+          {d.compromisos.length > 0 && (() => {
+            const total = d.compromisos.reduce((a, c) => a + (c.monto || 0), 0);
+            const pagado = d.compromisos.filter((c) => c.pagado).reduce((a, c) => a + (c.monto || 0), 0);
+            const pct = total ? Math.round((100 * pagado) / total) : 0;
+            return (
+              <section className="anillo-tarjeta">
+                <span className="anillo" style={{ '--pct': pct }}>
+                  <span>{pct}%</span>
+                </span>
+                <span>
+                  <strong>Gastos fijos del mes</strong>
+                  <small>Falta pagar {pesos(d.porPagar)}</small>
+                </span>
+              </section>
+            );
+          })()}
           <section>
             <h2 className="seccion__titulo">Gastos fijos del mes · falta pagar {pesos(d.porPagar)}</h2>
             {d.compromisos.length === 0 ? (

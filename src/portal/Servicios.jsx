@@ -332,7 +332,7 @@ const Servicios = ({ cuenta }) => {
             </div>
           )}
 
-          <section className="hoy">
+          <section className="hoy hoy--cuadros">
             <div className="dia-nav">
               <button type="button" className="icono-boton" aria-label="Día anterior" onClick={() => cargar(moverDia(fecha, -1))}>
                 <ChevronLeft />
@@ -365,7 +365,7 @@ const Servicios = ({ cuenta }) => {
               <div className="vacio">
                 <ClipboardList strokeWidth={1.2} />
                 <p>
-                  <strong>Nada anotado todavía.</strong>
+                  <strong>Nada anotado todavía</strong>
                   <br />
                   Aprieta «Anotar servicio» cuando una clienta pague.
                 </p>

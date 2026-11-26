@@ -3,7 +3,6 @@ import { Check, ChevronLeft, ChevronRight, Receipt } from 'lucide-react';
 import { api, post } from './api';
 import { pesos } from './insumosBase';
 
-const diaLargo = (f) => new Date(`${f}T12:00:00`).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
 const diaCorto = (f) => new Date(`${f}T12:00:00`).toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' });
 const moverDia = (f, n) => {
   const d = new Date(`${f}T12:00:00`);
@@ -12,35 +11,6 @@ const moverDia = (f, n) => {
 };
 
 /** Una línea: lo que sumó Vivy contra lo que de verdad entró (Mercado Pago) y lo anotado en el portal. */
-const Linea = ({ titulo, contado, real, anotado, detalle }) => {
-  const base = real ?? (anotado || null);
-  const dif = contado == null || base == null ? null : contado - base;
-  const ok = dif != null && Math.abs(dif) < 100;
-  return (
-    <li className="caja-linea">
-      <span className="caja-linea__texto">
-        <strong>{titulo}</strong>
-        <small>
-          {contado != null ? `Sumado ${pesos(contado)}` : 'Falta sumar'}
-          {real != null ? ` · Entró a MP ${pesos(real)}` : ''}
-          {anotado ? ` · Anotado ${pesos(anotado)}` : ''}
-          {detalle ? ` · ${detalle}` : ''}
-        </small>
-      </span>
-      {dif == null ? (
-        <span className="etiqueta">—</span>
-      ) : ok ? (
-        <span className="etiqueta etiqueta--ok">Cuadra</span>
-      ) : (
-        <span className="etiqueta etiqueta--alerta">
-          {dif > 0 ? 'Sobran ' : 'Faltan '}
-          {pesos(Math.abs(dif))}
-        </span>
-      )}
-    </li>
-  );
-};
-
 const Monto = ({ id, label, valor, onCambio, ayuda }) => (
   <div className="field">
     <label htmlFor={id}>{label}</label>
@@ -99,47 +69,59 @@ const Caja = () => {
 
       {d && (
         <>
-          <section className="hoy">
+          <section className="caja-cabeza">
             <div className="dia-nav">
               <button type="button" className="icono-boton" aria-label="Día anterior" onClick={() => cargar(moverDia(d.fecha, -1))}>
                 <ChevronLeft />
               </button>
-              <span className="dia-nav__texto">{d.fecha === d.hoy ? 'Hoy' : diaLargo(d.fecha)}</span>
+              <span className="caja-cabeza__dia">Cierre de caja · {d.fecha === d.hoy ? 'hoy' : diaCorto(d.fecha)}</span>
               <button type="button" className="icono-boton" aria-label="Día siguiente" disabled={d.fecha >= d.hoy} onClick={() => cargar(moverDia(d.fecha, 1))}>
                 <ChevronRight />
               </button>
             </div>
-            <div className="hoy__cifras">
-              <div>
-                <strong>{d.servicios}</strong>
-                <span>{d.servicios === 1 ? 'servicio anotado' : 'servicios anotados'}</span>
+            <p className="caja-cabeza__total">{pesos(d.total)}</p>
+            <p className="caja-cabeza__bajada">
+              {d.servicios} {d.servicios === 1 ? 'servicio anotado' : 'servicios anotados'}
+              {d.cierre ? ` · ${d.cierre.cuadra ? 'caja cerrada y cuadrada' : 'cerrada con diferencias'} (${d.cierre.por})` : ''}
+            </p>
+            {d.porHora && (
+              <div className="caja-barras" aria-hidden="true">
+                {d.porHora.map((v, i) => {
+                  const max = Math.max(...d.porHora, 1);
+                  const alto = v ? 18 + (82 * v) / max : 14;
+                  return <span key={i} className={v === max && v > 0 ? 'is-max' : ''} style={{ height: `${alto}%` }} />;
+                })}
               </div>
-              <div>
-                <strong>{pesos(d.total)}</strong>
-                <span>total anotado</span>
-              </div>
-            </div>
-            {d.cierre && (
-              <p className="plata-heroe__detalle">
-                {d.cierre.cuadra ? '✓ Caja cerrada y cuadrada' : '⚠ Caja cerrada con diferencias'} · por {d.cierre.por}
-              </p>
             )}
+            <div className="caja-barras__eje"><span>10:30</span><span>19:30</span></div>
+          </section>
+
+          <section className="caja-cuadros">
+            {[
+              ['Tarjeta (máquina)', num(tarjeta), d.mp?.maquina ?? d.anotado['Mercado Pago']],
+              ['Transferencias', num(transfer), d.mp?.transferencias ?? d.anotado.Transferencia],
+              ['Efectivo', num(efectivo), d.anotado.Efectivo],
+            ].map(([t, contado, base]) => {
+              const dif = contado == null || !base ? null : contado - base;
+              const ok = dif != null && Math.abs(dif) < 100;
+              return (
+                <div key={t} className={`caja-cuadro ${dif != null && !ok ? 'is-falta' : ''}`}>
+                  <small>{t}</small>
+                  <strong>{pesos(contado ?? base ?? 0)}</strong>
+                  <span>{dif == null ? 'Falta sumar' : ok ? 'Cuadra' : `${dif > 0 ? 'Sobran' : 'Faltan'} ${pesos(Math.abs(dif))}`}</span>
+                </div>
+              );
+            })}
+            <div className="caja-cuadro caja-cuadro--total">
+              <small>Total anotado</small>
+              <strong>{pesos(d.total)}</strong>
+              <span>{d.servicios} {d.servicios === 1 ? 'servicio' : 'servicios'}</span>
+            </div>
           </section>
 
           <section>
             <h2 className="seccion__titulo">¿Cuadra?</h2>
             {d.errorMP && <p className="portal-error">{d.errorMP}</p>}
-            <ul className="cuentas">
-              <Linea
-                titulo="Tarjeta (máquina)"
-                contado={num(tarjeta)}
-                real={d.mp?.maquina ?? null}
-                anotado={d.anotado['Mercado Pago']}
-                detalle={d.mp ? `${d.mp.maquinaPagos} pagos · comisión ${pesos(d.mp.comision)}` : 'sin conexión a MP'}
-              />
-              <Linea titulo="Transferencias" contado={num(transfer)} real={d.mp?.transferencias ?? null} anotado={d.anotado.Transferencia} />
-              <Linea titulo="Efectivo" contado={num(efectivo)} real={null} anotado={d.anotado.Efectivo} detalle={d.anotado.Efectivo ? '' : 'se compara con lo anotado'} />
-            </ul>
             <p className="muted">
               «Cuadra» = lo que sumaste es igual a lo que entró a Mercado Pago (o a lo anotado, en el efectivo). Si dice «Faltan» o «Sobran», revisa si quedó un pago
               sin sumar o una transferencia que no era de clienta.

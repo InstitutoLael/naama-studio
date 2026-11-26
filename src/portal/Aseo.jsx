@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Check, ListChecks, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Check, Pencil, Plus, Trash2 } from 'lucide-react';
 import { api, post } from './api';
 import Hoja from './Hoja';
 
@@ -129,19 +129,24 @@ const Aseo = () => {
       {!d && !error && <p className="muted">Cargando…</p>}
       {d && (
         <>
-          <section>
-            <h2 className="seccion__titulo">
-              Te toca hoy ({d.mias.filter((t) => t.hecha).length}/{d.mias.length})
-            </h2>
+          <section className="avance tarjeta">
+            <div className="avance__cabeza">
+              <span>Te toca hoy</span>
+              <strong>
+                {d.mias.filter((t) => t.hecha).length}/{d.mias.length}
+              </strong>
+            </div>
+            <div className="avance__barra">
+              <span style={{ width: `${d.mias.length ? (100 * d.mias.filter((t) => t.hecha).length) / d.mias.length : 0}%` }} />
+            </div>
             {d.mias.length === 0 ? (
-              <div className="vacio">
-                <ListChecks strokeWidth={1.2} />
-                <p>
-                  <strong>Nada para hoy.</strong>
-                </p>
-              </div>
+              <p className="avance__vacio">
+                <span className="nota-mano">nada para hoy</span>
+                <br />
+                Cuando te asignen una tarea, aparece aquí.
+              </p>
             ) : (
-              <ul className="cuentas">
+              <ul className="cuentas cuentas--plana">
                 {d.mias.map((t) => (
                   <Fila key={t.id} t={t} />
                 ))}

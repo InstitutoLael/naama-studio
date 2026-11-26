@@ -6,6 +6,10 @@ import Hoja from './Hoja';
 import { CATALOGO, minutosDe } from './servicios';
 import { servicesData } from '../data/servicesData';
 import { duracionDeServicio } from '../data/menuPrecios';
+import Photo from '../components/common/Photo';
+import { team } from '../data/team';
+
+const fotoDe = (nombre) => team.find((t) => t.name.toLowerCase() === String(nombre).split(' ')[0].toLowerCase())?.photo;
 
 const duracion = (servicio) => Math.max(15, duracionDeServicio(servicesData, servicio) || minutosDe(servicio));
 
@@ -28,6 +32,7 @@ const moverDia = (f, n) => {
   return d.toISOString().slice(0, 10);
 };
 const primer = (n) => n.split(' ')[0];
+const HORAS_SALON = ['10:30', '11:30', '12:30', '13:30', '14:30', '15:30', '16:30', '17:30', '18:30'];
 const DURACIONES = [30, 45, 60, 90, 120, 150, 180, 210, 240, 300, 360, 420, 480];
 
 /** Mensaje bonito para recordarle la hora a la clienta (va por WhatsApp). */
@@ -196,6 +201,22 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
             <input className="input" type="time" value={v.hora} onChange={cambia('hora')} required />
           </label>
         </div>
+        {v.fecha === d.fecha && (
+          <div className="horas-libres" role="radiogroup" aria-label="Horas del día">
+            {HORAS_SALON.map((h) => {
+              const ini = aMin(h);
+              const ocupada = d.citas.some(
+                (c) => c.id !== cita?.id && c.cuentaId === Number(v.cuentaId) && !['cancelada', 'no-vino'].includes(c.estado) && aMin(c.hora) < ini + Number(v.minutos) && ini < aMin(c.hora) + c.minutos,
+              );
+              return (
+                <button key={h} type="button" role="radio" aria-checked={v.hora === h} className={`hora-libre ${ocupada ? 'is-ocupada' : ''}`} onClick={() => setV((x) => ({ ...x, hora: h }))}>
+                  <strong>{h}</strong>
+                  <small>{v.hora === h ? 'elegida' : ocupada ? 'ocupada' : 'libre'}</small>
+                </button>
+              );
+            })}
+          </div>
+        )}
         <label className="field">
           <span>Dura</span>
           <select className="input" value={v.minutos} onChange={cambia('minutos')}>
@@ -246,8 +267,8 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
           </button>
         )}
         <div className="hoja__acciones">
-          <button type="submit" className="btn">
-            {cita ? 'Guardar cambios' : 'Agendar'}
+          <button type="submit" className={`btn ${cita ? '' : 'btn--terracota'}`}>
+            {cita ? 'Guardar cambios' : `Agendar ${v.hora} con ${primer(personas.find((p) => p.id === Number(v.cuentaId))?.nombre ?? '')}`}
           </button>
           {cita && (
             <button
@@ -332,6 +353,7 @@ const CalendarioCelu = () => {
 
 const Agenda = ({ cuenta }) => {
   const [d, setD] = useState(null);
+  const [ver, setVer] = useState('todas');
   const [clientas, setClientas] = useState([]);
   const [error, setError] = useState('');
   const [hoja, setHoja] = useState(null);
@@ -369,43 +391,66 @@ const Agenda = ({ cuenta }) => {
   for (let m = ABRE; m <= CIERRA; m += 60) horas.push(m);
   const datos = d ? { ...d, clientas } : null;
   const manana = d ? moverDia(d.hoy, 1) : null;
+  const visibles = !d ? [] : ver === 'todas' ? d.personas : ver === 'mias' ? d.personas.filter((p) => p.id === cuenta.id) : d.personas.filter((p) => p.id === ver);
 
   return (
     <div className="panel">
-      <header className="panel__cabeza">
-        <span className="eyebrow">Horas por persona</span>
-        <h1 className="panel__titulo">
-          La <em>agenda</em>
-        </h1>
+      <header className="panel__cabeza panel__cabeza--fila">
+        <div>
+          <span className="eyebrow">Horas por persona</span>
+          <h1 className="panel__titulo">
+            La <em>agenda</em>
+          </h1>
+        </div>
+        <button type="button" className="btn btn--sm" onClick={() => setHoja({ inicial: {} })}>
+          <Plus size={16} /> Agendar
+        </button>
       </header>
       {error && <p className="portal-error" role="alert">{error}</p>}
       {!d && !error && <p className="muted">Cargando…</p>}
       {d && (
         <>
-          <section className="hoy">
-            <div className="dia-nav">
-              <button type="button" className="icono-boton" aria-label="Día anterior" onClick={() => cargar(moverDia(d.fecha, -1))}>
-                <ChevronLeft />
-              </button>
-              <span className="dia-nav__texto">{d.fecha === d.hoy ? 'Hoy' : d.fecha === manana ? 'Mañana' : diaLargo(d.fecha)}</span>
-              <button type="button" className="icono-boton" aria-label="Día siguiente" onClick={() => cargar(moverDia(d.fecha, 1))}>
-                <ChevronRight />
-              </button>
-            </div>
-            <div className="hoy__cifras">
-              <div>
-                <strong>{d.citas.filter((c) => !['cancelada', 'no-vino'].includes(c.estado)).length}</strong>
-                <span>citas</span>
+          {(() => {
+            const base = new Date(`${d.fecha}T12:00:00`);
+            const lunes = new Date(base);
+            lunes.setDate(base.getDate() - ((base.getDay() + 6) % 7));
+            const dias = Array.from({ length: 6 }, (_, i) => {
+              const x = new Date(lunes);
+              x.setDate(lunes.getDate() + i);
+              return x.toISOString().slice(0, 10);
+            });
+            return (
+              <div className="semana">
+                <button type="button" className="icono-boton" aria-label="Semana anterior" onClick={() => cargar(moverDia(dias[0], -7))}>
+                  <ChevronLeft />
+                </button>
+                {dias.map((f) => {
+                  const x = new Date(`${f}T12:00:00`);
+                  return (
+                    <button key={f} type="button" className={`semana__dia ${f === d.fecha ? 'is-on' : ''} ${f === d.hoy ? 'is-hoy' : ''}`} onClick={() => cargar(f)}>
+                      <small>{'DLMMJVS'[x.getDay()]}</small>
+                      <strong>{x.getDate()}</strong>
+                    </button>
+                  );
+                })}
+                <button type="button" className="icono-boton" aria-label="Semana siguiente" onClick={() => cargar(moverDia(dias[5], 2))}>
+                  <ChevronRight />
+                </button>
               </div>
-              <div>
-                <strong>{d.citas.filter((c) => c.cuentaId === cuenta.id && !['cancelada', 'no-vino'].includes(c.estado)).length}</strong>
-                <span>tuyas</span>
-              </div>
-            </div>
-            <button type="button" className="hoy__boton" onClick={() => setHoja({ inicial: {} })}>
-              <Plus size={18} /> Agendar
-            </button>
-          </section>
+            );
+          })()}
+          <p className="agenda__resumen">
+            {d.fecha === d.hoy ? 'Hoy' : d.fecha === manana ? 'Mañana' : diaLargo(d.fecha)} ·{' '}
+            {d.citas.filter((c) => !['cancelada', 'no-vino'].includes(c.estado)).length} citas ·{' '}
+            {d.citas.filter((c) => c.cuentaId === cuenta.id && !['cancelada', 'no-vino'].includes(c.estado)).length} tuyas
+          </p>
+          <div className="chips agenda__filtros" role="group" aria-label="Ver">
+            <button type="button" className="chip chip--suave" aria-pressed={ver === 'todas'} onClick={() => setVer('todas')}>Todo el equipo</button>
+            <button type="button" className="chip" aria-pressed={ver === 'mias'} onClick={() => setVer('mias')}>Mis horas</button>
+            {d.personas.map((p) => (
+              <button key={p.id} type="button" className="chip" aria-pressed={ver === p.id} onClick={() => setVer(p.id)}>{primer(p.nombre)}</button>
+            ))}
+          </div>
 
           {d.fecha === manana && d.verNumeros && d.citas.some((c) => c.telefono && c.estado === 'agendada') && (
             <div className="aviso-fijo">
@@ -440,12 +485,14 @@ const Agenda = ({ cuenta }) => {
             ) : null;
           })()}
 
-          <h2 className="seccion__titulo">Todo el equipo</h2>
-          <div className="agenda" style={{ '--cols': d.personas.length }}>
+          <div className="agenda" style={{ '--cols': visibles.length || 1 }}>
             <div className="agenda__cabeza">
               <span />
-              {d.personas.map((p) => (
+              {visibles.map((p) => (
                 <span key={p.id} className={`agenda__persona ${p.dispo === 'no' ? 'is-no' : ''}`}>
+                  <span className="agenda__cara">
+                    {fotoDe(p.nombre) ? <Photo name={fotoDe(p.nombre)} alt="" sizes="40px" position="center 25%" /> : primer(p.nombre).charAt(0)}
+                  </span>
                   {primer(p.nombre)}
                   <small>{p.dispo === 'no' ? 'no viene' : p.dispo === 'manana' ? 'solo AM' : p.dispo === 'tarde' ? 'solo PM' : p.dispo === 'todo' ? 'todo el día' : ''}</small>
                 </span>
@@ -459,10 +506,10 @@ const Agenda = ({ cuenta }) => {
                   </span>
                 ))}
               </div>
-              {d.personas.map((p) => (
+              {visibles.map((p) => (
                 <div
                   key={p.id}
-                  className={`agenda__col ${p.dispo === 'no' ? 'is-no' : ''}`}
+                  className={`agenda__col agenda__col--c${d.personas.indexOf(p) % 4} ${p.dispo === 'no' ? 'is-no' : ''}`}
                   role="button"
                   tabIndex={-1}
                   aria-label={`Agendar con ${p.nombre}`}
@@ -504,7 +551,8 @@ const Agenda = ({ cuenta }) => {
               ))}
             </div>
           </div>
-          <p className="muted">Toca un espacio vacío en la columna de una persona para agendar a esa hora. Cada una tiene su propia columna: dos pueden atender a la vez.</p>
+          <p className="nota-mano">toca un espacio vacío para agendar ↑</p>
+          <p className="muted chico">Cada una tiene su propia columna: dos pueden atender a la vez. Horario del salón: 10:30 a 19:30.</p>
           <CalendarioCelu />
         </>
       )}
