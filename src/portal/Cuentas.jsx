@@ -1,20 +1,20 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { PlusIcon, SearchIcon, WhatsAppIcon } from '../components/common/Icons';
-import { api, post } from './api';
-import Hoja from './Hoja';
-import { PERMISOS, ROLES, ROL_IDS } from './permisos';
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { PlusIcon, SearchIcon, WhatsAppIcon } from "../components/common/Icons";
+import { api, post } from "./api";
+import Hoja from "./Hoja";
+import { PERMISOS, ROLES, ROL_IDS } from "./permisos";
 
 const FILTROS = [
-  ['todas', 'Todas'],
-  ['hoy', 'Entró hoy'],
-  ['nunca', 'No ha entrado'],
-  ['inactivas', 'Desactivadas'],
+  ["todas", "Todas"],
+  ["hoy", "Entró hoy"],
+  ["nunca", "No ha entrado"],
+  ["inactivas", "Desactivadas"],
 ];
 
 const cuando = (iso) => {
-  if (!iso) return 'Nunca ha entrado';
+  if (!iso) return "Nunca ha entrado";
   const d = new Date(iso);
-  return `Último ingreso: ${d.toLocaleDateString('es-CL', { day: 'numeric', month: 'short', timeZone: 'America/Santiago' })}, ${d.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Santiago' })}`;
+  return `Último ingreso: ${d.toLocaleDateString("es-CL", { day: "numeric", month: "short", timeZone: "America/Santiago" })}, ${d.toLocaleTimeString("es-CL", { hour: "2-digit", minute: "2-digit", timeZone: "America/Santiago" })}`;
 };
 
 const mensajeClave = (c, clave) =>
@@ -29,7 +29,12 @@ const RolYPermisos = ({ rol, extras, onRol, onExtras }) => {
         <legend>Rol</legend>
         <div className="roles">
           {ROL_IDS.map((r) => (
-            <button key={r} type="button" className={`option ${rol === r ? 'is-selected' : ''}`} onClick={() => onRol(r)}>
+            <button
+              key={r}
+              type="button"
+              className={`option ${rol === r ? "is-selected" : ""}`}
+              onClick={() => onRol(r)}
+            >
               <span className="option__main">
                 <span className="option__name">{ROLES[r].nombre}</span>
                 <span className="option__meta">{ROLES[r].detalle}</span>
@@ -46,12 +51,18 @@ const RolYPermisos = ({ rol, extras, onRol, onExtras }) => {
             const marcado = porRol || extras.includes(id);
             return (
               <li key={id}>
-                <label className={`permiso ${porRol ? 'is-fijo' : ''}`}>
+                <label className={`permiso ${porRol ? "is-fijo" : ""}`}>
                   <input
                     type="checkbox"
                     checked={marcado}
                     disabled={porRol}
-                    onChange={(e) => onExtras(e.target.checked ? [...extras, id] : extras.filter((x) => x !== id))}
+                    onChange={(e) =>
+                      onExtras(
+                        e.target.checked
+                          ? [...extras, id]
+                          : extras.filter((x) => x !== id),
+                      )
+                    }
                   />
                   <span>{texto}</span>
                   {porRol && <small>por su rol</small>}
@@ -66,27 +77,154 @@ const RolYPermisos = ({ rol, extras, onRol, onExtras }) => {
 };
 
 /** Muestra la clave temporal una sola vez, con botón para mandarla por WhatsApp. */
-const ClaveLista = ({ cuenta, clave, onCerrar }) => (
+const ClaveLista = ({ cuenta, clave, correo, onCerrar }) => (
   <Hoja titulo="Clave temporal" onCerrar={onCerrar}>
     <p className="muted">
-      Mándale esto a <strong>{cuenta.nombre}</strong>. La clave se muestra solo esta vez.
+      Mándale esto a <strong>{cuenta.nombre}</strong>. La clave se muestra solo
+      esta vez.
     </p>
     <p className="clave-temporal">{clave}</p>
+    {correo === "enviado" && (
+      <p className="muted">También le llegó por correo a {cuenta.email}.</p>
+    )}
     <div className="hoja__acciones">
-      <a className="btn" href={`https://wa.me/?text=${encodeURIComponent(mensajeClave(cuenta, clave))}`} target="_blank" rel="noreferrer">
+      <a
+        className="btn"
+        href={`https://wa.me/?text=${encodeURIComponent(mensajeClave(cuenta, clave))}`}
+        target="_blank"
+        rel="noreferrer"
+      >
         <WhatsAppIcon /> Mandar por WhatsApp
       </a>
-      <button type="button" className="btn btn--ghost" onClick={() => navigator.clipboard?.writeText(mensajeClave(cuenta, clave))}>
+      <button
+        type="button"
+        className="btn btn--ghost"
+        onClick={() =>
+          navigator.clipboard?.writeText(mensajeClave(cuenta, clave))
+        }
+      >
         Copiar mensaje
       </button>
     </div>
   </Hoja>
 );
 
+const ESTADO_CORREO = {
+  enviado: "Enviado",
+  pendiente: "Esperando",
+  error: "No salió",
+};
+const TIPO_CORREO = { gift: "Gift card", bienvenida: "Bienvenida" };
+
+/** Correos que salen desde la cuenta de Google del salón (Apps Script). */
+const CorreosGoogle = () => {
+  const [d, setD] = useState(null);
+  const [abierto, setAbierto] = useState(false);
+  const [msg, setMsg] = useState("");
+  const cargar = useCallback(
+    () =>
+      api("correos")
+        .then(setD)
+        .catch(() => {}),
+    [],
+  );
+  useEffect(() => {
+    cargar();
+  }, [cargar]);
+  if (!d) return null;
+  const malos = d.correos.filter((c) => c.estado !== "enviado").length;
+  return (
+    <section className="correos-google">
+      <span className="eyebrow">Correos por Google</span>
+      <p className="muted">
+        {d.conectado
+          ? "Conectados: las gift cards y las bienvenidas al portal salen solas desde la cuenta de Google del salón."
+          : "Todavía no conectados. Lo que se mande queda guardado y sale apenas se conecten (pasos en docs/correos-apps-script.gs)."}
+      </p>
+      <div className="hoja__acciones">
+        <button
+          type="button"
+          className="btn btn--ghost btn--sm"
+          onClick={() => setAbierto((x) => !x)}
+        >
+          {d.conectado ? "Cambiar enlace" : "Conectar"}
+        </button>
+        {d.conectado && malos > 0 && (
+          <button
+            type="button"
+            className="btn btn--sm"
+            onClick={async () => {
+              const r = await post("correos/reintentar").catch((e) => ({
+                error: e.message,
+              }));
+              setMsg(r.error ?? `${r.enviados} de ${r.total} salieron.`);
+              cargar();
+            }}
+          >
+            Reintentar {malos}
+          </button>
+        )}
+      </div>
+      {abierto && (
+        <form
+          className="hoja__form"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              const r = await post("correos/conectar", {
+                url: new FormData(e.currentTarget).get("url"),
+              });
+              setMsg(
+                r.enviados
+                  ? `Conectados. Salieron ${r.enviados} que estaban esperando.`
+                  : "Correos conectados.",
+              );
+              setAbierto(false);
+              cargar();
+            } catch (err) {
+              setMsg(err.message);
+            }
+          }}
+        >
+          <input
+            name="url"
+            className="input"
+            placeholder="https://script.google.com/macros/s/…/exec"
+            required
+            autoFocus
+          />
+          <button type="submit" className="btn">
+            Conectar
+          </button>
+        </form>
+      )}
+      {msg && (
+        <p className="muted" role="status">
+          {msg}
+        </p>
+      )}
+      {d.correos.length > 0 && (
+        <ul>
+          {d.correos.slice(0, 8).map((c) => (
+            <li key={c.id}>
+              <span>
+                {TIPO_CORREO[c.tipo] ?? c.tipo} · {c.para}
+              </span>
+              <span title={c.error ?? ""}>
+                {ESTADO_CORREO[c.estado] ?? c.estado}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+};
+
 const NuevaCuenta = ({ onCreada, onCerrar }) => {
-  const [rol, setRol] = useState('equipo');
+  const [rol, setRol] = useState("equipo");
   const [extras, setExtras] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
   return (
     <Hoja titulo="Nueva cuenta" onCerrar={onCerrar}>
@@ -95,11 +233,16 @@ const NuevaCuenta = ({ onCreada, onCerrar }) => {
         onSubmit={async (e) => {
           e.preventDefault();
           const f = new FormData(e.currentTarget);
-          setError('');
+          setError("");
           setEnviando(true);
           try {
-            const r = await post('cuentas', { nombre: f.get('nombre'), email: f.get('email'), rol, extras });
-            onCreada(r.cuenta, r.claveTemporal);
+            const r = await post("cuentas", {
+              nombre: f.get("nombre"),
+              email: f.get("email"),
+              rol,
+              extras,
+            });
+            onCreada(r.cuenta, r.claveTemporal, r.correo);
           } catch (err) {
             setError(err.message);
             setEnviando(false);
@@ -108,16 +251,38 @@ const NuevaCuenta = ({ onCreada, onCerrar }) => {
       >
         <div className="field">
           <label htmlFor="nc-nombre">Nombre</label>
-          <input id="nc-nombre" name="nombre" className="input" required autoComplete="off" />
+          <input
+            id="nc-nombre"
+            name="nombre"
+            className="input"
+            required
+            autoComplete="off"
+          />
         </div>
         <div className="field">
           <label htmlFor="nc-email">Correo</label>
-          <input id="nc-email" name="email" type="email" className="input" required autoComplete="off" />
+          <input
+            id="nc-email"
+            name="email"
+            type="email"
+            className="input"
+            required
+            autoComplete="off"
+          />
         </div>
-        <RolYPermisos rol={rol} extras={extras} onRol={setRol} onExtras={setExtras} />
-        {error && <p className="portal-error" role="alert">{error}</p>}
+        <RolYPermisos
+          rol={rol}
+          extras={extras}
+          onRol={setRol}
+          onExtras={setExtras}
+        />
+        {error && (
+          <p className="portal-error" role="alert">
+            {error}
+          </p>
+        )}
         <button type="submit" className="btn" disabled={enviando}>
-          {enviando ? 'Creando…' : 'Crear cuenta'}
+          {enviando ? "Creando…" : "Crear cuenta"}
         </button>
       </form>
     </Hoja>
@@ -128,10 +293,10 @@ const EditarCuenta = ({ cuenta, esYo, onGuardada, onClave, onCerrar }) => {
   const [rol, setRol] = useState(cuenta.rol);
   const [extras, setExtras] = useState(cuenta.extras);
   const [email, setEmail] = useState(cuenta.email);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
   const guardar = async (cambios) => {
-    setError('');
+    setError("");
     setEnviando(true);
     try {
       const r = await post(`cuentas/${cuenta.id}`, cambios);
@@ -145,13 +310,39 @@ const EditarCuenta = ({ cuenta, esYo, onGuardada, onClave, onCerrar }) => {
     <Hoja titulo={cuenta.nombre} onCerrar={onCerrar}>
       <div className="field">
         <label htmlFor="ec-email">Correo</label>
-        <input id="ec-email" type="email" className="input" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="off" />
-        {cuenta.email.endsWith('@pendiente.naamastudio.cl') && <small className="muted">Correo provisorio: pon el suyo y después «Restablecer clave» para mandarle su acceso.</small>}
+        <input
+          id="ec-email"
+          type="email"
+          className="input"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          autoComplete="off"
+        />
+        {cuenta.email.endsWith("@pendiente.naamastudio.cl") && (
+          <small className="muted">
+            Correo provisorio: pon el suyo y después «Restablecer clave» para
+            mandarle su acceso.
+          </small>
+        )}
       </div>
-      <RolYPermisos rol={rol} extras={extras} onRol={setRol} onExtras={setExtras} />
-      {error && <p className="portal-error" role="alert">{error}</p>}
+      <RolYPermisos
+        rol={rol}
+        extras={extras}
+        onRol={setRol}
+        onExtras={setExtras}
+      />
+      {error && (
+        <p className="portal-error" role="alert">
+          {error}
+        </p>
+      )}
       <div className="hoja__acciones">
-        <button type="button" className="btn" disabled={enviando} onClick={() => guardar({ rol, extras, email })}>
+        <button
+          type="button"
+          className="btn"
+          disabled={enviando}
+          onClick={() => guardar({ rol, extras, email })}
+        >
           Guardar cambios
         </button>
         <button
@@ -159,7 +350,12 @@ const EditarCuenta = ({ cuenta, esYo, onGuardada, onClave, onCerrar }) => {
           className="btn btn--ghost"
           disabled={enviando}
           onClick={async () => {
-            if (!window.confirm(`¿Restablecer la clave de ${cuenta.nombre}? Su clave actual deja de funcionar.`)) return;
+            if (
+              !window.confirm(
+                `¿Restablecer la clave de ${cuenta.nombre}? Su clave actual deja de funcionar.`,
+              )
+            )
+              return;
             try {
               const r = await post(`cuentas/${cuenta.id}/restablecer`);
               onClave(cuenta, r.claveTemporal);
@@ -182,7 +378,7 @@ const EditarCuenta = ({ cuenta, esYo, onGuardada, onClave, onCerrar }) => {
               if (window.confirm(texto)) guardar({ activa: !cuenta.activa });
             }}
           >
-            {cuenta.activa ? 'Desactivar' : 'Activar'}
+            {cuenta.activa ? "Desactivar" : "Activar"}
           </button>
         )}
       </div>
@@ -192,16 +388,16 @@ const EditarCuenta = ({ cuenta, esYo, onGuardada, onClave, onCerrar }) => {
 
 const Cuentas = ({ yo }) => {
   const [cuentas, setCuentas] = useState(null);
-  const [error, setError] = useState('');
-  const [busca, setBusca] = useState('');
-  const [filtro, setFiltro] = useState('todas');
-  const [rolFiltro, setRolFiltro] = useState('');
-  const [orden, setOrden] = useState('ingreso');
+  const [error, setError] = useState("");
+  const [busca, setBusca] = useState("");
+  const [filtro, setFiltro] = useState("todas");
+  const [rolFiltro, setRolFiltro] = useState("");
+  const [orden, setOrden] = useState("ingreso");
   const [hoja, setHoja] = useState(null); // { tipo: 'nueva' | 'editar' | 'clave', ... }
 
   const cargar = useCallback(async () => {
     try {
-      const r = await api('cuentas');
+      const r = await api("cuentas");
       setCuentas(r.cuentas);
     } catch (err) {
       setError(err.message);
@@ -218,20 +414,22 @@ const Cuentas = ({ yo }) => {
     if (!cuentas) return [];
     const q = busca.trim().toLowerCase();
     return cuentas
-      .filter((c) => !q || c.nombre.toLowerCase().includes(q) || c.email.includes(q))
+      .filter(
+        (c) => !q || c.nombre.toLowerCase().includes(q) || c.email.includes(q),
+      )
       .filter((c) => !rolFiltro || c.rol === rolFiltro)
       .filter((c) => {
-        if (filtro === 'hoy') return c.activa && c.entroHoy;
-        if (filtro === 'nunca') return c.activa && !c.ultimoIngreso;
-        if (filtro === 'inactivas') return !c.activa;
+        if (filtro === "hoy") return c.activa && c.entroHoy;
+        if (filtro === "nunca") return c.activa && !c.ultimoIngreso;
+        if (filtro === "inactivas") return !c.activa;
         return c.activa;
       })
       .sort((a, b) =>
-        orden === 'ingreso'
-          ? (b.ultimoIngreso ?? '').localeCompare(a.ultimoIngreso ?? '')
-          : orden === 'creada'
+        orden === "ingreso"
+          ? (b.ultimoIngreso ?? "").localeCompare(a.ultimoIngreso ?? "")
+          : orden === "creada"
             ? b.creada.localeCompare(a.creada)
-            : a.nombre.localeCompare(b.nombre, 'es'),
+            : a.nombre.localeCompare(b.nombre, "es"),
       );
   }, [cuentas, busca, filtro, rolFiltro, orden]);
 
@@ -247,7 +445,11 @@ const Cuentas = ({ yo }) => {
             El <em>equipo</em>
           </h1>
         </div>
-        <button type="button" className="btn btn--sm solo-compu" onClick={() => setHoja({ tipo: 'nueva' })}>
+        <button
+          type="button"
+          className="btn btn--sm solo-compu"
+          onClick={() => setHoja({ tipo: "nueva" })}
+        >
           <PlusIcon /> Nueva cuenta
         </button>
       </header>
@@ -255,15 +457,17 @@ const Cuentas = ({ yo }) => {
       <dl className="cifras">
         <div>
           <dt>Cuentas activas</dt>
-          <dd>{cuentas ? activas.length : '–'}</dd>
+          <dd>{cuentas ? activas.length : "–"}</dd>
         </div>
         <div>
           <dt>Entraron hoy</dt>
-          <dd>{cuentas ? hoy : '–'}</dd>
+          <dd>{cuentas ? hoy : "–"}</dd>
         </div>
         <div>
           <dt>Nunca han entrado</dt>
-          <dd>{cuentas ? activas.filter((c) => !c.ultimoIngreso).length : '–'}</dd>
+          <dd>
+            {cuentas ? activas.filter((c) => !c.ultimoIngreso).length : "–"}
+          </dd>
         </div>
       </dl>
 
@@ -271,17 +475,33 @@ const Cuentas = ({ yo }) => {
         <label className="buscador">
           <SearchIcon />
           <span className="visually-hidden">Buscar</span>
-          <input className="input" placeholder="Buscar por nombre o correo" value={busca} onChange={(e) => setBusca(e.target.value)} />
+          <input
+            className="input"
+            placeholder="Buscar por nombre o correo"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
         </label>
         <div className="herramientas__chips">
           {FILTROS.map(([id, label]) => (
-            <button key={id} type="button" className="chip" aria-pressed={filtro === id} onClick={() => setFiltro(id)}>
+            <button
+              key={id}
+              type="button"
+              className="chip"
+              aria-pressed={filtro === id}
+              onClick={() => setFiltro(id)}
+            >
               {label}
             </button>
           ))}
         </div>
         <div className="herramientas__selects">
-          <select className="input input--select" value={rolFiltro} onChange={(e) => setRolFiltro(e.target.value)} aria-label="Filtrar por rol">
+          <select
+            className="input input--select"
+            value={rolFiltro}
+            onChange={(e) => setRolFiltro(e.target.value)}
+            aria-label="Filtrar por rol"
+          >
             <option value="">Todos los roles</option>
             {ROL_IDS.map((r) => (
               <option key={r} value={r}>
@@ -289,7 +509,12 @@ const Cuentas = ({ yo }) => {
               </option>
             ))}
           </select>
-          <select className="input input--select" value={orden} onChange={(e) => setOrden(e.target.value)} aria-label="Ordenar">
+          <select
+            className="input input--select"
+            value={orden}
+            onChange={(e) => setOrden(e.target.value)}
+            aria-label="Ordenar"
+          >
             <option value="ingreso">Último ingreso</option>
             <option value="creada">Más nuevas</option>
             <option value="nombre">Nombre</option>
@@ -297,13 +522,21 @@ const Cuentas = ({ yo }) => {
         </div>
       </div>
 
-      {error && <p className="portal-error" role="alert">{error}</p>}
+      {error && (
+        <p className="portal-error" role="alert">
+          {error}
+        </p>
+      )}
       {!cuentas && !error && <p className="muted">Cargando…</p>}
 
       <ul className="cuentas">
         {lista.map((c) => (
           <li key={c.id}>
-            <button type="button" className={`cuenta ${c.activa ? '' : 'is-inactiva'}`} onClick={() => setHoja({ tipo: 'editar', cuenta: c })}>
+            <button
+              type="button"
+              className={`cuenta ${c.activa ? "" : "is-inactiva"}`}
+              onClick={() => setHoja({ tipo: "editar", cuenta: c })}
+            >
               <span className="cuenta__mono" aria-hidden="true">
                 {c.nombre.charAt(0)}
               </span>
@@ -316,43 +549,65 @@ const Cuentas = ({ yo }) => {
                 </span>
               </span>
               {c.entroHoy && <span className="punto-hoy">Hoy</span>}
-              {c.debeCambiar && c.activa && <span className="etiqueta">Clave temporal</span>}
+              {c.debeCambiar && c.activa && (
+                <span className="etiqueta">Clave temporal</span>
+              )}
               {!c.activa && <span className="etiqueta">Desactivada</span>}
             </button>
           </li>
         ))}
-        {cuentas && lista.length === 0 && <li className="muted">No hay cuentas con ese filtro.</li>}
+        {cuentas && lista.length === 0 && (
+          <li className="muted">No hay cuentas con ese filtro.</li>
+        )}
       </ul>
 
-      <button type="button" className="fab" onClick={() => setHoja({ tipo: 'nueva' })} aria-label="Nueva cuenta">
+      <CorreosGoogle />
+
+      <button
+        type="button"
+        className="fab"
+        onClick={() => setHoja({ tipo: "nueva" })}
+        aria-label="Nueva cuenta"
+      >
         <PlusIcon />
       </button>
 
-      {hoja?.tipo === 'nueva' && (
+      {hoja?.tipo === "nueva" && (
         <NuevaCuenta
           onCerrar={() => setHoja(null)}
-          onCreada={(c, clave) => {
+          onCreada={(c, clave, correo) => {
             setCuentas((xs) => [...(xs ?? []), { ...c, entroHoy: false }]);
-            setHoja({ tipo: 'clave', cuenta: c, clave });
+            setHoja({ tipo: "clave", cuenta: c, clave, correo });
           }}
         />
       )}
-      {hoja?.tipo === 'editar' && (
+      {hoja?.tipo === "editar" && (
         <EditarCuenta
           cuenta={hoja.cuenta}
           esYo={hoja.cuenta.id === yo.id}
           onCerrar={() => setHoja(null)}
           onGuardada={(c) => {
-            setCuentas((xs) => xs.map((x) => (x.id === c.id ? { ...x, ...c } : x)));
+            setCuentas((xs) =>
+              xs.map((x) => (x.id === c.id ? { ...x, ...c } : x)),
+            );
             setHoja(null);
           }}
           onClave={(c, clave) => {
-            setCuentas((xs) => xs.map((x) => (x.id === c.id ? { ...x, debeCambiar: true } : x)));
-            setHoja({ tipo: 'clave', cuenta: c, clave });
+            setCuentas((xs) =>
+              xs.map((x) => (x.id === c.id ? { ...x, debeCambiar: true } : x)),
+            );
+            setHoja({ tipo: "clave", cuenta: c, clave });
           }}
         />
       )}
-      {hoja?.tipo === 'clave' && <ClaveLista cuenta={hoja.cuenta} clave={hoja.clave} onCerrar={() => setHoja(null)} />}
+      {hoja?.tipo === "clave" && (
+        <ClaveLista
+          cuenta={hoja.cuenta}
+          clave={hoja.clave}
+          correo={hoja.correo}
+          onCerrar={() => setHoja(null)}
+        />
+      )}
     </div>
   );
 };

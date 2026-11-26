@@ -1,6 +1,6 @@
 # Correos de Naamá (E01–E03)
 
-Plantillas HTML listas para un servicio de envío (hoy la web **no envía correos**: falta conectar uno, por ejemplo Resend o Brevo).
+Plantillas HTML que el portal manda por Google (Apps Script con MailApp, ver `docs/correos-apps-script.gs`). Después de cambiar una, correr `node scripts/plantillas-correo.mjs`.
 Los datos van entre llaves dobles y se reemplazan al enviar.
 
 | Archivo | Cuándo se manda | Datos |

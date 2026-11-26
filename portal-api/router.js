@@ -2,6 +2,7 @@
 // Todo vive bajo /api/portal/… y responde JSON.
 
 import { asegurarEsquema } from './esquema.js';
+import { PLANTILLAS } from './plantillas-correo.js';
 import { emparejar, filasDePlanilla, indiceClientas, normNombre, recontar, procesarFilas, reintentarPendientes, sincronizarPortal } from './visitasAuto.js';
 import { enviarPush, llavesVapid } from './push.js';
 import { claveTemporal, hashClave, igualSeguro, nuevoToken, sha256, verificarClave } from './seguridad.js';
@@ -229,7 +230,7 @@ ruta('GET', /^cuentas$/, { permiso: 'cuentas' }, async ({ db }) => {
   });
 });
 
-ruta('POST', /^cuentas$/, { permiso: 'cuentas' }, async ({ db, cuenta, body }) => {
+ruta('POST', /^cuentas$/, { permiso: 'cuentas' }, async ({ db, env, cuenta, body }) => {
   const email = limpiarEmail(body.email);
   const nombre = limpiarNombre(body.nombre);
   const rol = String(body.rol ?? '');
@@ -251,7 +252,12 @@ ruta('POST', /^cuentas$/, { permiso: 'cuentas' }, async ({ db, cuenta, body }) =
   const id = r.meta.last_row_id;
   await registrar(db, cuenta.id, 'crear_cuenta', { id, rol });
   const nuevaCuenta = await db.prepare('SELECT * FROM cuentas WHERE id = ?').bind(id).first();
-  return json({ ok: true, cuenta: publica(nuevaCuenta), claveTemporal: temporal }, 201);
+  let correo = null;
+  if (!body.demo && body.correo !== false) {
+    const html = rellenar(PLANTILLAS.bienvenida, { nombre: nombre.split(' ')[0], email, clave_temporal: temporal });
+    correo = await encolarCorreo(db, env, { tipo: 'bienvenida', para: email, asunto: 'Bienvenida al portal de Naamá', html, ref: `cuenta:${id}` });
+  }
+  return json({ ok: true, cuenta: publica(nuevaCuenta), claveTemporal: temporal, correo }, 201);
 });
 
 ruta('POST', /^cuentas\/(\d+)$/, { permiso: 'cuentas' }, async ({ db, cuenta, body, params }) => {
@@ -2112,6 +2118,94 @@ ruta('POST', /^resenas$/, { permiso: 'cuentas' }, async ({ db, body }) => {
   return json({ ok: true });
 });
 
+
+/* ── correos por Google ────────────────────────────────── */
+// Los correos salen desde la cuenta de Google del salón con un Apps Script (MailApp). Igual que la planilla:
+// al script le llega solo un código y viene a buscar el correo aquí. Nada de claves compartidas.
+
+const escaparHtml = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const rellenar = (plantilla, datos) => plantilla.replace(/\{\{(\w+)\}\}/g, (_, k) => escaparHtml(datos[k] ?? ''));
+const fechaBonita = (f) => {
+  const [a, m, d] = String(f).split('-').map(Number);
+  const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  return a && m && d ? `${d} de ${meses[m - 1]} de ${a}` : String(f);
+};
+const PNG_DATA = /^data:image\/png;base64,[A-Za-z0-9+/=]+$/;
+
+/** Le avisa al Apps Script que hay un correo listo. Devuelve el estado final. */
+async function mandarCorreo(db, env, id) {
+  const c = await db.prepare('SELECT * FROM correos WHERE id = ?').bind(id).first();
+  if (!c || c.estado === 'enviado') return c?.estado ?? null;
+  const url = (await db.prepare(`SELECT valor FROM meta WHERE clave = 'correos_url'`).first())?.valor;
+  const marcar = (estado, error = null) =>
+    db
+      .prepare(`UPDATE correos SET estado = ?, error = ?, enviado = ?, html = CASE WHEN ? = 'enviado' THEN NULL ELSE html END, imagen = CASE WHEN ? = 'enviado' THEN NULL ELSE imagen END WHERE id = ?`)
+      .bind(estado, error, estado === 'enviado' ? ahora() : null, estado, estado, id)
+      .run();
+  if (!url) {
+    await marcar('pendiente', 'Falta conectar los correos de Google.');
+    return 'pendiente';
+  }
+  try {
+    const r = await (env.CORREO_FETCH ?? fetch)(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ token: c.token }),
+      redirect: 'follow',
+    });
+    const d = await r.json().catch(() => null);
+    if (d?.ok) {
+      await marcar('enviado');
+      return 'enviado';
+    }
+    await marcar('error', String(d?.error ?? `Google respondió ${r.status}.`).slice(0, 200));
+    return 'error';
+  } catch {
+    await marcar('error', 'No se pudo llegar al script de Google.');
+    return 'error';
+  }
+}
+
+async function encolarCorreo(db, env, { tipo, para, asunto, html, imagen = null, ref = null }) {
+  const r = await db
+    .prepare('INSERT INTO correos (token, tipo, para, asunto, html, imagen, ref, creado) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+    .bind(nuevoToken(), tipo, para, asunto, html, imagen, ref, ahora())
+    .run();
+  return mandarCorreo(db, env, r.meta.last_row_id);
+}
+
+// Lo que el Apps Script viene a buscar. Sin sesión: el código es la llave, sirve hasta que el correo sale y por 2 días.
+ruta('GET', /^correo\/([0-9a-f]{64})$/, {}, async ({ db, params }) => {
+  const c = await db.prepare('SELECT * FROM correos WHERE token = ?').bind(params[0]).first();
+  if (!c || c.estado === 'enviado' || !c.html || Date.now() - Date.parse(c.creado) > 2 * 86400000) return error(404, 'No encontrado.');
+  return json({ ok: true, correo: { para: c.para, asunto: c.asunto, html: c.html, imagen: c.imagen ? c.imagen.split(',')[1] : null } });
+});
+
+ruta('POST', /^correos\/conectar$/, { permiso: 'cuentas' }, async ({ db, env, cuenta, body }) => {
+  const url = String(body.url ?? '').trim();
+  if (!URL_PLANILLA.test(url)) return error(400, 'Ese enlace no es el de la aplicación web de Apps Script (termina en /exec).');
+  await db.prepare(`INSERT INTO meta (clave, valor) VALUES ('correos_url', ?) ON CONFLICT(clave) DO UPDATE SET valor = excluded.valor`).bind(url).run();
+  await registrar(db, cuenta.id, 'correos', { conectados: true });
+  // Lo que quedó esperando sale ahora.
+  const { results } = await db.prepare(`SELECT id FROM correos WHERE estado != 'enviado' AND html IS NOT NULL ORDER BY id LIMIT 20`).all();
+  let enviados = 0;
+  for (const c of results) if ((await mandarCorreo(db, env, c.id)) === 'enviado') enviados += 1;
+  return json({ ok: true, enviados });
+});
+
+ruta('GET', /^correos$/, { permiso: 'cuentas' }, async ({ db }) => {
+  const conectado = Boolean((await db.prepare(`SELECT valor FROM meta WHERE clave = 'correos_url'`).first())?.valor);
+  const { results } = await db.prepare('SELECT id, tipo, para, asunto, estado, error, creado, enviado FROM correos ORDER BY id DESC LIMIT 30').all();
+  return json({ ok: true, conectado, correos: results });
+});
+
+ruta('POST', /^correos\/reintentar$/, { permiso: 'cuentas' }, async ({ db, env }) => {
+  const { results } = await db.prepare(`SELECT id FROM correos WHERE estado != 'enviado' AND html IS NOT NULL ORDER BY id LIMIT 20`).all();
+  let enviados = 0;
+  for (const c of results) if ((await mandarCorreo(db, env, c.id)) === 'enviado') enviados += 1;
+  return json({ ok: true, enviados, total: results.length });
+});
+
 /* ── gift cards ─────────────────────────────────────────── */
 
 const DISENOS_GIFT = ['cacao', 'caramelo', 'marfil', 'burdeo', 'espresso', 'crema', 'arcilla', 'dorado'];
@@ -2165,6 +2259,28 @@ ruta('POST', /^giftcards$/, { sesion: true }, async ({ db, cuenta, body }) => {
     .run();
   const g = await db.prepare('SELECT * FROM giftcards WHERE id = ?').bind(r.meta.last_row_id).first();
   return json({ ok: true, giftcard: giftPublica(g, hoy) }, 201);
+});
+
+// Manda la gift card por correo. El portal dibuja la tarjeta (PNG) y la adjunta; el correo la muestra dentro.
+ruta('POST', /^giftcards\/(\d+)\/correo$/, { sesion: true }, async ({ db, env, cuenta, body, params }) => {
+  if (!permisoGift(cuenta)) return error(403, 'No tienes acceso a esta sección.');
+  const g = await db.prepare('SELECT * FROM giftcards WHERE id = ?').bind(Number(params[0])).first();
+  if (!g) return error(404, 'No existe esa gift card.');
+  const email = limpiarEmail(body.email);
+  if (!emailValido(email)) return error(400, 'Revisa el correo.');
+  const png = String(body.png ?? '');
+  if (!PNG_DATA.test(png) || png.length > 3_000_000) return error(400, 'Falta la imagen de la tarjeta.');
+  const html = rellenar(PLANTILLAS.giftCard, {
+    para: g.para,
+    de: g.de || 'Naamá Studio',
+    mensaje: g.mensaje || 'Para que te regales una pausa.',
+    tarjeta_url: 'cid:tarjeta',
+    codigo: g.codigo,
+    vence: fechaBonita(g.vence),
+  });
+  const estado = await encolarCorreo(db, env, { tipo: 'gift', para: email, asunto: `${g.para}, te regalaron una pausa en Naamá`, html, imagen: png, ref: `gift:${g.id}` });
+  await registrar(db, cuenta.id, 'gift_correo', { id: g.id, estado });
+  return json({ ok: true, estado });
 });
 
 ruta('POST', /^giftcards\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, params }) => {

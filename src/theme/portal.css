@@ -808,6 +808,11 @@ html.en-portal, html.en-portal body { background: var(--papel); }
 .meta__barra span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--durazno), var(--terracota)); transition: width 0.4s; }
 .gift { display: grid; gap: 12px; }
 .gift__canvas { width: 100%; height: auto; border-radius: var(--r-tarjeta); box-shadow: var(--sombra-alta); }
+.gift__correo { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--linea, rgba(22,20,19,.12)); }
+.gift__correo p { grid-column: 1 / -1; margin: 0; }
+.correos-google { margin-top: 28px; }
+.correos-google ul { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 6px; }
+.correos-google li { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--linea, rgba(22,20,19,.12)); }
 .gift__muestra { display: inline-block; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid; vertical-align: middle; }
 .caja-total { font-size: 1rem; }
 .tabla-margen { overflow-x: auto; border-radius: var(--r); background: var(--card); box-shadow: var(--sombra); padding: 6px 0; }
