@@ -12,6 +12,7 @@ const ESTUDIO = [
   { to: '/gift-cards', label: 'Gift cards' },
   { to: '/empresas', label: 'Empresas' },
   { to: '/contacto', label: 'Contacto' },
+  { to: '/preguntas', label: 'Preguntas' },
   { to: '/reservar', label: 'Reservar' },
 ];
 

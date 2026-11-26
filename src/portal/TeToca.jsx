@@ -8,10 +8,10 @@ const wa = (tel, texto) => `https://wa.me/${tel.replace('+', '')}?text=${encodeU
 
 const mensajeToca = (c) =>
   c.dormida
-    ? `Hola ${primerNombre(c.nombre)}! 🌸 Te escribimos de Naamá Studio. Hace tiempo que no te vemos y te echamos de menos. ¿Te reservamos una hora esta semana para regalarte una pausa? 🤍`
-    : `Hola ${primerNombre(c.nombre)}! 🌸 Te escribimos de Naamá Studio. Ya va siendo tiempo de tu ${c.servicio ? c.servicio.toLowerCase() : 'próxima visita'}. ¿Te reservamos una hora? 🤍`;
+    ? `Hola ${primerNombre(c.nombre)} 🤍 te escribimos de Naamá: hace tiempo que no te vemos y te echamos de menos. ¿Te reservamos una hora esta semana?`
+    : `Hola ${primerNombre(c.nombre)} 🤍 te escribimos de Naamá: ya te toca tu ${c.servicio ? c.servicio.toLowerCase() : 'próxima visita'}. ¿Te acomoda esta semana?`;
 const mensajeCumple = (c) =>
-  `¡Feliz cumpleaños, ${primerNombre(c.nombre)}! 🎂🌸 Todo el equipo de Naamá Studio te desea un día precioso. Cuando vengas este mes, te tenemos un regalito. 🤍`;
+  `Hola ${primerNombre(c.nombre)} 🤍 ¡feliz cumpleaños! Todo el equipo de Naamá te desea un día precioso. Cuando vengas este mes, te tenemos un regalito.`;
 
 const cuando = (dias) => (dias === 0 ? 'hoy' : dias === 1 ? 'mañana' : `en ${dias} días`);
 

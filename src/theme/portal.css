@@ -70,9 +70,14 @@ html.en-portal, html.en-portal body { background: var(--papel); }
 .avatar--sm { width: 36px; height: 36px; font-size: 1rem; }
 
 /* ── Carga ── */
-.splash { min-height: 100dvh; display: grid; place-items: center; background: var(--cacao); color: var(--crema); }
-.splash .logo { width: 170px; animation: splash 1.6s var(--ease-in-out) infinite alternate; }
-@keyframes splash { from { opacity: 0.35; } to { opacity: 1; } }
+.portal--splash { background: var(--tinta); }
+.splash { min-height: 100dvh; display: grid; place-content: center; justify-items: center; gap: 4px; background: var(--tinta); color: var(--blanco); }
+.splash .logo { width: 150px; }
+.splash__firma { font-family: var(--f-firma); font-style: italic; font-weight: 500; font-size: 2.2rem; color: var(--durazno); }
+.splash__barra { position: relative; width: 120px; height: 2px; margin-top: 14px; border-radius: 2px; background: color-mix(in srgb, var(--blanco) 15%, transparent); overflow: hidden; }
+.splash__barra::after { content: ''; position: absolute; inset: 0 auto 0 0; width: 45%; background: var(--terracota); animation: splash-barra 1.2s ease-in-out infinite; }
+@keyframes splash-barra { from { transform: translateX(-100%); } to { transform: translateX(240%); } }
+@media (prefers-reduced-motion: reduce) { .splash__barra::after { animation: none; transform: none; } }
 
 /* ── Entrar / configurar / clave ── */
 .portal--acceso { position: relative; background: var(--tinta); isolation: isolate; }
@@ -1212,3 +1217,60 @@ html.en-portal, html.en-portal body { background: var(--papel); }
 .mandar .mensaje__pasos li > span { padding: 0 !important; background: none !important; border-radius: 0; }
 .mandar .mensaje__pasos li > span::before { display: none !important; }
 .portal .agenda__filtros { flex-wrap: nowrap !important; overflow-x: auto; }
+
+/* D14 · Agenda en computador: «HOY en la casa», columnas y panel «Agendar» fijo a la derecha */
+.agenda__libre { display: none; }
+@media (min-width: 900px) {
+  .solo-celu { display: none !important; }
+  .portal__cuerpo:has(.agenda-pagina) { max-width: none; }
+  .agenda-pagina { grid-template-columns: minmax(0, 1fr) 320px; column-gap: 28px; align-items: start; }
+  .agenda-pagina > * { grid-column: 1; }
+  .agenda-pagina > .agendar-panel { grid-column: 2; grid-row: 1 / span 12; position: sticky; top: 24px; }
+  .agenda-hoy { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+  .agenda-hoy h1 { display: flex; align-items: baseline; gap: 14px; }
+  .agenda-hoy .gigante { font-size: clamp(3.6rem, 6vw, 5.4rem); line-height: 0.85; text-transform: uppercase; }
+  .agenda-hoy .firma { font-size: 2.2rem; color: var(--terracota); }
+  .agenda-hoy p { font-size: var(--fs-chico); color: var(--gris); text-transform: none; }
+  .agenda__libre { display: grid; place-items: center start; position: absolute; left: 6px; right: 6px; padding: 0 8px; border: 1.5px dashed var(--borde); border-radius: var(--r-pestana); font-size: 0.7rem; color: var(--gris); opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+  .agenda__col:hover .agenda__libre { opacity: 1; }
+  .agendar-panel { display: grid; gap: 12px; padding: 20px; border-radius: var(--r-tarjeta); background: var(--blanco); }
+  .agendar-panel__titulo { font-size: 1.5rem; font-weight: 300; letter-spacing: -0.03em; }
+  .agendar-panel .hoja__form { gap: 12px; }
+  .agendar-panel .horas-libres .hora-libre { background: var(--papel); box-shadow: none; }
+  .agendar-panel .horas-libres .hora-libre[aria-checked='true'] { background: var(--terracota); }
+}
+@media (min-width: 900px) {
+  .agendar-panel, .agendar-panel * { min-width: 0; }
+  .agendar-panel .input { width: 100%; }
+  .agendar-panel .fila-campos { grid-template-columns: 1fr 1fr; }
+  .agenda-pagina .agenda__resumen { display: none; }
+}
+.hora-libre[aria-checked='true'] strong { text-decoration: none; color: inherit; }
+
+/* D15 · Caja en computador: total gigante, cuadros grandes de color, barras abajo y formulario fijo a la derecha */
+.caja-barras-caja { display: grid; gap: 4px; width: 100%; }
+@media (min-width: 900px) {
+  .caja-pagina { grid-template-columns: minmax(0, 1fr) 340px; column-gap: 28px; align-items: start; }
+  .caja-pagina > * { grid-column: 1; }
+  .caja-pagina > .caja-form { grid-column: 2; grid-row: 1 / span 6; position: sticky; top: 24px; padding: 20px; border-radius: var(--r-tarjeta); background: var(--blanco); }
+  .caja-pagina > .caja-form .input { background: var(--papel); }
+  .caja-cabeza { justify-items: start; text-align: left; }
+  .caja-cabeza .dia-nav { justify-content: flex-start; gap: 10px; }
+  .caja-cabeza__total { font-size: clamp(4.4rem, 8vw, 7rem); }
+  .caja-cuadros { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .caja-cuadro { padding: 18px; min-height: 130px; align-content: space-between; }
+  .caja-cuadro strong { font-size: 2rem; }
+  .caja-cuadro:nth-child(1) { background: var(--terracota); color: var(--blanco); }
+  .caja-cuadro:nth-child(1) small { color: color-mix(in srgb, var(--blanco) 80%, transparent); }
+  .caja-cuadro:nth-child(2) { background: var(--cafe); color: var(--blanco); }
+  .caja-cuadro:nth-child(2) small { color: color-mix(in srgb, var(--blanco) 80%, transparent); }
+  .caja-cuadro:nth-child(3) { background: var(--arcilla); }
+  .caja-cuadro.is-falta { background: var(--rosa) !important; color: var(--error) !important; }
+  .caja-cuadro.is-falta small { color: var(--error) !important; }
+  .caja-barras-pc .caja-barras { height: 140px; gap: 8px; }
+  .caja-barras-pc .caja-barras span { border-radius: var(--r-pestana); }
+}
+@media (min-width: 900px) {
+  .caja-pagina, .agenda-pagina { grid-template-rows: repeat(8, auto) 1fr; }
+  .caja-pagina > .caja-form, .agenda-pagina > .agendar-panel { grid-row: 1 / 10; align-self: start; }
+}

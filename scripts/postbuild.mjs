@@ -90,7 +90,15 @@ const routes = [
     description: 'Arcadia 1297, San Miguel, Santiago. Lunes a sábado 10:30–19:30. WhatsApp +56 9 7952 0623.',
     image: '/img/casa-fachada-1600.webp',
     h1: 'Contacto y cómo llegar',
-    intro: 'Estamos en Arcadia 1297, San Miguel: la casa patrimonial de fachada terracota.',
+    intro: 'Estamos en Arcadia 1297, San Miguel, a pasos del metro El Llano.',
+  },
+  {
+    path: '/preguntas',
+    title: 'Preguntas frecuentes · Naamá Studio, San Miguel',
+    description: 'Horario, reservas, pagos, gift cards y cómo llegar a Naamá Studio en Arcadia 1297, San Miguel.',
+    h1: 'Preguntas frecuentes',
+    intro: 'Lo que más nos preguntan antes de venir.',
+    faq: true,
   },
   {
     path: '/portal',
@@ -111,6 +119,7 @@ const nav = [
   ['/reservar', 'Reservar'],
   ['/gift-cards', 'Gift cards'],
   ['/contacto', 'Contacto'],
+  ['/preguntas', 'Preguntas frecuentes'],
 ];
 
 const staticBody = (r) => {

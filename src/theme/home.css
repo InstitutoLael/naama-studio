@@ -90,3 +90,16 @@
   .inicio-eventos { border-top: 0; padding-top: 0; }
   .inicio-visita { padding-block: 64px 24px; }
 }
+
+/* D11 · Inicio en computador */
+@media (min-width: 1024px) {
+  .inicio-pc { display: grid !important; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; padding-block: 36px 64px; }
+  .inicio-pc .titulo { font-size: clamp(3.4rem, 5.4vw, 5.2rem); line-height: 0.98; }
+  .inicio-pc .titulo b { display: block; }
+  .inicio-pc__texto { display: grid; gap: 22px; }
+  .inicio-pc__texto p { max-width: 42ch; color: var(--gris); font-size: 1.05rem; }
+  .inicio-pc__botones { display: flex; gap: 10px; }
+  .inicio-pc__fotos { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 10px; height: 520px; }
+  .inicio-pc__fotos .photo { border-radius: var(--r-tarjeta); }
+  .inicio-pc__fotos .inicio-pc__arco { grid-row: span 2; border-radius: 999px 999px 4px 4px; }
+}

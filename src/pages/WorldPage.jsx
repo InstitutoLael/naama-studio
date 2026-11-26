@@ -142,7 +142,7 @@ const WorldPage = () => {
       <div className="container mundo-top">
         <Link to="/servicios" className="circulo-btn" aria-label="Volver a servicios"><ArrowLeft /></Link>
         <p>{mundo.name}</p>
-        <a href={whatsappUrl(`Hola! Tengo una consulta sobre ${mundo.name}.`)} target="_blank" rel="noopener noreferrer" className="circulo-btn" aria-label="Preguntar por WhatsApp">
+        <a href={whatsappUrl(`Hola 🤍 Tengo una consulta sobre ${mundo.name}.`)} target="_blank" rel="noopener noreferrer" className="circulo-btn" aria-label="Preguntar por WhatsApp">
           <WhatsAppIcon />
         </a>
       </div>

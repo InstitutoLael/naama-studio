@@ -49,5 +49,5 @@ export const isOpenNow = (date = new Date()) => {
   return minutos >= slot.open && minutos < slot.close;
 };
 
-export const whatsappUrl = (text = 'Hola! Me gustaría saber más sobre los servicios de Naamá Studio.') =>
+export const whatsappUrl = (text = 'Hola 🤍 Me gustaría saber más sobre Naamá Studio.') =>
   `https://wa.me/${SITE.phone}?text=${encodeURIComponent(text)}`;

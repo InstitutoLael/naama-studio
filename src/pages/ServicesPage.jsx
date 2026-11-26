@@ -2,9 +2,9 @@ import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SEOHead from '../components/shared/SEOHead';
 import Photo from '../components/common/Photo';
-import GrupoCarta from '../components/common/Carta';
+import GrupoCarta, { bajadaFila, precioFila } from '../components/common/Carta';
 import { agrupar, enSecciones } from '../data/menuPrecios';
-import { ArrowRight, CloseIcon, SearchIcon } from '../components/common/Icons';
+import { ArrowRight, CloseIcon, PlusIcon, SearchIcon } from '../components/common/Icons';
 import { mundos, servicesForMundo, totalServicios } from '../data/categories';
 import { servicesData } from '../data/servicesData';
 import { usePreciosVivos } from '../data/preciosVivos';
@@ -18,6 +18,64 @@ const matches = (service, words) => {
 
 /** Al tocar un servicio: a su mundo con el servicio ya elegido. */
 const linkDe = (mundo) => (it) => `/servicios/${mundo.id}?servicio=${encodeURIComponent(it.original ?? it.nombre)}`;
+
+/** D13 · computador: un mundo a la vez (los chips lo cambian), foto grande con el nombre, lista corta con + y los otros mundos en tarjetas. */
+const PreciosPC = ({ mundoId, elegir, version }) => {
+  const mundo = mundos.find((m) => m.id === mundoId) ?? mundos[0];
+  const items = useMemo(() => enSecciones(mundo.id, agrupar(servicesForMundo(servicesData, mundo))).flatMap((s) => s.items), [mundo, version]);
+  const total = servicesForMundo(servicesData, mundo).length;
+  const [palabra, ...resto] = mundo.name.split(/ & |, /);
+  const firma = mundo.name.slice(palabra.length).replace(/^ /, '').toLowerCase();
+  return (
+    <div className="precios-pc container">
+      <h1 className="gigante">Precios</h1>
+      <div className="chips" role="group" aria-label="Mundo">
+        {mundos.map((m) => (
+          <button key={m.id} className="chip" aria-pressed={m.id === mundo.id} onClick={() => elegir(m.id)}>{m.short}</button>
+        ))}
+      </div>
+      <div className="precios-pc__mundo">
+        <div className="precios-pc__foto">
+          <Photo name={mundo.photo} alt="" sizes="40vw" />
+          <p>
+            <span className="gigante">{palabra}</span>
+            {resto.length > 0 && <span className="firma firma--blanca">{firma}</span>}
+          </p>
+        </div>
+        <div>
+          <ul className="precios-pc__lista">
+            {items.slice(0, 8).map((it, i) => (
+              <li key={`${it.nombre}-${i}`}>
+                <Link to={linkDe(mundo)(it)} className="fila">
+                  <span className="fila__nombre">
+                    {it.nombre}
+                    {bajadaFila(it) && <small>{bajadaFila(it)}</small>}
+                  </span>
+                  <span className="fila__precio">{precioFila(it)}</span>
+                  <span className="fila__mas" aria-hidden="true"><PlusIcon /></span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+          <Link to={`/servicios/${mundo.id}`} className="link-sub precios-pc__todos">Ver los {total} de {mundo.short}</Link>
+        </div>
+      </div>
+      <h2 className="titulo precios-pc__otros-t">Otros <b>mundos</b></h2>
+      <div className="precios-pc__otros">
+        {mundos.filter((m) => m.id !== mundo.id).map((m) => (
+          <button key={m.id} className="precios-pc__otro tarjeta" onClick={() => { elegir(m.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+            <Photo name={m.photo} alt="" sizes="20vw" />
+            <span>
+              <strong>{m.short}</strong>
+              <small>{servicesForMundo(servicesData, m).length} servicios</small>
+            </span>
+            <span className="link-sub">Ver precios</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 /** P02 · Servicios y precios. */
 const ServicesPage = () => {
@@ -51,6 +109,9 @@ const ServicesPage = () => {
         description={`Los ${totalServicios} servicios de Naamá Studio con precios y duración: cabello, color, uñas, cejas, pestañas, depilación, faciales, masajes y podología en San Miguel.`}
       />
 
+      <PreciosPC mundoId={mundoFilter} elegir={(id) => { const n = new URLSearchParams(params); n.set('mundo', id); setParams(n, { replace: true, preventScrollReset: true }); }} version={versionPrecios} />
+
+      <div className="solo-cel">
       <header className="precios-hero">
         <Photo name="casa-sala" alt="" priority sizes="100vw" />
         <div className="precios-hero__velo" />
@@ -126,6 +187,7 @@ const ServicesPage = () => {
           <p>Arcadia 1297, San Miguel · Atendemos sin reserva también</p>
           <Link to="/reservar" className="btn">Reservar un servicio <ArrowRight /></Link>
         </div>
+      </div>
       </div>
     </div>
   );

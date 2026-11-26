@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SEOHead from '../components/shared/SEOHead';
 import Photo from '../components/common/Photo';
-import { ArrowLeft, ArrowRight, CheckIcon, ClockIcon, PinIcon, SearchIcon, WhatsAppIcon } from '../components/common/Icons';
+import { ArrowLeft, ArrowRight, CalendarIcon, CheckIcon, ClockIcon, PinIcon, SearchIcon, WhatsAppIcon } from '../components/common/Icons';
 import { mundos, servicesForMundo } from '../data/categories';
 import { servicesData } from '../data/servicesData';
 import { team } from '../data/team';
-import { HORARIO_CORTO, SITE, whatsappUrl } from '../data/site';
+import { HORARIO_CORTO, SITE, horaChile, whatsappUrl } from '../data/site';
 import { scrollToTop } from '../lib/smoothScroll';
 import { usePreciosVivos } from '../data/preciosVivos';
 import { precioTexto } from '../data/menuPrecios';
@@ -34,6 +34,29 @@ const corto = (d, op) => d.toLocaleDateString('es-CL', op).replace('.', '');
 const fechaLarga = (d) => d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' }).replace('.', '');
 const conMayuscula = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+const aMin = (h) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3));
+
+/** ¿Esa persona está tomada a esa hora? (según la agenda y su disponibilidad del día) */
+const tomada = (p, h, minutos) => {
+  if (!p) return false;
+  const ini = aMin(h);
+  if (p.dispo === 'no') return true;
+  if (p.dispo === 'manana' && ini >= 14 * 60) return true;
+  if (p.dispo === 'tarde' && ini < 14 * 60) return true;
+  return p.ocupadas.some(([hh, m]) => aMin(hh) < ini + minutos && ini < aMin(hh) + m);
+};
+
+/** Bloque de color con ícono (X11): lleno, domingo, cargando, sin WhatsApp. */
+const Estado = ({ tono, Icono, titulo, children }) => (
+  <div className={`estado-bloque estado-bloque--${tono}`} role="status">
+    <Icono />
+    <div>
+      <strong>{titulo}</strong>
+      <p>{children}</p>
+    </div>
+  </div>
+);
+
 /** P04 · Reservar en 4 pasos (en computador, 3 columnas con el ticket fijo). */
 const BookingFlow = () => {
   const version = usePreciosVivos();
@@ -50,6 +73,9 @@ const BookingFlow = () => {
   const [dia, setDia] = useState(null);
   const [hora, setHora] = useState('');
   const [nombre, setNombre] = useState('');
+  const [agenda, setAgenda] = useState(null); // { estado: 'cargando' | 'ok' | 'error', personas }
+  const [sinWhatsApp, setSinWhatsApp] = useState(false);
+  const vigilante = useRef();
 
   const dias = useMemo(proximosDias, []);
   const mundo = mundos.find((m) => m.id === mundoId) ?? mundos[0];
@@ -75,21 +101,72 @@ const BookingFlow = () => {
     if (!persona) setPersona(LIBRE);
   };
 
+  // Horas libres reales del día elegido (portal → agenda del salón)
+  useEffect(() => {
+    if (!dia) return undefined;
+    let vivo = true;
+    setAgenda({ estado: 'cargando' });
+    fetch(`/api/portal/publico/horas?fecha=${clave(dia)}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((r) => vivo && setAgenda({ estado: 'ok', personas: r.personas }))
+      .catch(() => vivo && setAgenda({ estado: 'error' }));
+    return () => {
+      vivo = false;
+    };
+  }, [dia]);
+
+  const minutosServicio = useMemo(() => {
+    const t = String(servicio?.time ?? '');
+    const h = /([\d.,]+)\s*h/.exec(t);
+    const m = /(\d+)\s*min/.exec(t);
+    return Math.max(30, Math.round((h ? parseFloat(h[1].replace(',', '.')) * 60 : 0) + (m ? Number(m[1]) : 0)) || 60);
+  }, [servicio]);
+
+  /** Una hora está ocupada si la persona elegida está tomada; con «Libre», si todas las que hacen el servicio lo están. */
+  const ocupada = (h) => {
+    if (agenda?.estado !== 'ok') return false;
+    const de = (n) => agenda.personas.find((p) => p.nombre.toLowerCase() === n.toLowerCase());
+    if (persona && !persona.libre) return tomada(de(persona.name), h, minutosServicio);
+    const candidatas = (servicio ? personas : team).map((t) => de(t.name)).filter(Boolean);
+    return candidatas.length > 0 && candidatas.every((p) => tomada(p, h, minutosServicio));
+  };
+  const diaLleno = !!dia && agenda?.estado === 'ok' && HORAS.every(ocupada);
+  const siguienteDia = dia ? dias.find((d) => d > dia) : null;
+  const esDomingo = horaChile().dia === 0;
+
+  // Si la hora elegida queda ocupada al cambiar de persona, se suelta.
+  useEffect(() => {
+    if (hora && ocupada(hora)) setHora('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [agenda, persona]);
+
+  // En computador, que el servicio elegido quede a la vista en su lista.
+  useEffect(() => {
+    const el = document.querySelector('.col-servicio .opcion[aria-pressed="true"]');
+    const lista = el?.closest('.opciones');
+    if (el && lista && lista.scrollHeight > lista.clientHeight) lista.scrollTop = el.offsetTop - 40;
+  }, [mundoId]);
+
+  const confirmar = () => {
+    // Si a los 2,5 s la página sigue a la vista, WhatsApp no se abrió.
+    clearTimeout(vigilante.current);
+    setSinWhatsApp(false);
+    const oculto = () => {
+      if (document.visibilityState === 'hidden') clearTimeout(vigilante.current);
+    };
+    document.addEventListener('visibilitychange', oculto, { once: true });
+    vigilante.current = setTimeout(() => {
+      if (document.visibilityState === 'visible' && document.hasFocus()) setSinWhatsApp(true);
+    }, 2500);
+  };
+
   const quien = persona?.libre ? 'Sin preferencia' : persona?.name;
   const precio = servicio ? precioTexto(servicio.price) : '—';
   const falta = !servicio ? 'Elige un servicio' : !dia ? 'Elige el día' : !hora ? 'Elige la hora' : null;
+  const activa = !servicio ? 1 : !dia || !hora ? 3 : 4;
 
-  const mensaje = [
-    'Hola Naamá Studio! Quiero reservar:',
-    `• Servicio: ${servicio?.name}`,
-    `• Especialista: ${quien ?? 'Sin preferencia'}`,
-    dia && `• Día: ${fechaLarga(dia)}`,
-    hora && `• Hora: ${hora}`,
-    nombre.trim() && `• Nombre: ${nombre.trim()}`,
-    '¡Muchas gracias!',
-  ]
-    .filter(Boolean)
-    .join('\n');
+  const diaTexto = dia ? dia.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric' }).replace(',', '') : '';
+  const mensaje = `Hola 🤍 Me gustaría reservar ${servicio?.name ?? ''}${persona && !persona.libre ? ` con ${persona.name}` : ''}${dia ? ` el ${diaTexto}` : ''}${hora ? ` a las ${hora}` : ''}.${nombre.trim() ? ` Gracias, ${nombre.trim()}.` : ' Gracias.'}`;
 
   const progreso = (
     <ol className="pasos" aria-label="Progreso">
@@ -129,13 +206,22 @@ const BookingFlow = () => {
         </div>
       )}
 
+      <div className="container reservar-pc-cabeza solo-pc">
+        <h1 className="titulo">Reserva <b>tu pausa</b></h1>
+        <div className="chips" role="group" aria-label="Mundo">
+          {mundos.map((m) => (
+            <button key={m.id} className="chip" aria-pressed={m.id === mundoId} onClick={() => { setMundoId(m.id); setBusca(''); }}>{m.short}</button>
+          ))}
+        </div>
+      </div>
+
       <div className="container reservar-grid">
         <div className="solo-cel">{progreso}</div>
 
         {/* 1 · Servicio */}
-        <section className="reservar-col col-servicio" aria-labelledby="t-servicio">
-          <h1 id="t-servicio" className="reservar-sub"><span className="solo-pc">1 · </span>¿Qué te hacemos?</h1>
-          <div className="mundo-fotos" role="group" aria-label="Mundos">
+        <section className={`reservar-col col-servicio ${activa === 1 ? 'is-activa' : ''}`} aria-labelledby="t-servicio">
+          <h2 id="t-servicio" className="reservar-sub"><span className="solo-pc">1 · Servicio · {mundo.short}</span><span className="solo-cel">¿Qué te hacemos?</span></h2>
+          <div className="mundo-fotos solo-cel" role="group" aria-label="Mundos">
             {mundos.map((m) => (
               <button key={m.id} className="mundo-foto" aria-pressed={m.id === mundoId} onClick={() => { setMundoId(m.id); setBusca(''); }}>
                 <Photo name={m.photo} alt="" sizes="(min-width: 1024px) 120px, 45vw" />
@@ -143,7 +229,7 @@ const BookingFlow = () => {
               </button>
             ))}
           </div>
-          <label className="buscador-caja">
+          <label className="buscador-caja solo-cel">
             <SearchIcon />
             <span className="visually-hidden">Buscar servicio</span>
             <input type="search" placeholder={`Buscar en ${mundo.short.toLowerCase()}…`} value={busca} onChange={(e) => setBusca(e.target.value)} />
@@ -177,9 +263,8 @@ const BookingFlow = () => {
           </div>
         </section>
 
-        {/* 2–3 · Con quién, día y hora */}
-        <section className="reservar-col col-cuando" aria-labelledby="t-cuando">
-          <h2 id="t-cuando" className="visually-hidden">Especialista, día y hora</h2>
+        {/* 2 · Con quién */}
+        <section className="reservar-col col-quien" aria-labelledby="t-quien">
           {servicio && (
             <div className="elegido tarjeta solo-cel">
               <Photo name={mundo.photo} alt="" sizes="64px" />
@@ -191,7 +276,7 @@ const BookingFlow = () => {
             </div>
           )}
 
-          <h3 className="reservar-sub"><span className="solo-pc">2 · </span>Con quién</h3>
+          <h2 id="t-quien" className="reservar-sub"><span className="solo-pc">2 · </span>Con quién</h2>
           <div className="quien-circulos" role="group" aria-label="Especialista">
             <button className="quien" aria-pressed={!!persona?.libre} onClick={() => setPersona(LIBRE)}>
               <span className="quien__libre">Libre</span>
@@ -205,7 +290,16 @@ const BookingFlow = () => {
             ))}
           </div>
 
-          <h3 className="reservar-sub"><span className="solo-pc">3 · </span>Día</h3>
+        </section>
+
+        {/* 3 · Día y hora */}
+        <section className={`reservar-col col-cuando ${activa === 3 ? 'is-activa' : ''}`} aria-labelledby="t-cuando">
+          <h2 id="t-cuando" className="reservar-sub"><span className="solo-pc">3 · Día y hora</span><span className="solo-cel">Día</span></h2>
+          {esDomingo && (
+            <Estado tono="tinta" Icono={ClockIcon} titulo="Domingo cerrado">
+              Atendemos de lunes a sábado, 10:30 a 19:30. Puedes dejar tu hora pedida para la semana.
+            </Estado>
+          )}
           <div className="dias" role="group" aria-label="Día">
             {dias.map((d) => (
               <button
@@ -222,17 +316,31 @@ const BookingFlow = () => {
             ))}
           </div>
 
-          <h3 className="reservar-sub">Hora</h3>
-          {dia ? (
-            <div className="horas" role="group" aria-label="Hora">
-              {HORAS.map((h) => (
-                <button key={h} className="hora" aria-pressed={hora === h} onClick={() => setHora(h)}>{h}</button>
-              ))}
-            </div>
-          ) : (
-            <p className="muted chico">Primero elige el día.</p>
+          <h3 className="reservar-sub solo-cel">Hora</h3>
+          {!dia && <p className="muted chico">Primero elige el día.</p>}
+          {dia && agenda?.estado === 'cargando' && (
+            <Estado tono="blanco" Icono={ClockIcon} titulo="Cargando horas">Buscando las horas libres…</Estado>
           )}
-          <p className="muted chico">Te confirmamos la disponibilidad por WhatsApp.</p>
+          {diaLleno && (
+            <Estado tono="rosa" Icono={CalendarIcon} titulo="Sin horas libres">
+              Ese día está lleno{persona && !persona.libre ? ` para ${persona.name}` : ''}.{' '}
+              {siguienteDia ? `Prueba el ${fechaLarga(siguienteDia)}` : 'Prueba otro día'} o escríbenos.
+            </Estado>
+          )}
+          {dia && agenda?.estado !== 'cargando' && !diaLleno && (
+            <div className="horas" role="group" aria-label="Hora">
+              {HORAS.map((h) => {
+                const tomadaH = ocupada(h);
+                return (
+                  <button key={h} className={`hora ${tomadaH ? 'is-ocupada' : ''}`} aria-pressed={hora === h} disabled={tomadaH} onClick={() => setHora(h)}>
+                    {h}
+                    {tomadaH && <small>ocupada</small>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          <p className="muted chico">{agenda?.estado === 'ok' ? 'Las horas tachadas ya están tomadas. ' : ''}Te confirmamos la hora por WhatsApp.</p>
 
           <div className="barra-fija solo-cel">
             <div className="barra-fija__dato">
@@ -246,7 +354,7 @@ const BookingFlow = () => {
         </section>
 
         {/* 4 · Ticket */}
-        <section className="reservar-col col-ticket" aria-labelledby="t-listo">
+        <section className="reservar-col col-ticket solo-cel" aria-labelledby="t-listo">
           <div className="ticket-cabeza">
             <h2 id="t-listo"><span className="gigante">Todo</span><span className="firma">listo</span></h2>
             <p className="muted chico">Al confirmar se abre WhatsApp con tu solicitud. Te respondemos para confirmar la hora.</p>
@@ -281,10 +389,11 @@ const BookingFlow = () => {
           {falta ? (
             <button className="btn btn--ancho" disabled>Falta: {falta.replace('Elige ', '')}</button>
           ) : (
-            <a href={whatsappUrl(mensaje)} target="_blank" rel="noopener noreferrer" className="btn btn--ancho">
+            <a href={whatsappUrl(mensaje)} target="_blank" rel="noopener noreferrer" className="btn btn--ancho" onClick={confirmar}>
               <WhatsAppIcon /> Confirmar por WhatsApp
             </a>
           )}
+          {sinWhatsApp && <SinWhatsApp mensaje={mensaje} />}
 
           <div className="antes">
             <h3 className="reservar-sub">Antes de venir</h3>
@@ -296,8 +405,48 @@ const BookingFlow = () => {
             <Link to="/contacto" className="link-sub chico">Cómo llegar</Link>
           </div>
         </section>
+
+        {/* 4 · Resumen oscuro (computador) */}
+        <aside className={`reservar-col col-resumen solo-pc ${activa === 4 ? 'is-activa' : ''}`} aria-label="Resumen">
+          <h2><span className="gigante">Todo</span><span className="firma firma--clara">listo</span></h2>
+          <dl>
+            <div><dt>Servicio</dt><dd>{servicio?.name ?? '—'}</dd></div>
+            <div><dt>Con</dt><dd>{quien ?? '—'}</dd></div>
+            <div><dt>Día</dt><dd>{dia ? conMayuscula(diaTexto) : '—'}</dd></div>
+            <div><dt>Hora</dt><dd>{hora || '—'}</dd></div>
+            <div><dt>Valor</dt><dd>{precio}</dd></div>
+          </dl>
+          <input className="campo" placeholder="Tu nombre (opcional)" aria-label="Tu nombre (opcional)" value={nombre} onChange={(e) => setNombre(e.target.value)} autoComplete="given-name" />
+          {falta ? (
+            <button className="btn btn--claro btn--ancho" disabled>Falta: {falta.replace('Elige ', '')}</button>
+          ) : (
+            <a href={whatsappUrl(mensaje)} target="_blank" rel="noopener noreferrer" className="btn btn--claro btn--ancho" onClick={confirmar}>
+              <WhatsAppIcon /> Confirmar
+            </a>
+          )}
+          {sinWhatsApp && <SinWhatsApp mensaje={mensaje} />}
+        </aside>
       </div>
     </div>
+  );
+};
+
+/** Si WhatsApp no se abrió: rosa, con el número y el mensaje para copiar. */
+const SinWhatsApp = ({ mensaje }) => {
+  const [copiado, setCopiado] = useState(false);
+  return (
+    <Estado tono="rosa" Icono={WhatsAppIcon} titulo="No se pudo abrir WhatsApp">
+      Copia el mensaje y escríbenos al {SITE.phoneDisplay}.{' '}
+      <button
+        type="button"
+        className="link-sub"
+        onClick={() => {
+          navigator.clipboard?.writeText(mensaje).then(() => setCopiado(true)).catch(() => {});
+        }}
+      >
+        {copiado ? 'Copiado' : 'Copiar mensaje'}
+      </button>
+    </Estado>
   );
 };
 

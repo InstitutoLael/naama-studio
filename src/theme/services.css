@@ -71,3 +71,32 @@
   .precios-grupos { grid-template-columns: 1fr 1fr; gap: 28px 40px; align-items: start; }
   .grupo__cuerpo { grid-template-columns: 96px 1fr; }
 }
+
+/* D13 · Precios en computador */
+.precios-pc { display: none; }
+@media (min-width: 1024px) {
+  .precios-pagina { padding-top: calc(var(--nav-h) + 12px); }
+  .precios-pc { display: grid; gap: 18px; padding-bottom: 64px; }
+  .precios-pc > .gigante { font-size: clamp(5rem, 9vw, 8.4rem); line-height: 0.85; }
+  .precios-pc__mundo { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+  .precios-pc__foto { position: relative; aspect-ratio: 5 / 4; border-radius: var(--r-tarjeta); overflow: hidden; }
+  .precios-pc__foto .photo { position: absolute; inset: 0; }
+  .precios-pc__foto::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--velo), transparent 55%); }
+  .precios-pc__foto p { position: absolute; z-index: 1; left: 24px; bottom: 20px; display: grid; color: var(--blanco); }
+  .precios-pc__foto .gigante { font-size: clamp(3rem, 5vw, 4.6rem); line-height: 0.9; }
+  .precios-pc__foto .firma { font-size: 2rem; margin-top: -4px; }
+  .precios-pc__lista .fila { width: 100%; align-items: center; }
+  .precios-pc__lista .fila__nombre { flex: 1; }
+  .precios-pc__todos { display: inline-block; margin-top: 14px; font-size: var(--fs-chico); }
+  .precios-pc__otros-t { font-size: 1.9rem; margin-top: 24px; }
+  .precios-pc__otros { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .precios-pc__otro { display: grid; grid-template-rows: 120px auto auto; gap: 6px; padding: 0 0 14px; overflow: hidden; text-align: left; }
+  .precios-pc__otro .photo { height: 120px; }
+  .precios-pc__otro > span { padding-inline: 14px; display: grid; }
+  .precios-pc__otro strong { font-weight: 700; }
+  .precios-pc__otro small { font-size: var(--fs-mini); color: var(--gris); }
+  .precios-pc__otro .link-sub { font-size: var(--fs-mini); }
+}
+.fila__mas { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--borde); display: grid; place-items: center; flex: none; transition: background 0.2s, border-color 0.2s; }
+.fila__mas svg { width: 16px; height: 16px; }
+.fila__mas.is-on { background: var(--terracota); border-color: var(--terracota); color: var(--blanco); }

@@ -16,9 +16,9 @@
 
 /* En celular se ve un paso a la vez */
 @media (max-width: 1023px) {
-  .reservar--paso-1 .col-cuando, .reservar--paso-1 .col-ticket,
+  .reservar--paso-1 .col-quien, .reservar--paso-1 .col-cuando, .reservar--paso-1 .col-ticket,
   .reservar--paso-2 .col-servicio, .reservar--paso-2 .col-ticket,
-  .reservar--paso-4 .col-servicio, .reservar--paso-4 .col-cuando { display: none; }
+  .reservar--paso-4 .col-servicio, .reservar--paso-4 .col-quien, .reservar--paso-4 .col-cuando { display: none; }
 }
 
 /* Progreso */
@@ -90,23 +90,63 @@
 .antes__cajas strong { font-size: var(--fs-chico); font-weight: 700; }
 .antes__cajas small { font-size: 0.7rem; color: var(--gris); }
 
-/* Computador: 3 columnas en una pantalla, ticket fijo */
+
+
+/* X11 · bloques de estado */
+.estado-bloque { display: grid; grid-template-columns: 20px 1fr; gap: 12px; padding: 14px 16px; border-radius: var(--r-tarjeta); }
+.estado-bloque svg { width: 18px; height: 18px; margin-top: 2px; }
+.estado-bloque strong { font-weight: 700; }
+.estado-bloque p { font-size: var(--fs-chico); }
+.estado-bloque--rosa { background: var(--rosa); color: var(--error); }
+.estado-bloque--rosa p { color: color-mix(in srgb, var(--error) 80%, var(--tinta)); }
+.estado-bloque--tinta { background: var(--tinta); color: var(--blanco); }
+.estado-bloque--tinta p { color: color-mix(in srgb, var(--blanco) 75%, transparent); }
+.estado-bloque--blanco { background: var(--blanco); }
+.estado-bloque--blanco p { color: var(--gris); }
+.estado-bloque .link-sub { color: inherit; }
+.hora { display: grid; place-content: center; line-height: 1.1; }
+.hora small { font-size: 0.6rem; font-weight: 500; }
+.hora.is-ocupada { background: var(--papel); border-color: transparent; color: var(--gris); text-decoration: line-through; cursor: not-allowed; }
+.hora.is-ocupada small { text-decoration: none; }
+
+/* D12 · computador: chips de mundo y 4 columnas en una pantalla */
 @media (min-width: 1024px) {
-  .reservar { padding-top: calc(var(--nav-h) + 24px); }
-  .reservar-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) 360px; gap: 28px; align-items: start; }
+  .reservar { padding-top: calc(var(--nav-h) + 20px); padding-bottom: 64px; }
   .reservar--paso-1 .reservar-grid { background: none; padding-top: 0; }
-  .mundo-fotos { grid-template-columns: repeat(3, 1fr); }
-  .mundo-foto { height: 84px; }
-  .col-ticket { position: sticky; top: calc(var(--nav-h) + 16px); background: var(--blanco); border-radius: var(--r-tarjeta); padding: 20px; }
-  .col-ticket .ticket { background: var(--papel); }
-  .ticket-cabeza { text-align: left; }
-  .ticket-cabeza h2 { justify-items: start; }
-  .ticket-cabeza .gigante { font-size: 3rem; }
-  .ticket-cabeza .firma { margin-left: 30px; }
-  .horas { grid-template-columns: repeat(4, 1fr); }
-  .dias { flex-wrap: wrap; overflow: visible; }
-}
-@media (min-width: 1024px) {
-  .dias .dia:nth-child(n + 16) { display: none; }
-  .col-ticket .campo { background: var(--papel); }
+  .reservar-pc-cabeza { display: grid !important; gap: 16px; margin-bottom: 18px; }
+  .reservar-pc-cabeza .titulo { font-size: clamp(2.8rem, 4.4vw, 4rem); line-height: 1; }
+  .reservar-grid { grid-template-columns: 1.1fr 0.9fr 1fr 0.95fr; gap: 12px; align-items: start; }
+  .reservar-col { background: var(--blanco); border-radius: var(--r-tarjeta); padding: 18px; gap: 12px; border: 1px solid transparent; min-height: 420px; }
+  .reservar-col.is-activa { border-color: var(--terracota); }
+  .reservar-col .reservar-sub { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--terracota); }
+  .col-servicio .opciones { max-height: 520px; position: relative; overflow-y: auto; scrollbar-width: thin; }
+  .col-servicio .opcion { grid-template-columns: 1fr auto; padding: 10px 0; }
+  .col-servicio .opcion__radio { display: none; }
+  .col-servicio .opcion[aria-pressed='true'] .opcion__nombre { font-weight: 800; }
+  .col-servicio .opcion[aria-pressed='true'] strong { font-weight: 800; }
+  .col-quien .quien-circulos { flex-direction: column; gap: 4px; overflow: visible; }
+  .col-quien .quien { grid-template-columns: 34px 1fr; justify-items: start; align-items: center; gap: 10px; padding: 6px 8px; border-radius: var(--r-campo); font-size: 0.88rem; font-weight: 700; }
+  .col-quien .quien .photo, .col-quien .quien__libre { width: 34px; height: 34px; outline: 0; }
+  .col-quien .quien__libre { font-size: 0.56rem; box-shadow: 0 0 0 1px var(--borde); }
+  .col-quien .quien[aria-pressed='true'] { background: var(--rosa); }
+  .col-cuando .dias { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; overflow: visible; }
+  .col-cuando .dia { width: auto; min-height: 0; padding: 8px 4px; display: flex; justify-content: center; gap: 4px; background: var(--papel); }
+  .col-cuando .dia small:last-child { display: none; }
+  .col-cuando .dia strong { font-size: 0.86rem; }
+  .col-cuando .dia small { font-size: 0.78rem; text-transform: lowercase; letter-spacing: 0; color: inherit; }
+  .col-cuando .dia:nth-child(n + 7) { display: none; }
+  .col-cuando .dia[aria-pressed='true'] { background: var(--terracota); color: var(--blanco); }
+  .col-cuando .dia[aria-pressed='true'] small { color: var(--blanco); }
+  .col-cuando .horas { grid-template-columns: 1fr 1fr; }
+  .col-cuando .hora { background: var(--papel); border-color: transparent; }
+  .col-cuando .hora[aria-pressed='true'] { background: var(--terracota); color: var(--blanco); }
+  .col-resumen { position: sticky; top: calc(var(--nav-h) + 16px); background: var(--tinta); color: var(--blanco); display: grid; gap: 12px; }
+  .col-resumen h2 { display: grid; }
+  .col-resumen .gigante { font-size: 3.2rem; line-height: 0.85; }
+  .col-resumen .firma { font-size: 1.9rem; margin-top: -4px; }
+  .col-resumen dl div { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--borde-claro); font-size: var(--fs-chico); }
+  .col-resumen dt { color: color-mix(in srgb, var(--blanco) 65%, transparent); }
+  .col-resumen dd { font-weight: 700; text-align: right; }
+  .col-resumen .campo { background: color-mix(in srgb, var(--blanco) 8%, transparent); border-color: var(--borde-claro); color: var(--blanco); }
+  .col-resumen .btn svg { width: 16px; height: 16px; }
 }

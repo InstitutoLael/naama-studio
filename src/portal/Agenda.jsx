@@ -38,18 +38,8 @@ const DURACIONES = [30, 45, 60, 90, 120, 150, 180, 210, 240, 300, 360, 420, 480]
 /** Mensaje bonito para recordarle la hora a la clienta (va por WhatsApp). */
 export const mensajeRecordatorio = (c) => {
   const dia = new Date(`${c.fecha}T12:00:00`).toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
-  return [
-    `Hola ${primer(c.clienta)} 🌸`,
-    '',
-    'Te recordamos tu hora en *Naamá Studio*:',
-    '',
-    `🗓️ ${dia.charAt(0).toUpperCase() + dia.slice(1)}`,
-    `🕐 ${c.hora} hrs`,
-    `✨ ${c.servicio ? `${c.servicio} con ${primer(c.quien)}` : `con ${primer(c.quien)}`}`,
-    '📍 Arcadia 1297, San Miguel (a pasos del metro El Llano)',
-    '',
-    'Si necesitas cambiarla, respóndenos por aquí. ¡Te esperamos para tu pausa! 🤍',
-  ].join('\n');
+  const dia2 = dia.split(' de ')[0].replace(',', '');
+  return `Hola ${primer(c.clienta)} 🤍 te recordamos tu hora en Naamá: ${dia2} a las ${c.hora}${c.servicio ? `, ${c.servicio.toLowerCase()}` : ''} con ${primer(c.quien)}. Arcadia 1297, San Miguel (a pasos del metro El Llano). Si necesitas cambiarla, respóndenos por aquí.`;
 };
 
 /** Reparte en carriles las citas que se cruzan (sobrecupo), para verlas lado a lado. */
@@ -69,11 +59,20 @@ const carriles = (citas) => {
   });
 };
 
-const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
+const FormCita = ({ d, cita, inicial, onListo, onCerrar, enLinea = false }) => {
   const [v, setV] = useState(() => ({
     cuentaId: cita?.cuentaId ?? inicial?.cuentaId ?? (d.personas.some((p) => p.id === d.yo) ? d.yo : d.personas[0]?.id),
     fecha: cita?.fecha ?? d.fecha,
-    hora: cita?.hora ?? inicial?.hora ?? '10:30',
+    hora:
+      cita?.hora ??
+      inicial?.hora ??
+      (() => {
+        const quien = inicial?.cuentaId ?? (d.personas.some((p) => p.id === d.yo) ? d.yo : d.personas[0]?.id);
+        return (
+          HORAS_SALON.find((h) => !d.citas.some((c) => c.cuentaId === quien && !['cancelada', 'no-vino'].includes(c.estado) && aMin(c.hora) < aMin(h) + 60 && aMin(h) < aMin(c.hora) + c.minutos)) ??
+          '10:30'
+        );
+      })(),
     minutos: cita?.minutos ?? (inicial?.servicio ? duracion(inicial.servicio) : 60),
     clienta: cita?.clienta ?? '',
     telefono: cita?.telefono ?? '',
@@ -99,8 +98,20 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
   );
   const personas = d.personas;
 
-  return (
-    <Hoja titulo={cita ? `Cita de ${cita.clienta}` : 'Agendar'} onCerrar={onCerrar}>
+  const envolver = (cuerpo) =>
+    enLinea ? (
+      <aside className="agendar-panel" aria-label="Agendar">
+        <h2 className="agendar-panel__titulo">Agendar</h2>
+        {cuerpo}
+        <p className="nota-mano">o toca un espacio libre en la columna</p>
+      </aside>
+    ) : (
+      <Hoja titulo={cita ? `Cita de ${cita.clienta}` : 'Agendar'} onCerrar={onCerrar}>
+        {cuerpo}
+      </Hoja>
+    );
+  return envolver(
+    <>
       {cita && (
         <div className="chips chips--chicos" role="radiogroup" aria-label="Estado">
           {ESTADOS.map(([k, t]) => (
@@ -285,7 +296,7 @@ const FormCita = ({ d, cita, inicial, onListo, onCerrar }) => {
           )}
         </div>
       </form>
-    </Hoja>
+    </>,
   );
 };
 
@@ -351,7 +362,20 @@ const CalendarioCelu = () => {
   );
 };
 
+const useEsCompu = () => {
+  const [si, setSi] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 900px)').matches);
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 900px)');
+    const f = () => setSi(mq.matches);
+    mq.addEventListener('change', f);
+    return () => mq.removeEventListener('change', f);
+  }, []);
+  return si;
+};
+
 const Agenda = ({ cuenta }) => {
+  const esCompu = useEsCompu();
+  const [panel, setPanel] = useState({ n: 0, inicial: {} });
   const [d, setD] = useState(null);
   const [ver, setVer] = useState('todas');
   const [clientas, setClientas] = useState([]);
@@ -381,11 +405,20 @@ const Agenda = ({ cuenta }) => {
 
   const listo = (t) => {
     setHoja(null);
+    setPanel((x) => ({ n: x.n + 1, inicial: {} }));
     setAviso(t);
     clearTimeout(avisoT.current);
     avisoT.current = setTimeout(() => setAviso(''), 3000);
     cargar(d.fecha);
   };
+
+  // En computador el «Agendar» vive en el panel de la derecha.
+  useEffect(() => {
+    if (esCompu && hoja && !hoja.cita) {
+      setPanel((x) => ({ n: x.n + 1, inicial: hoja.inicial ?? {} }));
+      setHoja(null);
+    }
+  }, [esCompu, hoja]);
 
   const horas = [];
   for (let m = ABRE; m <= CIERRA; m += 60) horas.push(m);
@@ -394,8 +427,19 @@ const Agenda = ({ cuenta }) => {
   const visibles = !d ? [] : ver === 'todas' ? d.personas : ver === 'mias' ? d.personas.filter((p) => p.id === cuenta.id) : d.personas.filter((p) => p.id === ver);
 
   return (
-    <div className="panel">
-      <header className="panel__cabeza panel__cabeza--fila">
+    <div className="panel agenda-pagina">
+      {d && (
+        <header className="agenda-hoy solo-compu">
+          <h1>
+            <span className="gigante">{d.fecha === d.hoy ? 'Hoy' : diaLargo(d.fecha).split(' ')[0].replace(',', '')}</span>
+            <span className="firma">en la casa</span>
+          </h1>
+          <p>
+            {diaLargo(d.fecha)} · {d.citas.filter((c) => !['cancelada', 'no-vino'].includes(c.estado)).length} citas
+          </p>
+        </header>
+      )}
+      <header className="panel__cabeza panel__cabeza--fila solo-celu">
         <div>
           <span className="eyebrow">Horas por persona</span>
           <h1 className="panel__titulo">
@@ -516,12 +560,22 @@ const Agenda = ({ cuenta }) => {
                   onClick={(e) => {
                     const y = e.clientY - e.currentTarget.getBoundingClientRect().top;
                     const m = Math.max(ABRE, Math.min(CIERRA - 30, ABRE + Math.round(y / PX / 15) * 15));
-                    setHoja({ inicial: { cuentaId: p.id, hora: aHora(m) } });
+                    if (esCompu) setPanel((x) => ({ n: x.n + 1, inicial: { cuentaId: p.id, hora: aHora(m) } }));
+                    else setHoja({ inicial: { cuentaId: p.id, hora: aHora(m) } });
                   }}
                 >
                   {horas.map((m) => (
                     <span key={m} className="agenda__linea" style={{ top: (m - ABRE) * PX }} />
                   ))}
+                  {p.dispo !== 'no' &&
+                    HORAS_SALON.filter((h) => {
+                      const ini = aMin(h);
+                      return !d.citas.some((c) => c.cuentaId === p.id && !['cancelada', 'no-vino'].includes(c.estado) && aMin(c.hora) < ini + 60 && ini < aMin(c.hora) + c.minutos);
+                    }).map((h) => (
+                      <span key={h} className="agenda__libre" style={{ top: (aMin(h) - ABRE) * PX + 3, height: 60 * PX - 6 }}>
+                        + libre
+                      </span>
+                    ))}
                   {carriles(d.citas.filter((c) => c.cuentaId === p.id)).map(({ c, carril, de }) => (
                       <button
                         key={c.id}
@@ -561,7 +615,8 @@ const Agenda = ({ cuenta }) => {
           {aviso}
         </p>
       )}
-      {hoja && datos && <FormCita d={datos} cita={hoja.cita} inicial={hoja.inicial} onListo={listo} onCerrar={() => setHoja(null)} />}
+      {esCompu && datos && <FormCita key={panel.n} d={datos} inicial={panel.inicial} enLinea onListo={listo} onCerrar={() => setPanel((x) => ({ n: x.n + 1, inicial: {} }))} />}
+      {hoja && datos && (!esCompu || hoja.cita) && <FormCita d={datos} cita={hoja.cita} inicial={hoja.inicial} onListo={listo} onCerrar={() => setHoja(null)} />}
     </div>
   );
 };
