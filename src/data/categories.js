@@ -1,3 +1,4 @@
+import { servicesData } from './servicesData.js';
 // "Mundos" de servicios. `categories` corresponde al campo `cat` de servicesData.
 // Todas las categorías de servicesData deben estar cubiertas por algún mundo.
 export const mundos = [
@@ -68,3 +69,6 @@ export const servicesForMundo = (services, mundo) =>
   services
     .filter((s) => splitCats(s.cat).some((c) => mundo.categories.includes(c)))
     .sort((a, b) => isExtra(a) - isExtra(b));
+
+/** Total de servicios (suma de los mundos): el mismo número en Inicio y en Servicios. */
+export const totalServicios = mundos.reduce((n, m) => n + servicesForMundo(servicesData, m).length, 0);

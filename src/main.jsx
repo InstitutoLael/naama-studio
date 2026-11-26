@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import '@fontsource-variable/playfair-display/wght.css';
-import '@fontsource-variable/playfair-display/wght-italic.css';
-import '@fontsource-variable/montserrat/wght.css';
+import '@fontsource-variable/inter-tight/wght.css';
+import '@fontsource/cormorant-garamond/latin-500-italic.css';
+import '@fontsource-variable/caveat/index.css';
 import './theme/base.css';
 import './theme/layout.css';
 import ErrorBoundary from './components/shared/ErrorBoundary';
