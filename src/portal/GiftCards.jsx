@@ -4,131 +4,24 @@ import { api, post } from './api';
 import Hoja from './Hoja';
 import { pesos } from './insumosBase';
 
-// Diseños en la línea «Pausa Cálida» de Naamá.
-export const DISENOS = {
-  espresso: { nombre: 'Espresso', fondo: '#211a17', texto: '#f3eae0', acento: '#c5a675', suave: 'rgba(243,234,224,0.65)' },
-  crema: { nombre: 'Crema', fondo: '#f3eae0', texto: '#211a17', acento: '#a65d45', suave: 'rgba(33,26,23,0.6)' },
-  arcilla: { nombre: 'Arcilla', fondo: '#a65d45', texto: '#fbf5ee', acento: '#f3d9b8', suave: 'rgba(251,245,238,0.75)' },
-  dorado: { nombre: 'Dorado', fondo: '#c5a675', texto: '#211a17', acento: '#fffaf2', suave: 'rgba(33,26,23,0.65)' },
-};
+import { DISENOS, disenoDe, dibujarGift, pdfDesde, pngDesde } from '../lib/giftcard';
+export { DISENOS, dibujarGift };
 
 const fechaLarga = (f) => new Date(`${f}T12:00:00`).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
-
-/** Dibuja la gift card en un canvas de 1500×900 (proporción de tarjeta). */
-export async function dibujarGift(canvas, g) {
-  const d = DISENOS[g.diseno] ?? DISENOS.espresso;
-  const W = 1500;
-  const H = 900;
-  canvas.width = W;
-  canvas.height = H;
-  try {
-    await Promise.all([document.fonts.load('italic 400 160px "Playfair Display"'), document.fonts.load('400 60px "Playfair Display"'), document.fonts.load('500 30px Montserrat')]);
-  } catch {
-    // si no cargan, usa las de respaldo
-  }
-  const c = canvas.getContext('2d');
-  c.fillStyle = d.fondo;
-  c.fillRect(0, 0, W, H);
-  // papel: un brillo suave en una esquina
-  const brillo = c.createRadialGradient(W * 0.85, H * 0.1, 10, W * 0.85, H * 0.1, W * 0.7);
-  brillo.addColorStop(0, 'rgba(255,255,255,0.10)');
-  brillo.addColorStop(1, 'rgba(255,255,255,0)');
-  c.fillStyle = brillo;
-  c.fillRect(0, 0, W, H);
-  // marco de esquinas
-  c.strokeStyle = d.acento;
-  c.lineWidth = 3;
-  const m = 56;
-  const l = 90;
-  for (const [x, y, sx, sy] of [
-    [m, m, 1, 1],
-    [W - m, m, -1, 1],
-    [m, H - m, 1, -1],
-    [W - m, H - m, -1, -1],
-  ]) {
-    c.beginPath();
-    c.moveTo(x, y + sy * l);
-    c.lineTo(x, y);
-    c.lineTo(x + sx * l, y);
-    c.stroke();
-  }
-  const serif = '"Playfair Display", Georgia, serif';
-  const sans = 'Montserrat, system-ui, sans-serif';
-  const espaciado = (t, x, y, sep) => {
-    let cx = x;
-    for (const ch of t) {
-      c.fillText(ch, cx, y);
-      cx += c.measureText(ch).width + sep;
-    }
-  };
-  // marca
-  c.fillStyle = d.texto;
-  c.font = `400 54px ${serif}`;
-  c.textBaseline = 'alphabetic';
-  espaciado('NAAMÁ', 120, 170, 14);
-  c.fillStyle = d.suave;
-  c.font = `500 20px ${sans}`;
-  espaciado('STUDIO · BEAUTY & WELLNESS', 122, 210, 6);
-  // palabra grande
-  c.fillStyle = d.acento;
-  c.font = `italic 400 190px ${serif}`;
-  c.fillText('Regalo', 110, 440);
-  // para / de
-  c.fillStyle = d.texto;
-  c.font = `400 52px ${serif}`;
-  c.fillText(`Para ${g.para}`, 120, 540);
-  if (g.de) {
-    c.fillStyle = d.suave;
-    c.font = `500 28px ${sans}`;
-    c.fillText(`con cariño, ${g.de}`, 122, 590);
-  }
-  // valor
-  const valor = g.servicio ? g.servicio : pesos(g.monto);
-  c.fillStyle = d.texto;
-  c.textAlign = 'right';
-  c.font = `400 ${valor.length > 14 ? 60 : 92}px ${serif}`;
-  c.fillText(valor, W - 120, 210);
-  if (g.servicio && g.monto) {
-    c.font = `500 26px ${sans}`;
-    c.fillStyle = d.suave;
-    c.fillText(pesos(g.monto), W - 122, 255);
-  }
-  // mensaje
-  if (g.mensaje) {
-    c.textAlign = 'right';
-    c.fillStyle = d.texto;
-    c.font = `italic 400 34px ${serif}`;
-    const palabras = g.mensaje.split(' ');
-    const lineas = [];
-    let linea = '';
-    for (const p of palabras) {
-      const prueba = linea ? `${linea} ${p}` : p;
-      if (c.measureText(prueba).width > 560) {
-        lineas.push(linea);
-        linea = p;
-      } else linea = prueba;
-    }
-    if (linea) lineas.push(linea);
-    const visibles = lineas.slice(0, 3);
-    visibles.forEach((t, i) => c.fillText(`${i === 0 ? '«' : ''}${t}${i === visibles.length - 1 ? '»' : ''}`, W - 120, 470 + i * 46));
-  }
-  // pie
-  c.textAlign = 'left';
-  c.fillStyle = d.suave;
-  c.font = `500 22px ${sans}`;
-  espaciado(`CÓDIGO ${g.codigo}`, 122, H - 110, 3);
-  c.textAlign = 'right';
-  c.fillText(`Válida hasta el ${fechaLarga(g.vence)} · Arcadia 1297, San Miguel`, W - 122, H - 110);
-  c.textAlign = 'left';
-}
 
 const Tarjeta = ({ g }) => {
   const ref = useRef();
   useEffect(() => {
     if (ref.current) dibujarGift(ref.current, g);
   }, [g]);
-  const blob = () => new Promise((r) => ref.current.toBlob(r, 'image/png'));
+  const blob = () => pngDesde(ref.current);
   const nombre = `Gift-card-Naama-${g.para.replace(/\s+/g, '-')}.png`;
+  const bajar = async (b, n) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = n;
+    a.click();
+  };
   return (
     <div className="gift">
       <canvas ref={ref} className="gift__canvas" aria-label={`Gift card para ${g.para}`} />
@@ -145,17 +38,11 @@ const Tarjeta = ({ g }) => {
             <Share2 size={16} /> Compartir
           </button>
         )}
-        <button
-          type="button"
-          className="btn btn--ghost"
-          onClick={async () => {
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(await blob());
-            a.download = nombre;
-            a.click();
-          }}
-        >
-          <Download size={16} /> Descargar
+        <button type="button" className="btn btn--ghost" onClick={async () => bajar(await blob(), nombre)}>
+          <Download size={16} /> PNG
+        </button>
+        <button type="button" className="btn btn--ghost" onClick={async () => bajar(await pdfDesde(ref.current), nombre.replace('.png', '.pdf'))}>
+          <Download size={16} /> PDF
         </button>
       </div>
     </div>
@@ -163,7 +50,7 @@ const Tarjeta = ({ g }) => {
 };
 
 const Nueva = ({ onListo, onCerrar }) => {
-  const [g, setG] = useState({ para: '', de: '', monto: '', servicio: '', mensaje: '', diseno: 'espresso', codigo: 'NAAMA-XXXX-XXXX', vence: new Date(Date.now() + 183 * 86400000).toISOString().slice(0, 10) });
+  const [g, setG] = useState({ para: '', de: '', monto: '', servicio: '', mensaje: '', diseno: 'burdeo', codigo: 'NAAMA-XXXX-XXXX', vence: new Date(Date.now() + 183 * 86400000).toISOString().slice(0, 10) });
   const [medio, setMedio] = useState('Mercado Pago');
   const [error, setError] = useState('');
   const cambia = (k) => (e) => setG((x) => ({ ...x, [k]: e.target.value }));
@@ -172,8 +59,8 @@ const Nueva = ({ onListo, onCerrar }) => {
     <Hoja titulo="Nueva gift card" onCerrar={onCerrar}>
       <div className="chips" role="radiogroup" aria-label="Diseño">
         {Object.entries(DISENOS).map(([k, d]) => (
-          <button key={k} type="button" role="radio" aria-checked={g.diseno === k} className={`chip ${g.diseno === k ? 'is-active' : ''}`} onClick={() => setG((x) => ({ ...x, diseno: k }))}>
-            <span className="gift__muestra" style={{ background: d.fondo, borderColor: d.acento }} /> {d.nombre}
+          <button key={k} type="button" role="radio" aria-checked={disenoDe(g.diseno) === k} className={`chip ${g.diseno === k ? 'is-active' : ''}`} onClick={() => setG((x) => ({ ...x, diseno: k }))}>
+            <span className="gift__muestra" style={{ background: d.fondo }} /> {d.nombre}
           </button>
         ))}
       </div>
@@ -304,7 +191,7 @@ const GiftCards = () => {
             {lista.map((g) => (
               <li key={g.id}>
                 <button type="button" className="pedido pedido--boton" onClick={() => setHoja({ ver: g })}>
-                  <span className="gift__muestra" style={{ background: DISENOS[g.diseno]?.fondo, borderColor: DISENOS[g.diseno]?.acento }} />
+                  <span className="gift__muestra" style={{ background: DISENOS[disenoDe(g.diseno)].fondo }} />
                   <span className="pedido__texto">
                     <strong>
                       {g.para} · {g.servicio || pesos(g.monto)}

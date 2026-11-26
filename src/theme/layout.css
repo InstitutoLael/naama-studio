@@ -206,3 +206,35 @@ main { display: block; min-height: 60vh; }
 .barra-fija__dato { display: grid; line-height: 1.2; min-width: 0; }
 .barra-fija__dato small { font-size: var(--fs-mini); opacity: 0.72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .barra-fija__dato strong { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em; }
+
+/* Piezas compartidas: botones redondos, círculos de especialistas, ayudas */
+.chico { font-size: var(--fs-chico); }
+@media (max-width: 1023px) { .solo-pc { display: none !important; } }
+@media (min-width: 1024px) { .solo-cel { display: none !important; } }
+.circulo-btn { width: 44px; height: 44px; border-radius: 50%; background: var(--blanco); display: grid; place-items: center; }
+.circulo-btn svg { width: 18px; height: 18px; }
+.quien-circulos { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 3px 2px 6px; }
+.quien-circulos::-webkit-scrollbar { display: none; }
+.quien { display: grid; justify-items: center; gap: 6px; flex: none; font-size: var(--fs-mini); font-weight: 600; }
+.quien .photo, .quien__libre { width: 58px; height: 58px; border-radius: 50%; outline: 2px solid transparent; outline-offset: 2px; transition: outline-color 0.2s; }
+.quien__libre { display: grid; place-items: center; background: var(--blanco); font-size: var(--fs-mini); font-weight: 700; }
+.quien[aria-pressed='true'] .photo, .quien[aria-pressed='true'] .quien__libre { outline-color: var(--terracota); }
+.quien-tarjeta { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; margin-top: 10px; }
+.quien-tarjeta .photo { width: 56px; height: 56px; border-radius: var(--r-campo); }
+.quien-tarjeta strong { display: block; }
+.quien-tarjeta small { font-size: var(--fs-mini); color: var(--gris); }
+.quien-tarjeta__tag { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--terracota); }
+
+/* P10 · 404 */
+.error404__cabeza { display: grid; justify-items: center; padding-block: 18px 22px; }
+.error404__numero { display: flex; align-items: center; font-size: clamp(7rem, 34vw, 260px); font-weight: 800; letter-spacing: -0.06em; line-height: 0.8; }
+.error404__cero { width: 0.62em; height: 0.84em; margin-inline: 0.02em; border-radius: 50%; overflow: hidden; position: relative; }
+.error404__cero .photo { position: absolute; inset: 0; }
+.error404__cabeza .firma { font-size: clamp(2rem, 9vw, 3.4rem); color: var(--terracota); margin-top: 6px; }
+.error404__casa { position: relative; min-height: 440px; display: grid; align-items: end; }
+.error404__casa > .photo { position: absolute; inset: 0; }
+.error404__casa::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--velo), transparent 60%); }
+.error404__texto { position: relative; z-index: 1; padding: 26px 18px 30px; color: var(--blanco); text-align: center; display: grid; gap: 8px; }
+.error404__texto h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
+.error404__texto p { font-size: var(--fs-chico); }
+.error404__botones { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
