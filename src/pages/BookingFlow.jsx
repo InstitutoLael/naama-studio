@@ -125,7 +125,9 @@ const BookingFlow = () => {
   /** Una hora está ocupada si la persona elegida está tomada; con «Libre», si todas las que hacen el servicio lo están. */
   const ocupada = (h) => {
     if (agenda?.estado !== 'ok') return false;
-    const de = (n) => agenda.personas.find((p) => p.nombre.toLowerCase() === n.toLowerCase());
+    // En el portal algunas usan su apodo (Vivy = Viviana): basta con que empiecen igual.
+    const base = (x) => x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const de = (n) => agenda.personas.find((p) => base(p.nombre) === base(n)) ?? agenda.personas.find((p) => base(p.nombre).slice(0, 3) === base(n).slice(0, 3));
     if (persona && !persona.libre) return tomada(de(persona.name), h, minutosServicio);
     const candidatas = (servicio ? personas : team).map((t) => de(t.name)).filter(Boolean);
     return candidatas.length > 0 && candidatas.every((p) => tomada(p, h, minutosServicio));
