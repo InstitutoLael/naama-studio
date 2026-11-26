@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import SEOHead from '../components/shared/SEOHead';
 import Photo from '../components/common/Photo';
-import { Reveal, SplitText } from '../components/common/Motion';
 import { ArrowRight, CloseIcon, InstagramIcon } from '../components/common/Icons';
 import { galleryCategories, galleryItems } from '../data/gallery';
 import { SITE } from '../data/site';
@@ -10,10 +9,12 @@ import { lockScroll } from '../lib/smoothScroll';
 import '../theme/gallery.css';
 
 const EASE = [0.16, 1, 0.3, 1];
+const SELECCION = ['unas-violeta', 'evento-ondas', 'casa-fachada', 'unas-burdeo-oro', 'cabello-balayage', 'evento-maquillaje'];
 
 const GalleryPage = () => {
   const [filter, setFilter] = useState('Todo');
   const [current, setCurrent] = useState(null);
+  const [cuantas, setCuantas] = useState(9);
 
   const items = useMemo(
     () => (filter === 'Todo' ? galleryItems : galleryItems.filter((g) => g.cat === filter)),
@@ -42,58 +43,76 @@ const GalleryPage = () => {
 
   const active = current !== null ? items[current] : null;
 
+  const elegidas = SELECCION.map((n) => galleryItems.find((g) => g.photo === n)).filter(Boolean);
+  const abrir = (item) => {
+    setFilter('Todo');
+    setCurrent(galleryItems.indexOf(item));
+  };
+
   return (
-    <div className="gallery-page">
+    <div className="galeria pagina">
       <SEOHead
         title="Galería"
         description="Trabajos reales de Naamá Studio: uñas, balayage, color y cortes, y rincones de nuestra casa en San Miguel."
         image="/img/unas-burdeo-oro-960.webp"
       />
 
-      <header className="page-hero container">
-        <p className="eyebrow">Galería</p>
-        <SplitText as="h1" className="page-hero__title" onMount delay={0.15} lines={['Nuestro trabajo,', <em key="g">sin filtros.</em>]} />
-        <Reveal as="p" className="lead page-hero__lead" delay={0.4}>
-          Resultados reales de nuestras especialistas y rincones de la casa. Para ver lo más reciente,
-          síguenos en Instagram.
-        </Reveal>
-      </header>
-
       <div className="container">
-        <div className="gallery-filters" role="group" aria-label="Filtrar galería">
+        <header className="galeria-hero">
+          <Photo name="unas-burdeo-floral" alt="" priority sizes="(min-width: 1024px) 1200px, 92vw" />
+          <span className="galeria-hero__eti">Galería</span>
+          <span className="galeria-hero__eti galeria-hero__eti--der">N.º 1297</span>
+          <h1>
+            <span className="gigante">Hecho<br />a mano</span>
+            <span className="firma firma--blanca">sin filtros</span>
+          </h1>
+        </header>
+        <p className="galeria-bajada">Resultados reales de nuestras especialistas y rincones de la casa. Para ver lo más reciente, síguenos en Instagram.</p>
+
+        <p className="eyebrow galeria-eyebrow">Seleccionadas</p>
+        <ul className="galeria-mosaico">
+          {elegidas.map((item) => (
+            <li key={item.photo}>
+              <button className="galeria-foto" onClick={() => abrir(item)} aria-label={`Ampliar: ${item.title}`}>
+                <Photo name={item.photo} alt={item.title} sizes="(min-width: 1024px) 25vw, 46vw" />
+                <span><small>{item.cat}</small>{item.title}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div className="chips galeria-filtros" role="group" aria-label="Filtrar galería">
           {galleryCategories.map((c) => (
-            <button key={c} className="chip" aria-pressed={filter === c} onClick={() => setFilter(c)}>
+            <button key={c} className="chip" aria-pressed={filter === c} onClick={() => { setFilter(c); setCuantas(9); }}>
               {c}
             </button>
           ))}
         </div>
 
-        <ul className="masonry" key={filter}>
-            {items.map((item, i) => (
-              <motion.li
-                key={item.photo}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: EASE, delay: Math.min(i, 8) * 0.04 }}
-              >
-                <button className="masonry__item" onClick={() => setCurrent(i)} aria-label={`Ampliar: ${item.title}`}>
-                  <Photo name={item.photo} alt={item.title} sizes="(min-width: 1100px) 30vw, (min-width: 600px) 45vw, 92vw" />
-                  <span className="masonry__caption">
-                    <small>{item.cat}</small>
-                    {item.title}
-                  </span>
-                </button>
-              </motion.li>
-            ))}
+        <ul className="galeria-grilla" key={filter}>
+          {items.slice(0, cuantas).map((item, i) => (
+            <motion.li key={item.photo} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, ease: EASE, delay: Math.min(i % 9, 8) * 0.03 }}>
+              <button className="galeria-foto galeria-foto--chica" onClick={() => setCurrent(i)} aria-label={`Ampliar: ${item.title}`}>
+                <Photo name={item.photo} alt={item.title} sizes="(min-width: 1024px) 25vw, 31vw" />
+              </button>
+            </motion.li>
+          ))}
         </ul>
+        {cuantas < items.length && (
+          <button className="galeria-mas" onClick={() => setCuantas((n) => n + 9)}>
+            Ver más fotos ({items.length - cuantas})
+          </button>
+        )}
 
-        <Reveal className="gallery-ig">
-          <InstagramIcon className="gallery-ig__icon" />
-          <p className="h3">Lo más nuevo está en <em>{SITE.instagramHandle}</em></p>
-          <a href={SITE.instagram} target="_blank" rel="noopener noreferrer" className="btn">
-            Seguir en Instagram <ArrowRight />
+        <div className="galeria-ig">
+          <div>
+            <p className="galeria-ig__handle">{SITE.instagramHandle}</p>
+            <small>Lo más nuevo está en Instagram</small>
+          </div>
+          <a href={SITE.instagram} target="_blank" rel="noopener noreferrer" className="btn btn--claro btn--sm">
+            <InstagramIcon /> Seguir
           </a>
-        </Reveal>
+        </div>
       </div>
 
       <AnimatePresence>

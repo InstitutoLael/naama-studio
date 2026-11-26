@@ -2105,7 +2105,7 @@ ruta('POST', /^resenas$/, { permiso: 'cuentas' }, async ({ db, body }) => {
 
 /* ── gift cards ─────────────────────────────────────────── */
 
-const DISENOS_GIFT = ['espresso', 'crema', 'arcilla', 'dorado'];
+const DISENOS_GIFT = ['cacao', 'caramelo', 'marfil', 'burdeo', 'espresso', 'crema', 'arcilla', 'dorado'];
 const ALFABETO_GIFT = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 const codigoGift = () => {
   const b = crypto.getRandomValues(new Uint8Array(8));
@@ -2145,7 +2145,7 @@ ruta('POST', /^giftcards$/, { sesion: true }, async ({ db, cuenta, body }) => {
   const servicio = texto(body.servicio, 60) || null;
   if (!para) return error(400, '¿Para quién es?');
   if (!monto && !servicio) return error(400, 'Pon un monto o un servicio.');
-  const diseno = DISENOS_GIFT.includes(body.diseno) ? body.diseno : 'espresso';
+  const diseno = DISENOS_GIFT.includes(body.diseno) ? body.diseno : 'burdeo';
   const hoy = fechaChile();
   const vence = FECHA.test(body.vence ?? '') && body.vence > hoy ? body.vence : fechaChile(new Date(Date.now() + 183 * 86400000));
   let codigo = codigoGift();

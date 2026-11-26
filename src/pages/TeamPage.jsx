@@ -2,99 +2,72 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import SEOHead from '../components/shared/SEOHead';
 import Photo from '../components/common/Photo';
-import { Parallax, Reveal, SplitText } from '../components/common/Motion';
+import { Reveal } from '../components/common/Motion';
 import { ArrowRight } from '../components/common/Icons';
 import { team } from '../data/team';
-import { servicesData } from '../data/servicesData';
 import '../theme/team.css';
 
-const NEW_MEMBERS = [];
+// Podóloga: cuando llegue su nombre y foto, se completa aquí (photo = nombre en photos.json).
+const PODOLOGA = { name: null, role: 'Podología clínica', photo: null };
 
-const countFor = (name) => servicesData.filter((s) => (s.worker ?? '').includes(name)).length;
-
+/** P05 · Equipo. */
 const TeamPage = () => (
-  <div className="team-page">
+  <div className="equipo pagina">
     <SEOHead
       title="Nuestro Equipo"
-      description="Conoce a las especialistas de Naamá Studio: colorimetría, cabello, uñas, faciales y maquillaje en San Miguel."
+      description="Conoce a las especialistas de Naamá Studio: colorimetría, cabello, uñas, faciales, maquillaje y podología en San Miguel."
       image="/img/equipo-1600.webp"
     />
 
-    <header className="page-hero container">
-      <p className="eyebrow">El equipo</p>
-      <SplitText
-        as="h1"
-        className="page-hero__title"
-        onMount
-        delay={0.15}
-        lines={['Las manos detrás', <em key="t">de tu cambio.</em>]}
-      />
-      <Reveal as="p" className="lead page-hero__lead" delay={0.4}>
-        Cada una experta en lo suyo. Elige con quién quieres atenderte o
-        déjate recomendar.
-      </Reveal>
+    <header className="container equipo-cabeza">
+      <p className="eyebrow">Equipo · {team.length + 1} especialistas</p>
+      <h1 className="titulo">Las manos <b>detrás de tu cambio</b></h1>
+      <p className="muted">Cada una experta en lo suyo. Elige con quién quieres atenderte o déjate recomendar.</p>
     </header>
 
-    <div className="container">
-      <Reveal y={80}>
-        <Parallax className="team-page__photo parallax" amount={8}>
-          <Photo name="equipo" alt="El equipo de Naamá Studio en la recepción de la casa" priority sizes="(min-width: 1440px) 1312px, 92vw" position="50% 45%" />
-        </Parallax>
-      </Reveal>
-    </div>
-
-    <section className="container section team-grid" aria-label="Especialistas">
+    <section className="container equipo-grilla" aria-label="Especialistas">
       {team.map((p, i) => (
-        <Reveal key={p.name} delay={(i % 3) * 0.08} y={50}>
-          <article className="member">
-            {p.photo ? (
-              <Photo name={p.photo} alt={`${p.name}, ${p.role}`} className="member__photo" sizes="(min-width: 1100px) 30vw, (min-width: 700px) 45vw, 92vw" position="50% 20%" />
-            ) : (
-              <div className="member__monogram" style={{ '--tone': p.tone }} aria-hidden="true">
-                <span>{p.name[0]}</span>
-              </div>
-            )}
-            <div className="member__body">
-              <div className="member__top">
-                <h2 className="member__name">{p.name}</h2>
-                {NEW_MEMBERS.includes(p.name) && <span className="member__badge">Nueva en el equipo</span>}
-              </div>
-              <p className="member__role">{p.role}</p>
-              <ul className="member__tags">
-                {p.specialties.map((s) => (
-                  <li key={s}>{s}</li>
-                ))}
-              </ul>
-              <Link to={`/servicios?especialista=${encodeURIComponent(p.name)}`} className="link-arrow">
-                {countFor(p.name)} servicios <ArrowRight />
-              </Link>
-            </div>
+        <Reveal key={p.name} delay={(i % 3) * 0.06} y={30}>
+          <article className="retrato">
+            <Photo name={p.photo} alt={`${p.name}, ${p.role}`} sizes="(min-width: 1024px) 16vw, 46vw" position="50% 22%" />
+            <h2>{p.name}</h2>
+            <p>{p.role}</p>
+            <Link to={`/reservar?con=${encodeURIComponent(p.name)}`} className="btn btn--sm">
+              Reservar <ArrowRight />
+            </Link>
           </article>
         </Reveal>
       ))}
+      <Reveal delay={0.1} y={30}>
+        <article className="retrato">
+          {PODOLOGA.photo ? (
+            <Photo name={PODOLOGA.photo} alt={`${PODOLOGA.name}, podóloga`} sizes="(min-width: 1024px) 16vw, 46vw" position="50% 22%" />
+          ) : (
+            <div className="retrato__vacio">
+              <strong>Podóloga</strong>
+              <small>{PODOLOGA.role}</small>
+            </div>
+          )}
+          <h2>{PODOLOGA.name ?? 'Podología'}</h2>
+          <p>{PODOLOGA.role}</p>
+          <Link to="/servicios/podologia" className="btn btn--sm">
+            Reservar <ArrowRight />
+          </Link>
+        </article>
+      </Reveal>
     </section>
 
-    <section className="team-life section on-ivory" aria-labelledby="vida-title">
-      <div className="container team-life__grid">
-        <div className="team-life__text">
-          <p className="eyebrow">La vida en Naamá</p>
-          <SplitText as="h2" id="vida-title" className="h2" lines={['Más que un equipo,', <em key="f">una familia.</em>]} />
-          <Reveal as="p" className="lead">
-            Celebramos juntas los aniversarios, las Fiestas Patrias y cada logro. Esa complicidad se
-            nota en cómo te recibimos.
-          </Reveal>
-          <Reveal>
-            <Link to="/reservar" className="btn">
-              Reservar con nosotras <ArrowRight />
-            </Link>
-          </Reveal>
-        </div>
-        <Reveal className="team-life__a" y={60}>
-          <Photo name="equipo-celebracion" alt="Parte del equipo celebrando con una torta de Naamá Studio" sizes="(min-width: 900px) 30vw, 80vw" />
-        </Reveal>
-        <Reveal className="team-life__b" delay={0.15} y={90}>
-          <Photo name="equipo-fiestas" alt="El equipo celebrando Fiestas Patrias en el patio de la casa" sizes="(min-width: 900px) 26vw, 70vw" />
-        </Reveal>
+    <section className="container equipo-familia" aria-labelledby="familia">
+      <div className="equipo-familia__foto">
+        <Photo name="equipo-celebracion" alt="Parte del equipo celebrando con una torta de Naamá Studio" sizes="(min-width: 1024px) 60vw, 92vw" />
+        <h2 id="familia">
+          <span className="gigante">Familia</span>
+          <span className="firma firma--blanca">más que un equipo</span>
+        </h2>
+      </div>
+      <div className="equipo-familia__texto">
+        <p>Celebramos juntas los aniversarios, las Fiestas Patrias y cada logro. Esa complicidad se nota en cómo te recibimos.</p>
+        <Link to="/reservar" className="btn btn--linea btn--ancho-cel">Reservar con nosotras</Link>
       </div>
     </section>
   </div>
