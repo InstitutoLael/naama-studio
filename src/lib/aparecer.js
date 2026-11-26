@@ -18,10 +18,14 @@ export const useAparecer = (clave) => {
       },
       { rootMargin: '0px 0px -8% 0px' },
     );
+    const inicio = performance.now();
     const marcar = () => {
+      const recien = performance.now() - inicio < 1500;
       document.querySelectorAll(SELECTOR).forEach((el) => {
         if (el.dataset.m01 || el.closest('[data-m01="1"]:not(:scope)')) return;
         el.dataset.m01 = '1';
+        // Lo que ya se ve al abrir la página no se anima: aparece al tiro (no atrasa la carga).
+        if (recien && el.getBoundingClientRect().top < window.innerHeight) return;
         el.classList.add('m01');
         io.observe(el);
       });

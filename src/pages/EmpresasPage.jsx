@@ -35,7 +35,7 @@ const EmpresasPage = () => (
         </div>
       </div>
       <div className="empresas-collage">
-        <Photo name="casa-sala" alt="La sala de espera de la casa" sizes="(min-width: 1024px) 22vw, 46vw" />
+        <Photo name="casa-sala" alt="La sala de espera de la casa" priority sizes="(min-width: 1024px) 22vw, 46vw" />
         <Photo name="salon-estaciones" alt="Estaciones de trabajo del salón" sizes="(min-width: 1024px) 22vw, 46vw" />
         <Photo name="unas-burdeo-oro" alt="Manicure burdeo con pan de oro" sizes="(min-width: 1024px) 22vw, 46vw" />
       </div>
