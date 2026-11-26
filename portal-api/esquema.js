@@ -283,6 +283,8 @@ const TABLAS = [
   `CREATE INDEX IF NOT EXISTS citas_fecha ON citas (fecha, cuenta_id)`,
   // Sobrecupo: citas que se aceptan aunque la persona ya tenga a otra clienta a esa hora.
   `CREATE TABLE IF NOT EXISTS citas_sobrecupo (cita_id INTEGER PRIMARY KEY)`,
+  // Visitas a la web pública: solo conteos por día (sin cookies, sin IP, sin datos de nadie).
+  `CREATE TABLE IF NOT EXISTS visitas_web (dia TEXT NOT NULL, tipo TEXT NOT NULL, clave TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (dia, tipo, clave))`,
   // Link privado de calendario (.ics) por persona, para verlo en el calendario del celu.
   // Mensajes de la administración a una persona: salen en su Inicio hasta que toca «Listo» (y llegan al celu).
   `CREATE TABLE IF NOT EXISTS mensajes (id INTEGER PRIMARY KEY AUTOINCREMENT, cuenta_id INTEGER NOT NULL, titulo TEXT NOT NULL, cuerpo TEXT, pasos TEXT, de TEXT, creado TEXT NOT NULL, visto TEXT)`,

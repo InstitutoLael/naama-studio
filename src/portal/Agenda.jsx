@@ -17,6 +17,7 @@ const ABRE = 10 * 60 + 30; // 10:30 (horario del salón)
 const CIERRA = 19 * 60 + 30; // 19:30 (un color largo puede pasarse: se ve igual)
 const PX = 1.4; // píxeles por minuto
 const ESTADOS = [
+  ['pedida', 'Pedida por la web'],
   ['agendada', 'Agendada'],
   ['confirmada', 'Confirmada'],
   ['llego', 'Llegó'],

@@ -1,6 +1,7 @@
 // Íconos del portal (lucide-react, ya incluido en la web).
 import {
   BellRing,
+  ChartColumn,
   CalendarClock,
   CalendarDays,
   Gift,
@@ -37,5 +38,6 @@ export const ICONO_MODULO = {
   plata: Wallet,
   legal: Scale,
   cuentas: KeyRound,
+  visitas: ChartColumn,
   ayuda: LifeBuoy,
 };

@@ -76,6 +76,9 @@ const BookingFlow = () => {
   const [agenda, setAgenda] = useState(null); // { estado: 'cargando' | 'ok' | 'error', personas }
   const [sinWhatsApp, setSinWhatsApp] = useState(false);
   const vigilante = useRef();
+  const [recarga, setRecarga] = useState(0);
+  const [tomadaAviso, setTomadaAviso] = useState(false);
+  const [enviando, setEnviando] = useState(false);
 
   const dias = useMemo(proximosDias, []);
   const mundo = mundos.find((m) => m.id === mundoId) ?? mundos[0];
@@ -113,7 +116,7 @@ const BookingFlow = () => {
     return () => {
       vivo = false;
     };
-  }, [dia]);
+  }, [dia, recarga]);
 
   const minutosServicio = useMemo(() => {
     const t = String(servicio?.time ?? '');
@@ -157,22 +160,63 @@ const BookingFlow = () => {
     if (el && lista && lista.scrollHeight > lista.clientHeight) lista.scrollTop = el.offsetTop - 40;
   }, [mundoId]);
 
-  const confirmar = () => {
+  /** Deja la hora pedida en la agenda del salón y abre WhatsApp con el mensaje. */
+  const confirmar = async (e, url) => {
+    e.preventDefault();
+    if (enviando) return;
+    setEnviando(true);
+    setTomadaAviso(false);
+    setSinWhatsApp(false);
+    const ventana = window.open('', '_blank');
+    let tomadaYa = false;
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 5000);
+      const r = await fetch('/api/portal/publico/reserva', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-naama': '1' },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          fecha: clave(dia),
+          hora,
+          servicio: servicio.name,
+          minutos: minutosServicio,
+          nombre: nombre.trim(),
+          persona: persona && !persona.libre ? persona.name : '',
+          candidatas: (personas.length ? personas : team).map((t2) => t2.name),
+        }),
+      });
+      clearTimeout(t);
+      tomadaYa = r.status === 409;
+    } catch {
+      // Sin conexión con la agenda: igual se manda por WhatsApp y el salón la anota.
+    }
+    setEnviando(false);
+    if (tomadaYa) {
+      ventana?.close();
+      setTomadaAviso(true);
+      setHora('');
+      setRecarga((n) => n + 1);
+      if (paso === 4) ir(2);
+      return;
+    }
+    if (ventana) ventana.location.href = url;
+    else window.location.href = url;
     // Si a los 2,5 s la página sigue a la vista, WhatsApp no se abrió.
     clearTimeout(vigilante.current);
-    setSinWhatsApp(false);
     const oculto = () => {
       if (document.visibilityState === 'hidden') clearTimeout(vigilante.current);
     };
     document.addEventListener('visibilitychange', oculto, { once: true });
     vigilante.current = setTimeout(() => {
-      if (document.visibilityState === 'visible' && document.hasFocus()) setSinWhatsApp(true);
+      if (document.visibilityState === 'visible' && document.hasFocus() && !ventana) setSinWhatsApp(true);
     }, 2500);
   };
 
   const quien = persona?.libre ? 'Sin preferencia' : persona?.name;
   const precio = servicio ? precioTexto(servicio.price) : '—';
-  const falta = !servicio ? 'Elige un servicio' : !dia ? 'Elige el día' : !hora ? 'Elige la hora' : null;
+  const faltaPaso = !servicio ? 'Elige un servicio' : !dia ? 'Elige el día' : !hora ? 'Elige la hora' : null;
+  const falta = faltaPaso ?? (!nombre.trim() ? 'Escribe tu nombre' : null);
   const activa = !servicio ? 1 : !dia || !hora ? 3 : 4;
 
   const diaTexto = dia ? dia.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric' }).replace(',', '') : '';
@@ -328,6 +372,11 @@ const BookingFlow = () => {
 
           <h3 className="reservar-sub solo-cel">Hora</h3>
           {!dia && <p className="muted chico">Primero elige el día.</p>}
+          {tomadaAviso && (
+            <Estado tono="rosa" Icono={CalendarIcon} titulo="Esa hora se acaba de tomar">
+              Alguien la reservó recién. Elige otra hora, ya marcamos las que quedan libres.
+            </Estado>
+          )}
           {dia && agenda?.estado === 'cargando' && (
             <Estado tono="blanco" Icono={ClockIcon} titulo="Cargando horas">Buscando las horas libres…</Estado>
           )}
@@ -357,8 +406,8 @@ const BookingFlow = () => {
               <small>{[dia && corto(dia, { weekday: 'short', day: 'numeric', month: 'short' }), hora, quien].filter(Boolean).join(' · ') || servicio?.name}</small>
               <strong>{precio}</strong>
             </div>
-            <button className="btn btn--claro btn--sm" disabled={!!falta} onClick={() => ir(4)}>
-              {falta ? falta : <>Continuar <ArrowRight /></>}
+            <button className="btn btn--claro btn--sm" disabled={!!faltaPaso} onClick={() => ir(4)}>
+              {faltaPaso ? faltaPaso : <>Continuar <ArrowRight /></>}
             </button>
           </div>
         </section>
@@ -367,7 +416,7 @@ const BookingFlow = () => {
         <section className="reservar-col col-ticket solo-cel" aria-labelledby="t-listo">
           <div className="ticket-cabeza">
             <h2 id="t-listo"><span className="gigante">Todo</span><span className="firma">listo</span></h2>
-            <p className="muted chico">Al confirmar se abre WhatsApp con tu solicitud. Te respondemos para confirmar la hora.</p>
+            <p className="muted chico">Al confirmar, la hora queda guardada para ti y se abre WhatsApp con tu solicitud. Te respondemos para confirmarla.</p>
           </div>
 
           <div className="ticket tarjeta">
@@ -392,15 +441,15 @@ const BookingFlow = () => {
           </div>
 
           <div className="field">
-            <label htmlFor="nombre">Tu nombre (opcional)</label>
+            <label htmlFor="nombre">Tu nombre</label>
             <input id="nombre" className="campo" placeholder="Ej.: Camila" value={nombre} onChange={(e) => setNombre(e.target.value)} autoComplete="given-name" />
           </div>
 
           {falta ? (
-            <button className="btn btn--ancho" disabled>Falta: {falta.replace('Elige ', '')}</button>
+            <button className="btn btn--ancho" disabled>Falta: {falta.replace(/^(Elige|Escribe) /, '')}</button>
           ) : (
-            <a href={whatsappUrl(mensaje)} target="_blank" rel="noopener noreferrer" className="btn btn--ancho" onClick={confirmar}>
-              <WhatsAppIcon /> Confirmar por WhatsApp
+            <a href={whatsappUrl(mensaje)} target="_blank" rel="noopener noreferrer" className="btn btn--ancho" aria-busy={enviando} onClick={(e) => confirmar(e, whatsappUrl(mensaje))}>
+              <WhatsAppIcon /> {enviando ? 'Reservando…' : 'Confirmar por WhatsApp'}
             </a>
           )}
           {sinWhatsApp && <SinWhatsApp mensaje={mensaje} />}
@@ -426,12 +475,12 @@ const BookingFlow = () => {
             <div><dt>Hora</dt><dd>{hora || '—'}</dd></div>
             <div><dt>Valor</dt><dd>{precio}</dd></div>
           </dl>
-          <input className="campo" placeholder="Tu nombre (opcional)" aria-label="Tu nombre (opcional)" value={nombre} onChange={(e) => setNombre(e.target.value)} autoComplete="given-name" />
+          <input className="campo" placeholder="Tu nombre" aria-label="Tu nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} autoComplete="given-name" />
           {falta ? (
-            <button className="btn btn--claro btn--ancho" disabled>Falta: {falta.replace('Elige ', '')}</button>
+            <button className="btn btn--claro btn--ancho" disabled>Falta: {falta.replace(/^(Elige|Escribe) /, '')}</button>
           ) : (
-            <a href={whatsappUrl(mensaje)} target="_blank" rel="noopener noreferrer" className="btn btn--claro btn--ancho" onClick={confirmar}>
-              <WhatsAppIcon /> Confirmar
+            <a href={whatsappUrl(mensaje)} target="_blank" rel="noopener noreferrer" className="btn btn--claro btn--ancho" aria-busy={enviando} onClick={(e) => confirmar(e, whatsappUrl(mensaje))}>
+              <WhatsAppIcon /> {enviando ? 'Reservando…' : 'Confirmar'}
             </a>
           )}
           {sinWhatsApp && <SinWhatsApp mensaje={mensaje} />}

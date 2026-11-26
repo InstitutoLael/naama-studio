@@ -18,6 +18,7 @@ const LIMITES = {
   entrarEmail: [5, 15],
   entrarIp: [20, 15],
   configurarIp: [5, 60],
+  reservaWebIp: [6, 60],
 };
 
 /* ── utilidades ─────────────────────────────────────────── */
@@ -2155,7 +2156,7 @@ ruta('POST', /^giftcards$/, { sesion: true }, async ({ db, cuenta, body }) => {
   if (!monto && !servicio) return error(400, 'Pon un monto o un servicio.');
   const diseno = DISENOS_GIFT.includes(body.diseno) ? body.diseno : 'burdeo';
   const hoy = fechaChile();
-  const vence = FECHA.test(body.vence ?? '') && body.vence > hoy ? body.vence : fechaChile(new Date(Date.now() + 183 * 86400000));
+  const vence = FECHA.test(body.vence ?? '') && body.vence > hoy ? body.vence : fechaChile(new Date(Date.now() + 92 * 86400000));
   let codigo = codigoGift();
   while (await db.prepare('SELECT id FROM giftcards WHERE codigo = ?').bind(codigo).first()) codigo = codigoGift();
   const r = await db
@@ -2353,7 +2354,7 @@ async function avisoDeManana(db, env, hoy) {
     }).catch(() => 0);
   }
   // A quienes confirman: cuántas faltan por confirmar.
-  const sinConfirmar = results.filter((c) => c.estado === 'agendada');
+  const sinConfirmar = results.filter((c) => c.estado === 'agendada' || c.estado === 'pedida');
   const conNumero = sinConfirmar.filter((c) => c.telefono || c.tel_clienta).length;
   if (sinConfirmar.length) {
     const destino = await conPermiso(db, 'clientas');
@@ -2933,7 +2934,7 @@ async function revisarMinimos(db, env, ids, cuenta, { urgente = false, motivo = 
 
 const HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
 const aMin = (h) => Number(h.slice(0, 2)) * 60 + Number(h.slice(3));
-const ESTADOS_CITA = ['agendada', 'confirmada', 'llego', 'no-vino', 'cancelada'];
+const ESTADOS_CITA = ['pedida', 'agendada', 'confirmada', 'llego', 'no-vino', 'cancelada'];
 
 const citaPublica = (c, verTel) => ({
   id: c.id,
@@ -3112,6 +3113,114 @@ ruta('GET', /^publico\/horas$/, {}, async ({ db, request }) => {
     200,
     { 'Cache-Control': 'no-store' },
   );
+});
+
+/* ── reserva desde la web pública ─────────────────────────────
+   La hora queda en la agenda como «pedida» (ocupa el espacio) hasta que el salón la confirma por WhatsApp.
+   Sin preferencia: se asigna a la primera especialista libre de las que hacen el servicio. */
+const HORAS_WEB = ['10:30', '11:30', '12:30', '14:30', '15:30', '16:30', '17:30', '18:30'];
+const base3 = (x) => String(x ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').slice(0, 3);
+
+ruta('POST', /^publico\/reserva$/, {}, async ({ db, env, request, body }) => {
+  const ip = ipDe(request);
+  if (await superaLimite(db, 'reservaWebIp', ip)) return error(429, 'Ya enviaste varias reservas. Escríbenos por WhatsApp.');
+  const hoy = fechaChile();
+  const fecha = FECHA.test(body.fecha ?? '') ? body.fecha : null;
+  const hora = HORAS_WEB.includes(body.hora) ? body.hora : null;
+  const nombre = texto(body.nombre, 60);
+  const servicio = texto(body.servicio, 80) || null;
+  if (!fecha || !hora || !nombre || !servicio) return error(400, 'Falta el día, la hora, el servicio o tu nombre.');
+  const tope = new Date(Date.parse(`${hoy}T12:00:00Z`) + 60 * 86400000).toISOString().slice(0, 10);
+  if (fecha < hoy || fecha > tope || new Date(`${fecha}T12:00:00Z`).getUTCDay() === 0) return error(400, 'Ese día no se puede reservar.');
+  if (fecha === hoy) {
+    const partes = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
+    const ahoraMin = Number(partes.find((x) => x.type === 'hour').value) * 60 + Number(partes.find((x) => x.type === 'minute').value);
+    if (aMin(hora) <= ahoraMin + 30) return error(400, 'Esa hora ya pasó. Elige otra.');
+  }
+  const minutos = numero(body.minutos, { min: 15, max: 300 }) ?? minutosDe(servicio) ?? 60;
+  const equipo = await profesionalesAgenda(db);
+  // Si eligió a alguien, solo ella; con «Sin preferencia», cualquiera de las que hacen el servicio.
+  const pedidas = (body.persona ? [body.persona] : Array.isArray(body.candidatas) ? body.candidatas.slice(0, 12) : []).map(base3).filter(Boolean);
+  const candidatas = equipo.filter((c) => pedidas.includes(base3(c.nombre)));
+  const { results: marcas } = await db.prepare('SELECT cuenta_id, estado FROM disponibilidad WHERE fecha = ?').bind(fecha).all();
+  const viene = (id) => {
+    const e = marcas.find((m) => m.cuenta_id === id)?.estado;
+    if (e === 'no') return false;
+    if (e === 'manana' && aMin(hora) >= 14 * 60) return false;
+    if (e === 'tarde' && aMin(hora) < 14 * 60) return false;
+    return true;
+  };
+  let elegida = null;
+  for (const c of candidatas) {
+    if (viene(c.id) && !(await choque(db, { fecha, hora, minutos, cuentaId: c.id }))) {
+      elegida = c;
+      break;
+    }
+  }
+  if (!elegida) return json({ ok: false, tomada: true, error: 'Esa hora se acaba de tomar. Elige otra.' }, 409);
+  await anotarIntento(db, 'reservaWebIp', ip);
+  const tel = body.telefono ? normalizarTelefono(body.telefono) : null;
+  const ligada = (await db.prepare('SELECT id FROM clientas WHERE activa = 1 AND lower(nombre) = lower(?)').bind(nombre).first())?.id ?? null;
+  const nota = ['Pedida por la web: confirmar por WhatsApp.', !body.persona ? 'Sin preferencia de especialista.' : null].filter(Boolean).join(' ');
+  const r = await db
+    .prepare(
+      `INSERT INTO citas (fecha, hora, minutos, cuenta_id, clienta, clienta_id, telefono, servicio, nota, estado, creada_por, por, creado, visto)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pedida', NULL, 'Web', ?, 0)`,
+    )
+    .bind(fecha, hora, Math.round(minutos), elegida.id, nombre, ligada, tel, servicio, nota, ahora())
+    .run();
+  await avisarCita(db, env, r.meta.last_row_id, 0).catch(() => 0);
+  return json({ ok: true, id: r.meta.last_row_id, con: String(elegida.nombre).split(' ')[0] }, 201);
+});
+
+/* ── visitas a la web (conteos anónimos) ─────────────────────── */
+const TIPOS_VISITA = ['visita', 'origen', 'whatsapp', 'reserva', 'instagram'];
+const sumarVisita = (db, tipo, clave) =>
+  db
+    .prepare('INSERT INTO visitas_web (dia, tipo, clave, n) VALUES (?, ?, ?, 1) ON CONFLICT (dia, tipo, clave) DO UPDATE SET n = n + 1')
+    .bind(fechaChile(), tipo, clave)
+    .run();
+
+ruta('POST', /^publico\/visita$/, {}, async ({ db, request, body }) => {
+  const tipo = TIPOS_VISITA.includes(body.tipo) && body.tipo !== 'reserva' ? body.tipo : null;
+  const clave = String(body.clave ?? '').toLowerCase().slice(0, 48);
+  if (!tipo || !/^[a-z0-9/_-]*$/.test(clave)) return error(400, 'No válido.');
+  if (/bot|crawl|spider|lighthouse|headless/i.test(request.headers.get('User-Agent') ?? '')) return json({ ok: true });
+  await sumarVisita(db, tipo, clave || '/');
+  return json({ ok: true });
+});
+
+ruta('GET', /^visitas$/, { permiso: 'cuentas' }, async ({ db, request }) => {
+  const dias = Math.min(Math.max(Number(new URL(request.url).searchParams.get('dias')) || 30, 7), 365);
+  const hoy = fechaChile();
+  const desde = new Date(Date.parse(`${hoy}T12:00:00Z`) - (dias - 1) * 86400000).toISOString().slice(0, 10);
+  const { results } = await db.prepare('SELECT dia, tipo, clave, n FROM visitas_web WHERE dia >= ? ORDER BY dia').bind(desde).all();
+  const total = (tipo) => results.filter((r) => r.tipo === tipo).reduce((a, r) => a + r.n, 0);
+  const por = (tipo) => {
+    const m = {};
+    for (const r of results.filter((x) => x.tipo === tipo)) m[r.clave] = (m[r.clave] ?? 0) + r.n;
+    return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([clave, n]) => ({ clave, n }));
+  };
+  const serie = [];
+  for (let i = 0; i < dias; i++) {
+    const d = new Date(Date.parse(`${desde}T12:00:00Z`) + i * 86400000).toISOString().slice(0, 10);
+    serie.push({ dia: d, visitas: results.filter((r) => r.dia === d && r.tipo === 'visita').reduce((a, r) => a + r.n, 0) });
+  }
+  const { results: web } = await db
+    .prepare(`SELECT COUNT(*) AS n FROM citas WHERE por = 'Web' AND substr(creado, 1, 10) >= ?`)
+    .bind(desde)
+    .all();
+  return json({
+    ok: true,
+    dias,
+    visitas: total('visita'),
+    whatsapp: total('whatsapp'),
+    instagram: total('instagram'),
+    reservas: web[0]?.n ?? 0,
+    paginas: por('visita').slice(0, 10),
+    origenes: por('origen'),
+    serie,
+  });
 });
 
 export async function manejar(request, env) {

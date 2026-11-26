@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import { legacyMundoIds } from './data/categories';
 import { scrollToElement, scrollToTop } from './lib/smoothScroll';
 import { useAparecer } from './lib/aparecer';
+import { contarVisita } from './lib/contador';
 
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const WorldPage = lazy(() => import('./pages/WorldPage'));
@@ -32,6 +33,9 @@ const EASE = [0.16, 1, 0.3, 1];
 const App = () => {
   const location = useLocation();
   useAparecer(location.pathname);
+  useEffect(() => {
+    contarVisita(location.pathname);
+  }, [location.pathname]);
 
   // Si la URL trae un ancla (#seccion), bajar hasta ella cuando la página ya está montada.
   useEffect(() => {
