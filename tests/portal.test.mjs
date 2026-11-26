@@ -1051,3 +1051,50 @@ test('horas libres públicas: dicen qué hora está tomada, sin datos de la clie
   assert.ok(!texto.includes('Secreta') && !texto.includes('Balayage') && !texto.includes('5691111'));
   assert.equal((await anonimo.pedir('publico/horas?fecha=2001-01-01')).status, 400);
 });
+
+test('reserva desde la web: queda «pedida» en la agenda y no deja tomar la misma hora dos veces', async () => {
+  const { admin } = await crearEquipo();
+  // Próximo día hábil (no domingo)
+  let d = new Date(Date.now() + 2 * 86400000);
+  if (d.getUTCDay() === 0) d = new Date(d.getTime() + 86400000);
+  const fecha = d.toISOString().slice(0, 10);
+  const web = cliente('7.7.7.7');
+  const r = await web.post('publico/reserva', { fecha, hora: '15:30', servicio: 'Esmaltado permanente', minutos: 60, nombre: 'Camila', persona: 'Gaby' });
+  assert.equal(r.status, 201);
+  assert.equal(r.data.con, 'Gaby');
+  const otra = await cliente('8.8.8.8').post('publico/reserva', { fecha, hora: '15:30', servicio: 'Esmaltado permanente', nombre: 'Otra', persona: '', candidatas: ['Gaby'] });
+  assert.equal(otra.status, 409);
+  const ag = await admin.pedir(`agenda?fecha=${fecha}`);
+  const cita = ag.data.citas.find((c) => c.clienta === 'Camila');
+  assert.equal(cita.estado, 'pedida');
+  assert.equal(cita.por, 'Web');
+  // Horas que no existen o días pasados no se aceptan
+  assert.equal((await web.post('publico/reserva', { fecha, hora: '03:00', servicio: 'X', nombre: 'Y', persona: 'Gaby' })).status, 400);
+  assert.equal((await web.post('publico/reserva', { fecha: '2001-01-02', hora: '10:30', servicio: 'X', nombre: 'Y', persona: 'Gaby' })).status, 400);
+});
+
+test('visitas a la web: se cuentan sin datos personales y solo Administración las ve', async () => {
+  const { admin, gaby } = await crearEquipo();
+  const web = cliente('6.6.6.6');
+  assert.equal((await web.post('publico/visita', { tipo: 'visita', clave: '/servicios' })).status, 200);
+  await web.post('publico/visita', { tipo: 'visita', clave: '/servicios' });
+  await web.post('publico/visita', { tipo: 'origen', clave: 'instagram' });
+  await web.post('publico/visita', { tipo: 'whatsapp', clave: '/reservar' });
+  assert.equal((await web.post('publico/visita', { tipo: 'visita', clave: '<script>' })).status, 400);
+  const v = await admin.pedir('visitas?dias=7');
+  assert.equal(v.data.visitas, 2);
+  assert.equal(v.data.whatsapp, 1);
+  assert.deepEqual(v.data.origenes, [{ clave: 'instagram', n: 1 }]);
+  assert.equal((await gaby.pedir('visitas')).status, 403);
+});
+
+test('reserva web: si eligió especialista, queda con ella aunque mande la lista completa', async () => {
+  const admin = await configurar();
+  await admin.post('cuentas', { nombre: 'Viviana', email: 'vivi@naama.cl', rol: 'equipo' });
+  await admin.post('cuentas', { nombre: 'Valeria', email: 'vale@naama.cl', rol: 'equipo' });
+  let d = new Date(Date.now() + 3 * 86400000);
+  if (d.getUTCDay() === 0) d = new Date(d.getTime() + 86400000);
+  const r = await cliente('5.5.5.5').post('publico/reserva', { fecha: d.toISOString().slice(0, 10), hora: '10:30', servicio: 'Corte de Dama', nombre: 'Ana', persona: 'Valeria', candidatas: ['Viviana', 'Valeria'] });
+  assert.equal(r.status, 201);
+  assert.equal(r.data.con, 'Valeria');
+});

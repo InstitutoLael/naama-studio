@@ -27,3 +27,5 @@
   .equipo-familia { grid-template-columns: 1.6fr 1fr; align-items: center; gap: 28px; margin-top: 56px; }
   .btn--ancho-cel { width: auto; justify-self: start; }
 }
+.retrato__vacio { place-items: center; background: var(--arcilla); }
+.retrato__vacio span { font-family: var(--f-firma); font-style: italic; font-size: 5rem; color: var(--terracota); line-height: 1; }

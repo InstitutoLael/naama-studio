@@ -8,7 +8,7 @@ import { team } from '../data/team';
 import '../theme/team.css';
 
 // Podóloga: cuando llegue su nombre y foto, se completa aquí (photo = nombre en photos.json).
-const PODOLOGA = { name: null, role: 'Podología clínica', photo: null };
+const PODOLOGA = { name: 'Michelle', role: 'Podología clínica', photo: null };
 
 /** P05 · Equipo. */
 const TeamPage = () => (
@@ -43,9 +43,8 @@ const TeamPage = () => (
           {PODOLOGA.photo ? (
             <Photo name={PODOLOGA.photo} alt={`${PODOLOGA.name}, podóloga`} sizes="(min-width: 1024px) 16vw, 46vw" position="50% 22%" />
           ) : (
-            <div className="retrato__vacio">
-              <strong>Podóloga</strong>
-              <small>{PODOLOGA.role}</small>
+            <div className="retrato__vacio" aria-hidden="true">
+              <span>{PODOLOGA.name.charAt(0)}</span>
             </div>
           )}
           <h2>{PODOLOGA.name ?? 'Podología'}</h2>

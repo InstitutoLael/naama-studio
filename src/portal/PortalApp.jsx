@@ -6,6 +6,7 @@ import { api, post } from './api';
 import { Configurar, CrearClave, Entrar } from './Acceso';
 import Panel from './Panel';
 import Cuentas from './Cuentas';
+import Visitas from './Visitas';
 import Clientas from './Clientas';
 import Insumos from './Insumos';
 import Compras from './Compras';
@@ -195,6 +196,16 @@ const PortalApp = () => {
     cargar();
   }, [cargar]);
 
+  // Este aparato es del equipo: sus visitas a la web no se cuentan.
+  useEffect(() => {
+    if (!estado.cuenta) return;
+    try {
+      localStorage.setItem('naama-equipo', '1');
+    } catch {
+      // nada
+    }
+  }, [estado.cuenta]);
+
   useEffect(() => {
     setCambiandoClave(false);
     window.scrollTo(0, 0);
@@ -293,6 +304,7 @@ const PortalApp = () => {
             <Route path="mi-mes" element={<MiMes cuenta={cuenta} />} />
             <Route path="plata" element={puede(cuenta, 'finanzas') ? <Plata /> : <Navigate to="/portal" replace />} />
             <Route path="cuentas" element={puede(cuenta, 'cuentas') ? <Cuentas yo={cuenta} /> : <Navigate to="/portal" replace />} />
+            <Route path="visitas" element={puede(cuenta, 'cuentas') ? <Visitas /> : <Navigate to="/portal" replace />} />
             <Route path="*" element={<Navigate to="/portal" replace />} />
           </Routes>
         )}

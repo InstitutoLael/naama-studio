@@ -4,7 +4,7 @@
 
 export const ANCHO = 1200;
 export const ALTO = 756;
-export const VIGENCIA_MESES = 6;
+export const VIGENCIA_MESES = 3;
 
 // Colores propios de las tarjetas (piezas gráficas, no la interfaz).
 export const DISENOS = {

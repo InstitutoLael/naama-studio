@@ -67,6 +67,7 @@ export const MODULOS = [
   { id: 'plata', grupo: 'plata', nombre: 'La plata', corto: 'Plata', bajada: 'Mercado Pago, disponible y gastos fijos', permiso: 'finanzas', listo: true },
   { id: 'legal', grupo: 'plata', nombre: 'Legal y pagos', bajada: 'Impuestos, honorarios, documentos', permiso: 'legal' },
   { id: 'ayuda', grupo: 'equipo', nombre: 'Ayuda', bajada: 'Dudas, fallas o algo que cambiar', permiso: null, listo: true },
+  { id: 'visitas', grupo: 'equipo', nombre: 'Visitas a la web', corto: 'Visitas', bajada: 'Cuánta gente entra y cuántas reservan', permiso: 'cuentas', listo: true },
   { id: 'cuentas', grupo: 'equipo', nombre: 'Cuentas', corto: 'Equipo', bajada: 'Quién entra y qué ve', permiso: 'cuentas', listo: true },
 ];
 

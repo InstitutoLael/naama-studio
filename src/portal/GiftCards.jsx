@@ -50,7 +50,7 @@ const Tarjeta = ({ g }) => {
 };
 
 const Nueva = ({ onListo, onCerrar }) => {
-  const [g, setG] = useState({ para: '', de: '', monto: '', servicio: '', mensaje: '', diseno: 'burdeo', codigo: 'NAAMA-XXXX-XXXX', vence: new Date(Date.now() + 183 * 86400000).toISOString().slice(0, 10) });
+  const [g, setG] = useState({ para: '', de: '', monto: '', servicio: '', mensaje: '', diseno: 'burdeo', codigo: 'NAAMA-XXXX-XXXX', vence: new Date(Date.now() + 92 * 86400000).toISOString().slice(0, 10) });
   const [medio, setMedio] = useState('Mercado Pago');
   const [error, setError] = useState('');
   const cambia = (k) => (e) => setG((x) => ({ ...x, [k]: e.target.value }));
