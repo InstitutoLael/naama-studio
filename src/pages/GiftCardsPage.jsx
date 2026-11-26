@@ -19,16 +19,7 @@ const GiftCardsPage = () => {
   const [mensaje, setMensaje] = useState('');
 
   const falta = [!para.trim() && 'para quién', !de.trim() && 'de quién', monto < MINIMO && `mínimo ${pesos(MINIMO)}`].filter(Boolean);
-  const texto = [
-    'Hola Naamá Studio! Quiero una gift card:',
-    `• Diseño: ${DISENOS[diseno].nombre}`,
-    `• Monto: ${pesos(monto)}`,
-    `• Para: ${para.trim()}`,
-    `• De: ${de.trim()}`,
-    mensaje.trim() && `• Mensaje: ${mensaje.trim()}`,
-  ]
-    .filter(Boolean)
-    .join('\n');
+  const texto = `Hola 🤍 Quiero regalar una gift card de ${pesos(monto)} (diseño ${DISENOS[diseno].nombre}) para ${para.trim()}, de ${de.trim()}.${mensaje.trim() ? ` El mensaje: «${mensaje.trim()}».` : ''}`;
 
   const tarjeta = { diseno, monto, para: para.trim() || 'Camila', de: de.trim() || 'Diego' };
 

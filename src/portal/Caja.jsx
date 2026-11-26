@@ -56,8 +56,8 @@ const Caja = () => {
   const totalSumado = (num(efectivo) ?? 0) + (num(tarjeta) ?? 0) + (num(transfer) ?? 0);
 
   return (
-    <div className="panel">
-      <header className="panel__cabeza">
+    <div className="panel caja-pagina">
+      <header className="panel__cabeza solo-celu">
         <span className="eyebrow">Al final del día</span>
         <h1 className="panel__titulo">
           Cierre de <em>caja</em>
@@ -84,6 +84,7 @@ const Caja = () => {
               {d.servicios} {d.servicios === 1 ? 'servicio anotado' : 'servicios anotados'}
               {d.cierre ? ` · ${d.cierre.cuadra ? 'caja cerrada y cuadrada' : 'cerrada con diferencias'} (${d.cierre.por})` : ''}
             </p>
+            <div className="solo-celu caja-barras-caja">
             {d.porHora && (
               <div className="caja-barras" aria-hidden="true">
                 {d.porHora.map((v, i) => {
@@ -94,6 +95,7 @@ const Caja = () => {
               </div>
             )}
             <div className="caja-barras__eje"><span>10:30</span><span>19:30</span></div>
+            </div>
           </section>
 
           <section className="caja-cuadros">
@@ -112,7 +114,7 @@ const Caja = () => {
                 </div>
               );
             })}
-            <div className="caja-cuadro caja-cuadro--total">
+            <div className="caja-cuadro caja-cuadro--total solo-celu">
               <small>Total anotado</small>
               <strong>{pesos(d.total)}</strong>
               <span>{d.servicios} {d.servicios === 1 ? 'servicio' : 'servicios'}</span>
@@ -128,7 +130,20 @@ const Caja = () => {
             </p>
           </section>
 
-          <section>
+          <div className="solo-compu caja-barras-caja caja-barras-pc">
+            {d.porHora && (
+              <div className="caja-barras" aria-hidden="true">
+                {d.porHora.map((v, i) => {
+                  const max = Math.max(...d.porHora, 1);
+                  const alto = v ? 18 + (82 * v) / max : 14;
+                  return <span key={i} className={v === max && v > 0 ? 'is-max' : ''} style={{ height: `${alto}%` }} />;
+                })}
+              </div>
+            )}
+            <div className="caja-barras__eje"><span>10:30</span><span>19:30</span></div>
+          </div>
+
+          <section className="caja-form">
             <h2 className="seccion__titulo">Cerrar el día</h2>
             <form
               className="hoja__form"

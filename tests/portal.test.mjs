@@ -1036,3 +1036,18 @@ test('«¿Quién vino?» se llena solo con Mi mes y la planilla; lo dudoso queda
   const t = await admin.post('visitas/planilla', {});
   assert.equal(t.data.planillaConectada, false);
 });
+
+test('horas libres públicas: dicen qué hora está tomada, sin datos de la clienta', async () => {
+  const admin = await configurar();
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Santiago' }).format(new Date());
+  const r = await admin.post('agenda', { fecha: hoy, hora: '15:30', clienta: 'Clienta Secreta', servicio: 'Balayage', telefono: '+56911111111', minutos: 90 });
+  assert.equal(r.status, 201);
+  const anonimo = cliente('9.9.9.9');
+  const h = await anonimo.pedir(`publico/horas?fecha=${hoy}`);
+  assert.equal(h.status, 200);
+  const diego = h.data.personas.find((p) => p.nombre === 'Diego');
+  assert.deepEqual(diego.ocupadas, [['15:30', 90]]);
+  const texto = JSON.stringify(h.data);
+  assert.ok(!texto.includes('Secreta') && !texto.includes('Balayage') && !texto.includes('5691111'));
+  assert.equal((await anonimo.pedir('publico/horas?fecha=2001-01-01')).status, 400);
+});

@@ -28,7 +28,7 @@ const fechaLarga = (iso) =>
 const puedeElegirContactos = () => typeof navigator !== 'undefined' && 'contacts' in navigator && 'select' in (navigator.contacts ?? {});
 
 const waUrl = (c) =>
-  `https://wa.me/${c.telefono.replace('+', '')}?text=${encodeURIComponent(`Hola ${c.nombre.split(' ')[0]}! Te escribimos de Naamá Studio 🤍`)}`;
+  `https://wa.me/${c.telefono.replace('+', '')}?text=${encodeURIComponent(`Hola ${c.nombre.split(' ')[0]} 🤍 te escribimos de Naamá.`)}`;
 
 /* ── Subir un contacto (todas) ─────────────────────────── */
 

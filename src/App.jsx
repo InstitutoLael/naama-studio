@@ -8,6 +8,7 @@ import FloatingWhatsApp from './components/site/FloatingWhatsApp';
 import Home from './pages/Home';
 import { legacyMundoIds } from './data/categories';
 import { scrollToElement, scrollToTop } from './lib/smoothScroll';
+import { useAparecer } from './lib/aparecer';
 
 const ServicesPage = lazy(() => import('./pages/ServicesPage'));
 const WorldPage = lazy(() => import('./pages/WorldPage'));
@@ -17,6 +18,7 @@ const BookingFlow = lazy(() => import('./pages/BookingFlow'));
 const GiftCardsPage = lazy(() => import('./pages/GiftCardsPage'));
 const EmpresasPage = lazy(() => import('./pages/EmpresasPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const PreguntasPage = lazy(() => import('./pages/PreguntasPage'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const PortalApp = lazy(() => import('./portal/PortalApp'));
 
@@ -29,6 +31,7 @@ const EASE = [0.16, 1, 0.3, 1];
 
 const App = () => {
   const location = useLocation();
+  useAparecer(location.pathname);
 
   // Si la URL trae un ancla (#seccion), bajar hasta ella cuando la página ya está montada.
   useEffect(() => {
@@ -74,6 +77,7 @@ const App = () => {
               <Route path="/gift-cards" element={<GiftCardsPage />} />
               <Route path="/empresas" element={<EmpresasPage />} />
               <Route path="/contacto" element={<ContactPage />} />
+              <Route path="/preguntas" element={<PreguntasPage />} />
               {/* Enlaces antiguos */}
               <Route path="/staff" element={<Navigate to="/servicios" replace />} />
               <Route path="/mundo/:mundoId" element={<LegacyMundo />} />

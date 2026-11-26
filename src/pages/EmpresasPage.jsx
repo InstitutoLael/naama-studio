@@ -13,8 +13,8 @@ const FORMAS = [
 ];
 const FOTOS = ['salon-estaciones', 'casa-sala', 'salon-recepcion'];
 const nombre = (p) => p.name.replace(/^Pack /, '');
-const pedir = (p) => whatsappUrl(`Hola! Me interesa el ${p.name} para mi empresa. ¿Me pueden enviar una propuesta?`);
-const PROPUESTA = whatsappUrl('Hola! Escribo de una empresa y me gustaría recibir la propuesta corporativa de Naamá Studio.');
+const pedir = (p) => whatsappUrl(`Hola 🤍 Escribo de una empresa: me interesa el ${p.name.replace(/^Pack /, 'pack ')} para mi equipo. ¿Me pueden enviar una propuesta?`);
+const PROPUESTA = whatsappUrl('Hola 🤍 Escribo de una empresa y me gustaría recibir una propuesta para mi equipo.');
 
 /** P08 · Empresas. */
 const EmpresasPage = () => (

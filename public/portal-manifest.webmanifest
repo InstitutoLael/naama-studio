@@ -7,8 +7,8 @@
   "scope": "/portal",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#b9674b",
-  "theme_color": "#f8f3ed",
+  "background_color": "#161413",
+  "theme_color": "#161413",
   "lang": "es-CL",
   "icons": [
     {

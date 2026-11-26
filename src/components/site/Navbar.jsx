@@ -147,7 +147,7 @@ const Navbar = () => {
                   </div>
                 )}
               </div>
-              {NAV_LINKS.filter((l) => l.to !== '/servicios').map((l) => (
+              {[...NAV_LINKS.filter((l) => l.to !== '/servicios'), { to: '/preguntas', label: 'Preguntas' }].map((l) => (
                 <NavLink key={l.to} to={l.to} className="menu__item">{l.label}</NavLink>
               ))}
             </motion.nav>

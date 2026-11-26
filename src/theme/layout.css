@@ -238,3 +238,20 @@ main { display: block; min-height: 60vh; }
 .error404__texto h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; }
 .error404__texto p { font-size: var(--fs-chico); }
 .error404__botones { display: flex; justify-content: center; gap: 8px; margin-top: 8px; }
+
+/* P17 · Preguntas */
+.dudas { padding-bottom: 40px; }
+.dudas__cuerpo { display: grid; gap: 18px; max-width: 760px; }
+.dudas__titulo { display: grid; padding-top: 8px; }
+.dudas__titulo .gigante { font-size: clamp(3.4rem, 18vw, 7rem); line-height: 0.86; }
+.dudas__titulo .firma { font-size: clamp(2rem, 9vw, 3.4rem); margin: -4px 0 0 18%; }
+.dudas__lista { display: grid; gap: 10px; }
+.duda { padding: 16px 18px; border-radius: var(--r-tarjeta); }
+.duda h2 { font-size: 1.08rem; font-weight: 700; letter-spacing: -0.015em; margin-bottom: 4px; }
+.duda p { font-size: var(--fs-chico); color: var(--gris); line-height: 1.5; }
+.duda--arcilla { background: var(--arcilla); }
+.duda--blanco { background: var(--blanco); }
+.duda--rosa { background: var(--rosa); }
+.dudas__pie { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
+.dudas__pie p { width: 100%; font-weight: 700; }
+.dudas__pie .btn svg { width: 16px; height: 16px; }

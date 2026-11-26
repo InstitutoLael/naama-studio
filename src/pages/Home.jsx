@@ -14,8 +14,27 @@ const Home = () => (
   <div className="inicio">
     <SEOHead />
 
+    {/* D11 · computador: título fino con la palabra clave en negrita, foto en arco y collage de 2 fotos */}
+    <section className="inicio-pc container solo-pc">
+      <div className="inicio-pc__texto">
+        <h1 className="titulo">
+          Una casa para <b>volver a ti</b>
+        </h1>
+        <p>Un salón de belleza y bienestar en una casa patrimonial de San Miguel. Cabello, color, uñas, rostro y masajes, hechos con calma y detalle.</p>
+        <div className="inicio-pc__botones">
+          <Link to="/reservar" className="btn btn--terracota">Reservar mi hora</Link>
+          <Link to="/servicios" className="btn btn--linea">Ver precios</Link>
+        </div>
+      </div>
+      <div className="inicio-pc__fotos">
+        <Photo name="cabello-balayage" alt="Balayage miel hecho en Naamá" priority sizes="22vw" className="inicio-pc__arco" position="center 30%" />
+        <Photo name="unas-violeta" alt="Uñas violeta galaxia" priority sizes="22vw" />
+        <Photo name="casa-fachada" alt="La fachada roja de Naamá Studio en Arcadia 1297" priority sizes="22vw" position="40% center" />
+      </div>
+    </section>
+
     {/* NAAMÁ + fotos partidas */}
-    <section className="inicio-hero container">
+    <section className="inicio-hero container solo-cel">
       <h1 className="inicio-hero__nombre gigante">Naamá</h1>
       <div className="inicio-hero__fotos">
         <Photo name="casa-fachada" alt="La fachada roja de Naamá Studio en Arcadia 1297" priority sizes="(min-width: 900px) 34vw, 50vw" position="30% center" />
@@ -125,7 +144,7 @@ const Home = () => (
         </div>
         <Photo name="evento-ondas" alt="Ondas para un matrimonio" sizes="(min-width: 900px) 20vw, 40vw" className="inicio-eventos__foto" />
         <a
-          href={whatsappUrl('Hola! Quiero cotizar peinado y maquillaje para un evento.')}
+          href={whatsappUrl('Hola 🤍 Quiero cotizar peinado y maquillaje para un evento.')}
           target="_blank"
           rel="noopener noreferrer"
           className="btn btn--linea btn--ancho inicio-eventos__btn"

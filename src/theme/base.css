@@ -289,3 +289,8 @@ textarea.input, textarea.campo { min-height: 96px; resize: vertical; line-height
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* M01 · aparece suave al bajar */
+.m01 { opacity: 0; transform: translateY(20px); transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+.m01.m01--in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .m01 { opacity: 1; transform: none; transition: none; } }

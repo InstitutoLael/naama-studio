@@ -3085,6 +3085,35 @@ ruta('POST', /^agenda\/(\d+)$/, { sesion: true }, async ({ db, cuenta, body, par
 });
 
 
+/* ── horas libres para la web pública (X11) ───────────────────
+   Solo dice qué horas están tomadas y quién viene ese día. Sin nombres de clientas ni servicios. */
+ruta('GET', /^publico\/horas$/, {}, async ({ db, request }) => {
+  const hoy = fechaChile();
+  const fecha = new URL(request.url).searchParams.get('fecha') ?? '';
+  if (!FECHA.test(fecha) || fecha < hoy) return error(400, 'Fecha no válida.');
+  const tope = new Date(Date.parse(`${hoy}T12:00:00Z`) + 60 * 86400000).toISOString().slice(0, 10);
+  if (fecha > tope) return error(400, 'Fecha no válida.');
+  const { results: equipo } = await db.prepare('SELECT id, nombre FROM cuentas WHERE activa = 1 AND demo = 0').all();
+  const { results: citas } = await db
+    .prepare(`SELECT cuenta_id, hora, minutos FROM citas WHERE fecha = ? AND estado NOT IN ('cancelada', 'no-vino')`)
+    .bind(fecha)
+    .all();
+  const { results: marcas } = await db.prepare('SELECT cuenta_id, estado FROM disponibilidad WHERE fecha = ?').bind(fecha).all();
+  return json(
+    {
+      ok: true,
+      fecha,
+      personas: equipo.map((c) => ({
+        nombre: String(c.nombre).split(' ')[0],
+        dispo: marcas.find((m) => m.cuenta_id === c.id)?.estado ?? null,
+        ocupadas: citas.filter((x) => x.cuenta_id === c.id).map((x) => [x.hora, x.minutos]),
+      })),
+    },
+    200,
+    { 'Cache-Control': 'no-store' },
+  );
+});
+
 export async function manejar(request, env) {
   const db = env.DB;
   if (!db) return error(503, 'Falta conectar la base de datos (D1) con el nombre DB en Cloudflare.');

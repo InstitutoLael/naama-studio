@@ -225,9 +225,11 @@ const PortalApp = () => {
 
   if (estado.cargando) {
     return (
-      <div className="portal portal--acceso">
+      <div className="portal portal--splash">
         <div className="splash">
           <Logo />
+          <p className="splash__firma">{new Date().getHours() < 12 ? 'buenos días' : new Date().getHours() < 20 ? 'buenas tardes' : 'buenas noches'}</p>
+          <span className="splash__barra" aria-hidden="true" />
         </div>
       </div>
     );
