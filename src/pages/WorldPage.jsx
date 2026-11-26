@@ -164,13 +164,11 @@ const WorldPage = () => {
           <div className="solo-celular">{quien}</div>
 
           <h2 className="mundo-sub">Servicios</h2>
-          <div className="chips" role="tablist" aria-label="Grupos">
+          <div className="chips" role="group" aria-label="Grupos">
             {secciones.map((s) => (
               <button
                 key={s.titulo}
-                role="tab"
                 className="chip chip--pestana"
-                aria-selected={seccion?.titulo === s.titulo}
                 aria-pressed={seccion?.titulo === s.titulo}
                 onClick={() => setTab(s.titulo)}
               >

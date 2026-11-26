@@ -8,7 +8,7 @@
  *  3. Genera sitemap.xml.
  * Cloudflare Pages sirve /servicios desde servicios.html; lo demás cae en index.html (SPA).
  */
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { mundos, servicesForMundo } from '../src/data/categories.js';
 import { servicesData } from '../src/data/servicesData.js';
@@ -138,8 +138,50 @@ const staticBody = (r) => {
 
 const template = await readFile(path.join(DIST, 'index.html'), 'utf8');
 
-const render = (r) => {
+// ── Velocidad: cada página precarga su foto principal, su código y la letra, para que no esperen a React ──
+const fotos = JSON.parse(await readFile(new URL('../src/data/photos.json', import.meta.url), 'utf8'));
+const assets = await readdir(path.join(DIST, 'assets'));
+const asset = (prefijo, ext) => assets.find((f) => f.startsWith(prefijo + '-') && f.endsWith(ext));
+const letra = assets.find((f) => /^inter-tight-latin-wght-normal-.*\.woff2$/.test(f));
+const PAGINA = {
+  '/': { foto: ['cabello-balayage', '(min-width: 1024px) 22vw, 50vw'] },
+  '/servicios': { codigo: 'ServicesPage', foto: ['casa-sala', '100vw'], soloCel: true },
+  '/reservar': { codigo: 'BookingFlow', foto: ['unas-burdeo-floral', '100vw'], soloCel: true },
+  '/galeria': { codigo: 'GalleryPage', foto: ['unas-burdeo-floral', '(min-width: 1024px) 1200px, 92vw'] },
+  '/empresas': { codigo: 'EmpresasPage', foto: ['casa-sala', '(min-width: 1024px) 22vw, 46vw'] },
+  '/equipo': { codigo: 'TeamPage' },
+  '/contacto': { codigo: 'ContactPage' },
+  '/gift-cards': { codigo: 'GiftCardsPage' },
+  '/preguntas': { codigo: 'PreguntasPage' },
+};
+const dependencias = async (archivo, vistos = new Set()) => {
+  if (!archivo || vistos.has(archivo)) return vistos;
+  vistos.add(archivo);
+  const js = await readFile(path.join(DIST, 'assets', archivo), 'utf8');
+  for (const m of js.matchAll(/from\s*"\.\/([^"]+\.js)"/g)) if (!m[1].startsWith('index-')) await dependencias(m[1], vistos);
+  return vistos;
+};
+const precargas = async (ruta) => {
+  const p = PAGINA[ruta.startsWith('/servicios/') ? '/servicios-mundo' : ruta] ?? (ruta.startsWith('/servicios/') ? { codigo: 'WorldPage' } : null);
+  const l = [];
+  if (letra) l.push(`<link rel="preload" href="/assets/${letra}" as="font" type="font/woff2" crossorigin />`);
+  if (!p) return l;
+  if (p.foto && fotos[p.foto[0]]) {
+    const [nombre, sizes] = p.foto;
+    const set = fotos[nombre].widths.map((w) => `/img/${nombre}-${w}.avif ${w}w`).join(', ');
+    l.push(`<link rel="preload" as="image" type="image/avif" fetchpriority="high" imagesrcset="${set}" imagesizes="${sizes}"${p.soloCel ? ' media="(max-width: 1023px)"' : ''} />`);
+  }
+  if (p.codigo) {
+    for (const f of await dependencias(asset(p.codigo, '.js'))) l.push(`<link rel="modulepreload" href="/assets/${f}" />`);
+    const css = asset(p.codigo, '.css');
+    if (css) l.push(`<link rel="preload" href="/assets/${css}" as="style" />`);
+  }
+  return l;
+};
+
+const render = async (r) => {
   let html = template;
+  if (!r.privada) html = html.replace('</head>', `    ${(await precargas(r.path)).join('\n    ')}\n  </head>`);
   const url = `${SITE}${r.path}`;
   const set = (re, value) => (html = html.replace(re, (m, a, _b, c) => `${a}${esc(value)}${c}`));
   set(/(<title>)([^<]*)(<\/title>)/, r.title);
@@ -182,7 +224,7 @@ const render = (r) => {
 for (const route of routes) {
   const file = route.path === '/' ? path.join(DIST, 'index.html') : path.join(DIST, `${route.path.slice(1)}.html`);
   await mkdir(path.dirname(file), { recursive: true });
-  await writeFile(file, render(route));
+  await writeFile(file, await render(route));
 }
 
 const today = new Date().toISOString().slice(0, 10);

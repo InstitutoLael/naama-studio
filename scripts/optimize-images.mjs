@@ -11,7 +11,7 @@ import path from 'node:path';
 
 const SRC = 'photos-src';
 const OUT = 'public/img';
-const WIDTHS = [480, 960, 1600, 2400];
+const WIDTHS = [240, 480, 960, 1600, 2400];
 
 await mkdir(OUT, { recursive: true });
 const files = (await readdir(SRC)).filter((f) => /\.(jpe?g|png|webp|heic)$/i.test(f));

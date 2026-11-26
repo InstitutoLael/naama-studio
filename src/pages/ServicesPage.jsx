@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SEOHead from '../components/shared/SEOHead';
 import Photo from '../components/common/Photo';
@@ -79,6 +79,13 @@ const PreciosPC = ({ mundoId, elegir, version }) => {
 
 /** P02 · Servicios y precios. */
 const ServicesPage = () => {
+  // Con la foto arriba (celular) el encabezado va en claro.
+  useEffect(() => {
+    document.documentElement.dataset.fotoArriba = '1';
+    return () => {
+      document.documentElement.dataset.fotoArriba = '';
+    };
+  }, []);
   const versionPrecios = usePreciosVivos();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState('');

@@ -10,7 +10,7 @@
 .regala-disenos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; max-width: 520px; }
 .regala-diseno { display: grid; gap: 6px; justify-items: center; font-size: var(--fs-mini); font-weight: 600; }
 .regala-diseno .gc-arte { border-radius: 8px; outline: 2px solid transparent; outline-offset: 2px; }
-.regala-diseno[aria-checked='true'] { color: var(--terracota); }
+.regala-diseno[aria-checked='true'] { color: var(--tinta); font-weight: 800; }
 .regala-diseno[aria-checked='true'] .gc-arte { outline-color: var(--terracota); }
 .regala-form { display: grid; gap: 14px; padding: 18px; background: transparent; }
 .regala-form .eyebrow { justify-self: center; }

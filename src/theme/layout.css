@@ -255,3 +255,10 @@ main { display: block; min-height: 60vh; }
 .dudas__pie { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 8px; }
 .dudas__pie p { width: 100%; font-weight: 700; }
 .dudas__pie .btn svg { width: 16px; height: 16px; }
+
+/* Encabezado en claro sobre la foto de arriba (Precios y Reservar en celular) */
+@media (max-width: 1023px) {
+  html[data-foto-arriba='1'] .nav:not(.nav--scrolled):not(.nav--abierto) { color: var(--blanco); }
+  html[data-foto-arriba='1'] .nav:not(.nav--scrolled) .nav__cta { --b-bg: var(--blanco); --b-fg: var(--tinta); --b-press: var(--arcilla); }
+  html[data-foto-arriba='1'] .nav:not(.nav--scrolled) .nav__burger { border-color: var(--borde-claro); }
+}

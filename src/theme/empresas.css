@@ -3,11 +3,11 @@
 .empresas-hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .empresas-hero > *, .empresas-panel > * { min-width: 0; }
 .empresas-panel { background: var(--terracota); color: var(--blanco); border-radius: var(--r-tarjeta); padding: 22px 20px; display: grid; gap: 14px; }
-.empresas-panel .eyebrow { color: var(--durazno); }
+.empresas-panel .eyebrow { color: var(--blanco); }
 .empresas-panel h1 { display: grid; }
 .empresas-panel .gigante { font-size: clamp(2.6rem, 12vw, 5.2rem); line-height: 0.88; }
 .empresas-panel .firma { font-size: clamp(1.6rem, 6vw, 2.6rem); margin-left: 12%; }
-.empresas-panel p { font-size: var(--fs-chico); opacity: 0.92; }
+.empresas-panel p { font-size: var(--fs-chico); }
 .empresas-panel__botones { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .empresas-collage { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 110px 110px; gap: 8px; }
 .empresas-collage .photo { border-radius: var(--r-campo); }

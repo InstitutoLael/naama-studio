@@ -142,6 +142,14 @@ const BookingFlow = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [agenda, persona]);
 
+  // Con la foto arriba (paso 1, celular) el encabezado va en claro.
+  useEffect(() => {
+    document.documentElement.dataset.fotoArriba = paso === 1 ? '1' : '';
+    return () => {
+      document.documentElement.dataset.fotoArriba = '';
+    };
+  }, [paso]);
+
   // En computador, que el servicio elegido quede a la vista en su lista.
   useEffect(() => {
     const el = document.querySelector('.col-servicio .opcion[aria-pressed="true"]');
@@ -193,7 +201,7 @@ const BookingFlow = () => {
       {/* Paso 1 · cabecera con foto (solo celular) */}
       {paso === 1 && (
         <header className="reservar-hero solo-cel">
-          <Photo name="unas-burdeo-floral" alt="" sizes="100vw" />
+          <Photo name="unas-burdeo-floral" alt="" priority sizes="100vw" />
           <div className="reservar-hero__texto">
             <p className="gigante">Reserva</p>
             <p className="firma firma--blanca">tu pausa</p>

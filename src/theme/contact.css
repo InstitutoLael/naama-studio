@@ -100,3 +100,4 @@
   .contacto-acciones { grid-template-columns: auto auto; justify-content: start; }
   .contacto-acciones .btn { width: auto; }
 }
+.contacto-cols a { display: inline-block; padding: 7px 0; }
