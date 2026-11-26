@@ -50,3 +50,68 @@ export const CheckIcon = (props) => (
     <path d="m5 12.5 4.5 4.5L19 7.5" />
   </svg>
 );
+
+const Trazo = ({ children, ...props }) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+    {children}
+  </svg>
+);
+
+export const PinIcon = (props) => (
+  <Trazo {...props}>
+    <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z" />
+    <circle cx="12" cy="10" r="2.4" />
+  </Trazo>
+);
+export const CalendarIcon = (props) => (
+  <Trazo {...props}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
+    <path d="M3.5 10h17M8 3v4M16 3v4" />
+  </Trazo>
+);
+export const ClockIcon = (props) => (
+  <Trazo {...props}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 7.5V12l3 2" />
+  </Trazo>
+);
+export const PersonIcon = (props) => (
+  <Trazo {...props}>
+    <circle cx="12" cy="8" r="3.6" />
+    <path d="M5 20c.9-3.6 3.6-5.6 7-5.6s6.1 2 7 5.6" />
+  </Trazo>
+);
+export const ScissorsIcon = (props) => (
+  <Trazo {...props}>
+    <circle cx="6.5" cy="17" r="2.8" />
+    <circle cx="17.5" cy="17" r="2.8" />
+    <path d="M8.6 15.2 18 4M15.4 15.2 6 4" />
+  </Trazo>
+);
+export const ArrowLeft = (props) => (
+  <Trazo {...props}>
+    <path d="M20 12H5M11 6l-6 6 6 6" />
+  </Trazo>
+);
+export const MinusIcon = (props) => (
+  <Trazo {...props}>
+    <path d="M5 12h14" />
+  </Trazo>
+);
+export const MailIcon = (props) => (
+  <Trazo {...props}>
+    <rect x="3" y="5" width="18" height="14" rx="3" />
+    <path d="m4 7 8 6 8-6" />
+  </Trazo>
+);
+export const NavigationIcon = (props) => (
+  <Trazo {...props}>
+    <path d="M12 3 19 20l-7-3.6L5 20 12 3Z" />
+  </Trazo>
+);
+export const LayersIcon = (props) => (
+  <Trazo {...props}>
+    <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 13 9 5 9-5" />
+  </Trazo>
+);

@@ -2,50 +2,45 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Logo from '../common/Logo';
 
-const KEY = 'naama-intro-seen';
-const EASE = [0.16, 1, 0.3, 1];
+const KEY = 'naama-carga-vista';
+const DURA = 1150; // máximo 1,2 s
 
-const alreadySeen = () => {
+const yaVista = () => {
   try {
-    return sessionStorage.getItem(KEY) === '1' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return localStorage.getItem(KEY) === '1' || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   } catch {
     return true;
   }
 };
 
-// Se evalúa una sola vez al cargar: permite a la portada esperar a que termine la intro.
-const INTRO_ACTIVE = typeof window !== 'undefined' && !alreadySeen();
-const INTRO_END = INTRO_ACTIVE ? performance.now() + 1550 : 0;
-/** Segundos que faltan para que termine la intro (mínimo 0.15). */
-export const introDelay = () => Math.max(0.15, (INTRO_END - performance.now()) / 1000);
+const ACTIVA = typeof window !== 'undefined' && !yaVista();
+const FIN = ACTIVA ? performance.now() + DURA : 0;
+/** Segundos que faltan para que termine la carga (para que la portada espere). */
+export const introDelay = () => Math.max(0.1, (FIN - performance.now()) / 1000);
 
-/** Intro breve con el monograma; se muestra solo en la primera visita de la sesión. */
+/** X05 · papel, anillo terracota y el logo al centro. Solo la primera vez. */
 const Preloader = () => {
-  const [visible, setVisible] = useState(INTRO_ACTIVE);
+  const [visible, setVisible] = useState(ACTIVA);
 
   useEffect(() => {
     if (!visible) return undefined;
-    try { sessionStorage.setItem(KEY, '1'); } catch { /* sin almacenamiento, no pasa nada */ }
-    const t = setTimeout(() => setVisible(false), 1700);
+    try { localStorage.setItem(KEY, '1'); } catch { /* sin almacenamiento */ }
+    const t = setTimeout(() => setVisible(false), DURA);
     return () => clearTimeout(t);
   }, [visible]);
 
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          className="preloader"
-          aria-hidden="true"
-          exit={{ clipPath: 'inset(0 0 100% 0)' }}
-          transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1, ease: EASE }}
-          >
-            <Logo className="preloader__logo" />
-          </motion.div>
+        <motion.div className="carga" aria-hidden="true" exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
+          <div className="carga__anillo">
+            <svg viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="56" className="carga__fondo" />
+              <circle cx="60" cy="60" r="56" className="carga__arco" />
+            </svg>
+            <Logo className="carga__logo" />
+          </div>
+          <p className="carga__texto">Cargando tu pausa</p>
         </motion.div>
       )}
     </AnimatePresence>

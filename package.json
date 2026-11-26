@@ -13,8 +13,9 @@
     "portal:local": "node scripts/portal-local.mjs"
   },
   "dependencies": {
-    "@fontsource-variable/montserrat": "^5.3.0",
-    "@fontsource-variable/playfair-display": "^5.3.0",
+    "@fontsource-variable/caveat": "^5.3.0",
+    "@fontsource-variable/inter-tight": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
     "framer-motion": "^12.33.0",
     "lucide-react": "^0.446.0",
     "qrcode": "^1.5.4",

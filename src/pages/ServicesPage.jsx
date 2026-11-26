@@ -1,184 +1,131 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import SEOHead from '../components/shared/SEOHead';
-import MenuItem from '../components/common/MenuItem';
+import Photo from '../components/common/Photo';
+import GrupoCarta from '../components/common/Carta';
 import { agrupar, enSecciones } from '../data/menuPrecios';
-import { Reveal, SplitText } from '../components/common/Motion';
 import { ArrowRight, CloseIcon, SearchIcon } from '../components/common/Icons';
-import { mundos, servicesForMundo } from '../data/categories';
+import { mundos, servicesForMundo, totalServicios } from '../data/categories';
 import { servicesData } from '../data/servicesData';
-import { team } from '../data/team';
-import '../theme/services.css';
 import { usePreciosVivos } from '../data/preciosVivos';
+import '../theme/services.css';
 
-// Minúsculas y sin tildes, para que "unas" encuentre "uñas" y "depilacion" encuentre "depilación".
-const normalize = (s = '') =>
-  s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ñ/g, 'n');
-
+const normalize = (s = '') => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ñ/g, 'n');
 const matches = (service, words) => {
-  const haystack = normalize([service.name, service.desc, service.why, service.worker, service.cat].join(' '));
+  const haystack = normalize([service.name, service.desc, service.worker, service.cat].join(' '));
   return words.every((w) => haystack.includes(w));
 };
 
+/** Al tocar un servicio: a su mundo con el servicio ya elegido. */
+const linkDe = (mundo) => (it) => `/servicios/${mundo.id}?servicio=${encodeURIComponent(it.original ?? it.nombre)}`;
+
+/** P02 · Servicios y precios. */
 const ServicesPage = () => {
   const versionPrecios = usePreciosVivos();
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState('');
   const mundoFilter = params.get('mundo') ?? 'todos';
-  const person = params.get('especialista') ?? '';
 
-  const setParam = (key, value) => {
+  const elegirMundo = (id) => {
     const next = new URLSearchParams(params);
-    if (value) next.set(key, value);
-    else next.delete(key);
+    if (id && id !== mundoFilter) next.set('mundo', id);
+    else next.delete('mundo');
     setParams(next, { replace: true, preventScrollReset: true });
   };
 
-  const groups = useMemo(() => {
+  const grupos = useMemo(() => {
     const words = normalize(query).split(/\s+/).filter(Boolean);
     return mundos
       .filter((m) => mundoFilter === 'todos' || m.id === mundoFilter)
       .map((m) => {
-        const items = agrupar(
-          servicesForMundo(servicesData, m).filter(
-            (s) => matches(s, words) && (!person || (s.worker ?? '').includes(person)),
-          ),
-        );
-        return { mundo: m, items, secciones: enSecciones(m.id, items) };
+        const items = agrupar(servicesForMundo(servicesData, m).filter((s) => matches(s, words)));
+        return { mundo: m, secciones: enSecciones(m.id, items) };
       })
-      .filter((g) => g.items.length > 0);
-  }, [query, mundoFilter, person, versionPrecios]);
-
-  const total = groups.reduce((n, g) => n + g.items.length, 0);
-
-  const reset = () => {
-    setQuery('');
-    setParams({}, { replace: true, preventScrollReset: true });
-  };
+      .filter((g) => g.secciones.length > 0);
+  }, [query, mundoFilter, versionPrecios]);
 
   return (
-    <div className="services-page">
+    <div className="precios-pagina">
       <SEOHead
         title="Servicios & Precios"
-        description={`Los ${servicesData.length} servicios de Naamá Studio con precios y duración: cabello, color, uñas, cejas, pestañas, depilación, faciales, masajes y podología en San Miguel.`}
+        description={`Los ${totalServicios} servicios de Naamá Studio con precios y duración: cabello, color, uñas, cejas, pestañas, depilación, faciales, masajes y podología en San Miguel.`}
       />
 
-      <header className="page-hero container">
-        <p className="eyebrow">Servicios & precios</p>
-        <SplitText
-          as="h1"
-          className="page-hero__title"
-          onMount
-          delay={0.15}
-          lines={['Todo lo que hacemos,', <em key="p">con precios claros.</em>]}
-        />
-        <Reveal as="p" className="lead page-hero__lead" delay={0.4}>
-          Busca por nombre, filtra por mundo o por especialista. Toca un servicio para ver en qué
-          consiste y reservarlo.
-        </Reveal>
+      <header className="precios-hero">
+        <Photo name="casa-sala" alt="" priority sizes="100vw" />
+        <div className="precios-hero__velo" />
+        <div className="precios-hero__texto container">
+          <h1 className="gigante">Precios</h1>
+          <p className="firma firma--clara">claros</p>
+        </div>
+        <div className="precios-hero__pie container">
+          <span>{totalServicios} servicios</span>
+          <span>Toca uno para reservarlo</span>
+        </div>
       </header>
 
-      <div className="catalog-bar">
-        <div className="container catalog-bar__inner">
-          <label className="catalog-search">
-            <SearchIcon />
-            <span className="visually-hidden">Buscar servicio</span>
-            <input
-              type="search"
-              placeholder="Buscar: balayage, uñas, cejas…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {query && (
-              <button onClick={() => setQuery('')} aria-label="Borrar búsqueda">
-                <CloseIcon />
-              </button>
-            )}
-          </label>
-
-          <div className="catalog-filters" role="group" aria-label="Filtrar por mundo">
-            <button className="chip" aria-pressed={mundoFilter === 'todos'} onClick={() => setParam('mundo', '')}>
-              Todos
+      <div className="container precios-filtros">
+        <div className="mundos-circulos" role="group" aria-label="Elegir mundo">
+          {mundos.map((m) => (
+            <button key={m.id} className="mundo-circulo" aria-pressed={mundoFilter === m.id} onClick={() => elegirMundo(m.id)}>
+              <Photo name={m.photo} alt="" sizes="80px" />
+              <span>{m.short}</span>
             </button>
-            {mundos.map((m) => (
-              <button
-                key={m.id}
-                className="chip"
-                aria-pressed={mundoFilter === m.id}
-                onClick={() => setParam('mundo', mundoFilter === m.id ? '' : m.id)}
-              >
-                {m.short}
-              </button>
-            ))}
-          </div>
-
-          <div className="catalog-people">
-            <label htmlFor="especialista" className="visually-hidden">Especialista</label>
-            <select
-              id="especialista"
-              className="catalog-select"
-              value={person}
-              onChange={(e) => setParam('especialista', e.target.value)}
-            >
-              <option value="">Todas las especialistas</option>
-              {team.map((t) => (
-                <option key={t.name} value={t.name}>
-                  {t.name} · {t.role}
-                </option>
-              ))}
-            </select>
-          </div>
+          ))}
         </div>
-      </div>
-
-      <div className="container catalog">
-        <p className="catalog__count" aria-live="polite">
-          {total} {total === 1 ? 'servicio' : 'servicios'}
-          {(query || person || mundoFilter !== 'todos') && (
-            <button className="catalog__reset" onClick={reset}>
-              Limpiar filtros
+        <label className="buscador-linea">
+          <SearchIcon />
+          <span className="visually-hidden">Buscar servicio</span>
+          <input type="search" placeholder="Busca: balayage, uñas, cejas…" value={query} onChange={(e) => setQuery(e.target.value)} />
+          {query && (
+            <button onClick={() => setQuery('')} aria-label="Borrar búsqueda">
+              <CloseIcon />
             </button>
           )}
-        </p>
+        </label>
+      </div>
 
-        {groups.length === 0 && (
-          <div className="catalog__empty">
-            <p className="h3">No encontramos “{query}”.</p>
-            <p className="muted">Prueba con otra palabra, o escríbenos y te orientamos.</p>
-            <button className="btn btn--ghost" onClick={reset}>Ver todos los servicios</button>
+      <div className="container precios-lista">
+        {grupos.length === 0 && (
+          <div className="precios-vacio tarjeta">
+            <p className="nota">no encontramos «{query}»</p>
+            <p className="muted">Prueba con otra palabra o escríbenos por WhatsApp.</p>
+            <button
+              className="btn btn--linea"
+              onClick={() => {
+                setQuery('');
+                elegirMundo('');
+              }}
+            >
+              Ver todos
+            </button>
           </div>
         )}
 
-        {groups.map(({ mundo, items, secciones }, gi) => (
-          <section key={mundo.id} className="carta" aria-labelledby={`g-${mundo.id}`}>
-            <header className="carta__cabeza">
-              <span className="carta__num">{String(gi + 1).padStart(2, '0')}</span>
-              <div>
-                <h2 id={`g-${mundo.id}`} className="carta__titulo">{mundo.name}</h2>
-                <p className="carta__bajada">{mundo.description}</p>
+        {grupos.map(({ mundo, secciones }) => (
+          <div key={mundo.id} className="precios-mundo">
+            {mundoFilter === 'todos' && (
+              <div className="precios-mundo__cabeza">
+                <h2 className="titulo">
+                  {mundo.name.split(' ')[0]} <b>{mundo.name.split(' ').slice(1).join(' ')}</b>
+                </h2>
+                <Link to={`/servicios/${mundo.id}`} className="link-linea">
+                  Ver el mundo <ArrowRight />
+                </Link>
               </div>
-              <Link to={`/servicios/${mundo.id}`} className="link-arrow carta__ver">
-                Ver mundo <ArrowRight />
-              </Link>
-            </header>
-            {secciones.map((sec) => (
-              <div key={sec.titulo} className="carta__seccion">
-                {secciones.length > 1 && <h3 className="carta__sub">{sec.titulo}</h3>}
-                <ul className="mitems">
-                  {sec.items.map((it, i) => (
-                    <MenuItem key={`${it.nombre}-${i}`} item={it} />
-                  ))}
-                </ul>
-              </div>
-            ))}
-            {items.length === 0 && null}
-          </section>
+            )}
+            <div className="precios-grupos">
+              {secciones.map((sec) => (
+                <GrupoCarta key={sec.titulo} titulo={sec.titulo} items={sec.items} mundo={mundo} linkDe={linkDe(mundo)} />
+              ))}
+            </div>
+          </div>
         ))}
 
-        <p className="catalog__note">
-          Los servicios marcados “Desde” pueden variar según el largo del cabello o la complejidad
-          del diseño. Si tienes dudas, escríbenos por WhatsApp.
-        </p>
+        <div className="precios-cierre">
+          <p>Arcadia 1297, San Miguel · Atendemos sin reserva también</p>
+          <Link to="/reservar" className="btn">Reservar un servicio <ArrowRight /></Link>
+        </div>
       </div>
     </div>
   );
