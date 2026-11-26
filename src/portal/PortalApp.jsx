@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { CalendarClock, Ellipsis, House, KeyRound, LogOut, Package, ShoppingBag, Smartphone, UsersRound, Wallet } from 'lucide-react';
+import { CalendarClock, Ellipsis, House, KeyRound, LogOut, Package, Plus, Smartphone, UsersRound } from 'lucide-react';
 import Logo from '../components/common/Logo';
 import { api, post } from './api';
 import { Configurar, CrearClave, Entrar } from './Acceso';
@@ -23,7 +23,7 @@ import Ayuda from './Ayuda';
 import GiftCards from './GiftCards';
 import Instalar, { esApp, registrarAppPortal } from './Instalar';
 import Hoja from './Hoja';
-import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
+import { ROLES, modulosPorGrupo, nombreModulo, puede } from './permisos';
 import { ICONO_MODULO } from './iconos';
 import '../theme/booking.css';
 import '../theme/portal.css';
@@ -51,50 +51,76 @@ const usePortalHead = () => {
   }, []);
 };
 
-/** Pestañas del menú: hasta 3 accesos + «Más». */
-const pestanas = (cuenta) => [
+// Barra inferior (celular): siempre con nombre. El + del centro anota lo principal de cada una.
+const PRINCIPALES = [
   { to: '/portal', label: 'Inicio', Icono: House, end: true },
   { to: '/portal/agenda', label: 'Agenda', Icono: CalendarClock },
   { to: '/portal/clientas', label: 'Clientas', Icono: UsersRound },
   { to: '/portal/insumos', label: 'Insumos', Icono: Package },
-  // El resto va en la barra lateral del computador; en el celular está en «Más» y en Inicio.
-  ...MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'agenda'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => ({
-    to: `/portal/${m.id}`,
-    label: m.corto ?? m.nombre,
-    Icono: ICONO_MODULO[m.id],
-    soloCompu: true,
-  })),
 ];
 
-const Menu = ({ cuenta, onMas }) => (
-  <nav className="tabbar" aria-label="Menú del portal">
-    <Link to="/portal" className="tabbar__logo" aria-label="Inicio">
-      <Logo />
-    </Link>
-    {pestanas(cuenta).map(({ to, label, Icono, end, soloCompu }) => (
-      <NavLink key={to} to={to} end={end} className={`tabbar__item ${soloCompu ? 'tabbar__item--compu' : ''}`}>
-        <Icono strokeWidth={1.6} />
-        <span>{label}</span>
-      </NavLink>
-    ))}
-    <button type="button" className="tabbar__item" onClick={onMas}>
-      <Ellipsis strokeWidth={1.6} />
-      <span>Más</span>
-    </button>
-    <div className="tabbar__yo">
-      <span className="avatar avatar--sm">{cuenta.nombre.charAt(0)}</span>
-      <span>
-        <strong>{cuenta.nombre}</strong>
-        <small>{ROLES[cuenta.rol]?.nombre}</small>
-      </span>
-    </div>
-  </nav>
-);
+const Menu = ({ cuenta, onMas }) => {
+  const mas = puede(cuenta, 'servicios') ? { to: '/portal/servicios', label: 'Anotar servicio' } : { to: '/portal/mi-mes', label: 'Anotar lo que hice' };
+  const item = ({ to, label, Icono, end }) => (
+    <NavLink key={to} to={to} end={end} className="tabbar__item">
+      <Icono strokeWidth={1.6} />
+      <span>{label}</span>
+    </NavLink>
+  );
+  return (
+    <>
+      <nav className="tabbar" aria-label="Menú del portal">
+        {PRINCIPALES.slice(0, 2).map(item)}
+        <span className="tabbar__hueco" aria-hidden="true" />
+        {PRINCIPALES.slice(2).map(item)}
+        <button type="button" className="tabbar__item" onClick={onMas}>
+          <Ellipsis strokeWidth={1.6} />
+          <span>Más</span>
+        </button>
+      </nav>
+      <Link to={mas.to} className="tabbar__mas" aria-label={mas.label}>
+        <Plus strokeWidth={2} />
+      </Link>
+
+      {/* Computador: barra lateral oscura con los mismos grupos */}
+      <nav className="lateral" aria-label="Menú del portal">
+        <Link to="/portal" className="lateral__logo" aria-label="Inicio">
+          <Logo />
+        </Link>
+        <NavLink to="/portal" end className="lateral__item">
+          <House strokeWidth={1.6} /> Inicio
+        </NavLink>
+        {modulosPorGrupo(cuenta).map((g) => (
+          <div key={g.id} className="lateral__grupo">
+            <p>{g.nombre}</p>
+            {g.modulos.map((m) => {
+              const Icono = ICONO_MODULO[m.id];
+              return (
+                <NavLink key={m.id} to={`/portal/${m.id}`} className="lateral__item">
+                  {Icono && <Icono strokeWidth={1.6} />} {m.corto && m.id !== 'cuentas' ? m.nombre : nombreModulo(m)}
+                </NavLink>
+              );
+            })}
+          </div>
+        ))}
+        <button type="button" className="lateral__yo" onClick={onMas}>
+          <span className="avatar avatar--sm">{cuenta.nombre.charAt(0)}</span>
+          <span>
+            <strong>{cuenta.nombre}</strong>
+            <small>{ROLES[cuenta.rol]?.nombre}</small>
+          </span>
+        </button>
+      </nav>
+    </>
+  );
+};
+
+const COLORES = ['terracota', 'cafe', 'arcilla', 'tinta'];
 
 const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
-  const pronto = MODULOS.filter((m) => !m.listo && puedeModulo(cuenta, m));
+  let n = -1;
   return (
-    <Hoja titulo="Más" onCerrar={onCerrar}>
+    <Hoja titulo="Todo el portal" onCerrar={onCerrar}>
       <div className="mas__yo">
         <span className="avatar">{cuenta.nombre.charAt(0)}</span>
         <span>
@@ -104,17 +130,27 @@ const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
           </small>
         </span>
       </div>
+      {modulosPorGrupo(cuenta).map((g) => (
+        <div key={g.id} className="mas__grupo">
+          <p className="grupo__titulo">{g.nombre}</p>
+          <ul className="mas__cuadros">
+            {g.modulos.map((m) => {
+              const Icono = ICONO_MODULO[m.id];
+              n += 1;
+              return (
+                <li key={m.id}>
+                  <Link to={`/portal/${m.id}`} className={`cuadro cuadro--${COLORES[n % COLORES.length]}`} onClick={onCerrar}>
+                    {Icono && <Icono strokeWidth={1.6} />}
+                    <span>{m.corto ?? nombreModulo(m)}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+      <p className="grupo__titulo">Mi cuenta</p>
       <ul className="grupo-lista">
-        {MODULOS.filter((m) => m.listo && !['clientas', 'insumos', 'agenda'].includes(m.id) && puedeModulo(cuenta, m)).map((m) => {
-          const Icono = ICONO_MODULO[m.id];
-          return (
-            <li key={m.id}>
-              <Link to={`/portal/${m.id}`} className="fila-lista" onClick={onCerrar}>
-                {Icono && <Icono strokeWidth={1.6} />} {m.id === 'cuentas' ? 'Equipo y cuentas' : m.nombre}
-              </Link>
-            </li>
-          );
-        })}
         {!esApp() && (
           <li>
             <Link to="/portal/app" className="fila-lista" onClick={onCerrar}>
@@ -133,21 +169,6 @@ const HojaMas = ({ cuenta, onCerrar, onClave, onSalir }) => {
           </button>
         </li>
       </ul>
-      {pronto.length > 0 && (
-        <>
-          <p className="grupo__titulo">Muy pronto</p>
-          <ul className="pronto">
-            {pronto.map((m) => {
-              const Icono = ICONO_MODULO[m.id];
-              return (
-                <li key={m.id}>
-                  {Icono && <Icono strokeWidth={1.6} />} {m.nombre}
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      )}
     </Hoja>
   );
 };

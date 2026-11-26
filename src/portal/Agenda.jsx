@@ -9,8 +9,8 @@ import { duracionDeServicio } from '../data/menuPrecios';
 
 const duracion = (servicio) => Math.max(15, duracionDeServicio(servicesData, servicio) || minutosDe(servicio));
 
-const ABRE = 10 * 60; // 10:00
-const CIERRA = 21 * 60; // 21:00 (los procesos largos de color terminan tarde)
+const ABRE = 10 * 60 + 30; // 10:30 (horario del salón)
+const CIERRA = 19 * 60 + 30; // 19:30 (un color largo puede pasarse: se ve igual)
 const PX = 1.4; // píxeles por minuto
 const ESTADOS = [
   ['agendada', 'Agendada'],

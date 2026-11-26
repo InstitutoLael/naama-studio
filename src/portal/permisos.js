@@ -51,21 +51,36 @@ export const puedeModulo = (cuenta, m) => !m.permiso || [].concat(m.permiso).som
 
 // Módulos del panel. `permiso: null` = lo tienen todas las cuentas.
 export const MODULOS = [
-  { id: 'agenda', nombre: 'Agenda', bajada: 'Las horas de cada una', permiso: null, listo: true },
-  { id: 'disponibilidad', nombre: 'Mi disponibilidad', corto: 'Disponibilidad', bajada: 'Cuándo vienes y quién está', permiso: null, listo: true },
-  { id: 'precios', nombre: 'Precios', bajada: 'Cuánto sale cada servicio', permiso: null, listo: true },
-  { id: 'clientas', nombre: 'Clientas', bajada: 'Sube contactos y anota quién vino', permiso: null, listo: true },
-  { id: 'insumos', nombre: 'Insumos', bajada: 'Anota lo que usaste y mira lo que queda', permiso: null, listo: true },
-  { id: 'compras', nombre: 'Lista de compras', bajada: 'Pide lo que falta', permiso: null, listo: true },
-  { id: 'mi-mes', nombre: 'Mi mes', bajada: 'Anota lo que hiciste este mes', permiso: null, listo: true },
-  { id: 'servicios', nombre: 'Servicios', corto: 'Servicios', bajada: 'Lo anotado, directo a la planilla', permiso: ['servicios', 'verServicios'], listo: true },
-  { id: 'te-toca', nombre: 'Te toca', bajada: 'Clientas a las que les toca volver', permiso: 'clientas', listo: true },
-  { id: 'aseo', nombre: 'Aseo y tareas', corto: 'Aseo', bajada: 'Lo que te toca hoy', permiso: null, listo: true },
-  { id: 'resenas', nombre: 'Mi QR de reseñas', corto: 'Reseñas', bajada: 'Que la clienta te evalúe en Google', permiso: null, listo: true },
-  { id: 'giftcards', nombre: 'Gift cards', bajada: 'Crear, vender y canjear', permiso: ['servicios', 'finanzas'], listo: true },
-  { id: 'caja', nombre: 'Cierre de caja', corto: 'Caja', bajada: 'Efectivo, máquina y transferencias', permiso: 'caja', listo: true },
-  { id: 'plata', nombre: 'La plata', corto: 'Plata', bajada: 'Mercado Pago, disponible y gastos fijos', permiso: 'finanzas', listo: true },
-  { id: 'legal', nombre: 'Legal y pagos', bajada: 'Impuestos, honorarios, documentos', permiso: 'legal' },
-  { id: 'ayuda', nombre: 'Ayuda', bajada: 'Dudas, fallas o algo que cambiar', permiso: null, listo: true },
-  { id: 'cuentas', nombre: 'Cuentas', corto: 'Equipo', bajada: 'Quién entra y qué ve', permiso: 'cuentas', listo: true },
+  { id: 'agenda', grupo: 'dia', nombre: 'Agenda', bajada: 'Las horas de cada una', permiso: null, listo: true },
+  { id: 'disponibilidad', grupo: 'dia', nombre: 'Mi disponibilidad', corto: 'Disponibilidad', bajada: 'Cuándo vienes y quién está', permiso: null, listo: true },
+  { id: 'precios', grupo: 'plata', nombre: 'Precios', bajada: 'Cuánto sale cada servicio', permiso: null, listo: true },
+  { id: 'clientas', grupo: 'clientas', nombre: 'Clientas', bajada: 'Sube contactos y anota quién vino', permiso: null, listo: true },
+  { id: 'insumos', grupo: 'insumos', nombre: 'Insumos', bajada: 'Anota lo que usaste y mira lo que queda', permiso: null, listo: true },
+  { id: 'compras', grupo: 'insumos', nombre: 'Lista de compras', bajada: 'Pide lo que falta', permiso: null, listo: true },
+  { id: 'mi-mes', grupo: 'dia', nombre: 'Mi mes', bajada: 'Anota lo que hiciste este mes', permiso: null, listo: true },
+  { id: 'servicios', grupo: 'plata', nombre: 'Servicios', corto: 'Servicios', bajada: 'Lo anotado, directo a la planilla', permiso: ['servicios', 'verServicios'], listo: true },
+  { id: 'te-toca', grupo: 'clientas', nombre: 'Te toca', bajada: 'Clientas a las que les toca volver', permiso: 'clientas', listo: true },
+  { id: 'aseo', grupo: 'dia', nombre: 'Aseo y tareas', corto: 'Aseo', bajada: 'Lo que te toca hoy', permiso: null, listo: true },
+  { id: 'resenas', grupo: 'clientas', nombre: 'Mi QR de reseñas', corto: 'Reseñas', bajada: 'Que la clienta te evalúe en Google', permiso: null, listo: true },
+  { id: 'giftcards', grupo: 'clientas', nombre: 'Gift cards', bajada: 'Crear, vender y canjear', permiso: ['servicios', 'finanzas'], listo: true },
+  { id: 'caja', grupo: 'plata', nombre: 'Cierre de caja', corto: 'Caja', bajada: 'Efectivo, máquina y transferencias', permiso: 'caja', listo: true },
+  { id: 'plata', grupo: 'plata', nombre: 'La plata', corto: 'Plata', bajada: 'Mercado Pago, disponible y gastos fijos', permiso: 'finanzas', listo: true },
+  { id: 'legal', grupo: 'plata', nombre: 'Legal y pagos', bajada: 'Impuestos, honorarios, documentos', permiso: 'legal' },
+  { id: 'ayuda', grupo: 'equipo', nombre: 'Ayuda', bajada: 'Dudas, fallas o algo que cambiar', permiso: null, listo: true },
+  { id: 'cuentas', grupo: 'equipo', nombre: 'Cuentas', corto: 'Equipo', bajada: 'Quién entra y qué ve', permiso: 'cuentas', listo: true },
 ];
+
+// Grupos del inicio, la hoja «Más» y la barra lateral (en este orden).
+export const GRUPOS = [
+  { id: 'dia', nombre: 'Día a día' },
+  { id: 'clientas', nombre: 'Clientas' },
+  { id: 'insumos', nombre: 'Insumos' },
+  { id: 'plata', nombre: 'Plata' },
+  { id: 'equipo', nombre: 'Equipo' },
+];
+
+/** Módulos listos que ve la cuenta, agrupados. */
+export const modulosPorGrupo = (cuenta) =>
+  GRUPOS.map((g) => ({ ...g, modulos: MODULOS.filter((m) => m.grupo === g.id && m.listo && puedeModulo(cuenta, m)) })).filter((g) => g.modulos.length);
+
+export const nombreModulo = (m) => (m.id === 'cuentas' ? 'Equipo y cuentas' : m.nombre);

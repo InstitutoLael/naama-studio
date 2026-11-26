@@ -50,7 +50,7 @@ const TeToca = () => {
           </span>
           {c.telefono && (
             <a
-              className="chip is-active"
+              className="chip chip--terracota is-active"
               href={wa(c.telefono, tipo === 'cumple' ? mensajeCumple(c) : mensajeToca(c))}
               target="_blank"
               rel="noreferrer"
