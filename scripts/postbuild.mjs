@@ -144,12 +144,12 @@ const assets = await readdir(path.join(DIST, 'assets'));
 const asset = (prefijo, ext) => assets.find((f) => f.startsWith(prefijo + '-') && f.endsWith(ext));
 const letra = assets.find((f) => /^inter-tight-latin-wght-normal-.*\.woff2$/.test(f));
 const PAGINA = {
-  '/': { foto: ['cabello-balayage', '(min-width: 1024px) 22vw, 50vw'] },
+  '/': { foto: ['cabello-balayage', '(min-width: 1024px) 22vw, 50vw'], foto2: ['casa-fachada', '50vw'] },
   '/servicios': { codigo: 'ServicesPage', foto: ['casa-sala', '100vw'], soloCel: true },
   '/reservar': { codigo: 'BookingFlow', foto: ['unas-burdeo-floral', '100vw'], soloCel: true },
   '/galeria': { codigo: 'GalleryPage', foto: ['unas-burdeo-floral', '(min-width: 1024px) 1200px, 92vw'] },
   '/empresas': { codigo: 'EmpresasPage', foto: ['casa-sala', '(min-width: 1024px) 22vw, 46vw'] },
-  '/equipo': { codigo: 'TeamPage' },
+  '/equipo': { codigo: 'TeamPage', foto: ['retrato-viviana', '(min-width: 1024px) 16vw, 46vw'] },
   '/contacto': { codigo: 'ContactPage' },
   '/gift-cards': { codigo: 'GiftCardsPage' },
   '/preguntas': { codigo: 'PreguntasPage' },
@@ -170,6 +170,11 @@ const precargas = async (ruta) => {
     const [nombre, sizes] = p.foto;
     const set = fotos[nombre].widths.map((w) => `/img/${nombre}-${w}.avif ${w}w`).join(', ');
     l.push(`<link rel="preload" as="image" type="image/avif" fetchpriority="high" imagesrcset="${set}" imagesizes="${sizes}"${p.soloCel ? ' media="(max-width: 1023px)"' : ''} />`);
+  }
+  if (p.foto2 && fotos[p.foto2[0]]) {
+    const [nombre, sizes] = p.foto2;
+    const set = fotos[nombre].widths.map((w) => `/img/${nombre}-${w}.avif ${w}w`).join(', ');
+    l.push(`<link rel="preload" as="image" type="image/avif" fetchpriority="high" imagesrcset="${set}" imagesizes="${sizes}" media="(max-width: 1023px)" />`);
   }
   if (p.codigo) {
     for (const f of await dependencias(asset(p.codigo, '.js'))) l.push(`<link rel="modulepreload" href="/assets/${f}" />`);

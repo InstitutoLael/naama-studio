@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Logo from '../common/Logo';
 
 const KEY = 'naama-carga-vista';
-const DURA = 1150; // máximo 1,2 s
+const DURA = 800; // máximo 1,2 s (más corto = la página aparece antes)
 
 const yaVista = () => {
   try {

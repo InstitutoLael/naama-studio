@@ -4,8 +4,8 @@ import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion
 const EASE = [0.16, 1, 0.3, 1];
 
 /** Aparece suavemente (fade + subida) al entrar en pantalla. */
-export const Reveal = ({ as = 'div', delay = 0, y = 40, className, children, ...rest }) => {
-  const reduce = useReducedMotion();
+export const Reveal = ({ as = 'div', delay = 0, y = 40, className, children, sinAnimar = false, ...rest }) => {
+  const reduce = useReducedMotion() || sinAnimar;
   const Tag = motion[as];
   return (
     <Tag
