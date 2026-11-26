@@ -1098,3 +1098,60 @@ test('reserva web: si eligió especialista, queda con ella aunque mande la lista
   assert.equal(r.status, 201);
   assert.equal(r.data.con, 'Valeria');
 });
+
+test('correos por Google: la gift card y la bienvenida salen por el script, que solo recibe un código', async () => {
+  const admin = await configurar();
+  const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  const g = await admin.post('giftcards', { para: 'Camila <b>', monto: '30.000', medio: 'Efectivo' });
+  assert.equal(g.status, 201);
+
+  // Sin conectar: queda guardado.
+  let r = await admin.post(`giftcards/${g.data.giftcard.id}/correo`, { email: 'camila@correo.cl', png: PNG });
+  assert.equal(r.data.estado, 'pendiente');
+  assert.equal((await admin.post(`giftcards/${g.data.giftcard.id}/correo`, { email: 'malo', png: PNG })).status, 400);
+  assert.equal((await admin.post(`giftcards/${g.data.giftcard.id}/correo`, { email: 'a@b.cl', png: 'data:text/html,hola' })).status, 400);
+
+  const llegados = [];
+  env.CORREO_FETCH = async (url, opciones) => {
+    assert.match(url, /script\.google\.com/);
+    const { token } = JSON.parse(opciones.body);
+    assert.match(token, /^[0-9a-f]{64}$/);
+    assert.equal(Object.keys(JSON.parse(opciones.body)).length, 1, 'al script solo le llega el código');
+    const c = await cliente('8.8.8.8').pedir(`correo/${token}`);
+    assert.equal(c.status, 200);
+    llegados.push({ token, ...c.data.correo });
+    return new Response(JSON.stringify({ ok: true }));
+  };
+  assert.equal((await admin.post('correos/conectar', { url: 'https://evil.example/exec' })).status, 400);
+  r = await admin.post('correos/conectar', { url: 'https://script.google.com/macros/s/AKfycbx_abcdefghijklmnopqrstuvwxyz/exec' });
+  assert.equal(r.data.enviados, 1, 'el que esperaba sale al conectar');
+  assert.equal(llegados[0].para, 'camila@correo.cl');
+  assert.match(llegados[0].html, /Camila &lt;b&gt;/, 'los datos van escapados');
+  assert.match(llegados[0].html, /cid:tarjeta/);
+  assert.match(llegados[0].html, new RegExp(g.data.giftcard.codigo));
+  assert.ok(llegados[0].imagen.startsWith('iVBOR'));
+
+  // Ya enviado: el código no vuelve a servir y no quedan datos guardados.
+  assert.equal((await cliente('8.8.8.8').pedir(`correo/${llegados[0].token}`)).status, 404);
+  const fila = await env.DB.prepare('SELECT html, imagen, estado FROM correos WHERE id = 1').first();
+  assert.equal(fila.estado, 'enviado');
+  assert.equal(fila.html, null);
+  assert.equal(fila.imagen, null);
+
+  // Cuenta nueva: le llega la bienvenida con su clave temporal.
+  r = await admin.post('cuentas', { nombre: 'Kata Pérez', email: 'kata@correo.cl', rol: 'equipo', extras: [] });
+  assert.equal(r.status, 201);
+  assert.equal(r.data.correo, 'enviado');
+  assert.equal(llegados[1].para, 'kata@correo.cl');
+  assert.match(llegados[1].html, new RegExp(r.data.claveTemporal));
+  assert.match(llegados[1].html, /Hola Kata:/);
+
+  // Solo Administración ve y conecta los correos.
+  const kata = cliente('7.7.7.7');
+  await kata.post('entrar', { email: 'kata@correo.cl', clave: r.data.claveTemporal });
+  assert.equal((await kata.pedir('correos')).status, 403);
+  const lista = await admin.pedir('correos');
+  assert.equal(lista.data.conectado, true);
+  assert.equal(lista.data.correos.length, 2);
+  assert.equal(lista.data.correos[0].html, undefined);
+});

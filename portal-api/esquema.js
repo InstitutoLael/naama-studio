@@ -302,6 +302,8 @@ const TABLAS = [
   // estado: lista (visita anotada) · pendiente (por confirmar) · saltada (no es clienta) · descartada.
   `CREATE TABLE IF NOT EXISTS visitas_auto (clave TEXT PRIMARY KEY, fecha TEXT NOT NULL, nombre TEXT, nombre_n TEXT, servicio TEXT, origen TEXT NOT NULL, clienta_id INTEGER, estado TEXT NOT NULL, creado TEXT NOT NULL)`,
   `CREATE INDEX IF NOT EXISTS visitas_auto_estado ON visitas_auto (estado, nombre_n)`,
+  // Correos que salen por Google (Apps Script con la cuenta del salón). El script viene a buscar cada uno con su código.
+  `CREATE TABLE IF NOT EXISTS correos (id INTEGER PRIMARY KEY AUTOINCREMENT, token TEXT NOT NULL UNIQUE, tipo TEXT NOT NULL, para TEXT NOT NULL, asunto TEXT NOT NULL, html TEXT, imagen TEXT, estado TEXT NOT NULL DEFAULT 'pendiente', error TEXT, ref TEXT, creado TEXT NOT NULL, enviado TEXT)`,
   `CREATE TABLE IF NOT EXISTS calendarios (token TEXT PRIMARY KEY, cuenta_id INTEGER NOT NULL, todas INTEGER NOT NULL DEFAULT 0, creado TEXT NOT NULL)`,
   `CREATE TABLE IF NOT EXISTS avisos_push (
     endpoint TEXT PRIMARY KEY,
@@ -313,7 +315,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v17';
+export const HUELLA = 'v18';
 
 let listo = false;
 
