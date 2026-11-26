@@ -313,7 +313,7 @@ const TABLAS = [
 ];
 
 // Cambia este número cada vez que se agregue o modifique una tabla.
-export const HUELLA = 'v16';
+export const HUELLA = 'v17';
 
 let listo = false;
 
