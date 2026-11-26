@@ -173,7 +173,7 @@ const Caja = () => {
                 <label htmlFor="cj-n">Nota (opcional)</label>
                 <input id="cj-n" className="input" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Ej.: se pagó el gas en efectivo" />
               </div>
-              <button type="submit" className="btn">
+              <button type="submit" className="btn btn--terracota btn--ancho">
                 <Check size={18} /> {d.cierre ? 'Actualizar cierre' : 'Cerrar caja'}
               </button>
             </form>

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { BellRing, CalendarClock, Cake, ChevronRight, LifeBuoy, ListChecks, Plus } from 'lucide-react';
 import { activarAvisos, avisosActivos, motivoSinAvisos } from './avisos';
 import { api, post } from './api';
-import { MODULOS, ROLES, puede, puedeModulo } from './permisos';
+import { MODULOS, ROLES, modulosPorGrupo, nombreModulo, puede, puedeModulo } from './permisos';
 import { ICONO_MODULO } from './iconos';
 
 const saludo = () => {
@@ -12,6 +12,8 @@ const saludo = () => {
   if (h < 20) return 'Buenas tardes';
   return 'Buenas noches';
 };
+
+const COLORES = ['terracota', 'cafe', 'arcilla', 'tinta'];
 
 const hoyLargo = () =>
   new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Santiago' });
@@ -61,9 +63,9 @@ const Panel = ({ cuenta }) => {
   }, []);
 
   const visibles = MODULOS.filter((m) => puedeModulo(cuenta, m));
-  const listos = visibles.filter((m) => m.listo);
   const pronto = visibles.filter((m) => !m.listo);
 
+  let n = -1;
   return (
     <div className="pantalla">
       <header className="saludo">
@@ -218,6 +220,27 @@ const Panel = ({ cuenta }) => {
       )}
 
       <section>
+
+        {modulosPorGrupo(cuenta).map((g) => (
+          <div key={g.id} className="bloques-grupo">
+            <h2 className="seccion__titulo">{g.nombre}</h2>
+            <ul className="bloques">
+              {g.modulos.map((m) => {
+                const Icono = ICONO_MODULO[m.id];
+                n += 1;
+                return (
+                  <li key={m.id}>
+                    <Link to={`/portal/${m.id}`} className={`bloque bloque--${COLORES[n % COLORES.length]}`}>
+                      {Icono && <Icono strokeWidth={1.6} />}
+                      <strong>{nombreModulo(m)}</strong>
+                      <small>{m.bajada}</small>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
         <Link to="/portal/ayuda" className="ayuda-acceso">
           <LifeBuoy strokeWidth={1.6} />
           <span>
@@ -226,25 +249,6 @@ const Panel = ({ cuenta }) => {
           </span>
           <ChevronRight strokeWidth={1.6} />
         </Link>
-
-        <h2 className="seccion__titulo">Accesos</h2>
-        <ul className="accesos">
-          {listos.map((m) => {
-            const Icono = ICONO_MODULO[m.id];
-            return (
-              <li key={m.id}>
-                <Link to={`/portal/${m.id}`} className="acceso-tile">
-                  <span className="acceso-tile__icono">{Icono && <Icono strokeWidth={1.6} />}</span>
-                  <span className="acceso-tile__texto">
-                    <strong>{m.id === 'cuentas' ? 'Equipo y cuentas' : m.nombre}</strong>
-                    <small>{m.bajada}</small>
-                  </span>
-                  <ChevronRight className="acceso-tile__flecha" strokeWidth={1.6} />
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
       </section>
 
       {pronto.length > 0 && (

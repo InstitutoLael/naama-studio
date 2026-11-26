@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Smartphone } from 'lucide-react';
 import { ArrowRight } from '../components/common/Icons';
 import Logo from '../components/common/Logo';
 import { post } from './api';
@@ -16,7 +15,7 @@ const Campo = ({ id, label, ...props }) => (
 
 const Aviso = ({ texto }) => (texto ? <p className="portal-error" role="alert">{texto}</p> : null);
 
-const Marco = ({ eyebrow, titulo, bajada, children, interno = false }) => (
+const Marco = ({ eyebrow, titulo, bajada, children, pie, interno = false }) => (
   <section className={`acceso ${interno ? 'acceso--interno' : ''}`}>
     {!interno && (
       <div className="acceso__marca">
@@ -30,6 +29,7 @@ const Marco = ({ eyebrow, titulo, bajada, children, interno = false }) => (
       {bajada && <p className="acceso__bajada muted">{bajada}</p>}
       {children}
     </div>
+    {pie}
   </section>
 );
 
@@ -54,7 +54,20 @@ export const Entrar = ({ onListo }) => {
   const { enviando, error, enviar } = useEnvio();
   const [olvido, setOlvido] = useState(false);
   return (
-    <Marco eyebrow="Portal del equipo" titulo={<>Hola, <em>bienvenida.</em></>} bajada="Entra con tu correo y tu clave.">
+    <Marco
+      eyebrow="Portal del equipo"
+      titulo={<>Hola, <em>bienvenida.</em></>}
+      bajada="Entra con tu correo y tu clave."
+      pie={
+        <Link to="/portal/app" className="acceso__instalar">
+          <span>
+            <strong>Instalar la app</strong>
+            <small>En tu celular, para entrar más rápido</small>
+          </span>
+          <span className="acceso__instalar-flecha"><ArrowRight /></span>
+        </Link>
+      }
+    >
       <form
         className="acceso__form"
         onSubmit={enviar(async (f) => {
@@ -77,9 +90,6 @@ export const Entrar = ({ onListo }) => {
             creas la tuya.
           </p>
         )}
-        <Link to="/portal/app" className="acceso__instalar">
-          <Smartphone strokeWidth={1.6} /> Instalar la app en tu celular
-        </Link>
       </form>
     </Marco>
   );
