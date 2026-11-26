@@ -168,7 +168,7 @@ const GiftCards = () => {
       {!d && !error && <p className="muted">Cargando…</p>}
       {d && (
         <>
-          <section className="hoy">
+          <section className="hoy hoy--cuadros hoy--regalo">
             <div className="hoy__cifras">
               <div>
                 <strong>{d.giftcards.filter((g) => g.estado === 'activa').length}</strong>
@@ -209,7 +209,7 @@ const GiftCards = () => {
             <div className="vacio">
               <Gift strokeWidth={1.2} />
               <p>
-                <strong>{q ? 'No hay ninguna con ese código.' : 'Todavía no hay gift cards.'}</strong>
+                <strong>{q ? 'no hay ninguna con ese código' : 'todavía no hay gift cards'}</strong>
               </p>
             </div>
           )}

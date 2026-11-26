@@ -193,7 +193,7 @@ const Compras = () => {
             <div className="vacio">
               <ShoppingBag strokeWidth={1.2} />
               <p>
-                <strong>No falta nada por ahora.</strong>
+                <strong>No falta nada por ahora</strong>
                 <br />
                 Si algo se acaba, tócalo en «+».
               </p>
@@ -217,7 +217,7 @@ const Compras = () => {
                       <button type="button" className="icono-boton" aria-label="Quitar de la lista" onClick={() => resolver(p, 'descartado')}>
                         <X size={18} />
                       </button>
-                      <button type="button" className="chip is-active" onClick={() => setHoja({ tipo: 'comprar', pedido: p })}>
+                      <button type="button" className="chip chip--comprado" onClick={() => setHoja({ tipo: 'comprar', pedido: p })}>
                         <Check size={14} /> Comprado
                       </button>
                     </span>
@@ -259,8 +259,8 @@ const Compras = () => {
       <button type="button" className="fab" onClick={() => setHoja({ tipo: 'pedir' })} aria-label="Pedir algo">
         <Plus />
       </button>
-      <button type="button" className="btn btn--sm btn--ghost solo-compu" onClick={() => setHoja({ tipo: 'pedir' })}>
-        <Plus size={16} /> Pedir algo
+      <button type="button" className="btn btn--ancho" onClick={() => setHoja({ tipo: 'pedir' })}>
+        <Plus size={16} /> Pedir algo que falta
       </button>
 
       {aviso && (

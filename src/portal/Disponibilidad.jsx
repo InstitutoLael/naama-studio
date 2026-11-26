@@ -56,7 +56,7 @@ const Disponibilidad = () => {
         <>
           <section>
             <p className="muted">Toca cómo vienes cada día. Si un día no marcas nada, se entiende que no está confirmado.</p>
-            <button type="button" className="btn btn--sm btn--ghost" onClick={() => marcar(d.dias.slice(0, 6), 'todo')}>
+            <button type="button" className="btn btn--sm" onClick={() => marcar(d.dias.slice(0, 6), 'todo')}>
               Marcar toda esta semana «Todo el día»
             </button>
             <ul className="cuentas dispo-lista">

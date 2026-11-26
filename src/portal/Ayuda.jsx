@@ -120,7 +120,7 @@ const MandarMensaje = ({ yoId }) => {
           </button>
         ))}
       </div>
-      <button type="button" className="btn" disabled={!a.length || !titulo.trim() || estado === 'Enviando…'} onClick={enviar}>
+      <button type="button" className="btn btn--terracota" disabled={!a.length || !titulo.trim() || estado === 'Enviando…'} onClick={enviar}>
         <Send strokeWidth={1.8} /> Enviar a {a.length === equipo.length ? 'todas' : `${a.length}`}
       </button>
       {estado && <p className="muted" role="status">{estado}</p>}

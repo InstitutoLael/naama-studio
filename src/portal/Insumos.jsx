@@ -975,6 +975,7 @@ const Insumos = ({ cuenta }) => {
           <strong>Anotar lo que usé</strong>
           <small>Servicio, producto y lo que marcó la pesa</small>
         </span>
+        <ChevronRight className="boton-heroe__flecha" strokeWidth={1.6} />
       </button>
 
       {verDatos && (
@@ -1026,7 +1027,7 @@ const Insumos = ({ cuenta }) => {
               <div className="vacio">
                 <Package strokeWidth={1.2} />
                 <p>
-                  <strong>Agreguemos el primer producto.</strong>
+                  <strong>Agreguemos el primer producto</strong>
                   <br />
                   Toca «+», sácale una foto y escribe cuánto trae. Toma un minuto.
                 </p>

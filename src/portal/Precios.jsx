@@ -134,7 +134,7 @@ const Precios = ({ cuenta }) => {
           {aviso}
         </p>
       )}
-      {puedeCambiar && <p className="muted precios__nota">Para cambiar un precio: toca el servicio y luego «Cambiar precio o tiempo».</p>}
+      {puedeCambiar && <p className="nota-mano precios__nota">toca un servicio para cambiar su precio o tiempo</p>}
       {grupos.length === 0 && <p className="muted precios__nada">No encontramos «{busca}». Prueba con otra palabra.</p>}
 
       {grupos.map(({ m, secciones }) => (

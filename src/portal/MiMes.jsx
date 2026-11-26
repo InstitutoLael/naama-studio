@@ -182,11 +182,16 @@ const MiMes = ({ cuenta }) => {
                     <span style={{ width: `${Math.min(100, (d.total / d.meta) * 100)}%` }} />
                   </div>
                   <small className="muted">
-                    {pesos(d.total)} de {pesos(d.meta)} · {d.total >= d.meta ? '¡Meta cumplida! 🎉' : `faltan ${pesos(d.meta - d.total)}`}
+                    {pesos(d.total)} de {pesos(d.meta)} · {d.total >= d.meta ? '¡Meta cumplida!' : `faltan ${pesos(d.meta - d.total)}`}
                   </small>
                 </>
               ) : (
-                <small className="muted">Ponte una meta y aquí vas viendo cuánto te falta.</small>
+                <>
+                  <small className="muted">Ponte una meta y aquí vas viendo cuánto te falta.</small>
+                  <div className="meta__barra" aria-hidden="true">
+                    <span style={{ width: 0 }} />
+                  </div>
+                </>
               )}
             </section>
           )}
@@ -213,7 +218,7 @@ const MiMes = ({ cuenta }) => {
               <div className="vacio">
                 <NotebookPen strokeWidth={1.2} />
                 <p>
-                  <strong>Nada anotado en {nombreMes(mes)}.</strong>
+                  <strong>nada anotado en {nombreMes(mes).split(' ')[0]}</strong>
                 </p>
               </div>
             ) : (

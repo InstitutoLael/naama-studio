@@ -1607,6 +1607,13 @@ ruta('GET', /^caja$/, { permiso: 'caja' }, async ({ db, env, request }) => {
   const { results: lista } = await db.prepare('SELECT * FROM servicios WHERE fecha = ? ORDER BY id').bind(fecha).all();
   const porMedio = Object.fromEntries(MEDIOS_PAGO.map((m) => [m, 0]));
   for (const x of lista) porMedio[x.medio] += x.monto + (x.propina || 0);
+  // Lo anotado por hora (10 a 19, hora de Chile) para las barritas del cierre.
+  const horaCL = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Santiago', hour: 'numeric', hourCycle: 'h23' });
+  const porHora = Array.from({ length: 10 }, () => 0);
+  for (const x of lista) {
+    const h = Number(horaCL.format(new Date(x.creado)));
+    if (Number.isFinite(h)) porHora[Math.min(9, Math.max(0, h - 10))] += x.monto + (x.propina || 0);
+  }
   let mp = null;
   let errorMP = null;
   try {
@@ -1622,6 +1629,7 @@ ruta('GET', /^caja$/, { permiso: 'caja' }, async ({ db, env, request }) => {
     fecha,
     servicios: lista.length,
     anotado: porMedio,
+    porHora,
     total: Object.values(porMedio).reduce((a, b) => a + b, 0),
     mp,
     errorMP,

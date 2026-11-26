@@ -33,7 +33,7 @@ html:has(.galeria), body:has(.galeria) { background: var(--tinta); }
   .galeria-hero h1 { left: 6%; right: auto; justify-items: start; text-align: left; }
   .galeria-mosaico { grid-template-columns: repeat(3, 1fr); }
   .galeria-mosaico li:nth-child(3n + 1) .galeria-foto { aspect-ratio: 1; }
-  .galeria-grilla { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .galeria-grilla { grid-template-columns: repeat(3, 1fr); gap: 8px; }
   .galeria-foto--chica { border-radius: var(--r-campo); }
 }
 .lightbox {
